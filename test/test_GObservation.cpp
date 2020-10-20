@@ -75,6 +75,8 @@ void TestGObservation::set(void)
            "Test GPhotons class");
     append(static_cast<pfunction>(&TestGObservation::test_response_cache),
            "Test GResponseCache class");
+    append(static_cast<pfunction>(&TestGObservation::test_response_vector_cache),
+           "Test GResponseVectorCache class");
     append(static_cast<pfunction>(&TestGObservation::test_observations_optimizer),
            "Test GObservations::likelihood class");
 
@@ -1623,6 +1625,84 @@ void TestGObservation::test_response_cache(void)
 
 
 /***********************************************************************//**
+ * @brief Test GResponseCache
+ ***************************************************************************/
+void TestGObservation::test_response_vector_cache(void)
+{
+    // Allocate cache
+    GResponseVectorCache cache;
+
+    // Set a few energies
+    GVector vector1(10);
+    vector1[1] = 1.0;
+    vector1[2] = 2.0;
+    GVector vector2(10);
+    vector2[5] = 5.0;
+    vector2[7] = 7.0;
+    GVector vector3(12);
+    vector3[1]  = 1.0;
+    vector3[11] = 11.0;
+
+    // Test empty cache
+    test_assert(cache.is_empty(), "Test that void cache is empty");
+    test_value(cache.size(), 0, "Test void cache size");
+
+    // Add one vector and check
+    cache.set("Crab", vector1);
+    test_assert(!cache.is_empty(), "Test that filled cache is not empty");
+    test_value(cache.size(), 1, "Test filled cache size");
+    GVector vector4(10);
+    bool flag = cache.contains("Crab", &vector4);
+    test_assert(flag, "Test that cache contains Crab vector.");
+    test_assert(vector4 == vector1, "Test cache values Crab.");
+
+    // Add another vector and check
+    cache.set("Vela", vector2);
+    test_assert(!cache.is_empty(), "Test that filled cache is not empty");
+    test_value(cache.size(), 2, "Test filled cache size");
+    GVector vector5(10);
+    flag = cache.contains("Vela", &vector5);
+    test_assert(flag, "Test that cache contains Vela vector.");
+    test_assert(vector5 == vector2, "Test cache values for Vela.");
+
+    // Replace Crab values (same dimension)
+    cache.set("Crab", vector2);
+    test_assert(!cache.is_empty(), "Test that filled cache is not empty");
+    test_value(cache.size(), 2, "Test filled cache size");
+    GVector vector6(10);
+    flag = cache.contains("Crab", &vector6);
+    test_assert(flag, "Test that cache contains Crab vector.");
+    test_assert(vector6 == vector2, "Test cache values for replaced Crab.");
+
+    // Replace Crab values (different dimension)
+    cache.set("Crab", vector3);
+    test_assert(!cache.is_empty(), "Test that filled cache is not empty");
+    test_value(cache.size(), 2, "Test filled cache size");
+    GVector vector7(12);
+    flag = cache.contains("Crab", &vector7);
+    test_assert(flag, "Test that cache contains Crab vector.");
+    test_assert(vector7 == vector3, "Test cache values for extended Crab.");
+
+    // Remove Crab cache
+    cache.remove("Crab");
+    test_value(cache.size(), 1, "Test filled cache size");
+    flag = cache.contains("Crab", &vector7);
+    test_assert(!flag, "Test that cache does not contain Crab vector.");
+    flag = cache.contains("Vela", &vector5);
+    test_assert(flag, "Test that cache contains Vela vector.");
+    test_assert(vector5 == vector2, "Test cache values for Vela.");
+
+    // Now clear the cache and test that it is empty
+    cache.clear();
+    test_assert(cache.is_empty(), "Test that emptied cache is empty");
+    test_value(cache.size(), 0, "Test emptied cache size");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Test GObservations::likelihood
  ***************************************************************************/
 void TestGObservation::test_observations_optimizer(void)
@@ -1666,7 +1746,7 @@ void TestGObservation::test_observations_optimizer(void)
 
         // Free the event list
         delete events;
-        
+
     } // endfor: added observations to container
 
     // Add the model to the observation
@@ -1822,7 +1902,7 @@ void TestOpenMP::test_observations_optimizer(const int& mode)
 
         // Delete events pointer
         delete events;
-        
+
     }
 
     // Add the model to the observation

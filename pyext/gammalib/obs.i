@@ -239,6 +239,7 @@
 %include "GPhases.i"
 %include "GResponse.i"
 %include "GResponseCache.i"
+%include "GResponseVectorCache.i"
 %include "GPhoton.i"
 %include "GPhotons.i"
 %include "GSource.i"

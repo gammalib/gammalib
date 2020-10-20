@@ -47,6 +47,7 @@ sources = GEnergies.cpp \
           GPhases.cpp \
           GResponse.cpp \
           GResponseCache.cpp \
+          GResponseVectorCache.cpp \
           GInstDir.cpp \
           GPhotons.cpp \
           GPhoton.cpp \

@@ -1,6 +1,6 @@
 .. _2.0:
 
-GammaLib 2.0 release (17 October 2020)
+GammaLib 2.0 release (20 October 2020)
 ======================================
 
 Overview
@@ -31,6 +31,8 @@ Improvements
 New features
 ------------
 
+* [`3403 <https://cta-redmine.irap.omp.eu/issues/3403>`_] -
+  Implement sparse vector response cache
 * [`3328 <https://cta-redmine.irap.omp.eu/issues/3328>`_] -
   Add ``GFunctions`` abstract base class and ``GIntegrals`` class
 

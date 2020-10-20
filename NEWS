@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-17 October 2020
+20 October 2020
 
 
 1. Introduction
@@ -14,6 +14,7 @@ made since the last release of GammaLib.
 The following classes have been added:
 - GFunctions
 - GIntegrals
+- GResponseVectorCache
 
 The following classes have been removed:
 - none
@@ -87,6 +88,10 @@ of functions (#3328).
 
 10. Observation module
 ----------------------
+The GResponseVectorCache class was added to handle caching of the vector response.
+Only non-zero IRF values are stored by the class. The class was integrated in the
+GResponse class (#3403).
+
 A vectorised response computation was implemented in GResponse that computes the
 IRF for all events in a given observations. This allows for a considerable reduction
 of the operations, in particular for binned or stacked analysis, where the code can

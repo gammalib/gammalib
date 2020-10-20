@@ -569,7 +569,7 @@ double GResponse::irf_spatial(const GEvent&       event,
     double irf = 0.0;
 
     // Set IRF value attributes
-    std::string     name  = obs.id() + "::" + source.name();
+    std::string     name  = obs.id() + ":" + source.name();
     const GInstDir& dir   = event.dir();
     const GEnergy&  ereco = event.energy();
     const GEnergy&  etrue = source.energy();
@@ -675,29 +675,49 @@ GVector GResponse::irf_spatial(const GModelSky&    model,
     // Continue only if model has a spatial component
     if (model.spatial() != NULL) {
 
-        // Compute IRF for spatial model
-        switch (model.spatial()->code()) {
-            case GMODEL_SPATIAL_POINT_SOURCE:
-                irfs = irf_ptsrc(model, obs, gradients);
-                break;
-            case GMODEL_SPATIAL_RADIAL:
-                irfs = irf_radial(model, obs, gradients);
-                break;
-            case GMODEL_SPATIAL_ELLIPTICAL:
-                irfs = irf_elliptical(model, obs, gradients);
-                break;
-            case GMODEL_SPATIAL_DIFFUSE:
-                irfs = irf_diffuse(model, obs, gradients);
-                break;
-            case GMODEL_SPATIAL_COMPOSITE:
-                irfs = irf_composite(model, obs, gradients);
-                break;
-            default:
-                break;
-        }
+        // Set IRF cache identifier
+        std::string cache_id = obs.id() + ":" + model.name();
 
-    } // endif: computed spatial model
+        // Signal if spatial model has free parameters
+        bool has_free_pars = model.spatial()->has_free_pars();
 
+        // If the spatial model component has free parameters, or the response
+        // cache should not be used, or the cache does not contain the requested
+        // IRF value then compute the IRF value for the spatial model.
+        if (has_free_pars    ||
+            !m_use_irf_cache ||
+            !m_irf_vector_cache.contains(cache_id, &irfs)) {
+
+            // Compute IRF for spatial model
+            switch (model.spatial()->code()) {
+                case GMODEL_SPATIAL_POINT_SOURCE:
+                    irfs = irf_ptsrc(model, obs, gradients);
+                    break;
+                case GMODEL_SPATIAL_RADIAL:
+                    irfs = irf_radial(model, obs, gradients);
+                    break;
+                case GMODEL_SPATIAL_ELLIPTICAL:
+                    irfs = irf_elliptical(model, obs, gradients);
+                    break;
+                case GMODEL_SPATIAL_DIFFUSE:
+                    irfs = irf_diffuse(model, obs, gradients);
+                    break;
+                case GMODEL_SPATIAL_COMPOSITE:
+                    irfs = irf_composite(model, obs, gradients);
+                    break;
+                default:
+                    break;
+            }
+
+            // If the spatial model has no free parameters and the response cache
+            // should be used then put the IRF value in the response cache.
+            if (!has_free_pars && m_use_irf_cache) {
+                m_irf_vector_cache.set(cache_id, irfs);
+            }
+
+        } // endif: computed spatial model
+
+    } // endif: model had spatial component
 
     // Return IRF values
     return irfs;
@@ -745,6 +765,7 @@ void GResponse::init_members(void)
     // Clear cache
     m_irf_cache.clear();
     m_nroi_cache.clear();
+    m_irf_vector_cache.clear();
 
     // Return
     return;
@@ -768,6 +789,7 @@ void GResponse::copy_members(const GResponse& rsp)
     m_irf_diffuse_resolution    = rsp.m_irf_diffuse_resolution;
     m_irf_cache                 = rsp.m_irf_cache;
     m_nroi_cache                = rsp.m_nroi_cache;
+    m_irf_vector_cache          = rsp.m_irf_vector_cache;
 
     // Return
     return;

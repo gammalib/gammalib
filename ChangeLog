@@ -1,8 +1,9 @@
-2020-10-17
+2020-10-20
 
         * Version 2.0.0 released
         ========================
 
+        Implement sparse vector response cache (#3403)
         Implement GMatrixSparse::row() and GMatrixSparse::add_to_row() methods
         Integrate analytical gradients for energy dispersion computation (#3333)
         Add GFunctions abstract base class (#3328)

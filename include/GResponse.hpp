@@ -33,6 +33,7 @@
 #include "GFunction.hpp"
 #include "GTime.hpp"
 #include "GResponseCache.hpp"
+#include "GResponseVectorCache.hpp"
 #include "GFunctions.hpp"
 
 /* __ Forward declarations _______________________________________________ */
@@ -319,8 +320,9 @@ protected:
     // Cache for irf(GEvent&, GSource&, GObservation&) and
     // nroi(GModelSky&, GEnergy&, GTime&, GEnergy&, GTime&, GObservation&)
     // computations
-    mutable GResponseCache m_irf_cache;
-    mutable GResponseCache m_nroi_cache;
+    mutable GResponseCache       m_irf_cache;
+    mutable GResponseCache       m_nroi_cache;
+    mutable GResponseVectorCache m_irf_vector_cache;
 };
 
 #endif /* GRESPONSE_HPP */

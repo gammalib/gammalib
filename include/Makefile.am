@@ -151,6 +151,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GInstDir.hpp \
                      GResponse.hpp \
                      GResponseCache.hpp \
+                     GResponseVectorCache.hpp \
                      GPhotons.hpp \
                      GPhoton.hpp \
                      GSource.hpp \

@@ -57,6 +57,7 @@ public:
     void                      test_energy(void);
     void                      test_energies(void);
     void                      test_response_cache(void);
+    void                      test_response_vector_cache(void);
     void                      test_observations_optimizer(void);
 };
 
@@ -68,7 +69,7 @@ public:
  * @brief Test suite for OpenMP testing
  ***************************************************************************/
 class TestOpenMP : public GTestSuite {
-    
+
 public:
     // Constructors and destructors
     TestOpenMP(void) : GTestSuite() {}
