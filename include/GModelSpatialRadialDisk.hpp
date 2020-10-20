@@ -86,16 +86,17 @@ protected:
     void         init_members(void);
     void         copy_members(const GModelSpatialRadialDisk& model);
     void         free_members(void);
-    void         update(void) const;
+    void         update(const bool& gradients) const;
     virtual void set_region(void) const;
 
     // Protected members
     GModelPar m_radius; //!< Disk radius (degrees)
 
     // Cached members used for pre-computations
-    mutable double m_last_radius;   //!< Last disk radius
-    mutable double m_radius_rad;    //!< Radius in radians
-    mutable double m_norm;          //!< Normalization
+    mutable double m_last_radius;     //!< Last disk radius
+    mutable double m_radius_rad;      //!< Radius in radians
+    mutable double m_norm;            //!< Normalization
+    mutable double m_factor_gradient; //!< Gradient factor
 };
 
 

@@ -151,7 +151,7 @@ and
 \end{equation}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{Radial disk}
+\paragraph{Radial disk}
 
 The radial disk function $f(\theta)$ is given by
 \begin{equation}
@@ -168,11 +168,16 @@ with the partial derivatives
 \end{equation}
 and
 \begin{equation}
-\frac{\partial f}{\partial \theta_0}  = ? .
+\frac{\partial f}{\partial \theta_0} = \left \{
+   \begin{array}{l l}
+     \displaystyle -2 \pi f^2(\theta) \sin \theta_0 & \mbox{if $\theta \le \theta_0$} \\ \\
+     \displaystyle 0 & \mbox{if $\theta > \theta_0$}
+   \end{array}
+   \right .
 \end{equation}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{Radial ring}
+\paragraph{Radial ring}
 
 The radial ring function $f(\theta)$ is given by
 \begin{equation}
@@ -198,7 +203,7 @@ and
 \end{equation}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{Radial Gaussian}
+\paragraph{Radial Gaussian}
 
 The radial Gaussian function $f(\theta)$ is given by
 \begin{equation}
@@ -214,7 +219,7 @@ and
 \end{equation}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{Radial shell}
+\paragraph{Radial shell}
 
 The shell function on a sphere is given by
 \begin{equation}

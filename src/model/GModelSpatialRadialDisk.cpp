@@ -51,6 +51,7 @@ const GModelSpatialRegistry   g_radial_disk_legacy_registry(&g_radial_disk_legac
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+//#define G_SMOOTH_RADIUS_GRADIENT            //!< Use smooth radius gradient
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -293,10 +294,35 @@ double GModelSpatialRadialDisk::eval(const double&  theta,
                                      const bool&    gradients) const
 {
     // Update precomputation cache
-    update();
+    update(gradients);
 
     // Set value
     double value = (theta <= m_radius_rad) ? m_norm : 0.0;
+
+    // Optionally compute gradients
+    if (gradients) {
+
+        // Alternative radius
+        #if defined(G_SMOOTH_RADIUS_GRADIENT)
+        double g_radius = 0.0;
+        if (m_radius.is_free()) {
+            const double k = 1000.0;
+            double       f1 = std::exp(-k * (m_radius_rad - theta));
+            double       f2 = 1.0 + f1;
+            g_radius        = m_norm * k / (f2 * f2) * m_radius.scale() *
+                              gammalib::deg2rad;
+        }
+
+        // Evaluate radius gradient
+        #else
+        double g_radius = (m_radius.is_free() && theta <= m_radius_rad)
+                          ? m_factor_gradient : 0.0;
+        #endif
+
+        // Set radius gradient
+        m_radius.factor_gradient(g_radius);
+
+    } // endif: gradient computation was requested
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
@@ -522,16 +548,21 @@ void GModelSpatialRadialDisk::init_members(void)
     m_radius.free();
     m_radius.scale(1.0);
     m_radius.gradient(0.0);
-    m_radius.has_grad(false);  // Radial components never have gradients
+
+    // Signal that this model provides analytical parameter gradients
+    //m_ra.has_grad(true);    // Not yet implemented
+    //m_dec.has_grad(true);   // Not yet implemented
+    m_radius.has_grad(true);
 
     // Set parameter pointer(s)
     m_pars.push_back(&m_radius);
 
     // Initialise precomputation cache. Note that zero values flag
     // uninitialised as a zero radius is not meaningful
-    m_last_radius = 0.0;
-    m_radius_rad  = 0.0;
-    m_norm        = 0.0;
+    m_last_radius     = 0.0;
+    m_radius_rad      = 0.0;
+    m_norm            = 0.0;
+    m_factor_gradient = 0.0;
 
     // Return
     return;
@@ -554,9 +585,10 @@ void GModelSpatialRadialDisk::copy_members(const GModelSpatialRadialDisk& model)
     m_radius = model.m_radius;
 
     // Copy precomputation cache
-    m_last_radius = model.m_last_radius;
-    m_radius_rad  = model.m_radius_rad;
-    m_norm        = model.m_norm;
+    m_last_radius     = model.m_last_radius;
+    m_radius_rad      = model.m_radius_rad;
+    m_norm            = model.m_norm;
+    m_factor_gradient = model.m_factor_gradient;
 
     // Return
     return;
@@ -576,6 +608,8 @@ void GModelSpatialRadialDisk::free_members(void)
 /***********************************************************************//**
  * @brief Update precomputation cache
  *
+ * @param[in] gradients Request gradient computation?
+ *
  * Computes the normalization
  * \f[
  *    {\tt m\_norm} = \frac{1}{2 \pi (1 - \cos r)}
@@ -586,7 +620,7 @@ void GModelSpatialRadialDisk::free_members(void)
  * approximation you might have expected:
  * \f[{\tt m\_norm} = \frac{1}{\pi r ^ 2}\f]
  ***************************************************************************/
-void GModelSpatialRadialDisk::update() const
+void GModelSpatialRadialDisk::update(const bool& gradients) const
 {
     // Update if radius has changed
     if (m_last_radius != radius()) {
@@ -597,9 +631,25 @@ void GModelSpatialRadialDisk::update() const
         // Compute disk radius in radians
         m_radius_rad = radius() * gammalib::deg2rad;
 
-        // Perform precomputations
-        double denom = gammalib::twopi * (1 - std::cos(m_radius_rad));
+        // Compute sine and cosine of radius, benefitting of the sincos
+        // function
+        double sin_radius;
+        double cos_radius;
+        if (gradients) {
+            sin_radius = std::sin(m_radius_rad);
+            cos_radius = std::cos(m_radius_rad);
+        }
+        else {
+            cos_radius = std::cos(m_radius_rad);
+        }
+
+        // Precompute radial disk function
+        double denom = gammalib::twopi * (1.0 - cos_radius);
         m_norm       = (denom > 0.0) ? 1.0 / denom : 0.0;
+
+        // Precompute factor gradient
+        m_factor_gradient = -gammalib::twopi * m_norm * m_norm * sin_radius *
+                            m_radius.scale() * gammalib::deg2rad;
 
     } // endif: update required
 
