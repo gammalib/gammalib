@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-20 October 2020
+21 October 2020
 
 
 1. Introduction
@@ -77,6 +77,8 @@ Added analytical gradients to the GModelSpatialRadialGauss class (#3203).
 
 Added is_energy_dependent() and is_time_dependent() methods to GModelSpatialRadial
 to allow for checking of energy or time dependence of spatial model components.
+
+A pre-computation cache was added to the GModelSpatialGauss class (#1300).
 
 
 9. Numerics module

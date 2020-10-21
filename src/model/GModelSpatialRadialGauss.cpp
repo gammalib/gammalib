@@ -324,12 +324,13 @@ double GModelSpatialRadialGauss::eval(const double&  theta,
                                       const GTime&   time,
                                       const bool&    gradients) const
 {
+    // Update
+    update(gradients);
+
     // Compute value
-    double sigma_rad = sigma() * gammalib::deg2rad;
-    double sigma2    = sigma_rad * sigma_rad;
     double theta2    = theta * theta;
-    double arg2      = theta2 / sigma2;
-    double value     = std::exp(-0.5 * arg2) / (gammalib::twopi * sigma2);
+    double arg2      = m_inv_sigma2_rad * theta2;
+    double value     = m_value_norm * std::exp(-0.5 * arg2);
 
     // Optionally compute gradients
     if (gradients) {
@@ -341,7 +342,7 @@ double GModelSpatialRadialGauss::eval(const double&  theta,
         double g_ra  = 0.0;
         double g_dec = 0.0;
         if (m_ra.is_free() || m_dec.is_free()) {
-            double g_theta = -theta / sigma2 * gammalib::deg2rad * value;
+            double g_theta = -theta * m_g_theta_norm * value;
             if (m_ra.is_free()) {
                 g_ra = g_theta * m_ra.factor_gradient() * m_ra.scale();
             }
@@ -355,8 +356,7 @@ double GModelSpatialRadialGauss::eval(const double&  theta,
         // Evaluate sigma gradient
         double g_sigma = 0.0;
         if (m_sigma.is_free()) {
-            g_sigma = (arg2 - 2.0) / sigma_rad * value *
-                      m_sigma.scale() * gammalib::deg2rad;
+            g_sigma = (arg2 - 2.0) * value * m_g_sigma_norm;
         }
         m_sigma.factor_gradient(g_sigma);
 
@@ -603,6 +603,13 @@ void GModelSpatialRadialGauss::init_members(void)
     // Set parameter pointer(s)
     m_pars.push_back(&m_sigma);
 
+    // Initialise pre-computation cache
+    m_last_sigma     = 0.0;
+    m_inv_sigma2_rad = 0.0;
+    m_value_norm     = 0.0;
+    m_g_theta_norm   = 0.0;
+    m_g_sigma_norm   = 0.0;
+
     // Return
     return;
 }
@@ -623,6 +630,13 @@ void GModelSpatialRadialGauss::copy_members(const GModelSpatialRadialGauss& mode
     m_type  = model.m_type;   // Needed to conserve model type
     m_sigma = model.m_sigma;
 
+    // Copy pre-computation cache
+    m_last_sigma     = model.m_last_sigma;
+    m_inv_sigma2_rad = model.m_inv_sigma2_rad;
+    m_value_norm     = model.m_value_norm;
+    m_g_theta_norm   = model.m_g_theta_norm;
+    m_g_sigma_norm   = model.m_g_sigma_norm;
+
     // Return
     return;
 }
@@ -633,6 +647,44 @@ void GModelSpatialRadialGauss::copy_members(const GModelSpatialRadialGauss& mode
  ***************************************************************************/
 void GModelSpatialRadialGauss::free_members(void)
 {
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Update precomputation cache
+ *
+ * @param[in] gradients Gradient computation requested?
+ ***************************************************************************/
+void GModelSpatialRadialGauss::update(const bool& gradients) const
+{
+    // Update if radius has changed
+    if (m_last_sigma != sigma()) {
+
+        // Store last values
+        m_last_sigma = sigma();
+
+        // Compute Gaussian sigma in radians
+        double sigma_rad  = sigma() * gammalib::deg2rad;
+        double sigma2_rad = sigma_rad * sigma_rad;
+        if (sigma2_rad > 0.0) {
+            m_inv_sigma2_rad = 1.0 / sigma2_rad;
+            m_value_norm     = 1.0 / (gammalib::twopi * sigma2_rad);
+        }
+        else {
+            m_inv_sigma2_rad = 0.0;
+            m_value_norm     = 0.0;
+        }
+
+        // Pre-compute gradient stuff
+        if (gradients) {
+            m_g_theta_norm = m_inv_sigma2_rad * gammalib::deg2rad;
+            m_g_sigma_norm = m_sigma.scale() * gammalib::deg2rad / sigma_rad;
+        }
+
+    } // endif: update required
+
     // Return
     return;
 }

@@ -1,6 +1,6 @@
 .. _2.0:
 
-GammaLib 2.0 release (20 October 2020)
+GammaLib 2.0 release (21 October 2020)
 ======================================
 
 Overview
@@ -27,6 +27,8 @@ Improvements
 * [`3203 <https://cta-redmine.irap.omp.eu/issues/3203>`_] -
   Implement vectorised response computation and analytical gradients for
   the radial Gaussian model in a stacked analysis
+* [`1300 <https://cta-redmine.irap.omp.eu/issues/1300>`_] -
+  Implement pre-computation cache in GModelSpatialGauss
 
 New features
 ------------

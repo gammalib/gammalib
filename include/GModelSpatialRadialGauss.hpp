@@ -87,10 +87,18 @@ protected:
     void         init_members(void);
     void         copy_members(const GModelSpatialRadialGauss& model);
     void         free_members(void);
+    void         update(const bool& gradients) const;
     virtual void set_region(void) const;
 
     // Protected members
-    GModelPar m_sigma;  //!< Gaussian width (deg)
+    GModelPar m_sigma;                 //!< Gaussian width (deg)
+
+    // Cached members used for pre-computations
+    mutable double m_last_sigma;       //!< Last Gaussian sigma
+    mutable double m_inv_sigma2_rad;   //!< sigma(rad)^-2
+    mutable double m_value_norm;       //!< (2pi sigma(rad))^-2
+    mutable double m_g_theta_norm;     //!< sigma(rad)^-2 deg2rad
+    mutable double m_g_sigma_norm;     //!< sigma(rad)^-1 sigma_scale deg2rad
 };
 
 
