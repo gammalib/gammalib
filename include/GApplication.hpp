@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GApplication.hpp - GammaLib application base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -134,7 +134,7 @@ protected:
     std::string              m_logfile;     //!< Log filename
     std::vector<std::string> m_args;        //!< Command line arguments
     std::time_t              m_tstart;      //!< Calendar start time of execution
-    std::clock_t             m_cstart;      //!< Clock start time of execution
+    double                   m_cstart;      //!< Clock start time of execution
     GApplicationPars         m_pars;        //!< Application parameters
     bool                     m_pars_loaded; //!< Application parameters loaded
     bool                     m_need_help;   //!< --help specified

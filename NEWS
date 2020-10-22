@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-21 October 2020
+22 October 2020
 
 
 1. Introduction
@@ -52,7 +52,8 @@ None
 
 4. Application module
 ---------------------
-None
+Corrected the computation of the elapsed CPU time in an application in case
+that OpenMP is enabled (#3417).
 
 
 5. Base module
@@ -67,7 +68,7 @@ None
 
 7. Linear algebra module
 ------------------------
-Implement GMatrixSparse::row() and GMatrixSparse::add_to_row() methods.
+Implemented GMatrixSparse::row() and GMatrixSparse::add_to_row() methods.
 
 
 

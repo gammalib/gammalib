@@ -1,6 +1,6 @@
 .. _2.0:
 
-GammaLib 2.0 release (21 October 2020)
+GammaLib 2.0 release (22 October 2020)
 ======================================
 
 Overview
@@ -17,6 +17,9 @@ In particular, this release provides:
 Bug fixes
 ---------
 
+* [`3417 <https://cta-redmine.irap.omp.eu/issues/3417>`_] -
+  Correct application elapsed CPU time for OpenMP
+
 
 Improvements
 ------------
@@ -29,6 +32,7 @@ Improvements
   the radial Gaussian model in a stacked analysis
 * [`1300 <https://cta-redmine.irap.omp.eu/issues/1300>`_] -
   Implement pre-computation cache in GModelSpatialGauss
+
 
 New features
 ------------

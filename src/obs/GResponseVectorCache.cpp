@@ -420,8 +420,8 @@ void GResponseVectorCache::copy_members(const GResponseVectorCache& cache)
             values  = new double[m_cache_entries[i]];
             indices = new int[m_cache_entries[i]];
             for (int k = 0; k < m_cache_entries[i]; ++k) {
-                values[k] = cache.m_cache_values[i][k];
-                values[k] = cache.m_cache_indices[i][k];
+                values[k]  = cache.m_cache_values[i][k];
+                indices[k] = cache.m_cache_indices[i][k];
             }
         }
         m_cache_values.push_back(values);

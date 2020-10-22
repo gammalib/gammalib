@@ -1,8 +1,9 @@
-2020-10-21
+2020-10-22
 
         * Version 2.0.0 released
         ========================
 
+        Correct application elapsed CPU time for OpenMP (#3417) 
         Implement sparse vector response cache (#3403)
         Implement GMatrixSparse::row() and GMatrixSparse::add_to_row() methods
         Integrate analytical gradients for energy dispersion computation (#3333)

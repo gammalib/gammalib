@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GApplication.cpp - GammaLib application base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,6 +30,11 @@
 #endif
 #include "GApplication.hpp"
 #include "GTools.hpp"
+
+/* __ OpenMP section _____________________________________________________ */
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -368,7 +373,11 @@ double GApplication::telapse(void) const
 double GApplication::celapse(void) const
 {
     // Compute elapsed CPU clock time
-    double celapse = ((double) (clock() - m_cstart)) / CLOCKS_PER_SEC;
+    #ifdef _OPENMP
+    double celapse = omp_get_wtime() - m_cstart;
+    #else
+    double celapse = (double(clock()) - m_cstart) / (double)CLOCKS_PER_SEC;
+    #endif
 
     // Return elapsed time
     return celapse;
@@ -909,7 +918,11 @@ void GApplication::init_members(void)
     std::time(&m_tstart);
 
     // Save the execution start clock
-    m_cstart = std::clock();
+    #ifdef _OPENMP
+    m_cstart = omp_get_wtime();
+    #else
+    m_cstart = double(clock());
+    #endif
 
     // Return
     return;
