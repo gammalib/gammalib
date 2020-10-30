@@ -345,9 +345,16 @@ double GObservation::model(const GModels& models,
     // If gradient is available then reset gradient vector elements to 0
     // and determine vector size
     if (use_grad) {
+
+        // Reset gradient vector
         (*gradient) = 0.0;
         grad_size   = gradient->size();
-    }
+
+        // Initialise stack of parameters with gradients
+        m_pars_with_gradients.clear();
+        m_pars_with_gradients.reserve(models.size());
+
+    } // endif: gradient vector available
 
     // Loop over models
     for (int i = 0; i < models.size(); ++i) {
@@ -489,6 +496,10 @@ GVector GObservation::model(const GModels& models,
     // If gradient is available then check gradient size and initialise
     // sparse matrix stack
     if (use_grad) {
+
+        // Initialise stack of parameters with gradients
+        m_pars_with_gradients.clear();
+        m_pars_with_gradients.reserve(models.size());
 
         // Check number of columns
         if (gradient->columns() != models.npars()) {
