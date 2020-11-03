@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GOptimizerLM.i - Levenberg Marquardt optimizer class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -63,9 +63,11 @@ public:
     void          lambda_dec(const double& value);
     void          eps(const double& eps);
     void          accept_dec(const double& value);
-    int           max_iter(void) const;
-    int           max_stalls(void) const;
-    int           max_boundary_hits(void) const;
+    const int&    npars(void) const;
+    const int&    nfree(void) const;
+    const int&    max_iter(void) const;
+    const int&    max_stalls(void) const;
+    const int&    max_boundary_hits(void) const;
     const double& lambda_start(void) const;
     const double& lambda_inc(void) const;
     const double& lambda_dec(void) const;

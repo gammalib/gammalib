@@ -31,6 +31,8 @@ The following methods have been added:
 - GObservation::model_grad(GModel&, GModelPar&)
 - GModelSpatialRadial::is_energy_dependent()
 - GModelSpatialRadial::is_time_dependent()
+- GOptimizerLM::npars()
+- GOptimizerLM::nfree()
 - GXmlElement(std::string&, int&);
 - GXmlElement(std::string&, double&);
 - GXmlElement(std::string&, std::string&);
@@ -119,7 +121,7 @@ only the function but also any available parameter gradients (#3333).
 
 11. Optimization module
 -----------------------
-None
+Added GOptimizerLM::npars() and GOptimizerLM::nfree() methods.
 
 
 12. Sky module

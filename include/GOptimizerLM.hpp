@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GOptimizerLM.hpp - Levenberg Marquardt optimizer            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -82,9 +82,11 @@ public:
     void          lambda_dec(const double& value);
     void          eps(const double& eps);
     void          accept_dec(const double& value);
-    int           max_iter(void) const;
-    int           max_stalls(void) const;
-    int           max_boundary_hits(void) const;
+    const int&    npars(void) const;
+    const int&    nfree(void) const;
+    const int&    max_iter(void) const;
+    const int&    max_stalls(void) const;
+    const int&    max_boundary_hits(void) const;
     const double& lambda_start(void) const;
     const double& lambda_inc(void) const;
     const double& lambda_dec(void) const;
@@ -300,6 +302,28 @@ void GOptimizerLM::accept_dec(const double& value)
 }
 
 
+/***********************************************************************//**
+ * @brief Return number of model parameters
+ *
+ * @return Number of model parameters.
+ ***************************************************************************/
+inline
+const int& GOptimizerLM::npars(void) const
+{
+    return (m_npars);
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of free model parameters
+ *
+ * @return Number of free model parameters.
+ ***************************************************************************/
+inline
+const int& GOptimizerLM::nfree(void) const
+{
+    return (m_nfree);
+}
 
 
 /***********************************************************************//**
@@ -308,7 +332,7 @@ void GOptimizerLM::accept_dec(const double& value)
  * @return Maximum number of iterations.
  ***************************************************************************/
 inline
-int GOptimizerLM::max_iter(void) const
+const int& GOptimizerLM::max_iter(void) const
 {
     return (m_max_iter);
 }
@@ -320,7 +344,7 @@ int GOptimizerLM::max_iter(void) const
  * @return Maximum number of allowed subsequent stalls.
  ***************************************************************************/
 inline
-int GOptimizerLM::max_stalls(void) const
+const int& GOptimizerLM::max_stalls(void) const
 {
     return (m_max_stall);
 }
@@ -332,7 +356,7 @@ int GOptimizerLM::max_stalls(void) const
  * @return Maximum number of parameter boundary hits.
  ***************************************************************************/
 inline
-int GOptimizerLM::max_boundary_hits(void) const
+const int& GOptimizerLM::max_boundary_hits(void) const
 {
     return (m_max_hit);
 }
