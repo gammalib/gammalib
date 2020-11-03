@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    test_GXml.cpp - Test xml module                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -122,26 +122,50 @@ void TestGXml::test_GXml_attributes(void)
  **************************************************************************/
 void TestGXml::test_GXml_elements(void)
 {
-    // Perform tests
+    // Test void constructor
+    GXmlElement element1;
+    test_value(element1.name(), "", "Check empty name of void constructor");
+
+    // Test integer value constructor
+    GXmlElement element2("integer", 41);
+    test_value(element2.name(), "integer", "Check name of integer constructor");
+    test_value(element2.value(), "41", "Check string value of integer constructor");
+    test_value(element2.integer(), 41, "Check integer value of integer constructor");
+
+    // Test floating point value constructor
+    GXmlElement element3("double", 41.123);
+    test_value(element3.name(), "double", "Check name of double constructor");
+    test_value(element3.value(), "41.123", "Check string value of double constructor");
+    test_value(element3.real(), 41.123, "Check double value of double constructor");
+
+    // Test string value constructor
+    GXmlElement element4("string", "41");
+    test_value(element4.name(), "string", "Check name of string constructor");
+    test_value(element4.value(), "41", "Check string value of string constructor");
+    test_value(element4.real(), 41.0, "Check double value of string constructor");
+    test_value(element4.integer(), 41, "Check integer value of string constructor");
+
+    // Perform element attributes
     GXmlElement element;
     element.attribute("test", "1.0");
     test_assert(element.attribute("test") == "1.0",
-                            "Test if element.attribute(\"test\")= 1.0",
-                            "Unexpected attribute "+element.attribute("test"));
+                "Test if element.attribute(\"test\")= 1.0",
+                "Unexpected attribute "+element.attribute("test"));
 
     element.attribute("test", "2.0");
     test_assert(element.attribute("test") == "2.0",
-                            "Test if element.attribute(\"test\")= 2.0",
-                            "Unexpected attribute "+element.attribute("test"));
+                "Test if element.attribute(\"test\")= 2.0",
+                "Unexpected attribute "+element.attribute("test"));
 
     element.attribute("test2", "1.0");
     test_assert(element.attribute("test2") == "1.0",
-                            "Test if element.attribute(\"test2\")= 1.0",
-                            "Unexpected attribute "+element.attribute("test2"));
+                "Test if element.attribute(\"test2\")= 1.0",
+                "Unexpected attribute "+element.attribute("test2"));
 
-    test_assert(element.attribute("test")  == "2.0"&& element.attribute("test2") == "1.0",
-                            "Test if  element.attribute(\"test\")= 2.0 and if element.attribute(\"test2\")= 1.0",
-                            "Unexpected attributes "+element.attribute("test")+" "+element.attribute("test2"));
+    test_assert(element.attribute("test")  == "2.0" &&
+                element.attribute("test2") == "1.0",
+                "Test if  element.attribute(\"test\")= 2.0 and if element.attribute(\"test2\")= 1.0",
+                "Unexpected attributes "+element.attribute("test")+" "+element.attribute("test2"));
 
     // Return
     return;

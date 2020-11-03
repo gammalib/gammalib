@@ -1,8 +1,9 @@
-2020-10-22
+2020-11-03
 
         * Version 2.0.0 released
         ========================
 
+        Add XML value constructors and access methods to GXmlElement class (#3431)
         Correct application elapsed CPU time for OpenMP (#3417) 
         Implement sparse vector response cache (#3403)
         Implement GMatrixSparse::row() and GMatrixSparse::add_to_row() methods

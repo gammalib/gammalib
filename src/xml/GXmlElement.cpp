@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GXmlElement.cpp - XML element node class implementation        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,8 +33,10 @@
 #include "GFilename.hpp"
 #include "GXmlDocument.hpp"
 #include "GXmlElement.hpp"
+#include "GXmlText.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_VALUE                                        "GXmlElement::value()"
 #define G_ATTRIBUTE                            "GXmlElement::attribute(int&)"
 #define G_PARSE_START                "GXmlElement::parse_start(std::string&)"
 #define G_PARSE_STOP                  "GXmlElement::parse_stop(std::string&)"
@@ -104,6 +106,87 @@ GXmlElement::GXmlElement(const std::string& segment) : GXmlNode()
 
     // Parse start element
     parse_start(segment);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Integer value constructor
+ *
+ * @param[in] name Element name.
+ * @param[in] value Integer value.
+ *
+ * Constructs a XML value element of the form
+ *
+ *       <name>value</name>
+ ***************************************************************************/
+GXmlElement::GXmlElement(const std::string& name,
+                         const int&         value) : GXmlNode()
+{
+    // Initialise members
+    init_members();
+
+    // Set element name
+    m_name = name;
+
+    // Append text element with value
+    this->append(GXmlText(gammalib::str(value)));
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Floating point value constructor
+ *
+ * @param[in] name Element name.
+ * @param[in] value Floating point value.
+ *
+ * Constructs a XML value element of the form
+ *
+ *       <name>value</name>
+ ***************************************************************************/
+GXmlElement::GXmlElement(const std::string& name,
+                         const double&      value) : GXmlNode()
+{
+    // Initialise members
+    init_members();
+
+    // Set element name
+    m_name = name;
+
+    // Append text element with value
+    this->append(GXmlText(gammalib::str(value)));
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief String value constructor
+ *
+ * @param[in] name Element name.
+ * @param[in] value String value.
+ *
+ * Constructs a XML value element of the form
+ *
+ *       <name>value</name>
+ ***************************************************************************/
+GXmlElement::GXmlElement(const std::string& name,
+                         const std::string& value) : GXmlNode()
+{
+    // Initialise members
+    init_members();
+
+    // Set element name
+    m_name = name;
+
+    // Append text element with value
+    this->append(GXmlText(value));
 
     // Return
     return;
@@ -194,6 +277,42 @@ GXmlElement* GXmlElement::clone(void) const
 {
     // Clone element
     return new GXmlElement(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Return string value
+ *
+ * @return String value.
+ *
+ * @exception GException::invalid_value
+ *            Element does not contain a single text element.
+ *
+ * Returns the string value of the text element in case that the element
+ * contains one text element. An exception is returned in case that the
+ * element does not contain a text element.
+ ***************************************************************************/
+std::string GXmlElement::value(void) const
+{
+    // Throw an exception if the element does not contain a single element
+    if (size() != 1) {
+        std::string msg = "Method requires a XML element instance that "
+                          "contains a single child, but this instance "
+                          "contains "+gammalib::str(size())+" childs. "
+                          "Please specify a valid XML element.";
+        throw GException::invalid_value(G_VALUE, msg);
+    }
+
+    // Throw an exception if the element does not contain a text element
+    const GXmlText *text = dynamic_cast<const GXmlText*>((*this)[0]);
+    if (text == NULL) {
+        std::string msg = "XML element instance does not contain a text "
+                          "element. Please specify a valid XML element.";
+        throw GException::invalid_value(G_VALUE, msg);
+    }
+
+    // Return text string as value
+    return (text->text());
 }
 
 

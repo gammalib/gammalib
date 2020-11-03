@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GXmlElement.i - XML element node class definition           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -40,6 +40,9 @@ public:
     GXmlElement(void);
     GXmlElement(const GXmlElement& node);
     explicit GXmlElement(const std::string& segment);
+    GXmlElement(const std::string& name, const int& value);
+    GXmlElement(const std::string& name, const double& value);
+    GXmlElement(const std::string& name, const std::string& value);
     virtual ~GXmlElement(void);
 
     // Methods
@@ -48,6 +51,10 @@ public:
     virtual std::string  classname(void) const;
     const std::string&   name(void) const;
     void                 name(const std::string& name);
+    std::string          value(void) const;
+    std::string          string(void) const;
+    double               real(void) const;
+    int                  integer(void) const;
     int                  attributes(void) const;
     const GXmlAttribute* attribute(const int& index) const;
     std::string          attribute(const std::string& name) const;

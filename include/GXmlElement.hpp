@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GXmlElement.hpp - XML element node class definition          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
+#include "GTools.hpp"
 #include "GXmlNode.hpp"
 #include "GXmlAttribute.hpp"
 
@@ -54,6 +55,9 @@ public:
     GXmlElement(void);
     GXmlElement(const GXmlElement& node);
     explicit GXmlElement(const std::string& segment);
+    GXmlElement(const std::string& name, const int& value);
+    GXmlElement(const std::string& name, const double& value);
+    GXmlElement(const std::string& name, const std::string& value);
     virtual ~GXmlElement(void);
 
     // Operators
@@ -65,6 +69,10 @@ public:
     virtual std::string  classname(void) const;
     const std::string&   name(void) const;
     void                 name(const std::string& name);
+    std::string          value(void) const;
+    std::string          string(void) const;
+    double               real(void) const;
+    int                  integer(void) const;
     int                  attributes(void) const;
     const GXmlAttribute* attribute(const int& index) const;
     std::string          attribute(const std::string& name) const;
@@ -126,6 +134,42 @@ void GXmlElement::name(const std::string& name)
 {
     m_name = name;
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return string value
+ *
+ * @return String value.
+ ***************************************************************************/
+inline
+std::string GXmlElement::string(void) const
+{
+    return (value());
+}
+
+
+/***********************************************************************//**
+ * @brief Return floating point value
+ *
+ * @return Floating point value.
+ ***************************************************************************/
+inline
+double GXmlElement::real(void) const
+{
+    return (gammalib::todouble(value()));
+}
+
+
+/***********************************************************************//**
+ * @brief Return integer value
+ *
+ * @return Integer value.
+ ***************************************************************************/
+inline
+int GXmlElement::integer(void) const
+{
+    return (gammalib::toint(value()));
 }
 
 

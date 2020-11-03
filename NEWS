@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-22 October 2020
+3 November 2020
 
 
 1. Introduction
@@ -31,6 +31,13 @@ The following methods have been added:
 - GObservation::model_grad(GModel&, GModelPar&)
 - GModelSpatialRadial::is_energy_dependent()
 - GModelSpatialRadial::is_time_dependent()
+- GXmlElement(std::string&, int&);
+- GXmlElement(std::string&, double&);
+- GXmlElement(std::string&, std::string&);
+- GXmlElement::value();
+- GXmlElement::string();
+- GXmlElement::real();
+- GXmlElement::integer();
 
 The following methods have been removed:
 - none
@@ -110,7 +117,6 @@ GResponse::convolve() method to perform the true energy integration, integrating
 only the function but also any available parameter gradients (#3333).
 
 
-
 11. Optimization module
 -----------------------
 None
@@ -128,7 +134,9 @@ None
 
 14. XML module
 --------------
-None
+Added value constructors the GXmlElement interface and the methods value(), string(),
+real() and integer() to access the value as string, floating point or integer value
+(#3431). 
 
 
 15. VO module

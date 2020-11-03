@@ -1,6 +1,6 @@
 .. _2.0:
 
-GammaLib 2.0 release (22 October 2020)
+GammaLib 2.0 release (3 November 2020)
 ======================================
 
 Overview
@@ -24,6 +24,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`3431 <https://cta-redmine.irap.omp.eu/issues/3431>`_] -
+  Add XML value constructors and access methods to ``GXmlElement`` class
 * [`3333 <https://cta-redmine.irap.omp.eu/issues/3333>`_] -
   Integrate analytical gradients for energy dispersion computation
 * Implement ``GMatrixSparse::row()`` and ``GMatrixSparse::add_to_row()`` methods
