@@ -316,7 +316,7 @@ void GModelSpatial::autoscale(void)
 /***********************************************************************//**
  * @brief Returns model flux integrated in circular sky region
  *
- * @param[in] reg Sky region.
+ * @param[in] region Sky region.
  * @param[in] srcEng Energy.
  * @param[in] srcTime Time.
  * @return Flux (adimensional or ph/cm2/s).
@@ -337,7 +337,7 @@ void GModelSpatial::autoscale(void)
  * \f$\omega\f$ is the position angle with respect to the connecting line
  * between the region centre and the direction on the sky.
  ***************************************************************************/
-double GModelSpatial::flux(const GSkyRegion* reg,
+double GModelSpatial::flux(const GSkyRegion& region,
                            const GEnergy&    srcEng,
                            const GTime&      srcTime) const
 {
@@ -346,18 +346,19 @@ double GModelSpatial::flux(const GSkyRegion* reg,
 
     // Continue only if region overlaps with model
     const GSkyRegion* model_reg = this->region();
-    if (model_reg->overlaps(*reg)) {
+    if (model_reg->overlaps(region)) {
 
         // Check if the model is a point source
         const GModelSpatialPointSource* ps_model =
               dynamic_cast<const GModelSpatialPointSource*>(this);
 
-        // If the model is not a point source integrate over circular regions overlap
+        // If the model is not a point source integrate over circular
+        // regions overlap
         if (ps_model == NULL) {
 
             // Thrown an exception if region is not a sky circle
             const GSkyRegionCircle* reg_circle =
-                  dynamic_cast<const GSkyRegionCircle*>(reg);
+                  dynamic_cast<const GSkyRegionCircle*>(&region);
             if (reg_circle == NULL) {
                 std::string msg = "Flux can only be computed for a circular "
                                   "region.";
@@ -410,13 +411,16 @@ double GModelSpatial::flux(const GSkyRegion* reg,
                                                          cosmodrad);
             GIntegral integral(&integrand);
 
+            // Suppress integration warnings
+            integral.silent(true);
+
             // Perform integration
             flux = integral.romberg(rho_min, rho_max);
 
         } // endif: source model was not a point source
 
-        // ... otherwise, if model is point source since it overlaps
-        // with region set flux to 1
+        // ... otherwise the model is point source that overlaps with the
+        // region, hence the flux is set flux to 1.0
         else {
             flux = 1.0;
         }
@@ -525,7 +529,7 @@ double GModelSpatial::circle_int_kern_rho::eval(const double& rho)
             if (rho_kludge < 0.0) {
                 rho_kludge = 0.0;
             }
-      
+
             // Compute omega integration range
             double omega_min = -domega;
             double omega_max = +domega;
@@ -549,7 +553,7 @@ double GModelSpatial::circle_int_kern_rho::eval(const double& rho)
         } //endif: domega was positive
 
     } // endif: rho was positive
-    
+
     // Return
     return flux;
 }

@@ -31,6 +31,7 @@
 #include "GTools.hpp"
 #include "GException.hpp"
 #include "GIntegral.hpp"
+#include "GEnergies.hpp"
 #include "GModelRegistry.hpp"
 #include "GModelSky.hpp"
 #include "GModelSpatialPointSource.hpp"
@@ -1043,6 +1044,252 @@ GPhotons GModelSky::mc(const double& area,
 
     // Return photon list
     return photons;
+}
+
+
+/***********************************************************************//**
+ * @brief Return sky model flux
+ *
+ * @param[in] emin Minimum energy.
+ * @param[in] emax Maximum energy.
+ * @return Sky model flux (cm\f$^{-2}\f$ s\f$^{-2}\f$)
+ *
+ * Returns the spatially integrate flux in the sky model.
+ *
+ * @todo Take spatial flux normalisation into account
+ ***************************************************************************/
+double GModelSky::flux(const GEnergy& emin, const GEnergy& emax) const
+{
+    // Initialise flux
+    double flux = 0.0;
+
+    // Get pointer on diffuse cube spatial model component
+    const GModelSpatialDiffuseCube* cube =
+          dynamic_cast<const GModelSpatialDiffuseCube*>(spatial());
+
+    // If spatial model is a diffuse cube then compute the flux by
+    // multiplying the spectrum of the spatial and spectral components
+    // using a node function
+    if (cube != NULL) {
+
+        // Get spectral nodes
+        GModelSpectralNodes nodes = cube->spectrum();
+
+        // Multiply spectral nodes with spectral model
+        for (int i = 0; i < nodes.nodes(); ++i) {
+
+            // Get energy and intensity
+            GEnergy energy    = nodes.energy(i);
+            double  intensity = nodes.intensity(i);
+
+            // Multiply intensity with spectral model
+            intensity *= spectral()->eval(energy);
+
+            // Store intensity
+            nodes.intensity(i, intensity);
+
+        } // endfor: multiplied spectral nodes with spectral model
+
+        // Compute flux
+        flux = nodes.flux(emin, emax);
+
+    } // endif: spatial model was a diffuse cube
+
+    // ... otherwise assume that the spatial model is unity and compute
+    // flux from the spectral component
+    else {
+        flux = spectral()->flux(emin, emax);
+    }
+
+    // Return flux
+    return flux;
+}
+
+
+/***********************************************************************//**
+ * @brief Return sky model flux within sky region
+ *
+ * @param[in] region Sky region.
+ * @param[in] emin Minimum energy.
+ * @param[in] emax Maximum energy.
+ * @return Sky model flux (cm\f$^{-2}\f$ s\f$^{-2}\f$)
+ *
+ * Returns the flux of the sky model within a given sky region.
+ ***************************************************************************/
+double GModelSky::flux(const GSkyRegion& region,
+                       const GEnergy&    emin,
+                       const GEnergy&    emax) const
+{
+    // Initialise flux
+    double flux = 0.0;
+
+    // Signal for which models the spatial component depends on energy
+    bool dependence = (spatial()->classname() == "GModelSpatialDiffuseCube") ||
+                      (spatial()->classname() == "GModelSpatialComposite");
+
+    // If the spatial component depends on energy then use
+    if (dependence) {
+
+        // Set 100 logarithmically-spaced energy nodes for node model
+        GEnergies energies(100, emin, emax, "LOG");
+
+        // Allocate spectral nodes
+        GModelSpectralNodes nodes(*spectral(), energies);
+
+        // Multiply spectral nodes with spatial flux within region
+        for (int i = 0; i < nodes.nodes(); ++i) {
+
+            // Get energy and intensity
+            GEnergy energy    = nodes.energy(i);
+            double  intensity = nodes.intensity(i);
+
+            // Multiply intensity with spatial flux within region. Note that
+            // this correctly takes the spatial normalisation into account
+            // since the flux() method does this.
+            intensity *= spatial()->flux(region, energy);
+
+            // Store intensity
+            nodes.intensity(i, intensity);
+
+        } // endfor: multiplied spectral nodes with spectral model
+
+        // Compute flux
+        flux = nodes.flux(emin, emax);
+
+    } // endif: spatial model was a diffuse cube
+
+    // ... otherwise the spatial model does not depend on energy, hence
+    // the flux is computed as the product between the spatial and
+    // spectral flux. Note that this correctly takes the spatial
+    // normalisation into account since the flux() method does this.
+    else {
+        flux = spatial()->flux(region) * spectral()->flux(emin, emax);
+    }
+
+    // Return flux
+    return flux;
+}
+
+
+/***********************************************************************//**
+ * @brief Return sky model energy flux
+ *
+ * @param[in] emin Minimum energy.
+ * @param[in] emax Maximum energy.
+ * @return Sky model energy flux (erg cm\f$^{-2}\f$ s\f$^{-2}\f$)
+ *
+ * Returns the spatially integrate energy flux in the sky model.
+ ***************************************************************************/
+double GModelSky::eflux(const GEnergy& emin, const GEnergy& emax) const
+{
+    // Initialise energy flux
+    double eflux = 0.0;
+
+    // Get pointer on diffuse cube spatial model component
+    const GModelSpatialDiffuseCube* cube =
+          dynamic_cast<const GModelSpatialDiffuseCube*>(spatial());
+
+    // If spatial model is a diffuse cube then compute the flux by
+    // multiplying the spectrum of the spatial and spectral components
+    // using a node function
+    if (cube != NULL) {
+
+        // Get spectral nodes
+        GModelSpectralNodes nodes = cube->spectrum();
+
+        // Multiply spectral nodes with spectral model
+        for (int i = 0; i < nodes.nodes(); ++i) {
+
+            // Get energy and intensity
+            GEnergy energy    = nodes.energy(i);
+            double  intensity = nodes.intensity(i);
+
+            // Multiply intensity with spectral model
+            intensity *= spectral()->eval(energy);
+
+            // Store intensity
+            nodes.intensity(i, intensity);
+
+        } // endfor: multiplied spectral nodes with spectral model
+
+        // Compute energy flux
+        eflux = nodes.eflux(emin, emax);
+
+    } // endif: spatial model was a diffuse cube
+
+    // ... otherwise assume that the spatial model is unity and compute
+    // energy flux from the spectral component
+    else {
+        eflux = spectral()->eflux(emin, emax);
+    }
+
+    // Return energy flux
+    return eflux;
+}
+
+
+/***********************************************************************//**
+ * @brief Return sky model energy flux within sky region
+ *
+ * @param[in] region Sky region.
+ * @param[in] emin Minimum energy.
+ * @param[in] emax Maximum energy.
+ * @return Sky model flux (cm\f$^{-2}\f$ s\f$^{-2}\f$)
+ *
+ * Returns the energy flux of the sky model within a given sky region.
+ ***************************************************************************/
+double GModelSky::eflux(const GSkyRegion& region,
+                        const GEnergy&    emin,
+                        const GEnergy&    emax) const
+{
+    // Initialise flux
+    double eflux = 0.0;
+
+    // Signal for which models the spatial component depends on energy
+    bool dependence = (spatial()->classname() == "GModelSpatialDiffuseCube") ||
+                      (spatial()->classname() == "GModelSpatialComposite");
+
+    // If the spatial component depends on energy then use
+    if (dependence) {
+
+        // Set 100 logarithmically-spaced energy nodes for node model
+        GEnergies energies(100, emin, emax, "LOG");
+
+        // Allocate spectral nodes
+        GModelSpectralNodes nodes(*spectral(), energies);
+
+        // Multiply spectral nodes with spatial flux within region
+        for (int i = 0; i < nodes.nodes(); ++i) {
+
+            // Get energy and intensity
+            GEnergy energy    = nodes.energy(i);
+            double  intensity = nodes.intensity(i);
+
+            // Multiply intensity with spatial flux within region. Note that
+            // this correctly takes the spatial normalisation into account
+            // since the flux() method does this.
+            intensity *= spatial()->flux(region, energy);
+
+            // Store intensity
+            nodes.intensity(i, intensity);
+
+        } // endfor: multiplied spectral nodes with spectral model
+
+        // Compute flux
+        eflux = nodes.eflux(emin, emax);
+
+    } // endif: spatial model was a diffuse cube
+
+    // ... otherwise the spatial model does not depend on energy, hence
+    // the flux is computed as the product between the spatial and
+    // spectral flux. Note that this correctly takes the spatial
+    // normalisation into account since the flux() method does this.
+    else {
+        eflux = spatial()->flux(region) * spectral()->eflux(emin, emax);
+    }
+
+    // Return flux
+    return eflux;
 }
 
 

@@ -1,8 +1,9 @@
-2020-11-03
+2020-11-07
 
         * Version 2.0.0 released
         ========================
 
+        Add GSkyModel flux() and eflux() methods (#3439)
         Add XML value constructors and access methods to GXmlElement class (#3431)
         Correct application elapsed CPU time for OpenMP (#3417) 
         Implement sparse vector response cache (#3403)

@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-3 November 2020
+7 November 2020
 
 
 1. Introduction
@@ -29,6 +29,10 @@ The following methods have been added:
 - GResponse::irf_spatial(GModelSky&, GObservation&, GMatrix*)
 - GObservation::model(GModels&, GMatrixSparse*)
 - GObservation::model_grad(GModel&, GModelPar&)
+- GModelSky::flux(GEnergy&, GEnergy&)
+- GModelSky::flux(GSkyRegion&, GEnergy&, GEnergy&)
+- GModelSky::eflux(GEnergy&, GEnergy&)
+- GModelSky::eflux(GSkyRegion&, GEnergy&, GEnergy&)
 - GModelSpatialRadial::is_energy_dependent()
 - GModelSpatialRadial::is_time_dependent()
 - GOptimizerLM::npars()
@@ -49,6 +53,8 @@ The following methods have been renamed:
 
 The arguments for the following methods have been changed:
 - GCOMObservation::drm(GSkyModel&) was GCOMObservation::drm(GSource&)
+- GModelSpatial::flux(GSkyRegion&, GEnergy&, GTime&) was
+  GModelSpatial::flux(GSkyRegion*, GEnergy&, GTime&)
 
 The return value of the following methods has been changed:
 - none

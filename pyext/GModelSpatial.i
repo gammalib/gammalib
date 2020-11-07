@@ -65,7 +65,7 @@ public:
     bool              has_free_pars(void) const;
     int               size(void) const;
     void              autoscale(void);
-    double            flux(const GSkyRegion* reg,
+    double            flux(const GSkyRegion& region,
                            const GEnergy&    srcEng = GEnergy(),
                            const GTime&      srcTime = GTime()) const;
     const GSkyRegion* region(void) const;

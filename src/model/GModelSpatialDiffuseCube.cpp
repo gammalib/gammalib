@@ -373,6 +373,8 @@ double GModelSpatialDiffuseCube::eval(const GPhoton& photon,
  * method to determine the sky direction. If no sky direction could be
  * determined, the method throws an GException::invalid_return_value
  * exception.
+ *
+ * @todo Make sure that spatial model value is taken into account.
  ***************************************************************************/
 GSkyDir GModelSpatialDiffuseCube::mc(const GEnergy& energy,
                                      const GTime&   time,

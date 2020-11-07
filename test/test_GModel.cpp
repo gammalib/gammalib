@@ -597,6 +597,17 @@ void TestGModel::test_sky_model(void)
     test_assert(!sky6.temporal()->has_par("Normalizations"),
                 "Do not expect \"Normalizations\" parameter in temporal component");
 
+    // Test flux computation methods
+    GModelSky sky7(spat_ptsrc, spec_plaw);
+    GEnergy   emin(0.1, "TeV");
+    GEnergy   emax(100.0, "TeV");
+    double    flux           = sky7.flux(emin, emax);
+    double    flux_spectrum  = spec_plaw.flux(emin, emax);
+    double    eflux          = sky7.eflux(emin, emax);
+    double    eflux_spectrum = spec_plaw.eflux(emin, emax);
+    test_value(flux, flux_spectrum, "Test flux() method");
+    test_value(eflux, eflux_spectrum, "Test eflux() method");
+
     // Exit test
     return;
 }
@@ -2713,19 +2724,21 @@ void TestGModel::test_spatial_model(void)
 void TestGModel::test_spectral_model(void)
 {
     // Test spectral models XML interface
-    test_xml_model("GModelSpectralConst",          m_xml_model_point_const);
-    test_xml_model("GModelSpectralPlaw",           m_xml_model_point_plaw);
-    test_xml_model("GModelSpectralPlawPhotonFlux", m_xml_model_point_plaw_phflux);
-    test_xml_model("GModelSpectralPlawEnergyFlux", m_xml_model_point_plaw_eflux);
-    test_xml_model("GModelSpectralExpPaw",         m_xml_model_point_eplaw);
-    test_xml_model("GModelSpectralExpInvPaw",      m_xml_model_point_einvplaw);
-    test_xml_model("GModelSpectralBrokenPlaw",     m_xml_model_point_bplaw);
+    test_xml_model("GModelSpectralConst",           m_xml_model_point_const);
+    test_xml_model("GModelSpectralPlaw",            m_xml_model_point_plaw);
+    test_xml_model("GModelSpectralPlawPhotonFlux",  m_xml_model_point_plaw_phflux);
+    test_xml_model("GModelSpectralPlawEnergyFlux",  m_xml_model_point_plaw_eflux);
+    test_xml_model("GModelSpectralExpPaw",          m_xml_model_point_eplaw);
+    test_xml_model("GModelSpectralExpInvPaw",       m_xml_model_point_einvplaw);
+    test_xml_model("GModelSpectralBrokenPlaw",      m_xml_model_point_bplaw);
     test_xml_model("GModelSpectralSmoothBrokenPlaw",m_xml_model_point_smoothbplaw);
-    test_xml_model("GModelSpectralSuperExpPlaw",   m_xml_model_point_supeplaw);
-    test_xml_model("GModelSpectralLogParabola",    m_xml_model_point_logparabola);
-    test_xml_model("GModelSpectralNodes",          m_xml_model_point_nodes);
-    test_xml_model("GModelSpectralFunc",           m_xml_model_point_filefct);
-    test_xml_model("GModelSpectralComposite",      m_xml_model_spectral_composite);
+    test_xml_model("GModelSpectralSuperExpPlaw",    m_xml_model_point_supeplaw);
+    test_xml_model("GModelSpectralLogParabola",     m_xml_model_point_logparabola);
+    test_xml_model("GModelSpectralNodes",           m_xml_model_point_nodes);
+    test_xml_model("GModelSpectralFunc",            m_xml_model_point_filefct);
+    test_xml_model("GModelSpectralExponential",     m_xml_point_exponential);
+    test_xml_model("GModelSpectralMultiplicative",  m_xml_point_multiplicative);
+    test_xml_model("GModelSpectralComposite",       m_xml_model_spectral_composite);
 
     // Return
     return;
@@ -3663,27 +3676,23 @@ void TestGModel::test_flux(void)
 
     // Test non overlapping region 
     GSkyRegionCircle circle1 = GSkyRegionCircle(centre2, 0.1);
-    GSkyRegion*      roi1    = &circle1;
-    test_value(model.flux(roi1), 0.0, 1.e-7, "Check model not overlapping with region");
+    test_value(model.flux(circle1), 0.0, 1.e-7, "Check model not overlapping with region");
 
     // Test fully contained model
     GSkyRegionCircle circle2 = GSkyRegionCircle(centre2, 1.0);
-    GSkyRegion*      roi2    = &circle2;
-    test_value(model.flux(roi2), 1.0, 1.e-4, "Check model fully contained in region");
+    test_value(model.flux(circle2), 1.0, 1.e-4, "Check model fully contained in region");
 
     // Test partially contained model
     GSkyRegionCircle circle3 = GSkyRegionCircle(centre2, 0.5);
-    GSkyRegion*      roi3    = &circle3;
-    test_value(model.flux(roi3), 0.44654, 1.e-4, "Check model partially contained in region");
+    test_value(model.flux(circle3), 0.44654, 1.e-4, "Check model partially contained in region");
 
     // Test point source in ROI
     GModelSpatialPointSource ps = GModelSpatialPointSource(centre1);
-    test_value(ps.flux(roi2), 1.0, 1.e-7, "Check point source contained in region");
+    test_value(ps.flux(circle2), 1.0, 1.e-7, "Check point source contained in region");
 
     // Test point source outside ROI
-    test_value(ps.flux(roi1), 0.0, 1.e-7, "Check point source not contained in region");
+    test_value(ps.flux(circle1), 0.0, 1.e-7, "Check point source not contained in region");
     
-
     // Exit test
     return;
 }

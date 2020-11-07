@@ -173,6 +173,16 @@ public:
                            const GEnergy& emin, const GEnergy& emax,
                            const GTime& tmin, const GTime& tmax,
                            GRan& ran) const;
+    double              flux(const GEnergy& emin,
+                             const GEnergy& emax) const;
+    double              flux(const GSkyRegion& region,
+                             const GEnergy&    emin,
+                             const GEnergy&    emax) const;
+    double              eflux(const GEnergy& emin,
+                              const GEnergy& emax) const;
+    double              eflux(const GSkyRegion& region,
+                              const GEnergy&    emin,
+                              const GEnergy&    emax) const;
 
 protected:
     // Protected methods

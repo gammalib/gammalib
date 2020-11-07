@@ -113,7 +113,7 @@ public:
     bool              has_free_pars(void) const;
     int               size(void) const;
     void              autoscale(void);
-    double            flux(const GSkyRegion* reg,
+    double            flux(const GSkyRegion& region,
                            const GEnergy&    srcEng = GEnergy(),
                            const GTime&      srcTime = GTime()) const;
     const GSkyRegion* region(void) const;
@@ -149,7 +149,7 @@ protected:
         double eval(const double& rho);
     public:
         const GModelSpatial*    m_model;     //!< Spatial model
-        const GSkyRegionCircle* m_reg;       //!< Interation region
+        const GSkyRegionCircle* m_reg;       //!< Integration region
         GEnergy                 m_srcEng;    //!< Photon energy
         GTime                   m_srcTime;   //!< Photon time
         double                  m_dist;      //!< Distance model-region (rad)
@@ -175,7 +175,7 @@ protected:
         double eval(const double& omega);
     public:
         const GModelSpatial*    m_model;   //!< Spatial model
-        const GSkyRegionCircle* m_reg;     //!< Interation region
+        const GSkyRegionCircle* m_reg;     //!< Integration region
         double                  m_rho;     //!< Offset from center of the region
         GEnergy                 m_srcEng;  //!< Photon energy
         GTime                   m_srcTime; //!< Photon time
