@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-7 November 2020
+8 November 2020
 
 
 1. Introduction
@@ -33,6 +33,10 @@ The following methods have been added:
 - GModelSky::flux(GSkyRegion&, GEnergy&, GEnergy&)
 - GModelSky::eflux(GEnergy&, GEnergy&)
 - GModelSky::eflux(GSkyRegion&, GEnergy&, GEnergy&)
+- GModelSky::flux_error(GEnergy&, GEnergy&)
+- GModelSky::flux_error(GSkyRegion&, GEnergy&, GEnergy&)
+- GModelSky::eflux_error(GEnergy&, GEnergy&)
+- GModelSky::eflux_error(GSkyRegion&, GEnergy&, GEnergy&)
 - GModelSpatialRadial::is_energy_dependent()
 - GModelSpatialRadial::is_time_dependent()
 - GOptimizerLM::npars()
@@ -89,6 +93,9 @@ Implemented GMatrixSparse::row() and GMatrixSparse::add_to_row() methods.
 
 8. Model module
 ---------------
+Added methods to GSkyModel to compute the photon flux and energy flux as
+well as their errors (#3439, #3074).
+
 Added analytical gradients to the GModelSpatialRadialGauss class (#3203).
 
 Added is_energy_dependent() and is_time_dependent() methods to GModelSpatialRadial

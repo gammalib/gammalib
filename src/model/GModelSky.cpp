@@ -1048,15 +1048,15 @@ GPhotons GModelSky::mc(const double& area,
 
 
 /***********************************************************************//**
- * @brief Return sky model flux
+ * @brief Return sky model photon flux
  *
  * @param[in] emin Minimum energy.
  * @param[in] emax Maximum energy.
- * @return Sky model flux (cm\f$^{-2}\f$ s\f$^{-2}\f$)
+ * @return Sky model photon flux (cm\f$^{-2}\f$ s\f$^{-1}\f$)
  *
- * Returns the spatially integrate flux in the sky model.
+ * Returns the spatially integrate photon flux in the sky model.
  *
- * @todo Take spatial flux normalisation into account
+ * @todo Take spatial photon flux normalisation into account
  ***************************************************************************/
 double GModelSky::flux(const GEnergy& emin, const GEnergy& emax) const
 {
@@ -1107,14 +1107,14 @@ double GModelSky::flux(const GEnergy& emin, const GEnergy& emax) const
 
 
 /***********************************************************************//**
- * @brief Return sky model flux within sky region
+ * @brief Return sky model photon flux within sky region
  *
  * @param[in] region Sky region.
  * @param[in] emin Minimum energy.
  * @param[in] emax Maximum energy.
- * @return Sky model flux (cm\f$^{-2}\f$ s\f$^{-2}\f$)
+ * @return Sky model photon flux (cm\f$^{-2}\f$ s\f$^{-1}\f$)
  *
- * Returns the flux of the sky model within a given sky region.
+ * Returns the photon flux of the sky model within a given sky region.
  ***************************************************************************/
 double GModelSky::flux(const GSkyRegion& region,
                        const GEnergy&    emin,
@@ -1176,7 +1176,7 @@ double GModelSky::flux(const GSkyRegion& region,
  *
  * @param[in] emin Minimum energy.
  * @param[in] emax Maximum energy.
- * @return Sky model energy flux (erg cm\f$^{-2}\f$ s\f$^{-2}\f$)
+ * @return Sky model energy flux (erg cm\f$^{-2}\f$ s\f$^{-1}\f$)
  *
  * Returns the spatially integrate energy flux in the sky model.
  ***************************************************************************/
@@ -1234,7 +1234,7 @@ double GModelSky::eflux(const GEnergy& emin, const GEnergy& emax) const
  * @param[in] region Sky region.
  * @param[in] emin Minimum energy.
  * @param[in] emax Maximum energy.
- * @return Sky model flux (cm\f$^{-2}\f$ s\f$^{-2}\f$)
+ * @return Sky model energy flux (erg cm\f$^{-2}\f$ s\f$^{-1}\f$)
  *
  * Returns the energy flux of the sky model within a given sky region.
  ***************************************************************************/
@@ -1290,6 +1290,558 @@ double GModelSky::eflux(const GSkyRegion& region,
 
     // Return flux
     return eflux;
+}
+
+
+/***********************************************************************//**
+ * @brief Return sky model photon flux error
+ *
+ * @param[in] emin Minimum energy.
+ * @param[in] emax Maximum energy.
+ * @return Sky model photon flux error (cm\f$^{-2}\f$ s\f$^{-1}\f$)
+ *
+ * Returns the spatially integrate photon flux error in the sky model. The
+ * photon flux error is computed using Gaussian error propagation
+ *
+ * \f[
+ *    \Delta F_{ph} = \sqrt{
+ *    \sum_i \left( \frac{\partial F_{ph}}{\partial p_i} \right)^2
+ *    \left( \Delta p_i \right)^2 }
+ * \f]
+ *
+ * where
+ * \f$F_{ph}\f$ is the sky model photon flux and
+ * \f$p_i\f$ are the sky model parameters.
+ ***************************************************************************/
+double GModelSky::flux_error(const GEnergy& emin, const GEnergy& emax) const
+{
+    // Initialise flux error
+    double flux_error = 0.0;
+
+    // Loop over all model parameters
+    for (int ipar = 0; ipar < size(); ++ipar) {
+
+        // Get non-const model pointer
+        GModelPar* par = const_cast<GModelPar*>(&(*this)[ipar]);
+
+        // Consider only free parameters
+        if (par->is_free()) {
+
+            // Save current model parameter
+            GModelPar current = *par;
+
+            // Autoscale model parameter
+            par->autoscale();
+
+            // Get actual parameter value
+            double x = par->factor_value();
+
+            // Set fixed step size for computation of derivative.
+            const double step_size = 0.0002;
+            double       h         = step_size;
+
+            // Re-adjust the step-size h in case that the initial step size is
+            // larger than the allowed parameter range
+            if (par->has_min() && par->has_max()) {
+                double par_h = par->factor_max() - par->factor_min();
+                if (par_h < h) {
+                    h = par_h;
+                }
+            }
+
+            // Initialise derivative
+            double derivative = 0.0;
+
+            // Continue only if step size is positive
+            if (h > 0.0) {
+
+                // If we are too close to the minimum boundary use a right
+                // sided difference ...
+                if (par->has_min() && ((x-par->factor_min()) < h)) {
+
+                    // Compute fs1
+                    par->factor_value(x);
+                    double fs1 = flux(emin, emax);
+
+                    // Compute fs2
+                    par->factor_value(x+h);
+                    double fs2 = flux(emin, emax);
+
+                    // Compute derivative
+                    derivative = (fs1 - fs2) / h;
+
+                }
+
+                // ... otherwise if we are too close to the maximum boundary use
+                // a left sided difference ...
+                else if (par->has_max() && ((par->factor_max()-x) < h)) {
+
+                    // Compute fs1
+                    par->factor_value(x);
+                    double fs1 = flux(emin, emax);
+
+                    // Compute fs2
+                    par->factor_value(x-h);
+                    double fs2 = flux(emin, emax);
+
+                    // Compute derivative
+                    derivative = (fs1 - fs2) / h;
+
+                }
+
+                // ... otherwise use a symmetric difference
+                else {
+
+                    // Compute fs1
+                    par->factor_value(x+h);
+                    double fs1 = flux(emin, emax);
+
+                    // Compute fs2
+                    par->factor_value(x-h);
+                    double fs2 = flux(emin, emax);
+
+                    // Compute derivative
+                    derivative = 0.5 * (fs1 - fs2) / h;
+
+                }
+
+            } // endif: step size was positive
+
+            // Add contribution
+            if (derivative > 0.0) {
+                double factor = derivative * par->factor_error();
+                flux_error   += factor * factor;
+            }
+
+            // Restore current model parameter
+            *par = current;
+
+        } // endif: parameter was free
+
+    } // endfor: looped over all parameters
+
+    // Take square root if required
+    if (flux_error > 0.0) {
+        flux_error = std::sqrt(flux_error);
+    }
+
+    // Return flux error
+    return flux_error;
+}
+
+
+/***********************************************************************//**
+ * @brief Return sky model photon flux error within sky region
+ *
+ * @param[in] region Sky region.
+ * @param[in] emin Minimum energy.
+ * @param[in] emax Maximum energy.
+ * @return Sky model photon flux error (cm\f$^{-2}\f$ s\f$^{-1}\f$)
+ *
+ * Returns the spatially integrate photon flux error in the sky model. The
+ * photon flux error is computed using Gaussian error propagation
+ *
+ * \f[
+ *    \Delta F_{ph} = \sqrt{
+ *    \sum_i \left( \frac{\partial F_{ph}}{\partial p_i} \right)^2
+ *    \left( \Delta p_i \right)^2 }
+ * \f]
+ *
+ * where
+ * \f$F_{ph}\f$ is the sky model photon flux and
+ * \f$p_i\f$ are the sky model parameters.
+ ***************************************************************************/
+double GModelSky::flux_error(const GSkyRegion& region,
+                             const GEnergy&    emin,
+                             const GEnergy&    emax) const
+{
+    // Initialise flux error
+    double flux_error = 0.0;
+
+    // Loop over all model parameters
+    for (int ipar = 0; ipar < size(); ++ipar) {
+
+        // Get non-const model pointer
+        GModelPar* par = const_cast<GModelPar*>(&(*this)[ipar]);
+
+        // Consider only free parameters
+        if (par->is_free()) {
+
+            // Save current model parameter
+            GModelPar current = *par;
+
+            // Autoscale model parameter
+            par->autoscale();
+
+            // Get actual parameter value
+            double x = par->factor_value();
+
+            // Set fixed step size for computation of derivative.
+            const double step_size = 0.0002;
+            double       h         = step_size;
+
+            // Re-adjust the step-size h in case that the initial step size is
+            // larger than the allowed parameter range
+            if (par->has_min() && par->has_max()) {
+                double par_h = par->factor_max() - par->factor_min();
+                if (par_h < h) {
+                    h = par_h;
+                }
+            }
+
+            // Initialise derivative
+            double derivative = 0.0;
+
+            // Continue only if step size is positive
+            if (h > 0.0) {
+
+                // If we are too close to the minimum boundary use a right
+                // sided difference ...
+                if (par->has_min() && ((x-par->factor_min()) < h)) {
+
+                    // Compute fs1
+                    par->factor_value(x);
+                    double fs1 = flux(region, emin, emax);
+
+                    // Compute fs2
+                    par->factor_value(x+h);
+                    double fs2 = flux(region, emin, emax);
+
+                    // Compute derivative
+                    derivative = (fs1 - fs2) / h;
+
+                }
+
+                // ... otherwise if we are too close to the maximum boundary use
+                // a left sided difference ...
+                else if (par->has_max() && ((par->factor_max()-x) < h)) {
+
+                    // Compute fs1
+                    par->factor_value(x);
+                    double fs1 = flux(region, emin, emax);
+
+                    // Compute fs2
+                    par->factor_value(x-h);
+                    double fs2 = flux(region, emin, emax);
+
+                    // Compute derivative
+                    derivative = (fs1 - fs2) / h;
+
+                }
+
+                // ... otherwise use a symmetric difference
+                else {
+
+                    // Compute fs1
+                    par->factor_value(x+h);
+                    double fs1 = flux(region, emin, emax);
+
+                    // Compute fs2
+                    par->factor_value(x-h);
+                    double fs2 = flux(region, emin, emax);
+
+                    // Compute derivative
+                    derivative = 0.5 * (fs1 - fs2) / h;
+
+                }
+
+            } // endif: step size was positive
+
+            // Add contribution
+            if (derivative > 0.0) {
+                double factor = derivative * par->factor_error();
+                flux_error   += factor * factor;
+            }
+
+            // Restore current model parameter
+            *par = current;
+
+        } // endif: parameter was free
+
+    } // endfor: looped over all parameters
+
+    // Take square root if required
+    if (flux_error > 0.0) {
+        flux_error = std::sqrt(flux_error);
+    }
+    // Return flux error
+    return flux_error;
+}
+
+
+/***********************************************************************//**
+ * @brief Return sky model energy flux error
+ *
+ * @param[in] emin Minimum energy.
+ * @param[in] emax Maximum energy.
+ * @return Sky model energy flux error (erg cm\f$^{-2}\f$ s\f$^{-1}\f$)
+ *
+ * Returns the spatially integrate energy flux error in the sky model. The
+ * energy flux error is computed using Gaussian error propagation
+ *
+ * \f[
+ *    \Delta F_E = \sqrt{
+ *    \sum_i \left( \frac{\partial F_E}{\partial p_i} \right)^2
+ *    \left( \Delta p_i \right)^2 }
+ * \f]
+ *
+ * where
+ * \f$F_E\f$ is the sky model energy flux and
+ * \f$p_i\f$ are the sky model parameters.
+ ***************************************************************************/
+double GModelSky::eflux_error(const GEnergy& emin, const GEnergy& emax) const
+{
+    // Initialise flux error
+    double eflux_error = 0.0;
+
+    // Loop over all model parameters
+    for (int ipar = 0; ipar < size(); ++ipar) {
+
+        // Get non-const model pointer
+        GModelPar* par = const_cast<GModelPar*>(&(*this)[ipar]);
+
+        // Consider only free parameters
+        if (par->is_free()) {
+
+            // Save current model parameter
+            GModelPar current = *par;
+
+            // Autoscale model parameter
+            par->autoscale();
+
+            // Get actual parameter value
+            double x = par->factor_value();
+
+            // Set fixed step size for computation of derivative.
+            const double step_size = 0.0002;
+            double       h         = step_size;
+
+            // Re-adjust the step-size h in case that the initial step size is
+            // larger than the allowed parameter range
+            if (par->has_min() && par->has_max()) {
+                double par_h = par->factor_max() - par->factor_min();
+                if (par_h < h) {
+                    h = par_h;
+                }
+            }
+
+            // Initialise derivative
+            double derivative = 0.0;
+
+            // Continue only if step size is positive
+            if (h > 0.0) {
+
+                // If we are too close to the minimum boundary use a right
+                // sided difference ...
+                if (par->has_min() && ((x-par->factor_min()) < h)) {
+
+                    // Compute fs1
+                    par->factor_value(x);
+                    double fs1 = eflux(emin, emax);
+
+                    // Compute fs2
+                    par->factor_value(x+h);
+                    double fs2 = eflux(emin, emax);
+
+                    // Compute derivative
+                    derivative = (fs1 - fs2) / h;
+
+                }
+
+                // ... otherwise if we are too close to the maximum boundary use
+                // a left sided difference ...
+                else if (par->has_max() && ((par->factor_max()-x) < h)) {
+
+                    // Compute fs1
+                    par->factor_value(x);
+                    double fs1 = eflux(emin, emax);
+
+                    // Compute fs2
+                    par->factor_value(x-h);
+                    double fs2 = eflux(emin, emax);
+
+                    // Compute derivative
+                    derivative = (fs1 - fs2) / h;
+
+                }
+
+                // ... otherwise use a symmetric difference
+                else {
+
+                    // Compute fs1
+                    par->factor_value(x+h);
+                    double fs1 = eflux(emin, emax);
+
+                    // Compute fs2
+                    par->factor_value(x-h);
+                    double fs2 = eflux(emin, emax);
+
+                    // Compute derivative
+                    derivative = 0.5 * (fs1 - fs2) / h;
+
+                }
+
+            } // endif: step size was positive
+
+            // Add contribution
+            if (derivative > 0.0) {
+                double factor = derivative * par->factor_error();
+                eflux_error  += factor * factor;
+            }
+
+            // Restore current model parameter
+            *par = current;
+
+        } // endif: parameter was free
+
+    } // endfor: looped over all parameters
+
+    // Take square root if required
+    if (eflux_error > 0.0) {
+        eflux_error = std::sqrt(eflux_error);
+    }
+
+    // Return flux error
+    return eflux_error;
+}
+
+
+/***********************************************************************//**
+ * @brief Return sky model energy flux error within sky region
+ *
+ * @param[in] region Sky region.
+ * @param[in] emin Minimum energy.
+ * @param[in] emax Maximum energy.
+ * @return Sky model energy flux error (erg cm\f$^{-2}\f$ s\f$^{-1}\f$)
+ *
+ * Returns the spatially integrate energy flux error in the sky model. The
+ * energy flux error is computed using Gaussian error propagation
+ *
+ * \f[
+ *    \Delta F_E = \sqrt{
+ *    \sum_i \left( \frac{\partial F_E}{\partial p_i} \right)^2
+ *    \left( \Delta p_i \right)^2 }
+ * \f]
+ *
+ * where
+ * \f$F_E\f$ is the sky model energy flux and
+ * \f$p_i\f$ are the sky model parameters.
+ ***************************************************************************/
+double GModelSky::eflux_error(const GSkyRegion& region,
+                              const GEnergy&    emin,
+                              const GEnergy&    emax) const
+{
+    // Initialise flux error
+    double eflux_error = 0.0;
+
+    // Loop over all model parameters
+    for (int ipar = 0; ipar < size(); ++ipar) {
+
+        // Get non-const model pointer
+        GModelPar* par = const_cast<GModelPar*>(&(*this)[ipar]);
+
+        // Consider only free parameters
+        if (par->is_free()) {
+
+            // Save current model parameter
+            GModelPar current = *par;
+
+            // Autoscale model parameter
+            par->autoscale();
+
+            // Get actual parameter value
+            double x = par->factor_value();
+
+            // Set fixed step size for computation of derivative.
+            const double step_size = 0.0002;
+            double       h         = step_size;
+
+            // Re-adjust the step-size h in case that the initial step size is
+            // larger than the allowed parameter range
+            if (par->has_min() && par->has_max()) {
+                double par_h = par->factor_max() - par->factor_min();
+                if (par_h < h) {
+                    h = par_h;
+                }
+            }
+
+            // Initialise derivative
+            double derivative = 0.0;
+
+            // Continue only if step size is positive
+            if (h > 0.0) {
+
+                // If we are too close to the minimum boundary use a right
+                // sided difference ...
+                if (par->has_min() && ((x-par->factor_min()) < h)) {
+
+                    // Compute fs1
+                    par->factor_value(x);
+                    double fs1 = eflux(region, emin, emax);
+
+                    // Compute fs2
+                    par->factor_value(x+h);
+                    double fs2 = eflux(region, emin, emax);
+
+                    // Compute derivative
+                    derivative = (fs1 - fs2) / h;
+
+                }
+
+                // ... otherwise if we are too close to the maximum boundary use
+                // a left sided difference ...
+                else if (par->has_max() && ((par->factor_max()-x) < h)) {
+
+                    // Compute fs1
+                    par->factor_value(x);
+                    double fs1 = eflux(region, emin, emax);
+
+                    // Compute fs2
+                    par->factor_value(x-h);
+                    double fs2 = eflux(region, emin, emax);
+
+                    // Compute derivative
+                    derivative = (fs1 - fs2) / h;
+
+                }
+
+                // ... otherwise use a symmetric difference
+                else {
+
+                    // Compute fs1
+                    par->factor_value(x+h);
+                    double fs1 = eflux(region, emin, emax);
+
+                    // Compute fs2
+                    par->factor_value(x-h);
+                    double fs2 = eflux(region, emin, emax);
+
+                    // Compute derivative
+                    derivative = 0.5 * (fs1 - fs2) / h;
+
+                }
+
+            } // endif: step size was positive
+
+            // Add contribution
+            if (derivative > 0.0) {
+                double factor = derivative * par->factor_error();
+                eflux_error  += factor * factor;
+            }
+
+            // Restore current model parameter
+            *par = current;
+
+        } // endif: parameter was free
+
+    } // endfor: looped over all parameters
+
+    // Take square root if required
+    if (eflux_error > 0.0) {
+        eflux_error = std::sqrt(eflux_error);
+    }
+    // Return flux error
+    return eflux_error;
 }
 
 

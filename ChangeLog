@@ -1,4 +1,4 @@
-2020-11-07
+2020-11-08
 
         * Version 2.0.0 released
         ========================
@@ -14,6 +14,7 @@
         Implement vectorised response computation (#3203)
         Implement analytical gradients for the radial Gaussian model in a
           stacked analysis (#3203)
+        Add GSkyModel flux_error() and eflux_error() methods (#3074)
         Implement pre-computation cache in GModelSpatialGauss (#1300)
 
 

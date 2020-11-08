@@ -95,6 +95,16 @@ public:
     double              eflux(const GSkyRegion& region,
                               const GEnergy&    emin,
                               const GEnergy&    emax) const;
+    double              flux_error(const GEnergy& emin,
+                                   const GEnergy& emax) const;
+    double              flux_error(const GSkyRegion& region,
+                                   const GEnergy&    emin,
+                                   const GEnergy&    emax) const;
+    double              eflux_error(const GEnergy& emin,
+                                    const GEnergy& emax) const;
+    double              eflux_error(const GSkyRegion& region,
+                                    const GEnergy&    emin,
+                                    const GEnergy&    emax) const;
 };
 
 
