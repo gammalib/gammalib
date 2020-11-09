@@ -537,9 +537,9 @@ GCTAEventList* GCTAModelCubeBackground::mc(const GObservation& obs, GRan& ran) c
  *       <spectrum type="...">
  *         ...
  *       </spectrum>
- *       <temporalModel type="...">
+ *       <temporal type="...">
  *         ...
- *       </temporalModel>
+ *       </temporal>
  *     </source>
  *
  * If no temporal component is found a constant model is assumed.
@@ -559,8 +559,8 @@ void GCTAModelCubeBackground::read(const GXmlElement& xml)
     m_spectral = xml_spectral(*spectral);
 
     // Optionally get temporal model
-    if (xml.elements("temporalModel")) {
-        const GXmlElement* temporal = xml.element("temporalModel", 0);
+    if (xml.elements("temporal")) {
+        const GXmlElement* temporal = xml.element("temporal", 0);
         m_temporal = xml_temporal(*temporal);
     }
     else {
@@ -600,9 +600,9 @@ void GCTAModelCubeBackground::read(const GXmlElement& xml)
  *       <spectrum type="...">
  *         ...
  *       </spectrum>
- *       <temporalModel type="...">
+ *       <temporal type="...">
  *         ...
- *       </temporalModel>
+ *       </temporal>
  *     </source>
  *
  * If no temporal component is found a constant model is assumed.
@@ -635,7 +635,7 @@ void GCTAModelCubeBackground::write(GXmlElement& xml) const
     if (src == NULL) {
         src = xml.append("source");
         if (spectral() != NULL) src->append(GXmlElement("spectrum"));
-        if (write_temporal)     src->append(GXmlElement("temporalModel"));
+        if (write_temporal)     src->append(GXmlElement("temporal"));
     }
 
     // Write spectral model
@@ -647,7 +647,7 @@ void GCTAModelCubeBackground::write(GXmlElement& xml) const
     // Optionally write temporal model
     if (write_temporal) {
         if (dynamic_cast<GModelTemporalConst*>(temporal()) == NULL) {
-            GXmlElement* temp = src->element("temporalModel", 0);
+            GXmlElement* temp = src->element("temporal", 0);
             temporal()->write(*temp);
         }
     }

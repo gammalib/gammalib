@@ -653,7 +653,7 @@ GCTAEventList* GCTAModelRadialAcceptance::mc(const GObservation& obs,
  *
  * The model is composed of a spectrum component ('spectral'), a radial
  * component ('radialModel'), and, optionally, of a temporal component
- * ('lightcurve'). If no temporal component is found a constant model is
+ * ('temporal'). If no temporal component is found a constant model is
  * assumed.
  ***************************************************************************/
 void GCTAModelRadialAcceptance::read(const GXmlElement& xml)
@@ -675,7 +675,7 @@ void GCTAModelRadialAcceptance::read(const GXmlElement& xml)
 
     // Optionally get temporal model
     try {
-        const GXmlElement* temp = xml.element("lightcurve", 0);
+        const GXmlElement* temp = xml.element("temporal", 0);
         m_temporal = xml_temporal(*temp);
     }
     catch (GException::xml_name_not_found &e) {
@@ -730,7 +730,7 @@ void GCTAModelRadialAcceptance::write(GXmlElement& xml) const
         src = xml.append("source");
         if (spectral() != NULL) src->append(GXmlElement("spectrum"));
         if (radial()   != NULL) src->append(GXmlElement("radialModel"));
-        if (write_temporal)     src->append(GXmlElement("temporalModel"));
+        if (write_temporal)     src->append(GXmlElement("temporal"));
     }
 
     // Write radial model
@@ -748,7 +748,7 @@ void GCTAModelRadialAcceptance::write(GXmlElement& xml) const
     // Optionally write temporal model
     if (write_temporal) {
         if (dynamic_cast<GModelTemporalConst*>(temporal()) == NULL) {
-            GXmlElement* temp = src->element("temporalModel", 0);
+            GXmlElement* temp = src->element("temporal", 0);
             temporal()->write(*temp);
         }
     }

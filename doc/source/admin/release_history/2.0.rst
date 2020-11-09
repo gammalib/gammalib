@@ -1,6 +1,6 @@
 .. _2.0:
 
-GammaLib 2.0 release (8 November 2020)
+GammaLib 2.0 release (9 November 2020)
 ======================================
 
 Overview
@@ -24,18 +24,12 @@ Bug fixes
 Improvements
 ------------
 
-* [`3439 <https://cta-redmine.irap.omp.eu/issues/3439>`_] -
-  Add ``GSkyModel`` ``flux()`` and ``eflux()`` methods
-* [`3431 <https://cta-redmine.irap.omp.eu/issues/3431>`_] -
-  Add XML value constructors and access methods to ``GXmlElement`` class
 * [`3333 <https://cta-redmine.irap.omp.eu/issues/3333>`_] -
   Integrate analytical gradients for energy dispersion computation
 * Implement ``GMatrixSparse::row()`` and ``GMatrixSparse::add_to_row()`` methods
 * [`3203 <https://cta-redmine.irap.omp.eu/issues/3203>`_] -
   Implement vectorised response computation and analytical gradients for
   the radial Gaussian model in a stacked analysis
-* [`3074 <https://cta-redmine.irap.omp.eu/issues/3074>`_] -
-  Add ``GSkyModel`` ``flux_error()`` and ``eflux_error()`` methods
 * [`1300 <https://cta-redmine.irap.omp.eu/issues/1300>`_] -
   Implement pre-computation cache in GModelSpatialGauss
 
@@ -43,10 +37,18 @@ Improvements
 New features
 ------------
 
+* [`3442 <https://cta-redmine.irap.omp.eu/issues/3442>`_] -
+  Add ``GCTAModelSkyCube`` class
+* [`3439 <https://cta-redmine.irap.omp.eu/issues/3439>`_] -
+  Add ``GSkyModel`` ``flux()`` and ``eflux()`` methods
+* [`3431 <https://cta-redmine.irap.omp.eu/issues/3431>`_] -
+  Add XML value constructors and access methods to ``GXmlElement`` class
 * [`3403 <https://cta-redmine.irap.omp.eu/issues/3403>`_] -
   Implement sparse vector response cache
 * [`3328 <https://cta-redmine.irap.omp.eu/issues/3328>`_] -
   Add ``GFunctions`` abstract base class and ``GIntegrals`` class
+* [`3074 <https://cta-redmine.irap.omp.eu/issues/3074>`_] -
+  Add ``GSkyModel`` ``flux_error()`` and ``eflux_error()`` methods
 
 
 Clean up

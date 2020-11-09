@@ -54,10 +54,12 @@ const std::string cta_irf               = "cta_dummy_irf";
 const std::string cta_events            = datadir+"/crab_events.fits";
 const std::string cta_events_gti        = datadir+"/crab_events_gti.fits[EVENTS2]";
 const std::string cta_cntmap            = datadir+"/crab_cntmap.fits";
+const std::string cta_modcube           = datadir+"/crab_modcube.fits";
 const std::string cta_bin_xml           = datadir+"/obs_binned.xml";
 const std::string cta_unbin_xml         = datadir+"/obs_unbinned.xml";
 const std::string cta_model_xml         = datadir+"/crab.xml";
 const std::string cta_rsp_xml           = datadir+"/rsp_models.xml";
+const std::string cta_sky_cube_xml      = datadir+"/cta_model_sky_cube.xml";
 const std::string cta_bgd_rad_gauss_xml = datadir+"/cta_model_bgd_rad_gauss.xml";
 const std::string cta_bgd_gauss_e_xml   = datadir+"/cta_model_bgd_gauss_e.xml";
 const std::string cta_cube_bgd_xml      = datadir+"/cta_model_cube_bgd.xml";
@@ -171,6 +173,8 @@ void TestGCTAModel::set(void)
     name("Test CTA models");
 
     // Append tests to test suite
+    append(static_cast<pfunction>(&TestGCTAModel::test_model_sky_cube),
+           "Test CTA sky cube model");
     append(static_cast<pfunction>(&TestGCTAModel::test_model_bgd),
            "Test CTA background model");
     append(static_cast<pfunction>(&TestGCTAModel::test_model_cube_bgd),
@@ -1747,6 +1751,67 @@ void TestGCTAResponse::test_edispcube_integration(const GCTACubeEdisp& edisp,
 }
 
 
+/***********************************************************************//**
+ * @brief Test CTA sky cube model
+ ***************************************************************************/
+void TestGCTAModel::test_model_sky_cube(void)
+{
+    // Test void constuctor
+    GCTAModelSkyCube model1;
+    test_value(model1.type(), "CTASkyCube", "Check void model type");
+    test_value(model1.size(), 1, "Check void model size");
+    test_value(model1["Normalization"].value(), 1.0, "Check void model \"Normalization\" value");
+    test_assert(model1.is_constant(), "Check if void model is constant.");
+
+    // Test XML constructor
+    GXml xml(cta_sky_cube_xml);
+    const GXmlElement& lib = *xml.element("source_library", 0);
+    const GXmlElement& src = *lib.element("source", 0);
+    GCTAModelSkyCube model2(src);
+    test_value(model2.size(), 5, "Check model2 size");
+    test_value(model2["Normalization"].value(), 1.0, "Check model2 \"Normalization\" value");
+    test_value(model2["Prefactor"].value(), 5.7e-16, "Check model2 \"Prefactor\" value");
+    test_value(model2["Index"].value(), -2.48, "Check model2 \"Index\" value");
+    test_value(model2["PivotEnergy"].value(), 0.3e6, "Check model2 \"PivotEnergy\" value");
+    test_value(model2.filename(), cta_modcube, "Check model2 filename");
+    test_assert(model2.is_constant(), "Check if model2 is constant.");
+
+    // Test filename and spectral constuctor
+    GModelSpectralPlaw plaw(1.0, 0.0, GEnergy(1.0, "TeV"));
+    GCTAModelSkyCube model3(cta_modcube, plaw);
+    test_value(model3.size(), 5, "Check model3 size");
+    test_value(model3["Normalization"].value(), 1.0, "Check model3 \"Normalization\" value");
+    test_value(model3["Prefactor"].value(), 1.0, "Check model3 \"Prefactor\" value");
+    test_value(model3["Index"].value(), 0.0, "Check model3 \"Index\" value");
+    test_value(model3["PivotEnergy"].value(), 1.0e6, "Check model3 \"PivotEnergy\" value");
+    test_value(model3.filename(), cta_modcube, "Check model3 filename");
+    test_assert(model3.is_constant(), "Check if model3 is constant.");
+
+    // Test loading of sky cube in model container
+    GModels models(cta_sky_cube_xml);
+    GModel* model = models["CTA sky cube"];
+    test_value(model->size(), 5, "Check model size");
+    test_value((*model)["Normalization"].value(), 1.0, "Check model \"Normalization\" value");
+    test_value((*model)["Prefactor"].value(), 5.7e-16, "Check model \"Prefactor\" value");
+    test_value((*model)["Index"].value(), -2.48, "Check model \"Index\" value");
+    test_value((*model)["PivotEnergy"].value(), 0.3e6, "Check model \"PivotEnergy\" value");
+    test_assert(model->is_constant(), "Check if model is constant.");
+
+    // Test XML saving and reloading of cube background
+    models.save("test.xml");
+    models.load("test.xml");
+    model = models["CTA sky cube"];
+    test_value(model->size(), 5, "Check model size");
+    test_value((*model)["Normalization"].value(), 1.0, "Check model \"Normalization\" value");
+    test_value((*model)["Prefactor"].value(), 5.7e-16, "Check model \"Prefactor\" value");
+    test_value((*model)["Index"].value(), -2.48, "Check model \"Index\" value");
+    test_value((*model)["PivotEnergy"].value(), 0.3e6, "Check model \"PivotEnergy\" value");
+    test_assert(model->is_constant(), "Check if model is constant.");
+
+    // Return
+    return;
+
+}
 /***********************************************************************//**
  * @brief Test CTA background
  ***************************************************************************/

@@ -86,5 +86,6 @@
 #include "GCTAModelRadialPolynom.hpp"
 #include "GCTAModelRadialProfile.hpp"
 #include "GCTAModelRadialAcceptance.hpp"
+#include "GCTAModelSkyCube.hpp"
 
 #endif /* GCTALIB_HPP */

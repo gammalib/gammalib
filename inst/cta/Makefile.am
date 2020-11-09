@@ -88,7 +88,8 @@ sources = src/cta_helpers_response_stacked_vector.cpp \
           src/GCTAModelRadialGauss.cpp \
           src/GCTAModelRadialPolynom.cpp \
           src/GCTAModelRadialProfile.cpp \
-          src/GCTAModelRadialAcceptance.cpp
+          src/GCTAModelRadialAcceptance.cpp \
+          src/GCTAModelSkyCube.cpp
 
 # Define headers to be installed
 pkginclude_HEADERS = include/GCTATypemaps.hpp \
@@ -144,6 +145,7 @@ pkginclude_HEADERS = include/GCTATypemaps.hpp \
                      include/GCTAModelRadialPolynom.hpp \
                      include/GCTAModelRadialProfile.hpp \
                      include/GCTAModelRadialAcceptance.hpp \
+                     include/GCTAModelSkyCube.hpp \
                      include/GCTALib.hpp
 
 # Build libtool library
@@ -178,7 +180,8 @@ testdatacta       = test/data/irf_1dc.xml \
                     test/data/crab_irf.xml \
                     test/data/onoff_model.xml \
                     test/data/crab_events.fits.gz \
-                    test/data/crab_cntmap.fits.gz
+                    test/data/crab_cntmap.fits.gz \
+                    test/data/crab_modcube.fits.gz
 testdatactadir    = $(pyexecdir)/gammalib/tests/cta/data
 testdatacta_DATA  = $(testdatacta)
 testcaldbcta      = test/caldb/cta_dummy_irf.dat \

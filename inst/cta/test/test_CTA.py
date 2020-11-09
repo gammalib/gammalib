@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib CTA module.
 #
-# Copyright (C) 2012-2018 Juergen Knoedlseder
+# Copyright (C) 2012-2020 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -405,6 +405,7 @@ class Test(gammalib.GPythonTestSuite):
         test_support.pickeling(self, gammalib.GCTAEventCube())
         test_support.pickeling(self, gammalib.GCTAEventList())
         test_support.pickeling(self, gammalib.GCTAInstDir())
+        test_support.pickeling(self, gammalib.GCTAModelSkyCube())
         test_support.pickeling(self, gammalib.GCTAModelBackground())
         test_support.pickeling(self, gammalib.GCTAModelAeffBackground())
         test_support.pickeling(self, gammalib.GCTAModelCubeBackground())
@@ -491,6 +492,7 @@ class Test(gammalib.GPythonTestSuite):
         hessirf.load_psf(hesspsf)
         hessirf.load_edisp(hessedisp)
         hessirf.load_background(hessbkg)
+        skycube = self._data + '/crab_modcube.fits.gz'
 
         # Perform pickeling tests of filled classes
         test_support.pickeling(self, gammalib.GCTAAeff2D(irfname))
@@ -512,6 +514,7 @@ class Test(gammalib.GPythonTestSuite):
         test_support.pickeling(self, gammalib.GCTAEventCube(cube))
         test_support.pickeling(self, gammalib.GCTAEventList(list))
         test_support.pickeling(self, gammalib.GCTAInstDir(instdir))
+        test_support.pickeling(self, gammalib.GCTAModelSkyCube(skycube,plaw))
         test_support.pickeling(self, gammalib.GCTAModelBackground(radgauss,plaw))
         test_support.pickeling(self, gammalib.GCTAModelAeffBackground(plaw))
         test_support.pickeling(self, gammalib.GCTAModelCubeBackground(plaw))

@@ -1,7 +1,7 @@
 /***************************************************************************
- *       GCTAModelIrfBackground.cpp - CTA IRF background model class       *
+ *               GCTAModelSkyCube.cpp - CTA sky cube model class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2020 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,8 +19,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAModelIrfBackground.cpp
- * @brief CTA IRF background model class implementation
+ * @file GCTAModelSkyCube.cpp
+ * @brief CTA sky cube model class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -29,30 +29,27 @@
 #include <config.h>
 #endif
 #include "GTools.hpp"
-#include "GMath.hpp"
-#include "GIntegral.hpp"
 #include "GModelRegistry.hpp"
 #include "GModelSpectralRegistry.hpp"
 #include "GModelTemporalRegistry.hpp"
 #include "GModelTemporalConst.hpp"
-#include "GModelSpectralNodes.hpp"
-#include "GCTAModelIrfBackground.hpp"
-#include "GCTAObservation.hpp"
-#include "GCTAResponseIrf.hpp"
-#include "GCTABackground.hpp"
+#include "GObservation.hpp"
+#include "GCTAModelSkyCube.hpp"
 #include "GCTASupport.hpp"
 
 /* __ Globals ____________________________________________________________ */
-const GCTAModelIrfBackground g_cta_inst_background_seed;
-const GModelRegistry         g_cta_inst_background_registry(&g_cta_inst_background_seed);
+const GCTAModelSkyCube g_cta_inst_sky_seed;
+const GModelRegistry   g_cta_inst_sky_registry(&g_cta_inst_sky_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_EVAL  "GCTAModelIrfBackground::eval(GEvent&, GObservation&, bool&)"
-#define G_NPRED             "GCTAModelIrfBackground::npred(GEnergy&, GTime&,"\
-                                                            " GObservation&)"
-#define G_MC               "GCTAModelIrfBackground::mc(GObservation&, GRan&)"
-#define G_XML_SPECTRAL   "GCTAModelIrfBackground::xml_spectral(GXmlElement&)"
-#define G_XML_TEMPORAL   "GCTAModelIrfBackground::xml_temporal(GXmlElement&)"
+#define G_EVAL        "GCTAModelSkyCube::eval(GEvent&, GObservation&, bool&)"
+#define G_NPRED    "GCTAModelSkyCube::npred(GEnergy&, GTime&, GObservation&)"
+#define G_MC                     "GCTAModelSkyCube::mc(GObservation&, GRan&)"
+#define G_READ_XML_SPATIAL "GCTAModelSkyCube::read_xml_spatial(GXmlElement&)"
+#define G_WRITE_XML_SPATIAL            "GCTAModelSkyCube::write_xml_spatial("\
+                                                              "GXmlElement&)"
+#define G_XML_SPECTRAL         "GCTAModelSkyCube::xml_spectral(GXmlElement&)"
+#define G_XML_TEMPORAL         "GCTAModelSkyCube::xml_temporal(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -60,7 +57,6 @@ const GModelRegistry         g_cta_inst_background_registry(&g_cta_inst_backgrou
 #define G_USE_NPRED_CACHE
 
 /* __ Debug definitions __________________________________________________ */
-//#define G_DUMP_MC
 //#define G_DEBUG_NPRED
 
 /* __ Constants __________________________________________________________ */
@@ -75,7 +71,7 @@ const GModelRegistry         g_cta_inst_background_registry(&g_cta_inst_backgrou
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GCTAModelIrfBackground::GCTAModelIrfBackground(void) : GModelData()
+GCTAModelSkyCube::GCTAModelSkyCube(void) : GModelData()
 {
     // Initialise class members
     init_members();
@@ -86,36 +82,14 @@ GCTAModelIrfBackground::GCTAModelIrfBackground(void) : GModelData()
 
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief XML constructor
  *
  * @param[in] xml XML element.
  *
- * Constructs a CTA instrumental background model from the information
- * provided by an XML element. The XML element is expected to have the
- * following structure
- *
- *     <source name="..." type="..." instrument="...">
- *       <spectrum type="...">
- *         ...
- *       </spectrum>
- *     </source>
- *
- * Optionally, a temporal model may be provided using the following
- * syntax
- *
- *     <source name="..." type="..." instrument="...">
- *       <spectrum type="...">
- *         ...
- *       </spectrum>
- *       <temporalModel type="...">
- *         ...
- *       </temporalModel>
- *     </source>
- *
- * If no temporal component is found a constant model is assumed.
+ * Constructs a CTA sky cube model from the information provided by an
+ * XML element (see GCTAModelSkyCube::read method).
  ***************************************************************************/
-GCTAModelIrfBackground::GCTAModelIrfBackground(const GXmlElement& xml) :
-                        GModelData(xml)
+GCTAModelSkyCube::GCTAModelSkyCube(const GXmlElement& xml) : GModelData(xml)
 {
     // Initialise members
     init_members();
@@ -132,17 +106,17 @@ GCTAModelIrfBackground::GCTAModelIrfBackground(const GXmlElement& xml) :
 
 
 /***********************************************************************//**
- * @brief Construct from spectral component
+ * @brief Construct from filename and spectral component
  *
+ * @param[in] filename Cube file name.
  * @param[in] spectral Spectral model component.
  *
- * Constructs a CTA instrumental background model from a spectral
+ * Constructs a CTA sky cube model from a cube @p filename and a @p spectral
  * model component. The temporal component is assumed to be constant.
- * Please refer to the classe GModelSpectral to learn more about the
- * definition of the spectral components.
  ***************************************************************************/
-GCTAModelIrfBackground::GCTAModelIrfBackground(const GModelSpectral& spectral) :
-                        GModelData()
+GCTAModelSkyCube::GCTAModelSkyCube(const GFilename&      filename,
+                                   const GModelSpectral& spectral) :
+                  GModelData()
 {
     // Initialise members
     init_members();
@@ -150,6 +124,42 @@ GCTAModelIrfBackground::GCTAModelIrfBackground(const GModelSpectral& spectral) :
     // Allocate temporal constant model
     GModelTemporalConst temporal;
 
+    // Load filename
+    load(filename);
+
+    // Clone model components
+    m_spectral = spectral.clone();
+    m_temporal = temporal.clone();
+
+    // Set parameter pointers
+    set_pointers();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Construct from model components
+ *
+ * @param[in] filename Cube file name.
+ * @param[in] spectral Spectral model component.
+ * @param[in] temporal Temporal model component.
+ *
+ * Constructs a CTA sky cube model from a cube @p filename, a @p spectral
+ * model component and a @p temporal component.
+ ***************************************************************************/
+GCTAModelSkyCube::GCTAModelSkyCube(const GFilename&      filename,
+                                   const GModelSpectral& spectral,
+                                   const GModelTemporal& temporal) :
+                  GModelData()
+{
+    // Initialise members
+    init_members();
+
+    // Load filename
+    load(filename);
+    
     // Clone model components
     m_spectral = spectral.clone();
     m_temporal = temporal.clone();
@@ -165,16 +175,16 @@ GCTAModelIrfBackground::GCTAModelIrfBackground(const GModelSpectral& spectral) :
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] bgd CTA instrument background model.
+ * @param[in] sky CTA sky cube model.
  ***************************************************************************/
-GCTAModelIrfBackground::GCTAModelIrfBackground(const GCTAModelIrfBackground& bgd) :
-                        GModelData(bgd)
+GCTAModelSkyCube::GCTAModelSkyCube(const GCTAModelSkyCube& sky) :
+                  GModelData(sky)
 {
     // Initialise class members
     init_members();
 
     // Copy members
-    copy_members(bgd);
+    copy_members(sky);
 
     // Return
     return;
@@ -184,7 +194,7 @@ GCTAModelIrfBackground::GCTAModelIrfBackground(const GCTAModelIrfBackground& bgd
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GCTAModelIrfBackground::~GCTAModelIrfBackground(void)
+GCTAModelSkyCube::~GCTAModelSkyCube(void)
 {
     // Free members
     free_members();
@@ -203,16 +213,16 @@ GCTAModelIrfBackground::~GCTAModelIrfBackground(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] bgd CTA instrument background model.
- * @return CTA instrument background model.
+ * @param[in] sky CTA sky cube model.
+ * @return CTA sky cube model.
  ***************************************************************************/
-GCTAModelIrfBackground& GCTAModelIrfBackground::operator=(const GCTAModelIrfBackground& bgd)
+GCTAModelSkyCube& GCTAModelSkyCube::operator=(const GCTAModelSkyCube& sky)
 {
     // Execute only if object is not identical
-    if (this != &bgd) {
+    if (this != &sky) {
 
         // Copy base class members
-        this->GModelData::operator=(bgd);
+        this->GModelData::operator=(sky);
 
         // Free members
         free_members();
@@ -221,7 +231,7 @@ GCTAModelIrfBackground& GCTAModelIrfBackground::operator=(const GCTAModelIrfBack
         init_members();
 
         // Copy members
-        copy_members(bgd);
+        copy_members(sky);
 
     } // endif: object was not identical
 
@@ -237,12 +247,11 @@ GCTAModelIrfBackground& GCTAModelIrfBackground::operator=(const GCTAModelIrfBack
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear CTA instrument background model
+ * @brief Clear CTA sky cube model
  *
- * This method properly resets the CTA instrument background model to an
- * initial state.
+ * This method properly resets the CTA sky cube model to an initial state.
  ***************************************************************************/
-void GCTAModelIrfBackground::clear(void)
+void GCTAModelSkyCube::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
@@ -258,13 +267,59 @@ void GCTAModelIrfBackground::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone CTA instrument background model
+ * @brief Clone CTA sky cube model
  *
- * @return Pointer to deep copy of CTA instrument background model.
+ * @return Pointer to deep copy of CTA sky cube model.
  ***************************************************************************/
-GCTAModelIrfBackground* GCTAModelIrfBackground::clone(void) const
+GCTAModelSkyCube* GCTAModelSkyCube::clone(void) const
 {
-    return new GCTAModelIrfBackground(*this);
+    return new GCTAModelSkyCube(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Load sky cube
+ *
+ * @param[in] filename Sky cube filename.
+ *
+ * Load the sky cube from the primary image extension.
+ ***************************************************************************/
+void GCTAModelSkyCube::load(const GFilename& filename)
+{
+    // Clear object
+    clear();
+
+    // Put into OpenMP criticial zone
+    #pragma omp critical(GCTAModelSkyCube_load)
+    {
+        // Open FITS file
+        GFits fits(filename);
+
+        // Get HDUs
+        const GFitsImage& hdu_skycube = *fits.image("Primary");
+        const GFitsTable& hdu_ebounds = *fits.table(gammalib::extname_ebounds);
+
+        // Read sky cube
+        m_cube.read(hdu_skycube);
+
+        // Read energy boundaries
+        m_ebounds.read(hdu_ebounds);
+
+        // Set energy node array
+        for (int i = 0; i < m_ebounds.size(); ++i) {
+            m_elogmeans.append(m_ebounds.elogmean(i).log10TeV());
+        }
+
+        // Close FITS file
+        fits.close();
+
+    } // end of OpenMP critical zone
+
+    // Store filename
+    m_filename = filename;
+
+    // Return
+    return;
 }
 
 
@@ -275,7 +330,7 @@ GCTAModelIrfBackground* GCTAModelIrfBackground::clone(void) const
  *
  * Sets the spectral model component of the model.
  ***************************************************************************/
-void GCTAModelIrfBackground::spectral(const GModelSpectral* spectral)
+void GCTAModelSkyCube::spectral(const GModelSpectral* spectral)
 {
     // Free spectral model component only if it differs from current
     // component. This prevents unintential deallocation of the argument
@@ -302,7 +357,7 @@ void GCTAModelIrfBackground::spectral(const GModelSpectral* spectral)
  *
  * Sets the temporal model component of the model.
  ***************************************************************************/
-void GCTAModelIrfBackground::temporal(const GModelTemporal* temporal)
+void GCTAModelSkyCube::temporal(const GModelTemporal* temporal)
 {
     // Free temporal model component only if it differs from current
     // component. This prevents unintential deallocation of the argument
@@ -323,36 +378,74 @@ void GCTAModelIrfBackground::temporal(const GModelTemporal* temporal)
 
 
 /***********************************************************************//**
- * @brief Return background rate in units of events MeV\f$^{-1}\f$
+ * @brief Return event rate in units of events MeV\f$^{-1}\f$
  *        s\f$^{-1}\f$ sr\f$^{-1}\f$
  *
  * @param[in] event Observed event.
  * @param[in] obs Observation.
  * @param[in] gradients Compute gradients?
- * @return Background rate (events MeV\f$^{-1}\f$ s\f$^{-1}\f$ sr\f$^{-1}\f$).
+ * @return Event rate (events MeV\f$^{-1}\f$ s\f$^{-1}\f$ sr\f$^{-1}\f$).
  *
- * The method returns a real rate, defined by the number of counts per MeV,
- * steradian and ontime.
+ * Evaluates the sky cube model. The method returns a measured rate, defined
+ * as the number of counts per MeV, steradian and ontime.
  *
  * If the @p gradients flag is true the method will also set the parameter
  * gradients of the model parameters.
  ***************************************************************************/
-double GCTAModelIrfBackground::eval(const GEvent&       event,
-                                    const GObservation& obs,
-                                    const bool&         gradients) const
+double GCTAModelSkyCube::eval(const GEvent&       event,
+                              const GObservation& obs,
+                              const bool&         gradients) const
 {
-    // Get reference on CTA pointing and effective area response from
-    // observation and reference on CTA instrument direction from event
-    const GCTAPointing&   pnt = gammalib::cta_pnt(G_EVAL, obs);
-    const GCTABackground& bgd = gammalib::cta_rsp_bkg(G_EVAL, obs);
-    const GCTAInstDir&    dir = gammalib::cta_dir(G_EVAL, event);
+    // Set indices and weighting factors for energy interpolation
+    m_elogmeans.set_value(event.energy().log10TeV());
+    int    inx_left  = m_elogmeans.inx_left();
+    int    inx_right = m_elogmeans.inx_right();
+    double wgt_left  = m_elogmeans.wgt_left();
+    double wgt_right = m_elogmeans.wgt_right();
 
-    // Set DETX and DETY in instrument direction
-    GCTAInstDir inst_dir = pnt.instdir(dir.dir());
-    
-    // Evaluate function
-    double logE = event.energy().log10TeV();
-    double spat = bgd(logE, inst_dir.detx(), inst_dir.dety());
+    // Get reference on CTA instrument direction from event
+    const GCTAInstDir& dir = gammalib::cta_dir(G_EVAL, event);
+
+    // Initialise non-normalised spatial component
+    double spat_raw = 0.0;
+
+    // If left weight is close to 1, use left node
+    if (std::abs(wgt_left-1.0) < 1.0e-6) {
+        spat_raw = m_cube(dir.dir(), inx_left);
+    }
+
+    // ... otherwise, if right weight is close to 1, use right node
+    else if (std::abs(wgt_right-1.0) < 1.0e-6) {
+        spat_raw = m_cube(dir.dir(), inx_right);
+    }
+
+    // ... otherwise perform interpolation
+    else {
+        double spat_left  = m_cube(dir.dir(), inx_left);
+        double spat_right = m_cube(dir.dir(), inx_right);
+        if (spat_left > 0.0 && spat_right > 0.0) {
+            spat_raw = std::exp(wgt_left  * std::log(spat_left) +
+                                wgt_right * std::log(spat_right));
+        }
+    }
+
+    // Multiply-in normalisation
+    double spat = spat_raw * m_norm.value();
+
+    // Make sure that spatial component does not become negative
+    if (spat < 0.0) {
+        spat = 0.0;
+    }
+
+    // Divide spatial model value by event size
+    if (event.size() != 0.0) {
+        spat /= event.size();
+    }
+    else {
+        spat = 0.0;
+    }
+
+    // Evaluate spectral and temporal components
     double spec = (spectral() != NULL)
                   ? spectral()->eval(event.energy(), event.time(), gradients)
                   : 1.0;
@@ -365,6 +458,13 @@ double GCTAModelIrfBackground::eval(const GEvent&       event,
     // If gradients were requested then multiply factors to spectral and
     // temporal gradients
     if (gradients) {
+
+        // Multiply factors to spatial gradient
+        if (m_norm.is_free()) {
+            double fact   = spec * temp;
+            double g_norm = spat_raw * m_norm.scale();
+            m_norm.factor_gradient(g_norm * fact);
+        }
 
         // Multiply factors to spectral gradients
         if (spectral() != NULL) {
@@ -392,33 +492,28 @@ double GCTAModelIrfBackground::eval(const GEvent&       event,
 
 
 /***********************************************************************//**
- * @brief Return spatially integrated background rate in units of
+ * @brief Return spatially integrated event rate in units of
  *        events MeV\f$^{-1}\f$ s\f$^{-1}\f$
  *
  * @param[in] obsEng Measured event energy.
  * @param[in] obsTime Measured event time.
  * @param[in] obs Observation.
- * @return Spatially integrated background rate
+ * @return Spatially integrated event rate
  *         (events MeV\f$^{-1}\f$ s\f$^{-1}\f$)
  *
- * Spatially integrates the instrumental background model for a given
- * measured event energy and event time. The method returns a real rate,
- * defined as the number of counts per MeV and ontime.
+ * Spatially integrates the sky cube model for a given measured event energy
+ * and event time.
  ***************************************************************************/
-double GCTAModelIrfBackground::npred(const GEnergy&      obsEng,
-                                     const GTime&        obsTime,
-                                     const GObservation& obs) const
+double GCTAModelSkyCube::npred(const GEnergy&      obsEng,
+                               const GTime&        obsTime,
+                               const GObservation& obs) const
 {
-    // Set number of iterations for Romberg integration.
-    static const int iter_theta = 6;
-    static const int iter_phi   = 6;
-
     // Initialise result
     double npred     = 0.0;
     bool   has_npred = false;
 
     // Build unique identifier
-    std::string id = obs.instrument() + "::" + obs.id();
+    std::string id = obs.instrument() + ":" + obs.id();
 
     // Check if Npred value is already in cache
     #if defined(G_USE_NPRED_CACHE)
@@ -431,7 +526,7 @@ double GCTAModelIrfBackground::npred(const GEnergy&      obsEng,
                 npred     = m_npred_values[i];
                 has_npred = true;
                 #if defined(G_DEBUG_NPRED)
-                std::cout << "GCTAModelIrfBackground::npred:";
+                std::cout << "GCTAModelSkyCube::npred:";
                 std::cout << " cache=" << i;
                 std::cout << " npred=" << npred << std::endl;
                 #endif
@@ -448,35 +543,24 @@ double GCTAModelIrfBackground::npred(const GEnergy&      obsEng,
         // Evaluate only if model is valid
         if (valid_model()) {
 
-            // Get reference on CTA pointing, background response and event
-            // list from observation
-            const GCTAPointing&   pnt    = gammalib::cta_pnt(G_NPRED, obs);
-            const GCTABackground& bgd    = gammalib::cta_rsp_bkg(G_NPRED, obs);
-            const GCTAEventList&  events = gammalib::cta_event_list(G_NPRED, obs);
+            // Set indices and weighting factors for energy interpolation
+            m_elogmeans.set_value(obsEng.log10TeV());
+            int    inx_left  = m_elogmeans.inx_left();
+            int    inx_right = m_elogmeans.inx_right();
+            double wgt_left  = m_elogmeans.wgt_left();
+            double wgt_right = m_elogmeans.wgt_right();
 
-            // Get instrument direction of RoI centre
-            GCTAInstDir roi_centre = pnt.instdir(events.roi().centre().dir());
+            // Loop over all map pixels
+            for (int i = 0; i < m_cube.npix(); ++i) {
 
-            // Get ROI radius in radians
-            double roi_radius = events.roi().radius() * gammalib::deg2rad;
+                // Get bin value
+                double value = wgt_left  * m_cube(i, inx_left) +
+                               wgt_right * m_cube(i, inx_right);
 
-            // Get log10 of energy in TeV
-            double logE = obsEng.log10TeV();
+                // Sum bin contents
+                npred += value * m_cube.solidangle(i);
 
-            // Setup integration function
-            GCTAModelIrfBackground::npred_roi_kern_theta integrand(&bgd,
-                                                                   logE,
-                                                                   roi_centre,
-                                                                   iter_phi);
-
-            // Setup integration
-            GIntegral integral(&integrand);
-
-            // Set fixed number of iterations
-            integral.fixed_iter(iter_theta);
-
-            // Spatially integrate radial component
-            npred = integral.romberg(0.0, roi_radius);
+            }
 
             // Store result in Npred cache
             #if defined(G_USE_NPRED_CACHE)
@@ -489,10 +573,9 @@ double GCTAModelIrfBackground::npred(const GEnergy&      obsEng,
             // Debug: Check for NaN
             #if defined(G_NAN_CHECK)
             if (gammalib::is_notanumber(npred) || gammalib::is_infinite(npred)) {
-                std::string origin  = "GCTAModelIrfBackground::npred";
+                std::string origin  = "GCTAModelSkyCube::npred";
                 std::string message = " NaN/Inf encountered (npred=" +
-                                      gammalib::str(npred) + ", roi_radius=" +
-                                      gammalib::str(roi_radius) + ")";
+                                      gammalib::str(npred) + ")";
                 gammalib::warning(origin, message);
             }
             #endif
@@ -500,6 +583,9 @@ double GCTAModelIrfBackground::npred(const GEnergy&      obsEng,
         } // endif: model was valid
 
     } // endif: Npred computation required
+
+    // Multiply in normalisation value
+    npred *= m_norm.value();
 
     // Multiply in spectral and temporal components
     npred *= spectral()->eval(obsEng, obsTime);
@@ -518,161 +604,36 @@ double GCTAModelIrfBackground::npred(const GEnergy&      obsEng,
  * @return Pointer to list of simulated events (needs to be de-allocated by
  *         client)
  *
- * Draws a sample of events from the background model using a Monte
- * Carlo simulation. The region of interest, the energy boundaries and the
- * good time interval for the sampling will be extracted from the observation
- * argument that is passed to the method. The method also requires a random
- * number generator of type GRan which is passed by reference, hence the
- * state of the random number generator will be changed by the method.
+ * @exception GException::feature_not_implemented
+ *            Class does not support the generation of event lists.
  *
- * For each event in the returned event list, the sky direction, the nominal
- * coordinates (DETX and DETY), the energy and the time will be set.
+ * The simulation of an event list from a sky cube model is not implemented,
+ * hence the method will always throw an exception.
  ***************************************************************************/
-GCTAEventList* GCTAModelIrfBackground::mc(const GObservation& obs, GRan& ran) const
+GCTAEventList* GCTAModelSkyCube::mc(const GObservation& obs, GRan& ran) const
 {
-    // Initialise new event list
-    GCTAEventList* list = new GCTAEventList;
+    // Feature not yet implemented
+    throw GException::feature_not_implemented(G_MC,
+          "MC computation not implemented for binned analysis.");
 
-    // Continue only if model is valid)
-    if (valid_model()) {
+    // Return NULL pointer
+    return NULL;
 
-        // Get reference on CTA pointing, background response and event list
-        // from observation
-        const GCTAPointing&   pnt    = gammalib::cta_pnt(G_MC, obs);
-        const GCTABackground& bgd    = gammalib::cta_rsp_bkg(G_MC, obs);
-        const GCTAEventList&  events = gammalib::cta_event_list(G_MC, obs);
-
-        // Get simulation region
-        const GCTARoi&  roi     = events.roi();
-        const GEbounds& ebounds = events.ebounds();
-        const GGti&     gti     = events.gti();
-
-        // Set simulation region for result event list
-        list->roi(roi);
-        list->ebounds(ebounds);
-        list->gti(gti);
-
-        // Create a spectral model that combines the information from the
-        // background information and the spectrum provided by the model
-        GModelSpectralNodes spectral(bgd.spectrum());
-        for (int i = 0; i < spectral.nodes(); ++i) {
-            GEnergy energy    = spectral.energy(i);
-            double  intensity = spectral.intensity(i);
-            double  norm      = m_spectral->eval(energy);
-            spectral.intensity(i, norm*intensity);
-        }
-
-        // Loop over all energy boundaries
-        for (int ieng = 0; ieng < ebounds.size(); ++ieng) {
-
-            // Compute the background rate in model within the energy
-            // boundaries from spectral component (units: cts/s).
-            // Note that the time here is ontime. Deadtime correction will
-            // be done later.
-            double rate = spectral.flux(ebounds.emin(ieng), ebounds.emax(ieng));
-
-            // Debug option: dump rate
-            #if defined(G_DUMP_MC)
-            std::cout << "GCTAModelIrfBackground::mc(\"" << name() << "\": ";
-            std::cout << "rate=" << rate << " cts/s)" << std::endl;
-            #endif
-
-            // If the rate is not positive then skip this energy bins
-            if (rate <= 0.0) {
-                continue;
-            }
-
-            // Loop over all good time intervals
-            for (int itime = 0; itime < gti.size(); ++itime) {
-
-                // Get Monte Carlo event arrival times from temporal model
-                GTimes times = m_temporal->mc(rate,
-                                              gti.tstart(itime),
-                                              gti.tstop(itime),
-                                              ran);
-
-                // Get number of events
-                int n_events = times.size();
-
-                // Reserve space for events
-                if (n_events > 0) {
-                    list->reserve(n_events);
-                }
-
-                // Debug option: provide number of times and initialize
-                // statisics
-                #if defined(G_DUMP_MC)
-                std::cout << " Interval " << itime;
-                std::cout << " events=" << n_events << std::endl;
-                int n_killed_by_roi = 0;
-                #endif
-
-                // Loop over events
-                for (int i = 0; i < n_events; ++i) {
-
-                    // Get Monte Carlo event energy from spectral model
-                    GEnergy energy = spectral.mc(ebounds.emin(ieng),
-                                                 ebounds.emax(ieng),
-                                                 times[i],
-                                                 ran);
-
-                    // Get Monte Carlo event direction from spatial model.
-                    // This only will set the DETX and DETY coordinates.
-                    GCTAInstDir instdir = bgd.mc(energy, times[i], ran);
-
-                    // Derive sky direction from instrument coordinates
-                    GSkyDir skydir = pnt.skydir(instdir);
-
-                    // Set sky direction in GCTAInstDir object
-                    instdir.dir(skydir);
-
-                    // Allocate event
-                    GCTAEventAtom event;
-
-                    // Set event attributes
-                    event.dir(instdir);
-                    event.energy(energy);
-                    event.time(times[i]);
-
-                    // Append event to list if it falls in ROI
-                    if (events.roi().contains(event)) {
-                        list->append(event);
-                    }
-                    #if defined(G_DUMP_MC)
-                    else {
-                        n_killed_by_roi++;
-                    }
-                    #endif
-
-                } // endfor: looped over all events
-
-                // Debug option: provide  statisics
-                #if defined(G_DUMP_MC)
-                std::cout << " Killed by ROI=";
-                std::cout << n_killed_by_roi << std::endl;
-                #endif
-
-            } // endfor: looped over all GTIs
-
-        } // endfor: looped over all energy boundaries
-
-    } // endif: model was valid
-
-    // Return
-    return list;
 }
 
 
 /***********************************************************************//**
- * @brief Read CTA instrument background model from XML element
+ * @brief Read CTA sky cube model from XML element
  *
  * @param[in] xml XML element.
  *
- * Set up CTA instrument background model from the information provided by
- * an XML element. The XML element is expected to have the following
- * structure
+ * Set up CTA sky cube model from the information provided by an XML element.
+ * The XML element is expected to have the following structure
  *
- *     <source name="..." type="..." instrument="...">
+ *     <source name="CTA sky cube" type="CTASkyCube" instrument="CTA">
+ *       <spatialModel type="ModelCube" file="model_cube.fits">
+ *         <parameter name="Normalization" scale="1" value="1" min="0.1" max="10" free="0"/>
+ *       </spatialModel>
  *       <spectrum type="...">
  *         ...
  *       </spectrum>
@@ -681,7 +642,10 @@ GCTAEventList* GCTAModelIrfBackground::mc(const GObservation& obs, GRan& ran) co
  * Optionally, a temporal model may be provided using the following
  * syntax
  *
- *     <source name="..." type="..." instrument="...">
+ *     <source name="CTA sky cube" type="CTASkyCube" instrument="CTA">
+ *       <spatialModel type="ModelCube" file="model_cube.fits">
+ *         <parameter name="Normalization" scale="1" value="1" min="0.1" max="10" free="0"/>
+ *       </spatialModel>
  *       <spectrum type="...">
  *         ...
  *       </spectrum>
@@ -692,21 +656,20 @@ GCTAEventList* GCTAModelIrfBackground::mc(const GObservation& obs, GRan& ran) co
  *
  * If no temporal component is found a constant model is assumed.
  ***************************************************************************/
-void GCTAModelIrfBackground::read(const GXmlElement& xml)
+void GCTAModelSkyCube::read(const GXmlElement& xml)
 {
     // Clear model
     clear();
 
-    // Initialise XML elements
-    const GXmlElement* spectral = NULL;
+    // Get pointers on spatial and spectral components
+    const GXmlElement* spat = xml.element("spatialModel", 0);
+    const GXmlElement* spec = xml.element("spectrum", 0);
 
-    // Get pointer on spectrum
-    spectral = xml.element("spectrum", 0);
+    // Set spatial and spectral models
+    read_xml_spatial(*spat);
+    m_spectral = xml_spectral(*spec);
 
-    // Extract spectral model
-    m_spectral = xml_spectral(*spectral);
-
-    // Optionally get temporal model
+    // Handle optional temporal model
     if (xml.elements("temporal")) {
         const GXmlElement* temporal = xml.element("temporal", 0);
         m_temporal = xml_temporal(*temporal);
@@ -728,14 +691,17 @@ void GCTAModelIrfBackground::read(const GXmlElement& xml)
 
 
 /***********************************************************************//**
- * @brief Write CTA instrument background model into XML element
+ * @brief Write CTA cube background model into XML element
  *
  * @param[in] xml XML element.
  *
- * Write CTA instrument background model information into an XML element.
+ * Write CTA cube background model information into an XML element.
  * The XML element will have the following structure
  *
- *     <source name="..." type="..." instrument="...">
+ *     <source name="CTA sky cube" type="CTASkyCube" instrument="CTA">
+ *       <spatialModel type="ModelCube" file="model_cube.fits">
+ *         <parameter name="Normalization" scale="1" value="1" min="0.1" max="10" free="0"/>
+ *       </spatialModel>
  *       <spectrum type="...">
  *         ...
  *       </spectrum>
@@ -744,7 +710,10 @@ void GCTAModelIrfBackground::read(const GXmlElement& xml)
  * If the model contains a non-constant temporal model, the temporal
  * component will also be written following the syntax
  *
- *     <source name="..." type="..." instrument="...">
+ *     <source name="CTA sky cube" type="CTASkyCube" instrument="CTA">
+ *       <spatialModel type="ModelCube" file="model_cube.fits">
+ *         <parameter name="Normalization" scale="1" value="1" min="0.1" max="10" free="0"/>
+ *       </spatialModel>
  *       <spectrum type="...">
  *         ...
  *       </spectrum>
@@ -755,7 +724,7 @@ void GCTAModelIrfBackground::read(const GXmlElement& xml)
  *
  * If no temporal component is found a constant model is assumed.
  ***************************************************************************/
-void GCTAModelIrfBackground::write(GXmlElement& xml) const
+void GCTAModelSkyCube::write(GXmlElement& xml) const
 {
     // Initialise pointer on source
     GXmlElement* src = NULL;
@@ -782,9 +751,16 @@ void GCTAModelIrfBackground::write(GXmlElement& xml) const
     // If no source with corresponding name was found then append one
     if (src == NULL) {
         src = xml.append("source");
-        if (spectral() != NULL) src->append(GXmlElement("spectrum"));
-        if (write_temporal)     src->append(GXmlElement("temporal"));
+        src->append(GXmlElement("spatialModel"));
+        src->append(GXmlElement("spectrum"));
+        if (write_temporal) {
+            src->append(GXmlElement("temporal"));
+        }
     }
+
+    // Write spatial model
+    GXmlElement* spat = src->element("spatialModel", 0);
+    write_xml_spatial(*spat);
 
     // Write spectral model
     if (spectral() != NULL) {
@@ -809,12 +785,12 @@ void GCTAModelIrfBackground::write(GXmlElement& xml) const
 
 
 /***********************************************************************//**
- * @brief Print CTA instrument background model information
+ * @brief Print CTA cube background model information
  *
  * @param[in] chatter Chattiness.
- * @return String containing CTA instrument background model information.
+ * @return String containing CTA cube background model information.
  ***************************************************************************/
-std::string GCTAModelIrfBackground::print(const GChatter& chatter) const
+std::string GCTAModelSkyCube::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
@@ -823,7 +799,7 @@ std::string GCTAModelIrfBackground::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append header
-        result.append("=== GCTAModelIrfBackground ===");
+        result.append("=== GCTAModelSkyCube ===");
 
         // Determine number of parameters per type
         int n_spectral = (spectral() != NULL) ? spectral()->size() : 0;
@@ -874,9 +850,27 @@ std::string GCTAModelIrfBackground::print(const GChatter& chatter) const
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GCTAModelIrfBackground::init_members(void)
+void GCTAModelSkyCube::init_members(void)
 {
+    // Initialise Value
+    m_norm.clear();
+    m_norm.name("Normalization");
+    m_norm.value(1.0);
+    m_norm.scale(1.0);
+    m_norm.range(0.001, 1000.0);
+    m_norm.gradient(0.0);
+    m_norm.fix();
+    m_norm.has_grad(true);
+
+    // Set parameter pointer(s)
+    m_pars.clear();
+    m_pars.push_back(&m_norm);
+
     // Initialise members
+    m_filename.clear();
+    m_cube.clear();
+    m_ebounds.clear();
+    m_elogmeans.clear();
     m_spectral = NULL;
     m_temporal = NULL;
 
@@ -894,19 +888,26 @@ void GCTAModelIrfBackground::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] bgd CTA background model.
+ * @param[in] sky CTA sky cube model.
  ***************************************************************************/
-void GCTAModelIrfBackground::copy_members(const GCTAModelIrfBackground& bgd)
+void GCTAModelSkyCube::copy_members(const GCTAModelSkyCube& sky)
 {
+    // Copy members
+    m_filename  = sky.m_filename;
+    m_cube      = sky.m_cube;
+    m_ebounds   = sky.m_ebounds;
+    m_elogmeans = sky.m_elogmeans;
+    m_norm      = sky.m_norm;
+
     // Copy cache
-    m_npred_names    = bgd.m_npred_names;
-    m_npred_energies = bgd.m_npred_energies;
-    m_npred_times    = bgd.m_npred_times;
-    m_npred_values   = bgd.m_npred_values;
+    m_npred_names    = sky.m_npred_names;
+    m_npred_energies = sky.m_npred_energies;
+    m_npred_times    = sky.m_npred_times;
+    m_npred_values   = sky.m_npred_values;
 
     // Clone spectral and temporal model components
-    m_spectral = (bgd.m_spectral != NULL) ? bgd.m_spectral->clone() : NULL;
-    m_temporal = (bgd.m_temporal != NULL) ? bgd.m_temporal->clone() : NULL;
+    m_spectral = (sky.m_spectral != NULL) ? sky.m_spectral->clone() : NULL;
+    m_temporal = (sky.m_temporal != NULL) ? sky.m_temporal->clone() : NULL;
 
     // Set parameter pointers
     set_pointers();
@@ -919,7 +920,7 @@ void GCTAModelIrfBackground::copy_members(const GCTAModelIrfBackground& bgd)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GCTAModelIrfBackground::free_members(void)
+void GCTAModelSkyCube::free_members(void)
 {
     // Free memory
     if (m_spectral != NULL) delete m_spectral;
@@ -940,10 +941,13 @@ void GCTAModelIrfBackground::free_members(void)
  * Set pointers to all model parameters. The pointers are stored in a vector
  * that is member of the GModelData base class.
  ***************************************************************************/
-void GCTAModelIrfBackground::set_pointers(void)
+void GCTAModelSkyCube::set_pointers(void)
 {
     // Clear parameters
     m_pars.clear();
+
+    // Push normalisation parameter on stack
+    m_pars.push_back(&m_norm);
 
     // Determine the number of parameters
     int n_spectral = (spectral() != NULL) ? spectral()->size() : 0;
@@ -976,13 +980,101 @@ void GCTAModelIrfBackground::set_pointers(void)
  * Returns 'true' if models has a spectral and a temporal component.
  * Otherwise returns 'false'.
  ***************************************************************************/
-bool GCTAModelIrfBackground::valid_model(void) const
+bool GCTAModelSkyCube::valid_model(void) const
 {
     // Set result
     bool result = ((spectral() != NULL) && (temporal() != NULL));
 
     // Return result
     return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Read spatial model from XML element
+ *
+ * @param[in] xml XML element.
+ *
+ * @exception GException::invalid_value
+ *            Invalid XML format encountered.
+ *
+ * Read sky cube information from the spatial XML element. The expected
+ * format of the XML element is
+ *
+ *     <spatialModel type="ModelCube" file="model_cube.fits">
+ *       <parameter name="Normalization" ../>
+ *     </spatialModel>
+ ***************************************************************************/
+void GCTAModelSkyCube::read_xml_spatial(const GXmlElement& xml)
+{
+    // Verify model type
+    if (xml.attribute("type") != "ModelCube") {
+        std::string msg = "Spatial model type \""+xml.attribute("type")+
+                          "\" is not of type \"ModelCube\". Please verify "
+                          "the XML format.";
+        throw GException::invalid_value(G_READ_XML_SPATIAL, msg);
+    }
+
+    // Get filename
+    GFilename filename = gammalib::xml_file_expand(xml, xml.attribute("file"));
+
+    // Get XML parameter
+    const GXmlElement* norm = gammalib::xml_get_par(G_READ_XML_SPATIAL, xml,
+                                                    m_norm.name());
+
+    // Read parameter
+    m_norm.read(*norm);
+
+    // Load sky cube
+    load(filename);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write spatial model into XML element
+ *
+ * @param[in] xml XML element.
+ *
+ * @exception GException::invalid_value
+ *            Invalid XML format encountered.
+ *
+ * Write sky cube information into the spatial XML element. The format of
+ * the XML element is
+ *
+ *     <spatialModel type="ModelCube" file="model_cube.fits">
+ *       <parameter name="Normalization" ../>
+ *     </spatialModel>
+ ***************************************************************************/
+void GCTAModelSkyCube::write_xml_spatial(GXmlElement& xml) const
+{
+    // Set model type
+    if (xml.attribute("type") == "") {
+        xml.attribute("type", "ModelCube");
+    }
+
+    // Verify model type
+    if (xml.attribute("type") != "ModelCube") {
+        std::string msg = "Spatial model type \""+xml.attribute("type")+
+                          "\" is not of type \"ModelCube\". Please verify "
+                          "the XML format.";
+        throw GException::invalid_value(G_WRITE_XML_SPATIAL, msg);
+    }
+
+    // Set filename
+    xml.attribute("file", gammalib::xml_file_reduce(xml, m_filename));
+
+    // Get XML parameter
+    GXmlElement* norm = gammalib::xml_need_par(G_WRITE_XML_SPATIAL, xml,
+                                               m_norm.name());
+
+    // Write parameter
+    m_norm.write(*norm);
+
+    // Return
+    return;
 }
 
 
@@ -994,7 +1086,7 @@ bool GCTAModelIrfBackground::valid_model(void) const
  *
  * Returns pointer to spectral model that is defined in an XML element.
  ***************************************************************************/
-GModelSpectral* GCTAModelIrfBackground::xml_spectral(const GXmlElement& spectral) const
+GModelSpectral* GCTAModelSkyCube::xml_spectral(const GXmlElement& spectral) const
 {
     // Get spectral model
     GModelSpectralRegistry registry;
@@ -1013,7 +1105,7 @@ GModelSpectral* GCTAModelIrfBackground::xml_spectral(const GXmlElement& spectral
  *
  * Returns pointer to temporal model that is defined in an XML element.
  ***************************************************************************/
-GModelTemporal* GCTAModelIrfBackground::xml_temporal(const GXmlElement& temporal) const
+GModelTemporal* GCTAModelSkyCube::xml_temporal(const GXmlElement& temporal) const
 {
     // Get temporal model
     GModelTemporalRegistry registry;
@@ -1021,110 +1113,4 @@ GModelTemporal* GCTAModelIrfBackground::xml_temporal(const GXmlElement& temporal
 
     // Return pointer
     return ptr;
-}
-
-
-/***********************************************************************//**
- * @brief Kernel for offset angle integration of background model
- *
- * @param[in] theta Offset angle from ROI centre (radians).
- *
- * Computes
- *
- * \f[
- *    K(\rho | E, t) = \sin \theta \times
- *                     \int_{0}^{2\pi}
- *                     B(\theta,\phi | E, t) d\phi
- * \f]
- *
- * where \f$B(\theta,\phi | E, t)\f$ is the background model for a specific
- * observed energy \f$E\f$ and time \f$t\f$.
- ***************************************************************************/
-double GCTAModelIrfBackground::npred_roi_kern_theta::eval(const double& theta)
-{
-    // Initialise value
-    double value = 0.0;
-
-    // Continue only if offset angle is positive
-    if (theta > 0.0) {
-
-        // Setup phi integration kernel
-        GCTAModelIrfBackground::npred_roi_kern_phi integrand(m_bgd,
-                                                             m_logE,
-                                                             m_roi_centre,
-                                                             theta);
-
-        // Setup integration
-        GIntegral integral(&integrand);
-
-        // Set fixed number of iterations
-        integral.fixed_iter(m_iter);
-
-        // Integrate over phi
-        value = integral.romberg(0.0, gammalib::twopi) * std::sin(theta);
-
-        // Debug: Check for NaN
-        #if defined(G_NAN_CHECK)
-        if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-            std::string origin  = "GCTAModelIrfBackground::npred_roi_kern_theta::eval"
-                                  "(" + gammalib::str(theta) + ")";
-            std::string message = " NaN/Inf encountered (value=" +
-                                  gammalib::str(value) + ")";
-            gammalib::warning(origin, message);
-        }
-        #endif
-
-    } // endif: offset angle was positive
-
-    // Return value
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Kernel for azimuth angle integration of background model
- *
- * @param[in] phi Azimuth angle around ROI centre (radians).
- *
- * Computes
- *
- * \f[
- *    B(\theta, \phi | E, t)
- * \f]
- *
- * using
- *
- * \f[ {\rm detx} = \theta \cos \phi \f]
- * \f[ {\rm dety} = \theta \sin \phi \f]
- *
- * @todo Verify correct orientation of detx and dety with respect to phi
- ***************************************************************************/
-double GCTAModelIrfBackground::npred_roi_kern_phi::eval(const double& phi)
-{
-    // Compute detx and dety in radians
-    double detx = m_roi_centre.detx();
-    double dety = m_roi_centre.dety();
-    if (m_theta > 0.0 ) {
-        detx += m_theta * std::cos(phi);
-        dety += m_theta * std::sin(phi);
-    }
-
-    // Get background value
-    double value = (*m_bgd)(m_logE, detx, dety);
-
-    // Debug: Check for NaN
-    #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::string origin  = "GCTAModelIrfBackground::npred_roi_kern_phi::eval"
-                              "(" + gammalib::str(phi) + ")";
-        std::string message = " NaN/Inf encountered (value=" +
-                              gammalib::str(value) + ", detx=" +
-                              gammalib::str(detx) + ", dety=" +
-                              gammalib::str(dety) + ")";
-        gammalib::warning(origin, message);
-    }
-    #endif
-
-    // Return Npred
-    return value;
 }

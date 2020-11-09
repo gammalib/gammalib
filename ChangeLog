@@ -1,8 +1,9 @@
-2020-11-08
+2020-11-09
 
         * Version 2.0.0 released
         ========================
 
+        Add GCTAModelSkyCube class (#3442)
         Add GSkyModel flux() and eflux() methods (#3439)
         Add XML value constructors and access methods to GXmlElement class (#3431)
         Correct application elapsed CPU time for OpenMP (#3417) 

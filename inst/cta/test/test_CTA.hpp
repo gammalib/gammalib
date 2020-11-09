@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    test_CTA.hpp  -  Test CTA classes                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -121,6 +121,7 @@ public:
     virtual void           set(void);
     virtual TestGCTAModel* clone(void) const { return new TestGCTAModel(*this); }
     virtual std::string    classname(void) const { return "TestGCTAModel"; }
+    void                   test_model_sky_cube(void);
     void                   test_model_bgd(void);
     void                   test_model_cube_bgd(void);
     void                   test_model_irf_bgd(void);
