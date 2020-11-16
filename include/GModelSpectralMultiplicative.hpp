@@ -177,7 +177,7 @@ std::string GModelSpectralMultiplicative::type(void) const
 inline
 int GModelSpectralMultiplicative::components(void) const
 {
-    return (m_spectral.size());
+    return ((int)m_spectral.size());
 }
 
 #endif /* GMODELSPECTRALMULTIPLICATIVE_HPP */
