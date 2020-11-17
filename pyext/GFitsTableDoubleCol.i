@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GFitsTableDoubleCol.i - FITS table double precision column class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -70,43 +70,41 @@ public:
  *       find out how to implement this (e.g. via typemaps).
  ***************************************************************************/
 %extend GFitsTableDoubleCol {
-    double __getitem__(int GFitsTableColInx[]) {
-        if (GFitsTableColInx[1] < 0 || GFitsTableColInx[1] >= self->nrows()) {
+    double __getitem__(int GTuple1D2D[]) {
+        if (GTuple1D2D[1] < 0 || GTuple1D2D[1] >= self->nrows()) {
             throw GException::out_of_range("__getitem__()", "Row index",
-                                           GFitsTableColInx[1], self->nrows());
+                                           GTuple1D2D[1], self->nrows());
         }
-        if (GFitsTableColInx[0] == 1) {
-            return (*self)(GFitsTableColInx[1]);
+        if (GTuple1D2D[0] == 1) {
+            return (*self)(GTuple1D2D[1]);
         }
         else {
-            if (GFitsTableColInx[2] >= 0 &&
-                GFitsTableColInx[2] < self->elements(GFitsTableColInx[1])) {
-                return (*self)(GFitsTableColInx[1], GFitsTableColInx[2]);
+            if (GTuple1D2D[2] >= 0 && GTuple1D2D[2] < self->elements(GTuple1D2D[1])) {
+                return (*self)(GTuple1D2D[1], GTuple1D2D[2]);
             }
             else {
                 throw GException::out_of_range("__getitem__()", "Column index",
-                                               GFitsTableColInx[2],
-                                               self->elements(GFitsTableColInx[1]));
+                                               GTuple1D2D[2],
+                                               self->elements(GTuple1D2D[1]));
             }
         }
     }
-    void __setitem__(int GFitsTableColInx[], double value) {
-        if (GFitsTableColInx[1] < 0 || GFitsTableColInx[1] >= self->nrows()) {
+    void __setitem__(int GTuple1D2D[], double value) {
+        if (GTuple1D2D[1] < 0 || GTuple1D2D[1] >= self->nrows()) {
             throw GException::out_of_range("__setitem__()", "Row index",
-                                           GFitsTableColInx[1], self->nrows());
+                                           GTuple1D2D[1], self->nrows());
         }
-        if (GFitsTableColInx[0] == 1) {
-            (*self)(GFitsTableColInx[1]) = value;
+        if (GTuple1D2D[0] == 1) {
+            (*self)(GTuple1D2D[1]) = value;
         }
         else {
-            if (GFitsTableColInx[2] >= 0 && GFitsTableColInx[2] <
-                self->elements(GFitsTableColInx[1])) {
-                (*self)(GFitsTableColInx[1], GFitsTableColInx[2]) = value;
+            if (GTuple1D2D[2] >= 0 && GTuple1D2D[2] < self->elements(GTuple1D2D[1])) {
+                (*self)(GTuple1D2D[1], GTuple1D2D[2]) = value;
             }
             else {
                 throw GException::out_of_range("__setitem__()", "Column index",
-                                               GFitsTableColInx[2],
-                                               self->elements(GFitsTableColInx[1]));
+                                               GTuple1D2D[2],
+                                               self->elements(GTuple1D2D[1]));
             }
         }
     }

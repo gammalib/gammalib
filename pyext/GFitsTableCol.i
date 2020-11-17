@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GFitsTableCol.i - FITS abstract table column base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -41,27 +41,6 @@
 #include "GException.hpp"
 %}
 %include "std_vector.i"
-
-// This typecheck verifies that all arguments are integers. The typecheck
-// is needed for using "int GFitsTableColInx" in overloaded methods.
-%typemap(typecheck, precedence=SWIG_TYPECHECK_INTEGER) int GFitsTableColInx[ANY] {
-    $1 = 1;
-    if (PySequence_Check($input)) {
-        int size = PyObject_Length($input);
-        for (int i = 0; i < size; i++) {
-            PyObject *o = PySequence_GetItem($input,i);
-            if (!PyInt_Check(o)) {
-                $1 = 0;
-                break;
-            }
-        }
-    }
-    else {
-        if (!PyInt_Check($input)) {
-            $1 = 0;
-        }
-    }
-}
 
 
 /***********************************************************************//**
@@ -141,120 +120,120 @@ public:
  * @todo Add range checking for type casting
  ***************************************************************************/
 %extend GFitsTableCol {
-    
+
     // String setting
-    void __setitem__(int GFitsTableColInx[], std::string value) {
+    void __setitem__(int GTuple1D2D[], std::string value) {
         if (dynamic_cast<GFitsTableStringCol*>(self) != NULL) {
             GFitsTableStringCol* col = dynamic_cast<GFitsTableStringCol*>(self);
-            if (GFitsTableColInx[0] == 1)
-                (*col)(GFitsTableColInx[1]) = value;
+            if (GTuple1D2D[0] == 1)
+                (*col)(GTuple1D2D[1]) = value;
             else
-                (*col)(GFitsTableColInx[1], GFitsTableColInx[2]) = value;
+                (*col)(GTuple1D2D[1], GTuple1D2D[2]) = value;
         }
         else {
             throw GException::bad_type("GFitsTableCol::__setitem__",
-                  "Column type does not support string setting.");            
+                  "Column type does not support string setting.");
         }
     }
-    
+
     // Integer setting
-    void __setitem__(int GFitsTableColInx[], int value) {
+    void __setitem__(int GTuple1D2D[], int value) {
         if (dynamic_cast<GFitsTableBitCol*>(self) != NULL) {
             GFitsTableBitCol* col = dynamic_cast<GFitsTableBitCol*>(self);
-            if (GFitsTableColInx[0] == 1)
-                (*col)(GFitsTableColInx[1]) = (bool)value;
+            if (GTuple1D2D[0] == 1)
+                (*col)(GTuple1D2D[1]) = (bool)value;
             else
-                (*col)(GFitsTableColInx[1], GFitsTableColInx[2]) = (bool)value;
+                (*col)(GTuple1D2D[1], GTuple1D2D[2]) = (bool)value;
         }
         else if (dynamic_cast<GFitsTableBoolCol*>(self) != NULL) {
             GFitsTableBoolCol* col = dynamic_cast<GFitsTableBoolCol*>(self);
-            if (GFitsTableColInx[0] == 1)
-                (*col)(GFitsTableColInx[1]) = (bool)value;
+            if (GTuple1D2D[0] == 1)
+                (*col)(GTuple1D2D[1]) = (bool)value;
             else
-                (*col)(GFitsTableColInx[1], GFitsTableColInx[2]) = (bool)value;
+                (*col)(GTuple1D2D[1], GTuple1D2D[2]) = (bool)value;
         }
         else if (dynamic_cast<GFitsTableByteCol*>(self) != NULL) {
             GFitsTableByteCol* col = dynamic_cast<GFitsTableByteCol*>(self);
-            if (GFitsTableColInx[0] == 1)
-                (*col)(GFitsTableColInx[1]) = (unsigned char)value;
+            if (GTuple1D2D[0] == 1)
+                (*col)(GTuple1D2D[1]) = (unsigned char)value;
             else
-                (*col)(GFitsTableColInx[1], GFitsTableColInx[2]) = (unsigned char)value;
+                (*col)(GTuple1D2D[1], GTuple1D2D[2]) = (unsigned char)value;
         }
         else if (dynamic_cast<GFitsTableLongCol*>(self) != NULL) {
             GFitsTableLongCol* col = dynamic_cast<GFitsTableLongCol*>(self);
-            if (GFitsTableColInx[0] == 1)
-                (*col)(GFitsTableColInx[1]) = (long)value;
+            if (GTuple1D2D[0] == 1)
+                (*col)(GTuple1D2D[1]) = (long)value;
             else
-                (*col)(GFitsTableColInx[1], GFitsTableColInx[2]) = (long)value;
+                (*col)(GTuple1D2D[1], GTuple1D2D[2]) = (long)value;
         }
         else if (dynamic_cast<GFitsTableLongLongCol*>(self) != NULL) {
             GFitsTableLongLongCol* col = dynamic_cast<GFitsTableLongLongCol*>(self);
-            if (GFitsTableColInx[0] == 1)
-                (*col)(GFitsTableColInx[1]) = (long long)value;
+            if (GTuple1D2D[0] == 1)
+                (*col)(GTuple1D2D[1]) = (long long)value;
             else
-                (*col)(GFitsTableColInx[1], GFitsTableColInx[2]) = (long long)value;
+                (*col)(GTuple1D2D[1], GTuple1D2D[2]) = (long long)value;
         }
         else if (dynamic_cast<GFitsTableShortCol*>(self) != NULL) {
             GFitsTableShortCol* col = dynamic_cast<GFitsTableShortCol*>(self);
-            if (GFitsTableColInx[0] == 1)
-                (*col)(GFitsTableColInx[1]) = (short)value;
+            if (GTuple1D2D[0] == 1)
+                (*col)(GTuple1D2D[1]) = (short)value;
             else
-                (*col)(GFitsTableColInx[1], GFitsTableColInx[2]) = (short)value;
+                (*col)(GTuple1D2D[1], GTuple1D2D[2]) = (short)value;
         }
         else if (dynamic_cast<GFitsTableULongCol*>(self) != NULL) {
             GFitsTableULongCol* col = dynamic_cast<GFitsTableULongCol*>(self);
-            if (GFitsTableColInx[0] == 1)
-                (*col)(GFitsTableColInx[1]) = (unsigned long)value;
+            if (GTuple1D2D[0] == 1)
+                (*col)(GTuple1D2D[1]) = (unsigned long)value;
             else
-                (*col)(GFitsTableColInx[1], GFitsTableColInx[2]) = (unsigned long)value;
+                (*col)(GTuple1D2D[1], GTuple1D2D[2]) = (unsigned long)value;
         }
         else if (dynamic_cast<GFitsTableUShortCol*>(self) != NULL) {
             GFitsTableUShortCol* col = dynamic_cast<GFitsTableUShortCol*>(self);
-            if (GFitsTableColInx[0] == 1)
-                (*col)(GFitsTableColInx[1]) = (unsigned short)value;
+            if (GTuple1D2D[0] == 1)
+                (*col)(GTuple1D2D[1]) = (unsigned short)value;
             else
-                (*col)(GFitsTableColInx[1], GFitsTableColInx[2]) = (unsigned short)value;
+                (*col)(GTuple1D2D[1], GTuple1D2D[2]) = (unsigned short)value;
         }
         else if (dynamic_cast<GFitsTableDoubleCol*>(self) != NULL) {
             GFitsTableDoubleCol* col = dynamic_cast<GFitsTableDoubleCol*>(self);
-            if (GFitsTableColInx[0] == 1)
-                (*col)(GFitsTableColInx[1]) = (double)value;
+            if (GTuple1D2D[0] == 1)
+                (*col)(GTuple1D2D[1]) = (double)value;
             else
-                (*col)(GFitsTableColInx[1], GFitsTableColInx[2]) = (double)value;
+                (*col)(GTuple1D2D[1], GTuple1D2D[2]) = (double)value;
         }
         else if (dynamic_cast<GFitsTableFloatCol*>(self) != NULL) {
             GFitsTableFloatCol* col = dynamic_cast<GFitsTableFloatCol*>(self);
-            if (GFitsTableColInx[0] == 1)
-                (*col)(GFitsTableColInx[1]) = (float)value;
+            if (GTuple1D2D[0] == 1)
+                (*col)(GTuple1D2D[1]) = (float)value;
             else
-                (*col)(GFitsTableColInx[1], GFitsTableColInx[2]) = (float)value;
+                (*col)(GTuple1D2D[1], GTuple1D2D[2]) = (float)value;
         }
         else {
             throw GException::bad_type("GFitsTableCol::__setitem__",
-                  "Column type does not support integer setting.");            
+                  "Column type does not support integer setting.");
         }
     }
-    
+
     // Floating point setting
-    void __setitem__(int GFitsTableColInx[], double value) {
+    void __setitem__(int GTuple1D2D[], double value) {
         if (dynamic_cast<GFitsTableDoubleCol*>(self) != NULL) {
             GFitsTableDoubleCol* col = dynamic_cast<GFitsTableDoubleCol*>(self);
-            if (GFitsTableColInx[0] == 1)
-                (*col)(GFitsTableColInx[1]) = value;
+            if (GTuple1D2D[0] == 1)
+                (*col)(GTuple1D2D[1]) = value;
             else
-                (*col)(GFitsTableColInx[1], GFitsTableColInx[2]) = value;
+                (*col)(GTuple1D2D[1], GTuple1D2D[2]) = value;
         }
         else if (dynamic_cast<GFitsTableFloatCol*>(self) != NULL) {
             GFitsTableFloatCol* col = dynamic_cast<GFitsTableFloatCol*>(self);
-            if (GFitsTableColInx[0] == 1)
-                (*col)(GFitsTableColInx[1]) = (float)value;
+            if (GTuple1D2D[0] == 1)
+                (*col)(GTuple1D2D[1]) = (float)value;
             else
-                (*col)(GFitsTableColInx[1], GFitsTableColInx[2]) = (float)value;
+                (*col)(GTuple1D2D[1], GTuple1D2D[2]) = (float)value;
         }
 
         else {
             throw GException::bad_type("GFitsTableCol::__setitem__",
-                  "Column type does not support floating point setting.");            
+                  "Column type does not support floating point setting.");
         }
     }
 };

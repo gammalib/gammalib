@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GCsv.i - Comma-separated values table class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,53 +28,6 @@
 #include "GCsv.hpp"
 #include "GTools.hpp"
 %}
-
-
-/***********************************************************************//**
- * @brief Tuple to index conversion to provide element access.
- *
- * The following function provides conversion between a Python tuple and
- * an integer array. This allows table element access via tuples, such as in
- * a[3,5] = 10.0 or c = a[2,9]. Note that the typemap will be globally
- * defined after inclusing of this file.
- ***************************************************************************/
-%{
-static int csv_tuple(PyObject *input, int *ptr) {
-    if (PySequence_Check(input)) {
-        int size = PyObject_Length(input);
-        if (size > 2) {
-            PyErr_SetString(PyExc_ValueError,"Too many arguments in tuple");
-            return 0;
-        }
-        for (int i = 0; i < size; i++) {
-            PyObject *o = PySequence_GetItem(input,i);
-            if (!PyInt_Check(o)) {
-                Py_XDECREF(o);
-                PyErr_SetString(PyExc_ValueError,"Expecting a tuple of integers");
-                return 0;
-            }
-            ptr[i] = (int)PyInt_AsLong(o);
-            Py_DECREF(o);
-        }
-        return 1;
-    }
-    else {
-        ptr[0] = 1;
-        if (!PyInt_Check(input)) {
-            PyErr_SetString(PyExc_ValueError,"Expecting an integer");
-            return 0;
-        }
-        ptr[1] = (int)PyInt_AsLong(input);
-        return 1;       
-    }
-}
-%}
-%typemap(in) int GCsvInx[ANY](int temp[2]) {
-   if (!csv_tuple($input,temp)) {
-      return NULL;
-   }
-   $1 = &temp[0];
-}
 
 
 /***********************************************************************//**
@@ -117,11 +70,11 @@ public:
  * @brief GCsv class extension
  ***************************************************************************/
 %extend GCsv {
-    std::string __getitem__(int GCsvInx[]) {
-        return (*self)(GCsvInx[0], GCsvInx[1]);
+    std::string __getitem__(int GTuple2D[]) {
+        return (*self)(GTuple2D[0], GTuple2D[1]);
     }
-    void __setitem__(int GCsvInx[], std::string value) {
-        (*self)(GCsvInx[0], GCsvInx[1]) = value;
+    void __setitem__(int GTuple2D[], std::string value) {
+        (*self)(GTuple2D[0], GTuple2D[1]) = value;
     }
     int __len__() {
         return (self->size());

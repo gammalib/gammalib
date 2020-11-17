@@ -85,11 +85,11 @@ public:
  * @brief GRmf class extension
  ***************************************************************************/
 %extend GRmf {
-    double __getitem__(int GTuple[2]) {
-        return self->at(GTuple[0], GTuple[1]);
+    double __getitem__(int GTuple2D[]) {
+        return self->at(GTuple2D[0], GTuple2D[1]);
     }
-    void __setitem__(int GTuple[2], const double& value) {
-        self->at(GTuple[0], GTuple[1]) = value;
+    void __setitem__(int GTuple2D[], const double& value) {
+        self->at(GTuple2D[0], GTuple2D[1]) = value;
     }
     int __len__() {
         return (self->size());

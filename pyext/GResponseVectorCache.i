@@ -38,8 +38,9 @@
  *
  */
 %include "typemaps.i"
-%apply GVector *OUTPUT { GVector* value };
-
+%typemap(argout) GVector *OUTPUT {
+    $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GVector, 0 |  0);
+}
 
 /***********************************************************************//**
  * @class GResponseVectorCache

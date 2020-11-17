@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GMatrixSparse.i - Sparse matrix class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -108,11 +108,11 @@ public:
  * @brief GMatrixSparse class extension
  ***************************************************************************/
 %extend GMatrixSparse {
-    double __getitem__(int GTuple[2]) {
-        return (*self)(GTuple[0], GTuple[1]);
+    double __getitem__(int GTuple2D[]) {
+        return (*self)(GTuple2D[0], GTuple2D[1]);
     }
-    void __setitem__(int GTuple[2], double value) {
-        (*self)(GTuple[0], GTuple[1]) = value;
+    void __setitem__(int GTuple2D[], double value) {
+        (*self)(GTuple2D[0], GTuple2D[1]) = value;
     }
     GVector __mul__(const GVector& vector) {
         return ((*self) * vector);

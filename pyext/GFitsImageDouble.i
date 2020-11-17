@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GFitsImageDouble.i - Double precision FITS image class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,10 +33,10 @@
     if (!PyList_Check($input)) {
         SWIG_exception(SWIG_ValueError, "List expected");
     }
-    int num = PyList_Size($input);
+    Py_ssize_t num = PyList_Size($input);
     if (num > 0) {
         $1 = (double*)malloc(num*sizeof(double));
-        for (int i = 0; i < num; i++) {
+        for (int i = 0; i < num; ++i) {
             PyObject *s = PyList_GetItem($input,i);
             if (!PyFloat_Check(s)) {
                 free($1);

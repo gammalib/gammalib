@@ -82,7 +82,9 @@
 %include stl.i
 
 /* __ Include GammaLib typemaps __________________________________________ */
+%include typemap_GChatter.i
 %include typemap_GFilename.i
+%include typemap_GTuple.i
 %include typemap_slices.i
 
 /* __ Include interface classes __________________________________________ */

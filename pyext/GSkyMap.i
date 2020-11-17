@@ -31,76 +31,6 @@
 
 
 /***********************************************************************//**
- * @brief Tuple to index conversion to provide pixel access.
- *
- * The following function provides conversion between a Python tuple and
- * an integer array. This allows skymap pixel access via tuples, such as in
- * a[3,5,10] = 10.0 or c = a[2,9].
- ***************************************************************************/
-%{
-static int skymap_tuple(PyObject *input, int *ptr) {
-    if (PySequence_Check(input)) {
-        int size = PyObject_Length(input);
-        if (size > 2) {
-            PyErr_SetString(PyExc_ValueError,"Too many arguments in tuple");
-            return 0;
-        }
-        ptr[0] = size;
-        for (int i = 0; i < size; i++) {
-            PyObject *o = PySequence_GetItem(input,i);
-            if (!PyInt_Check(o)) {
-                Py_XDECREF(o);
-                PyErr_SetString(PyExc_ValueError,"Expecting a tuple of integers");
-                return 0;
-            }
-            ptr[i+1] = (int)PyInt_AsLong(o);
-            Py_DECREF(o);
-        }
-        return 1;
-    }
-    else {
-        ptr[0] = 1;
-        if (!PyInt_Check(input)) {
-            PyErr_SetString(PyExc_ValueError,"Expecting an integer");
-            return 0;
-        }
-        ptr[1] = (int)PyInt_AsLong(input);
-        return 1;       
-    }
-}
-%}
-
-// This is the typemap that makes use of the function defined above
-%typemap(in) int GSkyMapInx[ANY](int temp[3]) {
-   if (!skymap_tuple($input,temp)) {
-      return NULL;
-   }
-   $1 = &temp[0];
-}
-
-// This typecheck verifies that all arguments are integers. The typecheck
-// is needed for using "int GSkyMapInx" in overloaded methods.
-%typemap(typecheck) int GSkyMapInx[ANY] {
-    $1 = 1;
-    if (PySequence_Check($input)) {
-        int size = PyObject_Length($input);
-        for (int i = 0; i < size; i++) {
-            PyObject *o = PySequence_GetItem($input,i);
-            if (!PyInt_Check(o)) {
-                $1 = 0;
-                break;
-            }
-        }
-    }
-    else {
-        if (!PyInt_Check($input)) {
-            $1 = 0;
-        }
-    }
-}
-
-
-/***********************************************************************//**
  * @class GSkyMap
  *
  * @brief GSkyMap class interface definition
@@ -200,23 +130,23 @@ public:
  * GSkyDir
  ***************************************************************************/
 %extend GSkyMap {
-    double __getitem__(int GSkyMapInx[]) {
-        if (GSkyMapInx[1] < 0 || GSkyMapInx[1] >= self->npix()) {
+    double __getitem__(int GTuple1D2D[]) {
+        if (GTuple1D2D[1] < 0 || GTuple1D2D[1] >= self->npix()) {
             throw GException::out_of_range("GSkyMap::__getitem__(int*)",
                                            "Sky map index",
-                                           GSkyMapInx[1], self->npix());
+                                           GTuple1D2D[1], self->npix());
         }
-        if (GSkyMapInx[0] == 1) {
-            return (*self)(GSkyMapInx[1]);
+        if (GTuple1D2D[0] == 1) {
+            return (*self)(GTuple1D2D[1]);
         }
         else {
-            if (GSkyMapInx[2] >= 0 && GSkyMapInx[2] < self->nmaps()) {
-                return (*self)(GSkyMapInx[1], GSkyMapInx[2]);
+            if (GTuple1D2D[2] >= 0 && GTuple1D2D[2] < self->nmaps()) {
+                return (*self)(GTuple1D2D[1], GTuple1D2D[2]);
             }
             else {
                 throw GException::out_of_range("GSkyMap::__getitem__(int*)",
                                                "Sky map number",
-                                               GSkyMapInx[2], self->nmaps());
+                                               GTuple1D2D[2], self->nmaps());
             }
         }
     }
@@ -225,23 +155,23 @@ public:
         return (*self)(pixel);
     }
     */
-    void __setitem__(int GSkyMapInx[], double value) {
-        if (GSkyMapInx[1] < 0 || GSkyMapInx[1] >= self->npix()) {
+    void __setitem__(int GTuple1D2D[], double value) {
+        if (GTuple1D2D[1] < 0 || GTuple1D2D[1] >= self->npix()) {
             throw GException::out_of_range("GSkyMap::__setitem__(int*,double&)",
                                            "Sky map index",
-                                           GSkyMapInx[1], self->npix());
+                                           GTuple1D2D[1], self->npix());
         }
-        if (GSkyMapInx[0] == 1) {
-            (*self)(GSkyMapInx[1]) = value;
+        if (GTuple1D2D[0] == 1) {
+            (*self)(GTuple1D2D[1]) = value;
         }
         else {
-            if (GSkyMapInx[2] >= 0 && GSkyMapInx[2] < self->nmaps()) {
-                (*self)(GSkyMapInx[1], GSkyMapInx[2]) = value;
+            if (GTuple1D2D[2] >= 0 && GTuple1D2D[2] < self->nmaps()) {
+                (*self)(GTuple1D2D[1], GTuple1D2D[2]) = value;
             }
             else {
                 throw GException::out_of_range("GSkyMap::__setitem__(int*,double&)",
                                                "Sky map number",
-                                               GSkyMapInx[2], self->nmaps());
+                                               GTuple1D2D[2], self->nmaps());
             }
         }
     }
