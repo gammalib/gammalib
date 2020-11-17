@@ -1,7 +1,7 @@
 /***************************************************************************
- *          GTypemaps.i  -  Typemaps for GammaLib Python interface         *
+ *                     typemap_GTuple.i - Tuple typemap                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2020 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,8 +19,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GTypemaps.i
- * @brief Provides typemaps for GammaLib
+ * @file typemap_GTuple.i
+ * @brief Provides GTuple typemap for GammaLib
  * @author Juergen Knoedlseder
  */
 %{
@@ -84,43 +84,35 @@
  * an integer array. This allows index access via tuples, such as in
  * a[3,5,10] = 10.0 or c = a[2,9].
  ***************************************************************************/
-%{
-static int var_tuple_to_index(PyObject *input, int *ptr, int dim) {
-    if (PySequence_Check(input)) {
-        int size = PyObject_Length(input);
-        if (size > dim) {
+%typemap(in) int GTuple[ANY] (int temp[11]) {
+    if (PySequence_Check($input)) {
+        int size = PyObject_Length($input);
+        if (size > 10) {
             PyErr_SetString(PyExc_ValueError,"Too many arguments in tuple");
-            return 0;
+            return NULL;
         }
-        ptr[0] = size;
+        temp[0] = size;
         for (int i = 0; i < size; i++) {
-            PyObject *o = PySequence_GetItem(input,i);
+            PyObject *o = PySequence_GetItem($input,i);
             if (!PyInt_Check(o)) {
                 Py_XDECREF(o);
                 PyErr_SetString(PyExc_ValueError,"Expecting a tuple of integers");
-                return 0;
+                return NULL;
             }
-            ptr[i+1] = (int)PyInt_AsLong(o);
+            temp[i+1] = (int)PyInt_AsLong(o);
             Py_DECREF(o);
         }
-        return 1;
+        $1 = &temp[0];
     }
     else {
-        ptr[0] = 1;
-        if (!PyInt_Check(input)) {
+        temp[0] = 1;
+        if (!PyInt_Check($input)) {
             PyErr_SetString(PyExc_ValueError,"Expecting an integer");
-            return 0;
+            return NULL;
         }
-        ptr[1] = (int)PyInt_AsLong(input);
-        return 1;       
+        temp[1] = (int)PyInt_AsLong($input);
+        $1 = &temp[0];
     }
-}
-%}
-%typemap(in) int GTuple[ANY] (int temp[11]) {
-   if (!var_tuple_to_index($input,temp,10)) {
-      return NULL;
-   }
-   $1 = &temp[0];
 }
 %typemap(typecheck) int GTuple[ANY] {
     $1 = 1;
@@ -140,13 +132,3 @@ static int var_tuple_to_index(PyObject *input, int *ptr, int dim) {
         }
     }
 }
-
-/* __ Enumerations _______________________________________________________ */
-typedef enum {
-    SILENT = 0,
-    TERSE = 1,
-    NORMAL = 2,
-    EXPLICIT = 3,
-    VERBOSE = 4
-} GChatter;
-

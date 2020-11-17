@@ -1,7 +1,7 @@
 /***************************************************************************
  * GCTAModelSpatialMultiplicative.hpp - Multiplicative spatial model class *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2018 by Juergen Knoedlseder                              *
+ *  copyright (C) 2018-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -132,7 +132,7 @@ std::string GCTAModelSpatialMultiplicative::type(void) const
 inline
 int GCTAModelSpatialMultiplicative::components(void) const
 {
-    return (m_spatial.size());
+    return ((int)m_spatial.size());
 }
 
 #endif /* GCTAMODELSPATIALMULTIPLICATIVE_HPP */

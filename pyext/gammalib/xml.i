@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          xml.i - XML module                             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -40,6 +40,7 @@
 %include stl.i
 
 /* __ Include GammaLib typemaps __________________________________________ */
+%include typemap_GChatter.i
 %include typemap_GFilename.i
 %include typemap_slices.i
 

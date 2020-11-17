@@ -40,7 +40,7 @@ public:
     // Constructors and destructors
     GFunctions(void);
     GFunctions(const GFunctions& functions);
-    virtual ~GFunction(void);
+    virtual ~GFunctions(void);
 
     // Methods
     virtual int     size(void) const = 0;

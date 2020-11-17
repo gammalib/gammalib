@@ -1,7 +1,7 @@
 /***************************************************************************
- *                         xspec.i - XSPEC module                          *
+ *                   typemap_GChatter.i - Chatter typemap                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2020 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -17,45 +17,21 @@
  *  You should have received a copy of the GNU General Public License      *
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
- * ----------------------------------------------------------------------- *
- * Usage:                                                                  *
- * swig -c++ -python -Wall xspec.i                                         *
  ***************************************************************************/
 /**
- * @file xspec.i
- * @brief XSPEC module
+ * @file typemap_GChatter.i
+ * @brief Provides GChatter typemap for GammaLib
  * @author Juergen Knoedlseder
  */
-%module xspec
-%feature("autodoc", "1");
-
-/* __ Headers needed for compilation _____________________________________ */
 %{
-#include <stddef.h>
-#include "GException.hpp"
-#include "GTools.hpp"
+/* Put headers and other declarations here that are needed for compilation */
 %}
 
-/* __ Include standard typemaps for vectors and strings __________________ */
-%include stl.i
-%include "std_vector.i"
-namespace std {
-   %template(vectord) vector<double>;
-};
-
-/* __ Include GammaLib typemaps __________________________________________ */
-%include typemap_GChatter.i
-%include typemap_GFilename.i
-%include typemap_GTuple.i
-
-/* __ Include interface classes __________________________________________ */
-%import(module="gammalib.base") "GBase.i";
-//%import(module="gammalib.base") "GContainer.i";
-
-/* __ Make sure that exceptions are catched ______________________________ */
-%import(module="gammalib.support") "GException.i";
-
-/* __ Application module _________________________________________________ */
-%include "GArf.i"
-%include "GPha.i"
-%include "GRmf.i"
+/* __ Enumerations _______________________________________________________ */
+typedef enum {
+    SILENT = 0,
+    TERSE = 1,
+    NORMAL = 2,
+    EXPLICIT = 3,
+    VERBOSE = 4
+} GChatter;

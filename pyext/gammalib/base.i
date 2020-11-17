@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          base.i - Base module                           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -40,6 +40,7 @@
 %include stl.i
 
 /* __ Include GammaLib typemaps __________________________________________ */
+%include typemap_GChatter.i
 %include typemap_GFilename.i
 
 /* __ Base module ________________________________________________________ */

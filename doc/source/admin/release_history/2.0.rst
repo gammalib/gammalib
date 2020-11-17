@@ -1,7 +1,7 @@
 .. _2.0:
 
-GammaLib 2.0 release (9 November 2020)
-======================================
+GammaLib 2.0 release (17 November 2020)
+=======================================
 
 Overview
 --------
@@ -26,6 +26,8 @@ Improvements
 
 * [`3333 <https://cta-redmine.irap.omp.eu/issues/3333>`_] -
   Integrate analytical gradients for energy dispersion computation
+* [`3324 <https://cta-redmine.irap.omp.eu/issues/3324>`_] -
+  Remove implicit conversion warnings
 * Implement ``GMatrixSparse::row()`` and ``GMatrixSparse::add_to_row()`` methods
 * [`3203 <https://cta-redmine.irap.omp.eu/issues/3203>`_] -
   Implement vectorised response computation and analytical gradients for

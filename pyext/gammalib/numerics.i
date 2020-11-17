@@ -44,7 +44,8 @@
 %template(vectorc) std::vector<std::complex<double> >;
 
 /* __ Include GammaLib typemaps __________________________________________ */
-%include GTypemaps.i
+%include typemap_GChatter.i
+%include typemap_GTuple.i
 %include typemap_GFilename.i
 
 /* __ Include interface classes __________________________________________ */
