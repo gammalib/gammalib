@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCTAModelSpatialLookup.i - Spatial lookup table model           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2019 by Juergen Knoedlseder                              *
+ *  copyright (C) 2019-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -47,9 +47,6 @@ public:
                            const GEbounds& ebds);
     GCTAModelSpatialLookup(const GCTAModelSpatialLookup& model);
     virtual ~GCTAModelSpatialLookup(void);
-
-    // Operators
-    virtual GCTAModelSpatialLookup& operator=(const GCTAModelSpatialLookup& model);
 
     // Implemented pure virtual methods
     virtual void                    clear(void);

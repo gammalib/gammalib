@@ -50,9 +50,6 @@ public:
     GSPIModelDataSpace(const GSPIModelDataSpace& model);
     virtual ~GSPIModelDataSpace(void);
 
-    // Operators
-    virtual GSPIModelDataSpace& operator=(const GSPIModelDataSpace& model);
-
     // Implemented pure virtual methods
     virtual void                clear(void);
     virtual GSPIModelDataSpace* clone(void) const;

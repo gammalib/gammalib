@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCTAModelBackground.i - Background model class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2018 by Juergen Knoedlseder                              *
+ *  copyright (C) 2018-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -47,9 +47,6 @@ public:
                         const GModelTemporal&   temporal);
     GCTAModelBackground(const GCTAModelBackground& model);
     virtual ~GCTAModelBackground(void);
-
-    // Operators
-    virtual GCTAModelBackground& operator=(const GCTAModelBackground& model);
 
     // Implemented pure virtual methods
     virtual void                 clear(void);

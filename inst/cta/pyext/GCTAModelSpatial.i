@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTAModelSpatial.i - Spatial model abstract base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2018 by Juergen Knoedlseder                              *
+ *  copyright (C) 2018-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -41,11 +41,6 @@ public:
     GCTAModelSpatial(void);
     GCTAModelSpatial(const GCTAModelSpatial& model);
     virtual ~GCTAModelSpatial(void);
-
-    // Operators
-    virtual GCTAModelSpatial& operator=(const GCTAModelSpatial& model);
-    virtual GModelPar&        operator[](const int& index);
-    virtual GModelPar&        operator[](const std::string& name);
 
     // Pure virtual methods
     virtual void              clear(void) = 0;

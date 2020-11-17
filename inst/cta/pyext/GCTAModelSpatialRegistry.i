@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCTAModelSpatialRegistry.i - Spatial model registry class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2018 by Juergen Knoedlseder                              *
+ *  copyright (C) 2018-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -43,9 +43,6 @@ public:
     GCTAModelSpatialRegistry(const GCTAModelSpatial* model);
     GCTAModelSpatialRegistry(const GCTAModelSpatialRegistry& registry);
     virtual ~GCTAModelSpatialRegistry(void);
-
-    // Operators
-    GCTAModelSpatialRegistry& operator=(const GCTAModelSpatialRegistry& registry);
 
     // Methods
     std::string       classname(void) const;

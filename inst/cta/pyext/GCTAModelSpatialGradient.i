@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelSpatialGradient.i - Spatial gradient CTA model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2018 by Juergen Knoedlseder                              *
+ *  copyright (C) 2018-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,9 +44,6 @@ public:
     explicit GCTAModelSpatialGradient(const GXmlElement& xml);
     GCTAModelSpatialGradient(const GCTAModelSpatialGradient& model);
     virtual ~GCTAModelSpatialGradient(void);
-
-    // Operators
-    virtual GCTAModelSpatialGradient& operator=(const GCTAModelSpatialGradient& model);
 
     // Implemented pure virtual methods
     virtual void                      clear(void);

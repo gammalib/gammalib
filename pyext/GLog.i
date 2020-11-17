@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        GLog.i - Information logger                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -119,8 +119,5 @@ public:
     }
     void centre(const std::string& arg, const int& n) {
         (*self) << gammalib::centre(arg, n);
-    }
-    void chatter(const int& chatter) {
-        self->chatter(GChatter(chatter));
     }
 }
