@@ -124,7 +124,7 @@ bool GResponseVectorCache::is_empty(void) const
 inline
 int GResponseVectorCache::size(void) const
 {
-    return (m_cache_ids.size());
+    return ((int)m_cache_ids.size());
 }
 
 #endif /* GRESPONSEVECTORCACHE_HPP */

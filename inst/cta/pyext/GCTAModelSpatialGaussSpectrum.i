@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GCTAModelSpatialGaussSpectrum.i - Spatial energy dependent Gaussian   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2019 by Juergen Knoedlseder                              *
+ *  copyright (C) 2019-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,9 +44,6 @@ public:
     explicit GCTAModelSpatialGaussSpectrum(const GXmlElement& xml);
     GCTAModelSpatialGaussSpectrum(const GCTAModelSpatialGaussSpectrum& model);
     virtual ~GCTAModelSpatialGaussSpectrum(void);
-
-    // Operators
-    virtual GCTAModelSpatialGaussSpectrum& operator=(const GCTAModelSpatialGaussSpectrum& model);
 
     // Implemented pure virtual methods
     virtual void                           clear(void);
