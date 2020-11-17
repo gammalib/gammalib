@@ -91,55 +91,55 @@ public:
  * @brief GFitsImageUShort class extension
  ***************************************************************************/
 %extend GFitsImageUShort {
-    unsigned short __getitem__(int GFitsImageInx[]) {
+    unsigned short __getitem__(int GTuple1D4D[]) {
         // Check image dimensions
-        for (int i = 0; i < GFitsImageInx[0]; ++i) {
-             if (GFitsImageInx[i+1] < 0 || GFitsImageInx[i+1] >= self->naxes(i)) {
+        for (int i = 0; i < GTuple1D4D[0]; ++i) {
+             if (GTuple1D4D[i+1] < 0 || GTuple1D4D[i+1] >= self->naxes(i)) {
                 throw GException::out_of_range("__getitem__(int)",
                                                "FITS image axis "+
                                                gammalib::str(i)+" index",
-                                               GFitsImageInx[i+1],
+                                               GTuple1D4D[i+1],
                                                self->naxes(i));
             }
         }
         // Return pixel value
-        if (GFitsImageInx[0] == 1) {
-            return (*self)(GFitsImageInx[1]);
+        if (GTuple1D4D[0] == 1) {
+            return (*self)(GTuple1D4D[1]);
         }
-        else if (GFitsImageInx[0] == 2) {
-            return (*self)(GFitsImageInx[1], GFitsImageInx[2]);
+        else if (GTuple1D4D[0] == 2) {
+            return (*self)(GTuple1D4D[1], GTuple1D4D[2]);
         }
-        else if (GFitsImageInx[0] == 3) {
-            return (*self)(GFitsImageInx[1], GFitsImageInx[2], GFitsImageInx[3]);
+        else if (GTuple1D4D[0] == 3) {
+            return (*self)(GTuple1D4D[1], GTuple1D4D[2], GTuple1D4D[3]);
         }
-        else if (GFitsImageInx[0] == 4) {
-            return (*self)(GFitsImageInx[1], GFitsImageInx[2], GFitsImageInx[3],
-                           GFitsImageInx[4]);
+        else if (GTuple1D4D[0] == 4) {
+            return (*self)(GTuple1D4D[1], GTuple1D4D[2], GTuple1D4D[3],
+                           GTuple1D4D[4]);
         }
         else {
             throw GException::fits_wrong_image_operator("__getitem__(int)",
-                                                        self->naxis(), GFitsImageInx[0]);
+                                                        self->naxis(), GTuple1D4D[0]);
         }
     }
-    void __setitem__(int GFitsImageInx[], unsigned short value) {
-        if (GFitsImageInx[0] == 1) {
-            self->at(GFitsImageInx[1]) = value;
+    void __setitem__(int GTuple1D4D[], unsigned short value) {
+        if (GTuple1D4D[0] == 1) {
+            self->at(GTuple1D4D[1]) = value;
         }
-        else if (GFitsImageInx[0] == 2) {
-            self->at(GFitsImageInx[1], GFitsImageInx[2]) = value;
+        else if (GTuple1D4D[0] == 2) {
+            self->at(GTuple1D4D[1], GTuple1D4D[2]) = value;
         }
-        else if (GFitsImageInx[0] == 3) {
-            self->at(GFitsImageInx[1], GFitsImageInx[2], GFitsImageInx[3]) =
+        else if (GTuple1D4D[0] == 3) {
+            self->at(GTuple1D4D[1], GTuple1D4D[2], GTuple1D4D[3]) =
                      value;
         }
-        else if (GFitsImageInx[0] == 4) {
-            self->at(GFitsImageInx[1], GFitsImageInx[2], GFitsImageInx[3],
-                     GFitsImageInx[4]) = value;
+        else if (GTuple1D4D[0] == 4) {
+            self->at(GTuple1D4D[1], GTuple1D4D[2], GTuple1D4D[3],
+                     GTuple1D4D[4]) = value;
         }
         else {
             throw GException::fits_wrong_image_operator("__setitem__(int)",
                                                         self->naxis(),
-                                                        GFitsImageInx[0]);
+                                                        GTuple1D4D[0]);
         }
     }
     PyObject* pixels(void) {
