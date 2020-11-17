@@ -42,13 +42,14 @@ The following methods have been added:
 - GModelSpatialRadial::is_time_dependent()
 - GOptimizerLM::npars()
 - GOptimizerLM::nfree()
-- GXmlElement(std::string&, int&);
-- GXmlElement(std::string&, double&);
-- GXmlElement(std::string&, std::string&);
-- GXmlElement::value();
-- GXmlElement::string();
-- GXmlElement::real();
-- GXmlElement::integer();
+- GXmlElement(std::string&, int&)
+- GXmlElement(std::string&, double&)
+- GXmlElement(std::string&, std::string&)
+- GXmlElement::value()
+- GXmlElement::string()
+- GXmlElement::real()
+- GXmlElement::integer()
+- gammalib::tmpnam()
 
 The following methods have been removed:
 - none
@@ -145,7 +146,8 @@ None
 
 13. Support module
 ------------------
-None
+Added gammalib::tmpnam() function to return a temporary file name, in replacement
+of the deprecated str::tmpnam() function (#3324).
 
 
 14. XML module
@@ -157,7 +159,7 @@ real() and integer() to access the value as string, floating point or integer va
 
 15. VO module
 -------------
-None
+Use gammalib::tmpnam() instead of str::tmpnam() in GVOClient (#3324).
 
 
 16. Xspec module

@@ -49,6 +49,7 @@ namespace gammalib {
     std::string              expand_env(const std::string& arg);
     std::string              filepath(const std::string& pathname,
                                       const std::string& filename);
+    std::string              tmpnam(void);
     std::string              toupper(const std::string& s);
     std::string              tolower(const std::string& s);
     std::vector<std::string> split(const std::string& s, const std::string& sep);

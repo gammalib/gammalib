@@ -407,6 +407,48 @@ std::string gammalib::filepath(const std::string& pathname,
 
 
 /***********************************************************************//**
+ * @brief Return temporary file name
+ *
+ * @return Temporary file name.
+ *
+ * Returns a temporary file name.
+ ***************************************************************************/
+std::string gammalib::tmpnam(void)
+{
+    // Set default temporary directory
+    char default_tmpdir[] = "/tmp";
+
+    // Get pointer to name of temporary directory by searching various
+    // possible environment variables
+    char *tmpdir = NULL;
+    if ((tmpdir = std::getenv("TEMP")) == NULL) {
+        if ((tmpdir = std::getenv("TMP")) == NULL) {
+            if ((tmpdir = std::getenv("TMPDIR")) == NULL) {
+                tmpdir = default_tmpdir;
+            }
+        }
+    }
+
+    // Allocate empty filename
+    char filename[256];
+    filename[0] = '\0';
+
+    // Combine temporary directory with temporary filename
+    strcat(filename, tmpdir);
+    strcat(filename, "/gammalibXXXXXX");
+
+    // Create temporary file
+    int         fd = mkstemp(filename);
+    std::string tmpname(filename);
+    close(fd);
+    unlink(filename);
+
+    // Return temporary file name
+    return tmpname;
+}
+
+
+/***********************************************************************//**
  * @brief Convert unsigned short integer value into string
  *
  * @param[in] value Unsigned short integer to be converted into string.

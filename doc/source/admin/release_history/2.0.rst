@@ -49,6 +49,8 @@ New features
   Implement sparse vector response cache
 * [`3328 <https://cta-redmine.irap.omp.eu/issues/3328>`_] -
   Add ``GFunctions`` abstract base class and ``GIntegrals`` class
+* [`3324 <https://cta-redmine.irap.omp.eu/issues/3324>`_] -
+  Add ``gammalib::tmpnam()`` function
 * [`3074 <https://cta-redmine.irap.omp.eu/issues/3074>`_] -
   Add ``GSkyModel`` ``flux_error()`` and ``eflux_error()`` methods
 

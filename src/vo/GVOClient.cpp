@@ -367,7 +367,7 @@ GXml GVOClient::execute(const std::string& request) const
  *
  * @param[in] hdu FITS HDU
  *
- * Publishes a FITS HDU.           
+ * Publishes a FITS HDU.
  ***************************************************************************/
 void GVOClient::publish(const GFitsHDU& hdu)
 {
@@ -381,7 +381,7 @@ void GVOClient::publish(const GFitsHDU& hdu)
     }
 
     // Save FITS HDU into a temporary file
-    std::string samp_share = std::tmpnam(NULL);
+    std::string samp_share = gammalib::tmpnam();
     GFits fits;
     fits.append(hdu);
     fits.saveto(samp_share, true);
@@ -454,7 +454,7 @@ void GVOClient::publish(const GVOTable& votable)
     }
 
     // Save FITS HDU into a temporary file
-    std::string samp_share = std::tmpnam(NULL);
+    std::string samp_share = gammalib::tmpnam();
     votable.xml().save(samp_share);
 
     // Compose notification to be passed to the Hub
@@ -507,7 +507,7 @@ void GVOClient::publish(const GVOTable& votable)
 /***********************************************************************//**
  * @brief Print VO client information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing VO client information
  ***************************************************************************/
 std::string GVOClient::print(const GChatter& chatter) const

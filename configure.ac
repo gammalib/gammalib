@@ -34,7 +34,6 @@ AC_CONFIG_SRCDIR([src/support/GTools.cpp])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([.])
 AM_INIT_AUTOMAKE([gnu no-dependencies -Wno-portability subdir-objects foreign])
-#AM_INIT_AUTOMAKE([gnu no-dependencies subdir-objects foreign])
 #AM_INIT_AUTOMAKE([gnu no-dependencies -Wno-portability subdir-objects serial-tests foreign])
 AC_CONFIG_HEADER([config.h])
 
