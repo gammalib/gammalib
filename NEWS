@@ -142,6 +142,10 @@ Added GOptimizerLM::npars() and GOptimizerLM::nfree() methods.
 
 12. Sky module
 --------------
+Fixed a bug in GSkyMap::stack_maps() where the stacked map was always stored in a
+one-dimensional GNdarray. Now, a stacked map is saved as a two-dimensional
+GNdarray for WCS maps.
+
 Added GSkyDirs container class to hold sky directions. The GHealpix::boundaries()
 method now returns an instance of GSkyDirs (#3324).
 

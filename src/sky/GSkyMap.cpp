@@ -2127,18 +2127,15 @@ GSkyMap GSkyMap::extract(const int& startx, const int& stopx,
     GNdarray new_pixels(nxpix, nypix, m_num_maps);
 
     // Get new pixel values
-    for (int i = 0; i < npixels; ++i) {
-
-        // Get the appropriate x,y pixel
-        int xpix = i % nxpix;
-        int ypix = i / nxpix;
-
-        // Loop over all maps
-        for (int m = 0; m < m_num_maps; ++m) {
-            new_pixels(xpix, ypix, m) = m_pixels(xpix+first_x, ypix+first_y, m);
+    for (int ix = 0; ix < nxpix; ++ix) {
+        int ix_src = ix + first_x;
+        for (int iy = 0; iy < nypix; ++iy) {
+            int iy_src = iy + first_y;
+            for (int imap = 0; imap < m_num_maps; ++imap) {
+                new_pixels(ix, iy, imap) = m_pixels(ix_src, iy_src, imap);
+            }
         }
-
-    } // endfor: looped over pixels
+    }
 
     // Create a copy of this map
     GSkyMap result = *this;
@@ -2235,22 +2232,30 @@ GSkyMap GSkyMap::extract(const GSkyRegions& inclusions) const
  ***************************************************************************/
 void GSkyMap::stack_maps(void)
 {
-    // Continue only if the map has pixels and if there is more than 1 map
+    // Continue only if the map has pixels and if there is more than one map
     if (m_num_pixels > 0 && m_num_maps > 1) {
 
+        // Initialise stacked pixels
+        GNdarray stacked_pixels;
+
         // Allocate stacked pixels
-        GNdarray stacked_pixels(m_num_pixels);
+        if (m_proj->code() == "HPX") {
+            stacked_pixels = GNdarray(m_num_pixels);
+        }
+        else {
+            stacked_pixels = GNdarray(m_num_x, m_num_y);
+        }
 
         // Stack map and save in pixels
         for (int i = 0; i < m_num_pixels; ++i) {
             double sum = 0.0;
-            for (int k = 0; k < m_num_maps; ++k) {
-                sum += (*this)(i,k);
+            for (int imap = 0; imap < m_num_maps; ++imap) {
+                sum += (*this)(i,imap);
             }
             stacked_pixels(i) = sum;
         }
 
-        // Set pointer to stacked pixels
+        // Set pixels to stacked pixels
         m_pixels = stacked_pixels;
 
         // Set number of maps to 1

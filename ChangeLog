@@ -3,6 +3,7 @@
         * Version 2.0.0 released
         ========================
 
+        Fix GSkyMap::stack_maps() method for WCS maps
         Add GCTAModelSkyCube class (#3442)
         Add GSkyModel flux() and eflux() methods (#3439)
         Add XML value constructors and access methods to GXmlElement class (#3431)
