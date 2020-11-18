@@ -130,18 +130,18 @@ const GSkyDir& GSkyDirs::operator[](const int& index) const
 /***********************************************************************//**
  * @brief Return reference to sky direction
  *
- * @param[in] index Sky directions index [0,...,size()-1].
+ * @param[in] index Sky direction index [0,...,size()-1].
  *
  * @exception GException::out_of_range
- *            Sky directions index is out of range.
+ *            Sky direction index is out of range.
  *
- * Returns a reference to the sky directions with the specified @p index.
+ * Returns a reference to the sky direction with the specified @p index.
  ***************************************************************************/
 inline
 GSkyDir& GSkyDirs::at(const int& index)
 {
-    // Return child element using const method
-    return const_cast<GSkyDir&>((this)->at(index));
+    // Return reference to sky direction using const method
+    return const_cast<GSkyDir&>(static_cast<const GSkyDirs*>(this)->at(index));
 }
 
 

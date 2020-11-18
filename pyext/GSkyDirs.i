@@ -49,8 +49,6 @@ public:
        void           clear(void);
        GSkyDirs*      clone(void) const;
        std::string    classname(void) const;
-       GSkyDir&       at(const int& index);
-       const GSkyDir& at(const int& index) const;
        int            size(void) const;
        bool           is_empty(void) const;
        GSkyDir&       append(const GSkyDir& dir);

@@ -201,12 +201,12 @@ GSkyDirs* GSkyDirs::clone(void) const
 /***********************************************************************//**
  * @brief Return reference to sky direction (const version)
  *
- * @param[in] index Sky directions index [0,...,size()-1].
+ * @param[in] index Sky direction index [0,...,size()-1].
  *
  * @exception GException::out_of_range
- *            Sky directions index is out of range.
+ *            Sky direction index is out of range.
  *
- * Returns a reference to the sky directions with the specified @p index.
+ * Returns a reference to the sky direction with the specified @p index.
  ***************************************************************************/
 const GSkyDir& GSkyDirs::at(const int& index) const
 {
