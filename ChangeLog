@@ -22,6 +22,15 @@
         Implement pre-computation cache in GModelSpatialGauss (#1300)
 
 
+2020-10-15
+
+        * Bug fix version 1.7.2 released
+        ================================
+
+        Fix copy of base class members in copy constructor of some
+          spatial models (#3402)
+
+
 2020-09-07
 
         * Bug fix version 1.7.1 released
