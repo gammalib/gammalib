@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for sky module                                                #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016-2018 Juergen Knoedlseder                               #
+# Copyright (C) 2016-2020 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -26,6 +26,7 @@ INCLUDES = -I$(top_srcdir)/include \
 
 # Define sources for this directory
 sources = GSkyDir.cpp \
+          GSkyDirs.cpp \
           GHorizDir.cpp \
           GSkyPixel.cpp \
           GSkyMap.cpp \

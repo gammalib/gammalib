@@ -33,6 +33,7 @@
 #include "GTools.hpp"
 #include "GMath.hpp"
 #include "GVector.hpp"
+#include "GSkyDirs.hpp"
 #include "GHealpix.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -696,7 +697,7 @@ std::vector<int> GHealpix::neighbours(const GSkyPixel& pixel) const
  * @param[in] step Number of returned points (4*step, defaults to 4).
  * @return Array of pixel boundaries.
  *
- * The method returns a vector with sky directions along the boundary of a
+ * The method returns a container of sky directions along the boundary of a
  * HealPix pixel. By default, the 4 corners of HealPix pixel will be
  * returned. The first point corresponds to the northernmost corner, the
  * subsequent points follow the pixel boundary through west, south and east
@@ -706,8 +707,7 @@ std::vector<int> GHealpix::neighbours(const GSkyPixel& pixel) const
  * This method has been adapted from the boundaries() function located in the
  * file healpix_base.cc in Healpix version 3.20.
  ***************************************************************************/
-std::vector<GSkyDir> GHealpix::boundaries(const GSkyPixel& pixel,
-                                          const int&       step) const
+GSkyDirs GHealpix::boundaries(const GSkyPixel& pixel, const int& step) const
 {
     // Throw an exception if sky map pixel is not 1D
     if (!pixel.is_1D()) {
@@ -719,7 +719,7 @@ std::vector<GSkyDir> GHealpix::boundaries(const GSkyPixel& pixel,
     }
 
     // Allocate boundaries
-    std::vector<GSkyDir> boundaries;
+    GSkyDirs boundaries;
 
     // Determine pixel index and face number
     int ix;
@@ -742,19 +742,19 @@ std::vector<GSkyDir> GHealpix::boundaries(const GSkyPixel& pixel,
 
         // First coordinate
         xyf2loc(xc+dc-i*d, yc+dc, face, &z, &phi);
-        boundaries.push_back(loc2dir(z, phi));
+        boundaries.append(loc2dir(z, phi));
 
         // Second coordinate
         xyf2loc(xc-dc, yc+dc-i*d, face, &z, &phi);
-        boundaries.push_back(loc2dir(z, phi));
+        boundaries.append(loc2dir(z, phi));
                 
         // Third coordinate
         xyf2loc(xc-dc+i*d, yc-dc, face, &z, &phi);
-        boundaries.push_back(loc2dir(z, phi));
+        boundaries.append(loc2dir(z, phi));
         
         // Forth coordinate
         xyf2loc(xc+dc, yc-dc+i*d, face, &z, &phi);
-        boundaries.push_back(loc2dir(z, phi));
+        boundaries.append(loc2dir(z, phi));
         
     } // endfor: looped over step size
 

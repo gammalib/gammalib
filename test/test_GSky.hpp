@@ -43,6 +43,7 @@ public:
     virtual std::string classname(void) const { return "TestGSky"; }
     void                test_GWcs(void);
     void                test_GSkyDir(void);
+    void                test_GSkyDirs(void);
     void                test_GSkyPixel(void);
     void                test_GSkyMap_healpix_construct(void);
     void                test_GSkyMap_healpix_io(void);

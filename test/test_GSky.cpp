@@ -63,6 +63,8 @@ void TestGSky::set(void){
            "Test GWcs");
     append(static_cast<pfunction>(&TestGSky::test_GSkyDir),
            "Test GSkyDir");
+    append(static_cast<pfunction>(&TestGSky::test_GSkyDirs),
+           "Test GSkyDirs");
     append(static_cast<pfunction>(&TestGSky::test_GSkyPixel),
            "Test GSkyPixel");
     append(static_cast<pfunction>(&TestGSky::test_GSkyMap_healpix_construct),
@@ -350,6 +352,65 @@ void TestGSky::test_GSkyDir(void)
     test_value(dir1.posang_deg(dir2), 31.4013337, "22. Position angle posang_deg()");
     test_value(dir1.posang_deg(dir2, "CEL"), 31.4013337, "23. Position angle posang_deg(CEL)");
     test_value(dir1.posang_deg(dir2, "GAL"), 90.0, "24. Position angle posang_deg(GAL)");
+
+    // Return
+    return;
+}
+
+
+/***************************************************************************
+ * @brief Test GSkyDirs class
+ ***************************************************************************/
+void TestGSky::test_GSkyDirs(void)
+{
+    // Manipulate GSkyDirs starting from an empty object
+    GSkyDirs dirs;
+    test_value(dirs.size(), 0, "GSkyDirs should have zero size.");
+    test_assert(dirs.is_empty(), "GSkyDirs should be empty.");
+
+    // Add a sky direction
+    dirs.append(GSkyDir());
+    test_value(dirs.size(), 1, "GSkyDirs should have 1 sky direction.");
+    test_assert(!dirs.is_empty(), "GSkyDirs should not be empty.");
+
+    // Remove sky direction
+    dirs.remove(0);
+    test_value(dirs.size(), 0, "GSkyDirs should have zero size.");
+    test_assert(dirs.is_empty(), "GSkyDirs should be empty.");
+
+    // Append two sky directions
+    dirs.append(GSkyDir());
+    dirs.append(GSkyDir());
+    test_value(dirs.size(), 2, "GSkyDirs should have 2 sky directions.");
+    test_assert(!dirs.is_empty(), "GSkyDirs should not be empty.");
+
+    // Clear object
+    dirs.clear();
+    test_value(dirs.size(), 0, "GSkyDirs should have zero size.");
+    test_assert(dirs.is_empty(), "GSkyDirs should be empty.");
+
+    // Insert two sky directions
+    dirs.insert(0, GSkyDir());
+    dirs.insert(0, GSkyDir());
+    test_value(dirs.size(), 2, "GSkyDirs should have 2 sky directions.");
+    test_assert(!dirs.is_empty(), "GSkyDirs should not be empty.");
+
+    // Extend sky directios
+    dirs.extend(dirs);
+    test_value(dirs.size(), 4, "GSkyDirs should have 4 sky directions.");
+    test_assert(!dirs.is_empty(), "GSkyDirs should not be empty.");
+
+    // Create 4 sky directions
+    dirs.clear();
+    for (int i = 0; i < 4; ++i) {
+        GSkyDir dir;
+        dir.radec_deg(double(i), double(i));
+        dirs.append(dir);
+    }
+    for (int i = 0; i < 4; ++i) {
+        test_value(dirs[i].ra_deg(), double(i));
+        test_value(dirs[i].dec_deg(), double(i));
+    }
 
     // Return
     return;

@@ -120,7 +120,7 @@ GEnergies::GEnergies(const GEbounds& ebounds)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param energies Energy container.
+ * @param energies[in] Energy container.
  *
  * Construct energy container by copying from another energy container.
  ***************************************************************************/

@@ -51,6 +51,8 @@ New features
   Add ``GFunctions`` abstract base class and ``GIntegrals`` class
 * [`3324 <https://cta-redmine.irap.omp.eu/issues/3324>`_] -
   Add ``gammalib::tmpnam()`` function
+* [`3324 <https://cta-redmine.irap.omp.eu/issues/3324>`_] -
+  Add ``GSkyDirs`` container class
 * [`3074 <https://cta-redmine.irap.omp.eu/issues/3074>`_] -
   Add ``GSkyModel`` ``flux_error()`` and ``eflux_error()`` methods
 

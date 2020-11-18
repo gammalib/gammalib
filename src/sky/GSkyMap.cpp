@@ -38,6 +38,7 @@
 #include "GFitsImage.hpp"
 #include "GFitsImageDouble.hpp"
 #include "GFitsTableDoubleCol.hpp"
+#include "GSkyDirs.hpp"
 #include "GSkyMap.hpp"
 #include "GHealpix.hpp"
 #include "GWcsRegistry.hpp"
@@ -1607,7 +1608,7 @@ double GSkyMap::flux(const GSkyPixel& pixel, const int& map) const
         GSkyDir centre = healpix->pix2dir(pixel);
 
         // Get boundaries
-        std::vector<GSkyDir> boundaries = healpix->boundaries(pixel, 3);
+        GSkyDirs boundaries = healpix->boundaries(pixel, 3);
 
         // Compute intensities
         double i0  = this->operator()(centre,         map);

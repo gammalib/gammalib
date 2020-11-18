@@ -41,9 +41,8 @@
 %include stl.i
 %include "std_vector.i"
 namespace std {
-   %template(vectori)      vector<int>;
-   %template(vectord)      vector<double>;
-   %template(vectorskydir) vector<GSkyDir>;
+   %template(vectori) vector<int>;
+   %template(vectord) vector<double>;
 };
 
 /* __ Include GammaLib typemaps __________________________________________ */
@@ -112,6 +111,7 @@ namespace std {
 
 /* __ Skymap handling ____________________________________________________ */
 %include "GSkyDir.i"
+%include "GSkyDirs.i"
 %include "GHorizDir.i"
 %include "GSkyPixel.i"
 %include "GSkyMap.i"

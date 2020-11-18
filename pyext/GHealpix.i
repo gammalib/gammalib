@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GHealpix.i - Healpix projection class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2020 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -60,13 +60,13 @@ public:
     virtual GBilinear   interpolator(const GSkyDir& dir) const;
 
     // Other methods
-    const int&           npix(void) const;
-    const int&           nside(void) const;
-    std::string          ordering(void) const;
-    void                 ordering(const std::string& ordering);
-    std::vector<int>     neighbours(const GSkyPixel& pixel) const;
-    std::vector<GSkyDir> boundaries(const GSkyPixel& pixel, const int& step = 1) const;
-    double               max_pixrad(void) const;
+    const int&       npix(void) const;
+    const int&       nside(void) const;
+    std::string      ordering(void) const;
+    void             ordering(const std::string& ordering);
+    std::vector<int> neighbours(const GSkyPixel& pixel) const;
+    GSkyDirs         boundaries(const GSkyPixel& pixel, const int& step = 1) const;
+    double           max_pixrad(void) const;
 };
 
 

@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-17 November 2020
+18 November 2020
 
 
 1. Introduction
@@ -15,6 +15,7 @@ The following classes have been added:
 - GFunctions
 - GIntegrals
 - GResponseVectorCache
+- GSkyDirs
 - GCTAModelSkyCube
 
 The following classes have been removed:
@@ -141,7 +142,8 @@ Added GOptimizerLM::npars() and GOptimizerLM::nfree() methods.
 
 12. Sky module
 --------------
-None
+Added GSkyDirs container class to hold sky directions. The GHealpix::boundaries()
+method now returns an instance of GSkyDirs (#3324).
 
 
 13. Support module

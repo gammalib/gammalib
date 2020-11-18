@@ -143,8 +143,9 @@
  *                        Analysis support services                        *
  ***************************************************************************/
 
-/* __ Skymap handling ____________________________________________________ */
+/* __ Sky handling _______________________________________________________ */
 #include "GSkyDir.hpp"
+#include "GSkyDirs.hpp"
 #include "GHorizDir.hpp"
 #include "GSkyPixel.hpp"
 #include "GSkyMap.hpp"
