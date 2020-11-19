@@ -258,7 +258,8 @@ GSkyRegionRect* GSkyRegionRect::clone(void) const
  * @param[in] posang Position angle [radians].
  *
  * Sets the position angle of the rectangular sky region. The position angle
- * is counted counterclockwise from North.
+ * is counted counterclockwise from cel. North and is aligned to the rect
+ * height.
  ***************************************************************************/
 void GSkyRegionRect::posang(const double& posang)
 {
@@ -279,7 +280,8 @@ void GSkyRegionRect::posang(const double& posang)
  * @param[in] posang Position angle [degrees].
  *
  * Sets the position angle of the rectangular sky region. The position angle
- * is counted counterclockwise from North.
+ * is counted counterclockwise from cel. North and is aligned to the rect
+ * height.
  ***************************************************************************/
 void GSkyRegionRect::posang_deg(const double& posang)
 {
@@ -333,7 +335,7 @@ void GSkyRegionRect::width(const double& width)
  *            Height value is less than 0.
  *
  * Sets the height of the rectangular sky region. Only non-negative radii are
- * allowed.
+ * allowed. For zero posang, the height axis is pointing to celestial north.
  ***************************************************************************/
 void GSkyRegionRect::height(const double& height)
 {

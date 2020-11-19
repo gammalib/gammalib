@@ -48,6 +48,9 @@
  * The class holds several properties such as solid angle subtended by the
  * region and computed through internal method compute_solid().
  *
+ * The position angle counts counter-clockwise from celestial North and is
+ * aligned with the height axis of the rectangle.
+ *
  ***************************************************************************/
 class GSkyRegionRect : public GSkyRegion {
 
