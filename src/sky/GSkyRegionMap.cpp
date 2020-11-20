@@ -657,14 +657,19 @@ void GSkyRegionMap::set_region_rect(const GSkyRegionRect* rect)
         // Get skydir of current corner
         GSkyDir corner = rect->get_corner(icorner);
 
-        // Get extension along declination
-        double dy = std::abs(corner.dec() - rect->centre().dec());
+        // Compute polar props in global coords relative to rectangle centre
+        double dist = rect->centre().dist(corner);
+        double pa   = rect->centre().posang(corner);
+
+        // Compute required map extension along RA/Dec for this corner
+        double dx = dist * std::sin(pa);
+        double dy = dist * std::cos(pa);
+
+        // Select the largest extension
         if (dy > dymax) {
             dymax = dy;
         }
 
-        // Get extension along right ascension, correct for spherical coordsys
-        double dx = std::abs(corner.ra() - rect->centre().ra()) * std::cos(corner.dec());
         if (dx > dxmax) {
             dxmax = dx;
         }
