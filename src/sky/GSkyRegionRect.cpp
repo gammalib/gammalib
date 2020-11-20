@@ -266,9 +266,6 @@ void GSkyRegionRect::posang(const double& posang)
     // Set the position angle
     m_posang = posang;
 
-    // Update the cache
-    update_cache();
-
     // Return
     return;
 }
@@ -586,10 +583,10 @@ bool GSkyRegionRect::contains_local(const GSkyDir& locdir) const
     bool dir_is_in = false;
 
     // Check containment: declination axis
-    if (std::abs(locdir.dec_deg()) <= m_halfheight) {
+    if ((std::abs(locdir.dec_deg()) - 1.0e-10) <= m_halfheight) {
 
         // Check containment: right ascension axis
-        if (std::abs(locdir.ra_deg()) <= m_halfwidth) {
+        if ((std::abs(locdir.ra_deg()) - 1.0e-10) <= m_halfwidth) {
 
             // Sky direction is inside the rectangle
             dir_is_in = true;
@@ -752,40 +749,22 @@ bool GSkyRegionRect::overlaps(const GSkyRegion& reg) const
  * Transform the sky direction :skydir: to the local cartesian coordinate system.
  * The origin of the local coordinate system is fixed to the center of the
  * rectangle and aligned in +ra (width) and +dec (height).
+ * Please note, that a GSkyDir object is returned, even if the local coordsys
+ * is cartesian.
  ***************************************************************************/
 GSkyDir GSkyRegionRect::transform_to_local(const GSkyDir& skydir) const
 {
-    // Get rid of negative right ascension coordinates
-    // to obtain angles in [0,2pi]
-    // (Surely there is a more clever way to to this)
-    double skydir_ra = skydir.ra();
-    if (skydir_ra < 0) {
-        skydir_ra += gammalib::twopi;
-    }
-    double centre_ra = m_centre.ra();
-    if (centre_ra < 0) {
-        centre_ra += gammalib::twopi;
-    }
+    // Get distance and polar angle relative to rectangle centre
+    double dist = m_centre.dist(skydir);
+    double pa   = m_centre.posang(skydir) - m_posang;
 
-    // Compute separation (in radians)
-    double dx = skydir_ra    - centre_ra;
-    double dy = skydir.dec() - m_centre.dec();
-
-    // Make sure the closest angular separation is chosen
-    if (std::abs(dx) > gammalib::pi) {
-        dx = gammalib::twopi - std::abs(dx);
-    }
-
-    // Correction for spherical coordinate system
-    dx *= std::cos(skydir.dec());
-
-    // Rotate with neg. PA
-    double new_x = m_posang_cos*dx - m_posang_sin*dy;
-    double new_y = m_posang_sin*dx + m_posang_cos*dy;
+    // Compute corresponding x and y coordinate from polar coords
+    double x = dist * std::sin(pa);
+    double y = dist * std::cos(pa);
 
     // Create output sky direction
     GSkyDir transformed;
-    transformed.radec(new_x, new_y);
+    transformed.radec(x, y);
 
     // Return
     return transformed;
@@ -804,17 +783,25 @@ GSkyDir GSkyRegionRect::transform_to_local(const GSkyDir& skydir) const
  ***************************************************************************/
 GSkyDir GSkyRegionRect::transform_to_global(const GSkyDir& locdir) const
 {
-    // Rotate local coordinates with positive PA
-    double dx = (m_posang_cos *locdir.ra())  + (m_posang_sin *locdir.dec());
-    double dy = (m_posang_cos *locdir.dec()) - (m_posang_sin *locdir.ra());
+    // // Initialise centre in local coordinates (maybe make class member?)
+    GSkyDir centre_local;
+    centre_local.radec(0,0);
 
-    // Shift by rectangle center, apply spherical coordinate scaling
-    double new_y = m_centre.dec() + dy;
-    double new_x = m_centre.ra()  + dx/std::cos(new_y);
+    // Access x and y in local coordsys
+    double x = locdir.ra();
+    double y = locdir.dec();
 
-    // Create output sky direction
-    GSkyDir transformed;
-    transformed.radec(new_x, new_y);
+    // Compute dist and position angle in polar coords
+    double dist = std::sqrt(x*x + y*y);
+    double pa   = gammalib::pihalf - std::atan2(y, x) + m_posang;
+
+    // // Compute distance and position angle for locdir in global coordinates
+    // double dist = centre_local.dist(locdir);
+    // double pa   = centre_local.posang(locdir) + m_posang;
+
+    // Create output global sky direction
+    GSkyDir transformed(m_centre);
+    transformed.rotate(pa, dist);
 
     // Return
     return transformed;
@@ -829,6 +816,8 @@ GSkyDir GSkyRegionRect::transform_to_global(const GSkyDir& locdir) const
  *
  * @exception GException::out_of_range
  *            Corner index is not in [0,3].
+ *
+ * The index counts CCW starting from +RA,+DEC: +R+D, +R-D, -R-D, -R+D.
  ***************************************************************************/
 GSkyDir GSkyRegionRect::get_corner(const int& index) const
 {
@@ -838,9 +827,9 @@ GSkyDir GSkyRegionRect::get_corner(const int& index) const
     }
 
     // Compute the offset to the corners
-    // Will be tr, br, tl, bl for indices 0-3 respectively
-    double dx = m_halfwidth  * (1 - 2*int(index < 2));
-    double dy = m_halfheight * (1 - 2*int(index % 2));
+    // Index counts CCW starting from +RA,+DEC: +R+D, +R-D, -R-D, -R+D
+    double dx = m_halfwidth  * (1 - 2*int(index >= 2));
+    double dy = m_halfheight * (1 - 2*int((index==1) || (index==2)));
 
     // Define local corner sky direction
     GSkyDir corner;
@@ -891,10 +880,6 @@ void GSkyRegionRect::copy_members(const GSkyRegionRect& region)
     m_halfheight = region.m_halfheight;
     m_posang     = region.m_posang;
 
-    // Copy cache
-    m_posang_cos = region.m_posang_cos;
-    m_posang_sin = region.m_posang_sin;
-
     // Return
     return;
 }
@@ -918,20 +903,6 @@ void GSkyRegionRect::compute_solid_angle(void)
     // Compute solid angle
     m_solid = (2*m_halfwidth) * (2*m_halfheight) * \
                 (gammalib::deg2rad * gammalib::deg2rad);
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Update the cache.
- ***************************************************************************/
-void GSkyRegionRect::update_cache(void)
-{
-    // Precompute cos and sin of position angle
-    m_posang_cos = std::cos(m_posang);
-    m_posang_sin = std::sin(m_posang);
 
     // Return
     return;

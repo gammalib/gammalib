@@ -49,7 +49,13 @@
  * region and computed through internal method compute_solid().
  *
  * The position angle counts counter-clockwise from celestial North and is
- * aligned with the height axis of the rectangle.
+ * aligned with the height axis of the rectangle. Note, that height and width
+ * describe the diameter of the region.
+ *
+ * Sky directions can be transformed to the local/global coordinate system via
+ * the methods transform_to_local() / transform_to_global().
+ * The position (in global coordinates) of the 4 corners of the rectangle can
+ * be received via the method get_corner(index).
  *
  ***************************************************************************/
 class GSkyRegionRect : public GSkyRegion {
@@ -107,16 +113,12 @@ protected:
     void copy_members(const GSkyRegionRect& region);
     void free_members(void);
     void compute_solid_angle(void);
-    void update_cache(void);
 
     // Protected members
     GSkyDir m_centre;     //!< Centre or reference point of the region
     double  m_halfwidth;  //!< Half width of the region [deg]
     double  m_halfheight; //!< Half height of the region [deg]
     double  m_posang;     //!< Position angle, counterclockwise from North [radians]
-
-    double m_posang_cos; //!< Cache for transform_to_local
-    double m_posang_sin; //!< Cache for transform_to_local
 };
 
 
