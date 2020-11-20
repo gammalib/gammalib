@@ -44,15 +44,16 @@
 #define G_WCS_COPY_DEBUG
 
 /* __ Constants __________________________________________________________ */
-const std::string datadir        = std::getenv("TEST_DATA");
-const std::string sky_region     = datadir + "/test_circle_region.reg";
-const std::string sky_region_map = datadir + "/test_map_region.fits";
-const std::string sky_map        = datadir + "/cena_lobes_parkes.fits";
+const std::string datadir         = std::getenv("TEST_DATA");
+const std::string sky_region      = datadir + "/test_circle_region.reg";
+const std::string sky_region_rect = datadir + "/test_rect_region.reg";
+const std::string sky_region_map  = datadir + "/test_map_region.fits";
+const std::string sky_map         = datadir + "/cena_lobes_parkes.fits";
 
 
 /***********************************************************************//**
  * @brief Set parameters and tests
- ***************************************************************************/    
+ ***************************************************************************/
 void TestGSky::set(void){
 
     // Test name
@@ -83,6 +84,8 @@ void TestGSky::set(void){
            "Test GSkyRegions");
     append(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle),
            "Test GSkyRegionCircle");
+    append(static_cast<pfunction>(&TestGSky::test_GSkyRegionRect),
+           "Test GSkyRegionRect");
     append(static_cast<pfunction>(&TestGSky::test_GSkyRegionMap),
            "Test GSkyRegionMap");
     append(static_cast<pfunction>(&TestGSky::test_GHorizDir),
@@ -539,7 +542,7 @@ void TestGSky::test_GWcs(void)
 
             // Throw an error if allocation failed
             if (cel == NULL || gal == NULL) {
-                std::cout << std::endl 
+                std::cout << std::endl
                         << "TEST ERROR: Could not allocate "+test_class+"."
                         << std::endl;
                 throw exception_error("Could not allocate"+test_class);
@@ -565,7 +568,7 @@ void TestGSky::test_GWcs(void)
                                             " tolerance 1.0e-10 exceeded: "+
                                             gammalib::str(tol));
                 }
-                test_try_success(); 
+                test_try_success();
             }
             catch (std::exception &e) {
                 test_try_failure(e);
@@ -640,166 +643,166 @@ void TestGSky::test_GSkyMap_healpix_construct(void)
 
     // Test void constructor
     GSkyMap empty_map;
-	test_assert(empty_map.is_empty(), "Check for empty sky map");
-	test_value(empty_map.npix(), 0, "Check for no sky map pixels");
-	test_value(empty_map.nx(), 0, "Check for no X-direction map pixels");
-	test_value(empty_map.ny(), 0, "Check for no Y-direction map pixels");
-	test_value(empty_map.nmaps(), 0, "Check for no sky maps");
+    test_assert(empty_map.is_empty(), "Check for empty sky map");
+    test_value(empty_map.npix(), 0, "Check for no sky map pixels");
+    test_value(empty_map.nx(), 0, "Check for no X-direction map pixels");
+    test_value(empty_map.ny(), 0, "Check for no Y-direction map pixels");
+    test_value(empty_map.nmaps(), 0, "Check for no sky maps");
 
     // Test Healpix constructors
     GSkyMap ring1("GAL", 1, "RING", 1);
-	test_assert(!ring1.is_empty(), "Check for non-empty sky map");
-	test_value(ring1.npix(), 12, "Check for 12 sky map pixels");
-	test_value(ring1.nx(), 0, "Check for no X-direction map pixels");
-	test_value(ring1.ny(), 0, "Check for no Y-direction map pixels");
-	test_value(ring1.nmaps(), 1, "Check for one sky map");
+    test_assert(!ring1.is_empty(), "Check for non-empty sky map");
+    test_value(ring1.npix(), 12, "Check for 12 sky map pixels");
+    test_value(ring1.nx(), 0, "Check for no X-direction map pixels");
+    test_value(ring1.ny(), 0, "Check for no Y-direction map pixels");
+    test_value(ring1.nmaps(), 1, "Check for one sky map");
     //
     GSkyMap ring2("GAL", 2, "RING", 1);
-	test_assert(!ring2.is_empty(), "Check for non-empty sky map");
-	test_value(ring2.npix(), 48, "Check for 48 sky map pixels");
-	test_value(ring2.nx(), 0, "Check for no X-direction map pixels");
-	test_value(ring2.ny(), 0, "Check for no Y-direction map pixels");
-	test_value(ring2.nmaps(), 1, "Check for one sky map");
+    test_assert(!ring2.is_empty(), "Check for non-empty sky map");
+    test_value(ring2.npix(), 48, "Check for 48 sky map pixels");
+    test_value(ring2.nx(), 0, "Check for no X-direction map pixels");
+    test_value(ring2.ny(), 0, "Check for no Y-direction map pixels");
+    test_value(ring2.nmaps(), 1, "Check for one sky map");
     //
     GSkyMap ring4("GAL", 4, "RING", 1);
-	test_assert(!ring4.is_empty(), "Check for non-empty sky map");
-	test_value(ring4.npix(), 192, "Check for 192 sky map pixels");
-	test_value(ring4.nx(), 0, "Check for no X-direction map pixels");
-	test_value(ring4.ny(), 0, "Check for no Y-direction map pixels");
-	test_value(ring4.nmaps(), 1, "Check for one sky map");
+    test_assert(!ring4.is_empty(), "Check for non-empty sky map");
+    test_value(ring4.npix(), 192, "Check for 192 sky map pixels");
+    test_value(ring4.nx(), 0, "Check for no X-direction map pixels");
+    test_value(ring4.ny(), 0, "Check for no Y-direction map pixels");
+    test_value(ring4.nmaps(), 1, "Check for one sky map");
     //
     GSkyMap ring8("GAL", 8, "RING", 1);
-	test_assert(!ring8.is_empty(), "Check for non-empty sky map");
-	test_value(ring8.npix(), 768, "Check for 768 sky map pixels");
-	test_value(ring8.nx(), 0, "Check for no X-direction map pixels");
-	test_value(ring8.ny(), 0, "Check for no Y-direction map pixels");
-	test_value(ring8.nmaps(), 1, "Check for one sky map");
+    test_assert(!ring8.is_empty(), "Check for non-empty sky map");
+    test_value(ring8.npix(), 768, "Check for 768 sky map pixels");
+    test_value(ring8.nx(), 0, "Check for no X-direction map pixels");
+    test_value(ring8.ny(), 0, "Check for no Y-direction map pixels");
+    test_value(ring8.nmaps(), 1, "Check for one sky map");
     //
     GSkyMap ring16("GAL", 16, "RING", 1);
-	test_assert(!ring16.is_empty(), "Check for non-empty sky map");
-	test_value(ring16.npix(), 3072, "Check for 3072 sky map pixels");
-	test_value(ring16.nx(), 0, "Check for no X-direction map pixels");
-	test_value(ring16.ny(), 0, "Check for no Y-direction map pixels");
-	test_value(ring16.nmaps(), 1, "Check for one sky map");
+    test_assert(!ring16.is_empty(), "Check for non-empty sky map");
+    test_value(ring16.npix(), 3072, "Check for 3072 sky map pixels");
+    test_value(ring16.nx(), 0, "Check for no X-direction map pixels");
+    test_value(ring16.ny(), 0, "Check for no Y-direction map pixels");
+    test_value(ring16.nmaps(), 1, "Check for one sky map");
     //
     GSkyMap ring32("GAL", 32, "RING", 1);
-	test_assert(!ring32.is_empty(), "Check for non-empty sky map");
-	test_value(ring32.npix(), 12288, "Check for 12288 sky map pixels");
-	test_value(ring32.nx(), 0, "Check for no X-direction map pixels");
-	test_value(ring32.ny(), 0, "Check for no Y-direction map pixels");
-	test_value(ring32.nmaps(), 1, "Check for one sky map");
+    test_assert(!ring32.is_empty(), "Check for non-empty sky map");
+    test_value(ring32.npix(), 12288, "Check for 12288 sky map pixels");
+    test_value(ring32.nx(), 0, "Check for no X-direction map pixels");
+    test_value(ring32.ny(), 0, "Check for no Y-direction map pixels");
+    test_value(ring32.nmaps(), 1, "Check for one sky map");
     //
     GSkyMap ring64("GAL", 64, "RING", 1);
-	test_assert(!ring64.is_empty(), "Check for non-empty sky map");
-	test_value(ring64.npix(), 49152, "Check for 49152 sky map pixels");
-	test_value(ring64.nx(), 0, "Check for no X-direction map pixels");
-	test_value(ring64.ny(), 0, "Check for no Y-direction map pixels");
-	test_value(ring64.nmaps(), 1, "Check for one sky map");
+    test_assert(!ring64.is_empty(), "Check for non-empty sky map");
+    test_value(ring64.npix(), 49152, "Check for 49152 sky map pixels");
+    test_value(ring64.nx(), 0, "Check for no X-direction map pixels");
+    test_value(ring64.ny(), 0, "Check for no Y-direction map pixels");
+    test_value(ring64.nmaps(), 1, "Check for one sky map");
     //
     GSkyMap ring128("GAL", 128, "RING", 1);
-	test_assert(!ring128.is_empty(), "Check for non-empty sky map");
-	test_value(ring128.npix(), 196608, "Check for 196608 sky map pixels");
-	test_value(ring128.nx(), 0, "Check for no X-direction map pixels");
-	test_value(ring128.ny(), 0, "Check for no Y-direction map pixels");
-	test_value(ring128.nmaps(), 1, "Check for one sky map");
+    test_assert(!ring128.is_empty(), "Check for non-empty sky map");
+    test_value(ring128.npix(), 196608, "Check for 196608 sky map pixels");
+    test_value(ring128.nx(), 0, "Check for no X-direction map pixels");
+    test_value(ring128.ny(), 0, "Check for no Y-direction map pixels");
+    test_value(ring128.nmaps(), 1, "Check for one sky map");
     //
     GSkyMap ring256("GAL", 256, "RING", 1);
-	test_assert(!ring256.is_empty(), "Check for non-empty sky map");
-	test_value(ring256.npix(), 786432, "Check 786432 XX sky map pixels");
-	test_value(ring256.nx(), 0, "Check for no X-direction map pixels");
-	test_value(ring256.ny(), 0, "Check for no Y-direction map pixels");
-	test_value(ring256.nmaps(), 1, "Check for one sky map");
+    test_assert(!ring256.is_empty(), "Check for non-empty sky map");
+    test_value(ring256.npix(), 786432, "Check 786432 XX sky map pixels");
+    test_value(ring256.nx(), 0, "Check for no X-direction map pixels");
+    test_value(ring256.ny(), 0, "Check for no Y-direction map pixels");
+    test_value(ring256.nmaps(), 1, "Check for one sky map");
     //
     GSkyMap ring512("GAL", 512, "RING", 1);
-	test_assert(!ring512.is_empty(), "Check for non-empty sky map");
-	test_value(ring512.npix(), 3145728, "Check for 3145728 sky map pixels");
-	test_value(ring512.nx(), 0, "Check for no X-direction map pixels");
-	test_value(ring512.ny(), 0, "Check for no Y-direction map pixels");
-	test_value(ring512.nmaps(), 1, "Check for one sky map");
+    test_assert(!ring512.is_empty(), "Check for non-empty sky map");
+    test_value(ring512.npix(), 3145728, "Check for 3145728 sky map pixels");
+    test_value(ring512.nx(), 0, "Check for no X-direction map pixels");
+    test_value(ring512.ny(), 0, "Check for no Y-direction map pixels");
+    test_value(ring512.nmaps(), 1, "Check for one sky map");
     //
     GSkyMap nest1("GAL", 1, "NEST", 1);
-	test_assert(!nest1.is_empty(), "Check for non-empty sky map");
-	test_value(nest1.npix(), 12, "Check for 12 sky map pixels");
-	test_value(nest1.nx(), 0, "Check for no X-direction map pixels");
-	test_value(nest1.ny(), 0, "Check for no Y-direction map pixels");
-	test_value(nest1.nmaps(), 1, "Check for one sky map");
+    test_assert(!nest1.is_empty(), "Check for non-empty sky map");
+    test_value(nest1.npix(), 12, "Check for 12 sky map pixels");
+    test_value(nest1.nx(), 0, "Check for no X-direction map pixels");
+    test_value(nest1.ny(), 0, "Check for no Y-direction map pixels");
+    test_value(nest1.nmaps(), 1, "Check for one sky map");
     //
     GSkyMap nest2("GAL", 2, "NEST", 1);
-	test_assert(!nest2.is_empty(), "Check for non-empty sky map");
-	test_value(nest2.npix(), 48, "Check for 48 sky map pixels");
-	test_value(nest2.nx(), 0, "Check for no X-direction map pixels");
-	test_value(nest2.ny(), 0, "Check for no Y-direction map pixels");
-	test_value(nest2.nmaps(), 1, "Check for one sky map");
+    test_assert(!nest2.is_empty(), "Check for non-empty sky map");
+    test_value(nest2.npix(), 48, "Check for 48 sky map pixels");
+    test_value(nest2.nx(), 0, "Check for no X-direction map pixels");
+    test_value(nest2.ny(), 0, "Check for no Y-direction map pixels");
+    test_value(nest2.nmaps(), 1, "Check for one sky map");
     //
     GSkyMap nest4("GAL", 4, "NEST", 1);
-	test_assert(!nest4.is_empty(), "Check for non-empty sky map");
-	test_value(nest4.npix(), 192, "Check for 192 sky map pixels");
-	test_value(nest4.nx(), 0, "Check for no X-direction map pixels");
-	test_value(nest4.ny(), 0, "Check for no Y-direction map pixels");
-	test_value(nest4.nmaps(), 1, "Check for one sky map");
+    test_assert(!nest4.is_empty(), "Check for non-empty sky map");
+    test_value(nest4.npix(), 192, "Check for 192 sky map pixels");
+    test_value(nest4.nx(), 0, "Check for no X-direction map pixels");
+    test_value(nest4.ny(), 0, "Check for no Y-direction map pixels");
+    test_value(nest4.nmaps(), 1, "Check for one sky map");
     //
     GSkyMap nest8("GAL", 8, "NEST", 1);
-	test_assert(!nest8.is_empty(), "Check for non-empty sky map");
-	test_value(nest8.npix(), 768, "Check for 768 sky map pixels");
-	test_value(nest8.nx(), 0, "Check for no X-direction map pixels");
-	test_value(nest8.ny(), 0, "Check for no Y-direction map pixels");
-	test_value(nest8.nmaps(), 1, "Check for one sky map");
+    test_assert(!nest8.is_empty(), "Check for non-empty sky map");
+    test_value(nest8.npix(), 768, "Check for 768 sky map pixels");
+    test_value(nest8.nx(), 0, "Check for no X-direction map pixels");
+    test_value(nest8.ny(), 0, "Check for no Y-direction map pixels");
+    test_value(nest8.nmaps(), 1, "Check for one sky map");
     //
     GSkyMap nest16("GAL", 16, "NEST", 1);
-	test_assert(!nest16.is_empty(), "Check for non-empty sky map");
-	test_value(nest16.npix(), 3072, "Check for 3072 sky map pixels");
-	test_value(nest16.nx(), 0, "Check for no X-direction map pixels");
-	test_value(nest16.ny(), 0, "Check for no Y-direction map pixels");
-	test_value(nest16.nmaps(), 1, "Check for one sky map");
+    test_assert(!nest16.is_empty(), "Check for non-empty sky map");
+    test_value(nest16.npix(), 3072, "Check for 3072 sky map pixels");
+    test_value(nest16.nx(), 0, "Check for no X-direction map pixels");
+    test_value(nest16.ny(), 0, "Check for no Y-direction map pixels");
+    test_value(nest16.nmaps(), 1, "Check for one sky map");
     //
     GSkyMap nest32("GAL", 32, "NEST", 1);
-	test_assert(!nest32.is_empty(), "Check for non-empty sky map");
-	test_value(nest32.npix(), 12288, "Check for 12288 sky map pixels");
-	test_value(nest32.nx(), 0, "Check for no X-direction map pixels");
-	test_value(nest32.ny(), 0, "Check for no Y-direction map pixels");
-	test_value(nest32.nmaps(), 1, "Check for one sky map");
+    test_assert(!nest32.is_empty(), "Check for non-empty sky map");
+    test_value(nest32.npix(), 12288, "Check for 12288 sky map pixels");
+    test_value(nest32.nx(), 0, "Check for no X-direction map pixels");
+    test_value(nest32.ny(), 0, "Check for no Y-direction map pixels");
+    test_value(nest32.nmaps(), 1, "Check for one sky map");
     //
     GSkyMap nest64("GAL", 64, "NEST", 1);
-	test_assert(!nest64.is_empty(), "Check for non-empty sky map");
-	test_value(nest64.npix(), 49152, "Check for 49152 sky map pixels");
-	test_value(nest64.nx(), 0, "Check for no X-direction map pixels");
-	test_value(nest64.ny(), 0, "Check for no Y-direction map pixels");
-	test_value(nest64.nmaps(), 1, "Check for one sky map");
+    test_assert(!nest64.is_empty(), "Check for non-empty sky map");
+    test_value(nest64.npix(), 49152, "Check for 49152 sky map pixels");
+    test_value(nest64.nx(), 0, "Check for no X-direction map pixels");
+    test_value(nest64.ny(), 0, "Check for no Y-direction map pixels");
+    test_value(nest64.nmaps(), 1, "Check for one sky map");
     //
     GSkyMap nest128("GAL", 128, "NEST", 1);
-	test_assert(!nest128.is_empty(), "Check for non-empty sky map");
-	test_value(nest128.npix(), 196608, "Check for 196608 sky map pixels");
-	test_value(nest128.nx(), 0, "Check for no X-direction map pixels");
-	test_value(nest128.ny(), 0, "Check for no Y-direction map pixels");
-	test_value(nest128.nmaps(), 1, "Check for one sky map");
+    test_assert(!nest128.is_empty(), "Check for non-empty sky map");
+    test_value(nest128.npix(), 196608, "Check for 196608 sky map pixels");
+    test_value(nest128.nx(), 0, "Check for no X-direction map pixels");
+    test_value(nest128.ny(), 0, "Check for no Y-direction map pixels");
+    test_value(nest128.nmaps(), 1, "Check for one sky map");
     //
     GSkyMap nest256("GAL", 256, "NEST", 1);
-	test_assert(!nest256.is_empty(), "Check for non-empty sky map");
-	test_value(nest256.npix(), 786432, "Check for 786432 sky map pixels");
-	test_value(nest256.nx(), 0, "Check for no X-direction map pixels");
-	test_value(nest256.ny(), 0, "Check for no Y-direction map pixels");
-	test_value(nest256.nmaps(), 1, "Check for one sky map");
+    test_assert(!nest256.is_empty(), "Check for non-empty sky map");
+    test_value(nest256.npix(), 786432, "Check for 786432 sky map pixels");
+    test_value(nest256.nx(), 0, "Check for no X-direction map pixels");
+    test_value(nest256.ny(), 0, "Check for no Y-direction map pixels");
+    test_value(nest256.nmaps(), 1, "Check for one sky map");
     //
     GSkyMap nest512("GAL", 512, "NEST", 1);
-	test_assert(!nest512.is_empty(), "Check for non-empty sky map");
-	test_value(nest512.npix(), 3145728, "Check for 3145728 sky map pixels");
-	test_value(nest512.nx(), 0, "Check for no X-direction map pixels");
-	test_value(nest512.ny(), 0, "Check for no Y-direction map pixels");
-	test_value(nest512.nmaps(), 1, "Check for one sky map");
+    test_assert(!nest512.is_empty(), "Check for non-empty sky map");
+    test_value(nest512.npix(), 3145728, "Check for 3145728 sky map pixels");
+    test_value(nest512.nx(), 0, "Check for no X-direction map pixels");
+    test_value(nest512.ny(), 0, "Check for no Y-direction map pixels");
+    test_value(nest512.nmaps(), 1, "Check for one sky map");
     //
     GSkyMap map1("CEL", 1, "RING", 1);
-	test_assert(!map1.is_empty(), "Check for non-empty sky map");
-	test_value(map1.npix(), 12, "Check for 12 sky map pixels");
-	test_value(map1.nx(), 0, "Check for no X-direction map pixels");
-	test_value(map1.ny(), 0, "Check for no Y-direction map pixels");
-	test_value(map1.nmaps(), 1, "Check for one sky map");
+    test_assert(!map1.is_empty(), "Check for non-empty sky map");
+    test_value(map1.npix(), 12, "Check for 12 sky map pixels");
+    test_value(map1.nx(), 0, "Check for no X-direction map pixels");
+    test_value(map1.ny(), 0, "Check for no Y-direction map pixels");
+    test_value(map1.nmaps(), 1, "Check for one sky map");
     //
     GSkyMap map2("CEL", 1, "NESTED", 2);
-	test_assert(!map2.is_empty(), "Check for non-empty sky map");
-	test_value(map2.npix(), 12, "Check for 12 sky map pixels");
-	test_value(map2.nx(), 0, "Check for no X-direction map pixels");
-	test_value(map2.ny(), 0, "Check for no Y-direction map pixels");
-	test_value(map2.nmaps(), 2, "Check for one sky map");
+    test_assert(!map2.is_empty(), "Check for non-empty sky map");
+    test_value(map2.npix(), 12, "Check for 12 sky map pixels");
+    test_value(map2.nx(), 0, "Check for no X-direction map pixels");
+    test_value(map2.ny(), 0, "Check for no Y-direction map pixels");
+    test_value(map2.nmaps(), 2, "Check for one sky map");
 
     // Test Healpix copy constructor
     GSkyMap ring1cpy = ring1;
@@ -892,7 +895,7 @@ void TestGSky::test_GSkyMap_healpix_io(void)
             refmap(pix) = pix+1;
         refmap.save(file1, true);
 
-        test_try_success(); 
+        test_try_success();
     }
     catch (std::exception &e) {
         test_try_failure(e);
@@ -912,7 +915,7 @@ void TestGSky::test_GSkyMap_healpix_io(void)
             throw exception_error("Loaded file differs from saved file.");
         }
 
-        test_try_success(); 
+        test_try_success();
     }
     catch (std::exception &e) {
         test_try_failure(e);
@@ -930,7 +933,7 @@ void TestGSky::test_GSkyMap_healpix_io(void)
         if (diff > 0) {
             throw exception_error("Loaded file differs from saved file.");
         }
-        test_try_success(); 
+        test_try_success();
     }
     catch (std::exception &e) {
         test_try_failure(e);
@@ -1291,7 +1294,7 @@ void TestGSky::test_GSkyMap(void)
         }
     }
 	test_value(total_more, total_src, 1.0e-3, "Test nmaps() method with more maps");
-	test_value(map_more.nmaps(), 4, "Test nmaps() method with more maps");    
+	test_value(map_more.nmaps(), 4, "Test nmaps() method with more maps");
     GSkyMap map_less = map_src;
     map_less.nmaps(1);
     double total_less = 0.0;
@@ -1301,7 +1304,7 @@ void TestGSky::test_GSkyMap(void)
         }
     }
 	test_value(total_less, 0.5*total_src, 1.0e-3, "Test nmaps() method with less maps");
-	test_value(map_less.nmaps(), 1, "Test nmaps() method with less maps");    
+	test_value(map_less.nmaps(), 1, "Test nmaps() method with less maps");
 
     // Test map extraction
     GSkyMap map_extract = map_src.extract(0);
@@ -1312,7 +1315,7 @@ void TestGSky::test_GSkyMap(void)
         }
     }
 	test_value(total_extract, 0.5*total_src, 1.0e-3, "Test extract() method with 1 map");
-	test_value(map_extract.nmaps(), 1, "Test extract() method with 1 map");    
+	test_value(map_extract.nmaps(), 1, "Test extract() method with 1 map");
     map_extract = map_src.extract(0,2);
     total_extract = 0.0;
     for (int k = 0; k < map_extract.nmaps(); ++k) {
@@ -1321,7 +1324,7 @@ void TestGSky::test_GSkyMap(void)
         }
     }
 	test_value(total_extract, total_src, 1.0e-3, "Test extract() method with 2 maps");
-	test_value(map_extract.nmaps(), 2, "Test extract() method with 2 maps");    
+	test_value(map_extract.nmaps(), 2, "Test extract() method with 2 maps");
 
     // Define one more map for shaping manipulation
     GSkyMap map_shape0("CAR", "GAL", 0.0, 0.0, -1.0, 1.0, 10, 10);
@@ -1596,25 +1599,25 @@ void TestGSky::test_GSkyMap_io(void)
 
     // Load HEALPix map and check content
     GSkyMap map1(filename+"[HEALPIX1]");
-	test_value(map1.npix(), healpix1.npix(), "Check number of HEALPix pixels");    
+	test_value(map1.npix(), healpix1.npix(), "Check number of HEALPix pixels");
     int failures1(0);
     for (int i = 0; i < map1.npix(); ++i) {
         if (std::abs(map1(i)-double(i+1)) > 1.0e-6) {
             failures1++;
         }
     }
-	test_value(failures1, 0, "Check number of invalid HEALPix pixel values");    
+	test_value(failures1, 0, "Check number of invalid HEALPix pixel values");
 
     // Load WCS1 map and check content
     GSkyMap map2(filename+"[WCS1]");
-	test_value(map2.npix(), wcs1.npix(), "Check number of WCS pixels");    
+	test_value(map2.npix(), wcs1.npix(), "Check number of WCS pixels");
     int failures2(0);
     for (int i = 0; i < map2.npix(); ++i) {
         if (std::abs(map2(i)-double(i+1)) > 1.0e-6) {
             failures2++;
         }
     }
-	test_value(failures2, 0, "Check number of invalid WCS pixel values");    
+	test_value(failures2, 0, "Check number of invalid WCS pixel values");
 
     // Load WCS3 map and check content
     GSkyMap map3(filename+"[WCS3]");
@@ -1644,15 +1647,15 @@ void TestGSky::test_GSkyMap_io(void)
     // Allocate regions
     GSkyRegions regions;
 
-	// Test regions loading
-	test_try("Test regions loading");
-	try {
-		regions.load(sky_region);
-		test_try_success();
-	}
-	catch (std::exception &e) {
-		test_try_failure(e);
-	}
+    // Test regions loading
+    test_try("Test regions loading");
+    try {
+        regions.load(sky_region);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
 
     // Check if region was loaded correctly
     test_value(regions.size(), 5, "5 sky regions expected");
@@ -1667,25 +1670,25 @@ void TestGSky::test_GSkyMap_io(void)
     test_value(regions[3]->name(), "Test 2", "Name \"Test 2\" for fourth sky region");
     test_value(regions[4]->name(), "Test 3", "Name \"Test 3\" for fifth sky region");
 
-	// Test regions saving
-	test_try("Test regions saving");
-	try {
-		regions.save("region.reg");
-		test_try_success();
-	}
-	catch (std::exception &e) {
-		test_try_failure(e);
-	}
+    // Test regions saving
+    test_try("Test regions saving");
+    try {
+        regions.save("region.reg");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
 
-	// Test regions reloading
-	test_try("Test regions reloading");
-	try {
-		regions.load("region.reg");
-		test_try_success();
-	}
-	catch (std::exception &e) {
-		test_try_failure(e);
-	}
+    // Test regions reloading
+    test_try("Test regions reloading");
+    try {
+        regions.load("region.reg");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
 
     // Check if region was loaded correctly
     test_value(regions.size(), 5, "5 sky regions expected");
@@ -1818,7 +1821,243 @@ void TestGSky::test_GSkyRegionCircle(void)
 
 
 /***************************************************************************
- * @brief Test GSkyRegionMap
+ * @brief GSkyRegionRect
+ ***************************************************************************/
+void TestGSky::test_GSkyRegionRect(void)
+{
+    // Define region for comparison
+    GSkyDir refdir_radeczerozero = GSkyDir();
+    refdir_radeczerozero.radec_deg(0,0);
+    double ref_width  = 1.;
+    double ref_height = 1.;
+    double ref_pa_deg = 0.;
+
+    // Test constructing
+    test_try("Test constructor");
+    try {
+        GSkyRegionRect rect(refdir_radeczerozero, ref_width, ref_height, ref_pa_deg);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test constructing with negative width (should be forbidden)
+    test_try("Test constructor2");
+    try {
+        GSkyRegionRect rect(refdir_radeczerozero, -1, ref_height, ref_pa_deg);
+        test_try_failure();
+    }
+    catch (GException::invalid_argument &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test constructing with negative height (should be forbidden)
+    test_try("Test constructor3");
+    try {
+        GSkyRegionRect rect(refdir_radeczerozero, ref_width, -1, ref_pa_deg);
+        test_try_failure();
+    }
+    catch (GException::invalid_argument &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test constructing with negative posang (should be allowed)
+    test_try("Test constructor4");
+    try {
+        GSkyRegionRect rect(refdir_radeczerozero, ref_width, ref_height, -1);
+        test_try_success();
+    }
+    catch (GException::invalid_argument &e) {
+        test_try_failure();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test assignment of neg width after construction
+    test_try("Test width assignment after");
+    try {
+        GSkyRegionRect rect(refdir_radeczerozero, ref_width, ref_height, ref_pa_deg);
+        rect.width(-1.0);
+        test_try_failure();
+    }
+    catch (GException::invalid_argument &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test assignment of neg height after construction
+    test_try("Test height assignment after");
+    try {
+        GSkyRegionRect rect(refdir_radeczerozero, ref_width, ref_height, ref_pa_deg);
+        rect.height(-1.0);
+        test_try_failure();
+    }
+    catch (GException::invalid_argument &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test assignment of neg posang after construction
+    test_try("Test posang assignment after");
+    try {
+        GSkyRegionRect rect(refdir_radeczerozero, ref_width, ref_height, ref_pa_deg);
+        rect.posang_deg(-1.0);
+        test_try_success();
+    }
+    catch (GException::invalid_argument &e) {
+        test_try_failure();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Check radius assignment
+    GSkyRegionRect rect(refdir_radeczerozero, ref_width, ref_height, ref_pa_deg);
+
+    double check_width  = rect.width();
+    test_value(ref_width, check_width, 1.0e-10, "Test width assignment");
+
+    double check_height = rect.width();
+    test_value(ref_height, check_height, 1.0e-10, "Test height assignment");
+
+    double check_pa_deg = rect.posang_deg();
+    test_value(ref_pa_deg, check_pa_deg, 1.0e-10, "Test posang assignment");
+
+    // Check solid angle assignment
+    double solidangle_check = rect.solidangle();
+    double solidangle = ref_width*gammalib::deg2rad * ref_height*gammalib::deg2rad;
+    test_value(solidangle_check, solidangle, 1.0e-10, "Test solid angle");
+
+    // Initialise objects
+    GSkyDir refdir_radeczerozero = GSkyDir();
+    GSkyDir test_dir_0 = GSkyDir();
+    GSkyDir test_dir_1 = GSkyDir();
+    GSkyDir test_dir_2 = GSkyDir();
+
+    refdir_radeczerozero.radec_deg(0,0);
+    GSkyRegionRect refregion(refdir_radeczerozero, 10, 6, 0);
+
+    // Check GSkyDir containment
+    // Upper right
+    test_dir_0.radec_deg(6, 2);
+    test_dir_1.radec_deg(4, 2);
+    test_dir_2.radec_deg(4, 4);
+    test_assert(!refregion.contains(test_dir_0),"test for containment");
+    test_assert(refregion.contains(test_dir_1),"test for containment");
+    test_assert(!refregion.contains(test_dir_2),"test for containment");
+
+    // Upper left
+    test_dir_0.radec_deg(-6, 2);
+    test_dir_1.radec_deg(-4, 2);
+    test_dir_2.radec_deg(-4, 4);
+    test_assert(!refregion.contains(test_dir_0),"test for containment");
+    test_assert(refregion.contains(test_dir_1),"test for containment");
+    test_assert(!refregion.contains(test_dir_2),"test for containment");
+
+    // Lower left
+    test_dir_0.radec_deg(-6, -2);
+    test_dir_1.radec_deg(-4, -2);
+    test_dir_2.radec_deg(-4, -4);
+    test_assert(!refregion.contains(test_dir_0),"test for containment");
+    test_assert(refregion.contains(test_dir_1),"test for containment");
+    test_assert(!refregion.contains(test_dir_2),"test for containment");
+
+    // Lower right
+    test_dir_0.radec_deg(6, -2);
+    test_dir_1.radec_deg(4, -2);
+    test_dir_2.radec_deg(4, -4);
+    test_assert(!refregion.contains(test_dir_0),"test for containment");
+    test_assert(refregion.contains(test_dir_1),"test for containment");
+    test_assert(!refregion.contains(test_dir_2),"test for containment");
+
+    // Corners
+    test_assert(refregion.contains(refregion.get_corner(0)),"test for corner containment");
+    test_assert(refregion.contains(refregion.get_corner(1)),"test for corner containment");
+    test_assert(refregion.contains(refregion.get_corner(2)),"test for corner containment");
+    test_assert(refregion.contains(refregion.get_corner(3)),"test for corner containment");
+
+
+    // Check GSkyDir containment for rotated rectangle
+    GSkyRegionRect refregion_rot(refdir_radeczerozero, 10, 10, 45);
+
+    // Check corner containment
+    test_assert(refregion_rot.contains(refregion_rot.get_corner(0)),"test for corner containment");
+    test_assert(refregion_rot.contains(refregion_rot.get_corner(1)),"test for corner containment");
+    test_assert(refregion_rot.contains(refregion_rot.get_corner(2)),"test for corner containment");
+    test_assert(refregion_rot.contains(refregion_rot.get_corner(3)),"test for corner containment");
+
+    // Check GSkyDir containment
+    test_dir_0.radec_deg(refregion_rot.get_corner(0).ra_deg()+1, 0);
+    test_dir_1.radec_deg(refregion_rot.get_corner(0).ra_deg()  , 0);
+    test_dir_2.radec_deg(refregion_rot.get_corner(0).ra_deg()-1, 0);
+    test_assert(!refregion_rot.contains(test_dir_0),"test for containment");
+    test_assert(refregion_rot.contains(test_dir_1),"test for containment");
+    test_assert(refregion_rot.contains(test_dir_2),"test for containment");
+
+    // Check local<->global coordinate transformations
+    test_dir_0.radec_deg(50,50);
+    test_dir_1 = refregion_rot.transform_to_local(test_dir_0);
+    test_dir_2 = refregion_rot.transform_to_global(test_dir_1);
+    test_value(test_dir_0.ra(),  test_dir_2.ra(),  1.0e-10, "Test coord trafo");
+    test_value(test_dir_0.dec(), test_dir_2.dec(), 1.0e-10, "Test coord trafo");
+
+    // Check other rects containment
+    GSkyDir refdir_raoffset = GSkyDir();
+    refdir_raoffset.radec_deg(5,0);
+
+    GSkyDir refdir_rapole = GSkyDir();
+    refdir_rapole.radec_deg(359,0);
+
+    GSkyDir refdir_decpole = GSkyDir();
+    refdir_decpole.radec_deg(0,89);
+
+    GSkyDir refdir_ndecpole = GSkyDir();
+    refdir_ndecpole.radec_deg(100,89);
+
+    GSkyRegionRect refregion_smaller(refdir_radeczerozero, 5,  3, 0);
+    GSkyRegionRect refregion_larger(refdir_radeczerozero, 20, 12, 0);
+    GSkyRegionRect refregion_raoffset(refdir_raoffset, 10, 6, 0);
+    GSkyRegionRect refregion_rapole(refdir_rapole,   3, 3, 0);
+    GSkyRegionRect refregion_decpole(refdir_decpole, 3, 3, 0);
+
+    // Test contain dirs (same from circle)
+    test_assert(refregion.contains(refdir_radeczerozero),"test for containment");
+    test_assert(refregion.contains(refregion.centre()), "test if centre in rectangle");
+
+    // Test contain regions (same from circle)
+    test_assert(refregion.contains(refregion_smaller),"test for containment region");
+    test_assert(!refregion.contains(refregion_larger), "test for containment region2 ");
+    test_assert(refregion.contains(refregion), "test3 for containment region");
+
+    test_assert(refregion.contains(refdir_rapole), "rapole for containment region");
+    test_assert(refregion_decpole.contains(refdir_ndecpole), "rapole for containment region");
+
+    // Test overlaps (same from circle)
+    test_assert(refregion.overlaps(refregion_smaller),"test for overlap");
+    test_assert(refregion.overlaps(refregion_larger),"test2 for overlap");
+    test_assert(refregion.overlaps(refregion_raoffset),"test3 for overlap");
+    test_assert(!refregion.overlaps(refregion_decpole),"test4 for overlap");
+
+
+    // Exit test
+    return;
+}
+
+
+/***************************************************************************
+ * @brief GSkyRegionMap_construct
  ***************************************************************************/
 void TestGSky::test_GSkyRegionMap(void)
 {
@@ -1853,13 +2092,16 @@ void TestGSky::test_GSkyRegionMap(void)
     refdir_radeczerozero.radec_deg(0.0,0.0);
     refdir_radeclargeshift.radec_deg(2.0,0.0);
     refdir_radecsmallshift.radec_deg(0.3,0.0);
-    GSkyRegionCircle inregion(refdir_radeczerozero,0.2);
-    GSkyRegionCircle outregion(refdir_radeclargeshift,0.2);
-    GSkyRegionCircle overregion(refdir_radecsmallshift,0.3);
 
     // Test contains dirs
     test_assert(regmap.contains(refdir_radeczerozero),"test for direction containment");
     test_assert(!regmap.contains(refdir_radeclargeshift),"test2 for direction containment");
+
+
+    // Test circles
+    GSkyRegionCircle inregion(refdir_radeczerozero,0.2);
+    GSkyRegionCircle outregion(refdir_radeclargeshift,0.2);
+    GSkyRegionCircle overregion(refdir_radecsmallshift,0.3);
 
     // Test contains regions
     test_assert(regmap.contains(inregion),"test for region containment");
@@ -1868,6 +2110,21 @@ void TestGSky::test_GSkyRegionMap(void)
     // Test overlaps regions
     test_assert(regmap.overlaps(inregion),"test for region overlap");
     test_assert(regmap.overlaps(overregion),"test2 for region overlap");
+
+
+    // Test rectangles
+    GSkyRegionRect inrect(refdir_radeczerozero, 0.3, 0.3, 0);
+    GSkyRegionRect outrect(refdir_radeclargeshift, 0.3, 0.3, 0);
+    GSkyRegionRect overrect(refdir_radecsmallshift, 0.3, 0.3, 0);
+
+    // Test contains regions
+    test_assert(regmap.contains(inrect),"test for region containment");
+    test_assert(!regmap.contains(outrect),"test2 for region containment");
+
+    // Test overlaps regions
+    test_assert(regmap.overlaps(inrect),"test for region overlap");
+    test_assert(regmap.overlaps(overrect),"test2 for region overlap");
+
 
     // Exit test
     return;
