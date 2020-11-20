@@ -446,10 +446,32 @@ bool GSkyRegionMap::contains(const GSkyRegion& reg) const
 
     } // endcase: circular region
 
+    // Case of a rectangular region
+    else if (reg.type() == "Rect") {
+
+        // Create rectangular region from reg
+        const GSkyRegionRect* rect = dynamic_cast<const GSkyRegionRect*>(&reg);
+
+        // Create region map from rectangle
+        GSkyRegionMap rect_map(rect);
+
+        // Retrieve map data
+        const GSkyMap&          regmap   = rect_map.map();
+        const std::vector<int>& regnzvec = rect_map.nonzero_indices();
+
+        // Loop over input map non-zero pixels and check if they are all in
+        for (int i = 0; i < regnzvec.size(); ++i) {
+            if (!contains(regmap.inx2dir(regnzvec[i]))) {
+                inside = false;
+                break;
+            }
+        }
+    } // endcase: rectangular region
+
     // Other cases not implemented
     else {
         throw GException::feature_not_implemented(G_CONTAINS,
-              "Method only implemented for cicular and map regions.");
+            "Method only implemented for cicular, rectangular and map regions.");
     }
 
     // Return result
