@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-18 November 2020
+21 November 2020
 
 
 1. Introduction
@@ -25,12 +25,14 @@ The following classes have been renamed:
 - none
 
 The following methods have been added:
-- GModel::eval(GObservation&, GMatrixSparse*)
-- GModelSky::eval(GObservation&, GMatrixSparse*)
 - GResponse::convolve(GModelSky&, GObservation&, GMatrixSparse*)
 - GResponse::irf_spatial(GModelSky&, GObservation&, GMatrix*)
 - GObservation::model(GModels&, GMatrixSparse*)
 - GObservation::model_grad(GModel&, GModelPar&)
+- GModels::eval(GObservation&, GMatrixSparse*)
+- GModel::eval(GObservation&, GMatrixSparse*)
+- GModelSky::eval(GObservation&, GMatrixSparse*)
+- GModelData::eval(GObservation&, GMatrixSparse*)
 - GModelSky::flux(GEnergy&, GEnergy&)
 - GModelSky::flux(GSkyRegion&, GEnergy&, GEnergy&)
 - GModelSky::eflux(GEnergy&, GEnergy&)
@@ -59,9 +61,9 @@ The following methods have been renamed:
 - none
 
 The arguments for the following methods have been changed:
-- GCOMObservation::drm(GSkyModel&) was GCOMObservation::drm(GSource&)
 - GModelSpatial::flux(GSkyRegion&, GEnergy&, GTime&) was
   GModelSpatial::flux(GSkyRegion*, GEnergy&, GTime&)
+- GCOMObservation::drm(GSkyModel&) was GCOMObservation::drm(GSource&)
 
 The return value of the following methods has been changed:
 - none
@@ -96,6 +98,9 @@ Implemented GMatrixSparse::row() and GMatrixSparse::add_to_row() methods.
 
 8. Model module
 ---------------
+Added GModels::eval() vector evaluation method to compute the model values for
+all events within a given observation (#3455).
+
 Added methods to GSkyModel to compute the photon flux and energy flux as
 well as their errors (#3439, #3074).
 

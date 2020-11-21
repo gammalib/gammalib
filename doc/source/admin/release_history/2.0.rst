@@ -1,6 +1,6 @@
 .. _2.0:
 
-GammaLib 2.0 release (18 November 2020)
+GammaLib 2.0 release (21 November 2020)
 =======================================
 
 Overview
@@ -40,6 +40,8 @@ Improvements
 New features
 ------------
 
+* [`3455 <https://cta-redmine.irap.omp.eu/issues/3455>`_] -
+  Add ``GModels::eval()`` vector evaluation method
 * [`3442 <https://cta-redmine.irap.omp.eu/issues/3442>`_] -
   Add ``GCTAModelSkyCube`` class
 * [`3439 <https://cta-redmine.irap.omp.eu/issues/3439>`_] -

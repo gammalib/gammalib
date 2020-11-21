@@ -1,8 +1,9 @@
-2020-11-18
+2020-11-21
 
         * Version 2.0.0 released
         ========================
 
+        Add GModels::eval() vector evaluation method (#3455)
         Fix GSkyMap::stack_maps() method for WCS maps
         Add GCTAModelSkyCube class (#3442)
         Add GSkyModel flux() and eflux() methods (#3439)

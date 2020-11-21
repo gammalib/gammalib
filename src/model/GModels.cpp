@@ -35,6 +35,8 @@
 #include "GModel.hpp"
 #include "GModelRegistry.hpp"
 #include "GObservation.hpp"
+#include "GVector.hpp"
+#include "GMatrixSparse.hpp"
 #include "GXml.hpp"
 #include "GXmlElement.hpp"
 #include "GOptimizerPars.hpp"
@@ -905,6 +907,40 @@ double GModels::eval(const GEvent&       event,
 
     // Return model value
     return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Evaluate sum vector of all models
+ *
+ * @param[in] obs Observation.
+ * @param[in] gradients Pointer to gradients matrix.
+ * @return Vector of model values.
+ *
+ * Evaluates the sum vector of all models for all events in the observation.
+ * Only valid models are considered in this evaluation.
+ *
+ * If the @p gradients pointer is not NULL the method will fill the
+ * corresponding matrix with the parameter gradients of the model.
+ ***************************************************************************/
+GVector GModels::eval(const GObservation& obs,
+                      GMatrixSparse*      gradients) const
+{
+    // Get number of events
+    int nevents = obs.events()->size();
+
+    // Initialise model sum
+    GVector values(nevents);
+
+    // Evaluate function for all models
+    for (int i = 0; i < size(); ++i) {
+        if (m_models[i]->is_valid(obs.instrument(), obs.id())) {
+            values += m_models[i]->eval(obs, gradients);
+        }
+    }
+
+    // Return model values
+    return values;
 }
 
 

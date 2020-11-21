@@ -71,6 +71,8 @@ public:
     double         eval(const GEvent& event,
                         const GObservation& obs,
                         const bool& gradients = false) const;
+    GVector        eval(const GObservation& obs,
+                        GMatrixSparse*      gradients = NULL) const;
 };
 
 
