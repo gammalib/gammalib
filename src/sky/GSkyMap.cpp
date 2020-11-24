@@ -87,7 +87,8 @@
 #define G_SQRT                                       "GSkyMap sqrt(GSkyMap&)"
 #define G_LOG                                         "GSkyMap log(GSkyMap&)"
 #define G_LOG10                                     "GSkyMap log10(GSkyMap&)"
-#define G_SMOOTH_KERNEL       "GSkyMap::smooth_kernel(std::string&, double&)"
+#define G_CONVOLUTION_KERNEL     "GSkyMap::convolution_kernel(std::string&, "\
+                                                            "double&, bool&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -1966,61 +1967,6 @@ bool GSkyMap::overlaps(const GSkyRegion& region) const
 
 
 /***********************************************************************//**
- * @brief Smooth sky map
- *
- * @param[in] kernel Smoothing kernel type ("DISK", "GAUSSIAN").
- * @param[in] par Smoothing parameter.
- *
- * Smoothes all sky maps using the specified @p kernel and a smoothing
- * parameter. For the "DISK" kernel the smoothing parameter is the disk
- * radius in degrees. For the "GAUSSIAN" kernel the smoothing parameter is
- * the Gaussian sigma in degrees.
- ***************************************************************************/
-void GSkyMap::smooth(const std::string& kernel, const double& par)
-{
-    // Continue only if the smoothing parameter is positive
-    if (par > 0.0) {
-
-        // Get FFT of smoothing kernel
-        GFft fft_kernel(smooth_kernel(kernel, par));
-
-        // Loop over all sky maps
-        for (int k = 0; k < m_num_maps; ++k) {
-
-            // Extract sky map
-            GNdarray array(m_num_x, m_num_y);
-            const double *src = m_pixels.data() + k*m_num_pixels;
-            double       *dst = array.data();
-            for (int i = 0; i < m_num_pixels; ++i) {
-                *dst++ = *src++;
-            }
-
-            // FFT of sky map
-            GFft fft_array = GFft(array);
-
-            // Multiply FFT of sky map with FFT of kernel
-            GFft fft_smooth = fft_array * fft_kernel;
-
-            // Backward transform sky map
-            GNdarray smooth = fft_smooth.backward();
-
-            // Insert sky map
-            src = smooth.data();
-            dst = m_pixels.data() + k*m_num_pixels;
-            for (int i = 0; i < m_num_pixels; ++i) {
-                *dst++ = *src++;
-            }
-
-        } // endfor: looped over all sky map
-
-    } // endif: smoothing parameter was positive
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Extract maps into a new sky map object
  *
  * @param[in] map First map to extract
@@ -3621,21 +3567,90 @@ bool GSkyMap::is_same(const GSkyMap& map) const
 
 
 /***********************************************************************//**
- * @brief Return smoothing kernel
+ * @brief Convolve sky map
  *
- * @param[in] kernel Smoothing kernel type ("DISK", "GAUSSIAN").
- * @param[in] par Smoothing parameter (>0).
- * @return Array filled with smoothing kernel.
+ * @param[in] kernel Convolution kernel type ("DISK", "GAUSSIAN").
+ * @param[in] par Convolution parameter.
+ * @param[in] normalise Normalise kernel?
+ *
+ * Convolves all sky maps using the specified @p kernel and a convolution
+ * parameter.
+ *
+ * For the "DISK" kernel the convolution parameter is the disk radius in
+ * degrees. For the "GAUSSIAN" kernel the convolution parameter is the
+ * Gaussian sigma in degrees.
+ *
+ * If @p normalise is true the kernel is normalised to an integral of unity
+ * so that the operation corresponds to a smoothing. Otherwise the maximum
+ * of the kernel is 1 so that the convolution is a correlation.
  ***************************************************************************/
-GNdarray GSkyMap::smooth_kernel(const std::string& kernel,
-                                const double&      par) const
+void GSkyMap::convolve(const std::string& kernel,
+                       const double&      par,
+                       const bool&        normalise)
+{
+    // Continue only if the convolution parameter is positive
+    if (par > 0.0) {
+
+        // Get FFT of convolution kernel
+        GFft fft_kernel(convolution_kernel(kernel, par, normalise));
+
+        // Loop over all sky maps
+        for (int k = 0; k < m_num_maps; ++k) {
+
+            // Extract sky map
+            GNdarray array(m_num_x, m_num_y);
+            const double *src = m_pixels.data() + k*m_num_pixels;
+            double       *dst = array.data();
+            for (int i = 0; i < m_num_pixels; ++i) {
+                *dst++ = *src++;
+            }
+
+            // FFT of sky map
+            GFft fft_array = GFft(array);
+
+            // Multiply FFT of sky map with FFT of kernel
+            GFft fft_smooth = fft_array * fft_kernel;
+
+            // Backward transform sky map
+            GNdarray smooth = fft_smooth.backward();
+
+            // Insert sky map
+            src = smooth.data();
+            dst = m_pixels.data() + k*m_num_pixels;
+            for (int i = 0; i < m_num_pixels; ++i) {
+                *dst++ = *src++;
+            }
+
+        } // endfor: looped over all sky map
+
+    } // endif: convolution parameter was positive
+
+    // Return
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Return convolution kernel
+ *
+ * @param[in] kernel Convolution kernel type ("DISK", "GAUSSIAN").
+ * @param[in] par Convolution parameter (>0).
+ * @param[in] normalise Normalise kernel?
+ * @return Array filled with convolution kernel.
+ *
+ * If @p normalise is true the kernel is normalised to an integral of unity
+ * so that the operation corresponds to a smoothing. Otherwise the maximum
+ * of the kernel is 1 so that the convolution is a correlation.
+ ***************************************************************************/
+GNdarray GSkyMap::convolution_kernel(const std::string& kernel,
+                                     const double&      par,
+                                     const bool&        normalise) const
 {
     // Get pointer on WCS projection
     const GWcs* wcs = dynamic_cast<const GWcs*>(m_proj);
     if (wcs == NULL) {
         std::string msg = "Sky map is not a WCS projection. Method is only "
                           "valid for WCS projections.";
-        throw GException::invalid_argument(G_SMOOTH_KERNEL, msg);
+        throw GException::invalid_argument(G_CONVOLUTION_KERNEL, msg);
     }
 
     // Get X and Y step size
@@ -3714,11 +3729,11 @@ GNdarray GSkyMap::smooth_kernel(const std::string& kernel,
     else {
         std::string msg = "Invalid kernel type \""+kernel+"\" specified. "
                           "Please specify one of \"DISK\", \"GAUSSIAN\".";
-        throw GException::invalid_argument(G_SMOOTH_KERNEL, msg);
+        throw GException::invalid_argument(G_CONVOLUTION_KERNEL, msg);
     }
 
     // Normalise kernel
-    if (sum > 0.0) {
+    if ((normalise) && (sum > 0.0)) {
         for (int ix = 0; ix < m_num_x; ++ix) {
             for (int iy = 0; iy < m_num_y; ++iy) {
                 kern(ix,iy) /= sum;

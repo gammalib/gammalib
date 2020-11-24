@@ -103,7 +103,10 @@ public:
     bool                    contains(const GSkyDir& dir) const;
     bool                    contains(const GSkyPixel& pixel) const;
     bool                    overlaps(const GSkyRegion& region) const;
-    void                    smooth(const std::string& kernel, const double& par);
+    void                    smooth(const std::string& kernel,
+                                   const double&      par);
+    void                    correlate(const std::string& kernel,
+                                      const double&      par);
     const GSkyProjection*   projection(void) const;
     void                    projection(const GSkyProjection& proj);
     const double*           pixels(void) const;

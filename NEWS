@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-21 November 2020
+24 November 2020
 
 
 1. Introduction
@@ -43,6 +43,7 @@ The following methods have been added:
 - GModelSky::eflux_error(GSkyRegion&, GEnergy&, GEnergy&)
 - GModelSpatialRadial::is_energy_dependent()
 - GModelSpatialRadial::is_time_dependent()
+- GSkyMap::correlate()
 - GOptimizerLM::npars()
 - GOptimizerLM::nfree()
 - GXmlElement(std::string&, int&)
@@ -147,6 +148,11 @@ Added GOptimizerLM::npars() and GOptimizerLM::nfree() methods.
 
 12. Sky module
 --------------
+Added GSkyMap::correlate() method as opposed to GSkyMap::smooth(). While the later
+smoothes a map, and hence conserves the intensity in a sky map, the correlate()
+method will sum the intensities over a correlation kernel and assign the result to
+the sky map pixels (#3461). 
+
 Fixed a bug in GSkyMap::stack_maps() where the stacked map was always stored in a
 one-dimensional GNdarray. Now, a stacked map is saved as a two-dimensional
 GNdarray for WCS maps.

@@ -168,7 +168,10 @@ public:
     bool                    contains(const GSkyDir& dir) const;
     bool                    contains(const GSkyPixel& pixel) const;
     bool                    overlaps(const GSkyRegion& region) const;
-    void                    smooth(const std::string& kernel, const double& par);
+    void                    smooth(const std::string& kernel,
+                                   const double&      par);
+    void                    correlate(const std::string& kernel,
+                                      const double&      par);
     const GSkyProjection*   projection(void) const;
     void                    projection(const GSkyProjection& proj);
     const double*           pixels(void) const;
@@ -210,8 +213,12 @@ private:
     bool              is_healpix(const GFitsHDU& hdu) const;
     bool              is_wcs(const GFitsHDU& hdu) const;
     bool              is_same(const GSkyMap& map) const;
-    GNdarray          smooth_kernel(const std::string& kernel,
-                                    const double&      par) const;
+    void              convolve(const std::string& kernel,
+                               const double&      par,
+                               const bool&        normalise);
+    GNdarray          convolution_kernel(const std::string& kernel,
+                                         const double&      par,
+                                         const bool&        normalise) const;
 
     // Private data area
     int               m_num_pixels; //!< Number of pixels (used for pixel allocation)
@@ -403,6 +410,44 @@ inline
 int GSkyMap::ndim(void) const
 {
     return (int)m_shape.size();
+}
+
+
+/***********************************************************************//**
+ * @brief Smooth sky map
+ *
+ * @param[in] kernel Smoothing kernel type ("DISK", "GAUSSIAN").
+ * @param[in] par Smoothing parameter.
+ *
+ * Smoothes all sky maps using the specified @p kernel and a smoothing
+ * parameter. For the "DISK" kernel the smoothing parameter is the disk
+ * radius in degrees. For the "GAUSSIAN" kernel the smoothing parameter is
+ * the Gaussian sigma in degrees.
+ ***************************************************************************/
+inline
+void GSkyMap::smooth(const std::string& kernel, const double& par)
+{
+    convolve(kernel, par, true);
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Correlates sky map
+ *
+ * @param[in] kernel Correlation kernel type ("DISK", "GAUSSIAN").
+ * @param[in] par Correlation parameter.
+ *
+ * Correlates all sky maps using the specified @p kernel and a correlation
+ * parameter. For the "DISK" kernel the correlation parameter is the disk
+ * radius in degrees. For the "GAUSSIAN" kernel the correlation parameter is
+ * the Gaussian sigma in degrees.
+ ***************************************************************************/
+inline
+void GSkyMap::correlate(const std::string& kernel, const double& par)
+{
+    convolve(kernel, par, false);
+    return;
 }
 
 
