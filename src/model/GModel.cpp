@@ -621,6 +621,7 @@ void GModel::init_members(void)
     m_scales.clear();
     m_ids.clear();
     m_pars.clear();
+    m_associations.clear();
     m_ts           = 0.0;
     m_has_ts       = false;
     m_has_tscalc   = false;
@@ -646,6 +647,7 @@ void GModel::copy_members(const GModel& model)
     m_scales       = model.m_scales;
     m_ids          = model.m_ids;
     m_pars         = model.m_pars;
+    m_associations = model.m_associations;
     m_ts           = model.m_ts;
     m_has_ts       = model.m_has_ts;
     m_has_tscalc   = model.m_has_tscalc;
@@ -699,6 +701,9 @@ void GModel::read_attributes(const GXmlElement& xml)
     // Read instrument scales
     read_scales(xml);
 
+    // Read model associations
+    m_associations.read(xml);
+
     // Return
     return;
 }
@@ -742,6 +747,9 @@ void GModel::write_attributes(GXmlElement& xml) const
 
     // Write instrument scales
     write_scales(xml);
+
+    // Write model associations
+    m_associations.write(xml);
 
     // Return
     return;
@@ -797,6 +805,17 @@ std::string GModel::print_attributes(void) const
     }
     else {
         result.append("all");
+    }
+
+    // Append associations
+    if (!m_associations.is_empty()) {
+        result.append("\n"+gammalib::parformat("Associations"));
+        for (int i = 0; i < m_associations.size(); ++i) {
+            if (i > 0) {
+                result.append(", ");
+            }
+            result.append(m_associations[i].name());
+        }
     }
 
     // Return result

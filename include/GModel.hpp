@@ -32,6 +32,7 @@
 #include <string>
 #include "GBase.hpp"
 #include "GModelPar.hpp"
+#include "GModelAssociations.hpp"
 #include "GXmlElement.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
@@ -130,31 +131,33 @@ public:
     virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
 
     // Implemented methods
-    int                     size(void) const;
-    int                     scales(void) const;
-    GModelPar&              at(const int& index);
-    const GModelPar&        at(const int& index) const;
-    bool                    has_par(const std::string& name) const;
-    bool                    has_scales(void) const;
-    const std::string&      name(void) const;
-    void                    name(const std::string& name);
-    const double&           ts(void) const;
-    void                    ts(const double& ts);
-    const bool&             tscalc(void) const;
-    void                    tscalc(const bool& tscalc);
-    const bool&             has_ts(void) const;
-    std::string             instruments(void) const;
-    void                    instruments(const std::string& instruments);
-    GModelPar&              scale(const int& index);
-    const GModelPar&        scale(const int& index) const;
-    GModelPar               scale(const std::string& instrument) const;
-    void                    scale(const GModelPar& par);
-    std::string             ids(void) const;
-    void                    ids(const std::string& ids);
-    bool                    is_valid(const std::string& instruments,
-                                     const std::string& ids) const;
-    const bool&             has_eval_indices(void) const;
-    const std::vector<int>& eval_indices(void) const;
+    int                       size(void) const;
+    int                       scales(void) const;
+    GModelPar&                at(const int& index);
+    const GModelPar&          at(const int& index) const;
+    bool                      has_par(const std::string& name) const;
+    bool                      has_scales(void) const;
+    const std::string&        name(void) const;
+    void                      name(const std::string& name);
+    const double&             ts(void) const;
+    void                      ts(const double& ts);
+    const bool&               tscalc(void) const;
+    void                      tscalc(const bool& tscalc);
+    const bool&               has_ts(void) const;
+    std::string               instruments(void) const;
+    void                      instruments(const std::string& instruments);
+    GModelPar&                scale(const int& index);
+    const GModelPar&          scale(const int& index) const;
+    GModelPar                 scale(const std::string& instrument) const;
+    void                      scale(const GModelPar& par);
+    std::string               ids(void) const;
+    void                      ids(const std::string& ids);
+    bool                      is_valid(const std::string& instruments,
+                                       const std::string& ids) const;
+    const GModelAssociations& associations(void) const;
+    void                      associations(const GModelAssociations& associations);
+    const bool&               has_eval_indices(void) const;
+    const std::vector<int>&   eval_indices(void) const;
 
 protected:
     // Protected methods
@@ -173,6 +176,7 @@ protected:
     std::vector<GModelPar>   m_scales;       //!< Model instrument scale factors
     std::vector<std::string> m_ids;          //!< Identifiers to which model applies
     std::vector<GModelPar*>  m_pars;         //!< Pointers to all model parameters
+    GModelAssociations       m_associations; //!< Model associations
     bool                     m_has_ts;       //!< Signals if TS is available
     bool                     m_has_tscalc;   //!< Signals if tscalc attribute is available
     bool                     m_tscalc;       //!< Signals if TS should be computed
@@ -274,6 +278,7 @@ void GModel::name(const std::string& name)
     return;
 }
 
+
 /***********************************************************************//**
  * @brief Return Test Statistic value
  *
@@ -362,6 +367,35 @@ inline
 const bool& GModel::has_ts(void) const
 {
     return m_has_ts;
+}
+
+
+/***********************************************************************//**
+ * @brief Return model associations
+ *
+ * @return Model associations.
+ *
+ * Returns model associations.
+ ***************************************************************************/
+inline
+const GModelAssociations& GModel::associations(void) const
+{
+    return m_associations;
+}
+
+
+/***********************************************************************//**
+ * @brief Set model associations
+ *
+ * @param[in] associations Model associations.
+ *
+ * Set the model associations.
+ ***************************************************************************/
+inline
+void GModel::associations(const GModelAssociations& associations)
+{
+    m_associations = associations;
+    return;
 }
 
 

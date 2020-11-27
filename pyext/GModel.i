@@ -61,28 +61,30 @@ public:
     virtual void        write(GXmlElement& xml) const = 0;
 
     // Implemented methods
-    int                     size(void) const;
-    int                     scales(void) const;
-    bool                    has_par(const std::string& name) const;
-    bool                    has_scales(void) const;
-    const std::string&      name(void) const;
-    void                    name(const std::string& name);
-    const double&           ts(void) const;
-    void                    ts(const double& ts);
-    const bool&             tscalc(void) const;
-    void                    tscalc(const bool& tscalc);
-    const bool&             has_ts(void) const;
-    std::string             instruments(void) const;
-    void                    instruments(const std::string& instruments);
-    GModelPar&              scale(const int& index);
-    GModelPar               scale(const std::string& instrument) const;
-    void                    scale(const GModelPar& par);
-    std::string             ids(void) const;
-    void                    ids(const std::string& ids);
-    bool                    is_valid(const std::string& instruments,
-                                     const std::string& ids) const;
-    const bool&             has_eval_indices(void) const;
-    const std::vector<int>& eval_indices(void) const;
+    int                       size(void) const;
+    int                       scales(void) const;
+    bool                      has_par(const std::string& name) const;
+    bool                      has_scales(void) const;
+    const std::string&        name(void) const;
+    void                      name(const std::string& name);
+    const double&             ts(void) const;
+    void                      ts(const double& ts);
+    const bool&               tscalc(void) const;
+    void                      tscalc(const bool& tscalc);
+    const bool&               has_ts(void) const;
+    std::string               instruments(void) const;
+    void                      instruments(const std::string& instruments);
+    GModelPar&                scale(const int& index);
+    GModelPar                 scale(const std::string& instrument) const;
+    void                      scale(const GModelPar& par);
+    std::string               ids(void) const;
+    void                      ids(const std::string& ids);
+    bool                      is_valid(const std::string& instruments,
+                                       const std::string& ids) const;
+    const GModelAssociations& associations(void) const;
+    void                      associations(const GModelAssociations& associations);
+    const bool&               has_eval_indices(void) const;
+    const std::vector<int>&   eval_indices(void) const;
 };
 
 

@@ -116,6 +116,7 @@ private:
     std::string m_temp_lightcurve;
     std::string m_temp_phasecurve;
     std::string m_xml_file;
+    std::string m_assoc_file;
 
     // Model definiton XML files
     std::string m_xml_model_point_const;

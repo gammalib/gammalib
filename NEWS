@@ -33,6 +33,7 @@ The following methods have been added:
 - GObservation::model_grad(GModel&, GModelPar&)
 - GModels::eval(GObservation&, GMatrixSparse*)
 - GModel::eval(GObservation&, GMatrixSparse*)
+- GModel::associations()
 - GModelSky::eval(GObservation&, GMatrixSparse*)
 - GModelData::eval(GObservation&, GMatrixSparse*)
 - GModelSky::flux(GEnergy&, GEnergy&)
@@ -102,8 +103,12 @@ Implemented GMatrixSparse::row() and GMatrixSparse::add_to_row() methods.
 8. Model module
 ---------------
 Added GModelAssociation class to implement a model association and the
-GModelAssociations container class to hold a list of model associations
-(#3469).
+GModelAssociations container class to hold a list of model associations.
+The GModelAssociations class was added as a member of GModel, and
+GModel::associations() getter and setter methods have been implemented to
+access the associations. The associations are also automatically written in
+the GModel::read_attributes() and GModel::write_attributes() methods, and
+the association names are displayed by GModel::print_attributes() (#3469).
 
 Added GModels::eval() vector evaluation method to compute the model values for
 all events within a given observation (#3455).

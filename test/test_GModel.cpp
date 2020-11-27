@@ -55,6 +55,7 @@ void TestGModel::set(void)
     m_temp_lightcurve = datadir + "/model_temporal_lightcurve.fits";
     m_temp_phasecurve = datadir + "/model_temporal_phasecurve.fits";
     m_xml_file        = datadir + "/crab.xml";
+    m_assoc_file      = datadir + "/crab_associations.xml";
 
     // Set model definiton XML files
     m_xml_model_point_const        = datadir + "/model_point_const.xml";
@@ -788,6 +789,7 @@ void TestGModel::test_sky_model(void)
     GXml         xml2(m_xml_file);
     GXmlElement* element2 = xml2.element(0)->element(0);
     GModelSky    sky6(*element2);
+    test_value(sky6.associations().size(), 0, "Check absence of associations");
 
     // Test has_par methods
     test_assert(sky6.spatial()->has_par("RA"),
@@ -813,6 +815,14 @@ void TestGModel::test_sky_model(void)
     double    eflux_spectrum = spec_plaw.eflux(emin, emax);
     test_value(flux, flux_spectrum, "Test flux() method");
     test_value(eflux, eflux_spectrum, "Test eflux() method");
+
+    // Test associations
+    GXml         xml3(m_assoc_file);
+    GXmlElement* element3 = xml3.element(0)->element(0);
+    GModelSky    sky8(*element3);
+    test_value(sky8.associations().size(), 2, "Check presence of two associations");
+    test_assert(sky8.associations().contains("Crab nebula"), "Check presence of \"Crab nebula\" association");
+    test_assert(sky8.associations().contains("Crab pulsar"), "Check presence of \"Crab pulsar\" association");
 
     // Exit test
     return;

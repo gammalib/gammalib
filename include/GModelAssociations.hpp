@@ -31,9 +31,9 @@
 #include <string>
 #include <vector>
 #include "GContainer.hpp"
+#include "GModelAssociation.hpp"
 
 /* __ Forward declarations _______________________________________________ */
-class GModelAssociation;
 class GXmlElement;
 
 
