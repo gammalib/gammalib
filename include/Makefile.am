@@ -157,6 +157,8 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GPhoton.hpp \
                      GSource.hpp \
                      GModelPar.hpp \
+                     GModelAssociation.hpp \
+                     GModelAssociations.hpp \
                      GModels.hpp \
                      GModel.hpp \
                      GModelRegistry.hpp \

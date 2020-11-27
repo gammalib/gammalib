@@ -179,7 +179,7 @@ void GPhoton::clear(void)
  ***************************************************************************/
 GPhoton* GPhoton::clone(void) const
 {
-    // Clone this image
+    // Clone this photon
     return new GPhoton(*this);
 }
 
@@ -187,7 +187,7 @@ GPhoton* GPhoton::clone(void) const
 /***********************************************************************//**
  * @brief Print photon
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing photon information.
  ***************************************************************************/
 std::string GPhoton::print(const GChatter& chatter) const
@@ -245,7 +245,7 @@ void GPhoton::init_members(void)
  ***************************************************************************/
 void GPhoton::copy_members(const GPhoton& photon)
 {
-    // Copy time
+    // Copy members
     m_dir    = photon.m_dir;
     m_energy = photon.m_energy;
     m_time   = photon.m_time;

@@ -1,8 +1,9 @@
-2020-11-24
+2020-11-27
 
         * Version 2.0.0 released
         ========================
 
+        Add GModelAssociation and GModelAssociations classes (#3469)
         Add GSkyMap::correlate() method (#3461)
         Add GModels::eval() vector evaluation method (#3455)
         Fix GSkyMap::stack_maps() method for WCS maps

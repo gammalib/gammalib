@@ -166,6 +166,8 @@
 
 /* __ Model handling _____________________________________________________ */
 %include "GModelPar.i"
+%include "GModelAssociation.i"
+%include "GModelAssociations.i"
 %include "GModels.i"
 %include "GModel.i"
 %include "GModelRegistry.i"

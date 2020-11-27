@@ -199,6 +199,8 @@
 
 /* __ Model handling _____________________________________________________ */
 #include "GModelPar.hpp"
+#include "GModelAssociation.hpp"
+#include "GModelAssociations.hpp"
 #include "GModels.hpp"
 #include "GModel.hpp"
 #include "GModelRegistry.hpp"

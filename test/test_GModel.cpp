@@ -108,6 +108,10 @@ void TestGModel::set(void)
     // Append tests
     append(static_cast<pfunction>(&TestGModel::test_model_par),
            "Test GModelPar");
+    append(static_cast<pfunction>(&TestGModel::test_model_association),
+           "Test GModelAssociation");
+    append(static_cast<pfunction>(&TestGModel::test_model_associations),
+           "Test GModelAssociations");
     append(static_cast<pfunction>(&TestGModel::test_sky_model),
            "Test GModelSky");
 
@@ -479,6 +483,208 @@ void TestGModel::test_model_par(void)
     test_value(par.gradient(), 2.0e-16);
     test_value(par.min(), -8.0e-16);
     test_value(par.max(), -3.0e-16);
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GModelAssociation class
+ ***************************************************************************/
+void TestGModel::test_model_association(void)
+{
+    // Test void constructor
+    GModelAssociation assoc1;
+    test_assert(assoc1.is_empty(), "Check that void instance is empty");
+    test_value(assoc1.size(), 0, "Check that void instance has zero size");
+    test_value(assoc1.name(), "", "Check that void instance has empty name");
+
+    // Test name constructor
+    GModelAssociation assoc2("Crab");
+    test_assert(assoc2.is_empty(), "Check that named instance is empty");
+    test_value(assoc2.size(), 0, "Check that named instance has zero size");
+    test_value(assoc2.name(), "Crab", "Check that named instance is \"Crab\"");
+
+    // Create XML element
+    GXmlElement xml1("association name=\"Crab\"");
+    xml1.append(GXmlElement("property name=\"RA\" value=\"83.0\""));
+    xml1.append(GXmlElement("property name=\"DEC\" value=\"22.0\" error=\"1.0\""));
+
+    // Test XML constructor
+    GModelAssociation assoc3(xml1);
+    test_assert(!assoc3.is_empty(), "Check that XML instance is not empty");
+    test_value(assoc3.size(), 2, "Check that XML instance has size 2");
+    test_value(assoc3.name(), "Crab", "Check that XML instance is \"Crab\"");
+    test_value(assoc3.value("RA"), "83.0", "Check value of \"RA\" property of XML instance");
+    test_value(assoc3.error("RA"), "", "Check error of \"RA\" property of XML instance");
+    test_value(assoc3.value("DEC"), "22.0", "Check value of \"DEC\" property of XML instance");
+    test_value(assoc3.error("DEC"), "1.0", "Check error of \"DEC\" property of XML instance");
+
+    // Test write() and read() methods
+    GXmlElement xml2;
+    assoc3.write(xml2);
+    GModelAssociation assoc4;
+    assoc4.read(xml2);
+    test_assert(!assoc4.is_empty(), "Check that instance after read() is not empty");
+    test_value(assoc4.size(), 2, "Check that instance after read() has size 2");
+    test_value(assoc4.name(), "Crab", "Check that instance after read() is \"Crab\"");
+    test_value(assoc4.value("RA"), "83.0", "Check value of \"RA\" property of instance after read()");
+    test_value(assoc4.error("RA"), "", "Check error of \"RA\" property of instance after read()");
+    test_value(assoc4.value("DEC"), "22.0", "Check value of \"DEC\" property of instance after read()");
+    test_value(assoc4.error("DEC"), "1.0", "Check error of \"DEC\" property of instance after read()");
+
+    // Test copy constructor
+    GModelAssociation assoc5(assoc4);
+    test_assert(!assoc5.is_empty(), "Check that copied instance is not empty");
+    test_value(assoc5.size(), 2, "Check that copied instance has size 2");
+    test_value(assoc5.name(), "Crab", "Check that copied instance is \"Crab\"");
+    test_value(assoc5.value("RA"), "83.0", "Check value of \"RA\" property of copied instance");
+    test_value(assoc5.error("RA"), "", "Check error of \"RA\" property of copied instance");
+    test_value(assoc5.value("DEC"), "22.0", "Check value of \"DEC\" property of copied instance");
+    test_value(assoc5.error("DEC"), "1.0", "Check error of \"DEC\" property of copied instance");
+
+    // Test clear method
+    assoc5.clear();
+    test_assert(assoc5.is_empty(), "Check that cleared instance is empty");
+    test_value(assoc5.size(), 0, "Check that cleared instance has zero size");
+    test_value(assoc5.name(), "", "Check that cleared instance has empty name");
+
+    // Test name() and property() methods
+    GModelAssociation assoc6;
+    assoc6.name("Sun");
+    assoc6.property("Rise", "Now");
+    assoc6.property("Set", "Later", "Maybe");
+    test_value(assoc6.name(), "Sun", "Check name() method");
+    test_value(assoc6.value("Rise"), "Now", "Check value() method for \"Rise\"");
+    test_value(assoc6.error("Rise"), "", "Check error() method for \"Rise\"");
+    test_value(assoc6.value("Set"), "Later", "Check value() method for \"Set\"");
+    test_value(assoc6.error("Set"), "Maybe", "Check error() method for \"Set\"");
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GModelAssociations class
+ ***************************************************************************/
+void TestGModel::test_model_associations(void)
+{
+    // Test void constructor
+    GModelAssociations assoc1;
+    test_assert(assoc1.is_empty(), "Check that void instance is empty");
+    test_value(assoc1.size(), 0, "Check that void instance has zero size");
+
+    // Create XML element
+    GXmlElement xml0("anker");
+    GXmlElement xml1("associations");
+    GXmlElement xml2("association name=\"Crab\"");
+    GXmlElement xml3("association name=\"Vela\"");
+    xml2.append(GXmlElement("property name=\"RA\" value=\"83.0\""));
+    xml2.append(GXmlElement("property name=\"DEC\" value=\"22.0\" error=\"1.0\""));
+    xml3.append(GXmlElement("property name=\"RA\" value=\"128.50\" error=\"2.0\""));
+    xml3.append(GXmlElement("property name=\"DEC\" value=\"-45.83\""));
+    xml1.append(xml2);
+    xml1.append(xml3);
+    xml0.append(xml1);
+
+    // Test XML constructor
+    GModelAssociations assoc2(xml0);
+    test_assert(!assoc2.is_empty(), "Check that XML instance is not empty");
+    test_value(assoc2.size(), 2, "Check that XML instance has size 2");
+    test_assert(assoc2.contains("Crab"), "Check that XML instance contains \"Crab\"");
+    test_assert(assoc2.contains("Vela"), "Check that XML instance contains \"Vela\"");
+    test_assert(!assoc2.contains("Sun"), "Check that XML instance does not contain \"Sun\"");
+    test_value(assoc2["Crab"].value("RA"), "83.0", "Check value of \"RA\" property of XML instance");
+    test_value(assoc2["Crab"].error("RA"), "", "Check error of \"RA\" property of XML instance");
+    test_value(assoc2["Crab"].value("DEC"), "22.0", "Check value of \"DEC\" property of XML instance");
+    test_value(assoc2["Crab"].error("DEC"), "1.0", "Check error of \"DEC\" property of XML instance");
+    test_value(assoc2["Vela"].value("RA"), "128.50", "Check value of \"RA\" property of XML instance");
+    test_value(assoc2["Vela"].error("RA"), "2.0", "Check error of \"RA\" property of XML instance");
+    test_value(assoc2["Vela"].value("DEC"), "-45.83", "Check value of \"DEC\" property of XML instance");
+    test_value(assoc2["Vela"].error("DEC"), "", "Check error of \"DEC\" property of XML instance");
+
+    // Test write() and read() methods
+    GXmlElement xml4;
+    assoc2.write(xml4);
+    GModelAssociations assoc3;
+    assoc3.read(xml4);
+    test_assert(!assoc3.is_empty(), "Check that instance after read() is not empty");
+    test_value(assoc3.size(), 2, "Check that instance after read() has size 2");
+    test_assert(assoc3.contains("Crab"), "Check that instance after read() contains \"Crab\"");
+    test_assert(assoc3.contains("Vela"), "Check that instance after read() contains \"Vela\"");
+    test_assert(!assoc3.contains("Sun"), "Check that instance after read() does not contain \"Sun\"");
+    test_value(assoc3["Crab"].value("RA"), "83.0", "Check value of \"RA\" property of instance after read()");
+    test_value(assoc3["Crab"].error("RA"), "", "Check error of \"RA\" property of instance after read()");
+    test_value(assoc3["Crab"].value("DEC"), "22.0", "Check value of \"DEC\" property of instance after read()");
+    test_value(assoc3["Crab"].error("DEC"), "1.0", "Check error of \"DEC\" property of instance after read()");
+    test_value(assoc3["Vela"].value("RA"), "128.50", "Check value of \"RA\" property of instance after read()");
+    test_value(assoc3["Vela"].error("RA"), "2.0", "Check error of \"RA\" property of instance after read()");
+    test_value(assoc3["Vela"].value("DEC"), "-45.83", "Check value of \"DEC\" property of instance after read()");
+    test_value(assoc3["Vela"].error("DEC"), "", "Check error of \"DEC\" property of instance after read()");
+
+    // Test copy constructor
+    GModelAssociations assoc4(assoc3);
+    test_assert(!assoc4.is_empty(), "Check that copied instance is not empty");
+    test_value(assoc4.size(), 2, "Check that copied instance has size 2");
+    test_assert(assoc4.contains("Crab"), "Check that copied instance contains \"Crab\"");
+    test_assert(assoc4.contains("Vela"), "Check that copied instance contains \"Vela\"");
+    test_assert(!assoc4.contains("Sun"), "Check that copied instance does not contain \"Sun\"");
+    test_value(assoc4["Crab"].value("RA"), "83.0", "Check value of \"RA\" property of copied instance");
+    test_value(assoc4["Crab"].error("RA"), "", "Check error of \"RA\" property of copied instance");
+    test_value(assoc4["Crab"].value("DEC"), "22.0", "Check value of \"DEC\" property of copied instance");
+    test_value(assoc4["Crab"].error("DEC"), "1.0", "Check error of \"DEC\" property of copied instance");
+    test_value(assoc4["Vela"].value("RA"), "128.50", "Check value of \"RA\" property of copied instance");
+    test_value(assoc4["Vela"].error("RA"), "2.0", "Check error of \"RA\" property of copied instance");
+    test_value(assoc4["Vela"].value("DEC"), "-45.83", "Check value of \"DEC\" property of copied instance");
+    test_value(assoc4["Vela"].error("DEC"), "", "Check error of \"DEC\" property of copied instance");
+
+    // Test clear method
+    assoc4.clear();
+    test_assert(assoc4.is_empty(), "Check that cleared instance is empty");
+    test_value(assoc4.size(), 0, "Check that cleared instance has zero size");
+
+    // Make sure than an empty container does not write anything in the
+    // XML element
+    GModelAssociations assoc5;
+    GXmlElement xml5;
+    assoc5.write(xml5);
+    test_assert(xml5.is_empty(), "Check that XML element is empty");
+
+    // Test container handling
+    GModelAssociation a1("Crab");
+    GModelAssociation a2("Vela");
+    GModelAssociation a3("Sun");
+    GModelAssociation a4("Moon");
+    assoc5.append(a1);
+    assoc5.append(a2);
+    test_value(assoc5.size(), 2, "Check that instance has size 2");
+    test_assert(assoc5.contains("Crab"), "Check that instance contains \"Crab\"");
+    test_assert(assoc5.contains("Vela"), "Check that instance contains \"Vela\"");
+    assoc5.remove(0);
+    test_value(assoc5.size(), 1, "Check that instance has size 1");
+    test_assert(!assoc5.contains("Crab"), "Check that instance no longer contains \"Crab\"");
+    assoc5.insert(0, a3);
+    test_value(assoc5.size(), 2, "Check that instance has size 2");
+    test_value(assoc5[0].name(), "Sun", "Check that 1st entry is \"Sun\"");
+    test_value(assoc5[1].name(), "Vela", "Check that 2nd entry is \"Vela\"");
+    assoc5.insert("Vela", a1);
+    test_value(assoc5.size(), 3, "Check that instance has size 2");
+    test_value(assoc5[0].name(), "Sun", "Check that 1st entry is \"Sun\"");
+    test_value(assoc5[1].name(), "Crab", "Check that 2nd entry is \"Crab\"");
+    test_value(assoc5[2].name(), "Vela", "Check that 3rd entry is \"Vela\"");
+    assoc5.remove("Sun");
+    test_value(assoc5.size(), 2, "Check that instance has size 2");
+    test_value(assoc5[0].name(), "Crab", "Check that 1st entry is \"Crab\"");
+    test_value(assoc5[1].name(), "Vela", "Check that 2nd entry is \"Vela\"");
+    GModelAssociations assoc6;
+    assoc6.append(a4);
+    assoc5.extend(assoc6);
+    test_value(assoc5.size(), 3, "Check that instance has size 2");
+    test_value(assoc5[0].name(), "Crab", "Check that 1st entry is \"Crab\"");
+    test_value(assoc5[1].name(), "Vela", "Check that 2nd entry is \"Vela\"");
+    test_value(assoc5[2].name(), "Moon", "Check that 3rd entry is \"Moon\"");
 
     // Exit test
     return;

@@ -114,6 +114,8 @@ class Test(gammalib.GPythonTestSuite):
         """
         # Perform pickeling tests of empty classes
         test_support.pickeling(self, gammalib.GModelPar())
+        test_support.pickeling(self, gammalib.GModelAssociation())
+        test_support.pickeling(self, gammalib.GModelAssociations())
         test_support.pickeling(self, gammalib.GModels())
         test_support.pickeling(self, gammalib.GModelSky())
         test_support.pickeling(self, gammalib.GModelSpatialComposite())
@@ -184,9 +186,20 @@ class Test(gammalib.GPythonTestSuite):
         spamap.mc_cone(circle)
         spacube = gammalib.GModelSpatialDiffuseCube(cube, 3.0)
         spacube.mc_cone(circle)
+        xml1    = gammalib.GXmlElement('association name="Crab"')
+        xml1.append(gammalib.GXmlElement('property name="RA" value="83.0"'))
+        xml1.append(gammalib.GXmlElement('property name="DEC" value="22.0" error="1.0"'))
+        xml2    = gammalib.GXmlElement('association name="Vela"')
+        xml2.append(gammalib.GXmlElement('property name="RA" value="128.50" error="2.1"'))
+        xml2.append(gammalib.GXmlElement('property name="DEC" value="-45.83"'))
+        xml3    = gammalib.GXmlElement('associations')
+        xml3.append(xml1)
+        xml3.append(xml2)
 
         # Perform pickeling tests of filled classes
         test_support.pickeling(self, gammalib.GModelPar('Par',2.0,5.0))
+        test_support.pickeling(self, gammalib.GModelAssociation(xml1))
+        test_support.pickeling(self, gammalib.GModelAssociations(xml3))
         test_support.pickeling(self, gammalib.GModels(self._setup_models()))
         test_support.pickeling(self, gammalib.GModelSky(sky))
         test_support.pickeling(self, gammalib.GModelSpatialComposite(spacom))

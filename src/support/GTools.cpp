@@ -1716,7 +1716,7 @@ void gammalib::xml_check_par(const std::string& origin,
     if (number < 1) {
         std::string msg = "Parameter \""+name+"\" not found in XML element."
                           " Please verify the XML format.";
-         throw GException::invalid_value(origin, msg);
+        throw GException::invalid_value(origin, msg);
     }
     else if (number > 1) {
         std::string msg = "Parameter \""+name+"\" found "+

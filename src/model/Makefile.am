@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for model module                                              #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016-2019 Juergen Knoedlseder                               #
+# Copyright (C) 2016-2020 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -26,6 +26,8 @@ INCLUDES = -I$(top_srcdir)/include \
 
 # Define sources for this directory
 sources = GModelPar.cpp \
+          GModelAssociation.cpp \
+          GModelAssociations.cpp \
           GModels.cpp \
           GModel.cpp \
           GModelRegistry.cpp \

@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-24 November 2020
+27 November 2020
 
 
 1. Introduction
@@ -16,6 +16,8 @@ The following classes have been added:
 - GIntegrals
 - GResponseVectorCache
 - GSkyDirs
+- GModelAssociation
+- GModelAssociations
 - GCTAModelSkyCube
 
 The following classes have been removed:
@@ -99,6 +101,10 @@ Implemented GMatrixSparse::row() and GMatrixSparse::add_to_row() methods.
 
 8. Model module
 ---------------
+Added GModelAssociation class to implement a model association and the
+GModelAssociations container class to hold a list of model associations
+(#3469).
+
 Added GModels::eval() vector evaluation method to compute the model values for
 all events within a given observation (#3455).
 

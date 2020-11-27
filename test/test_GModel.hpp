@@ -48,6 +48,8 @@ public:
     virtual TestGModel* clone(void) const;
     virtual std::string classname(void) const { return "TestGModel"; }
     void                test_model_par(void);
+    void                test_model_association(void);
+    void                test_model_associations(void);
     void                test_sky_model(void);
     void                test_point_source(void);
     void                test_diffuse_const(void);
