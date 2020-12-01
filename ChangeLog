@@ -26,6 +26,14 @@
         Implement pre-computation cache in GModelSpatialGauss (#1300)
 
 
+2020-12-02
+
+        * Bug fix version 1.7.3 released
+        ================================
+
+        Fix inaccuracy in CTA background model evaluation (#3472)
+
+
 2020-10-15
 
         * Bug fix version 1.7.2 released

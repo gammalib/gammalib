@@ -40,6 +40,7 @@
 #include "GCTAObservation.hpp"
 #include "GCTAResponseIrf.hpp"
 #include "GCTABackground.hpp"
+#include "GCTAEventBin.hpp"
 #include "GCTASupport.hpp"
 
 /* __ Globals ____________________________________________________________ */
@@ -58,9 +59,10 @@ const GModelRegistry         g_cta_inst_background_registry(&g_cta_inst_backgrou
 
 /* __ Coding definitions _________________________________________________ */
 #define G_USE_NPRED_CACHE
+#define G_USE_RATE_EBIN
 
 /* __ Debug definitions __________________________________________________ */
-//#define G_DUMP_MC
+#define G_DUMP_MC
 //#define G_DEBUG_NPRED
 
 /* __ Constants __________________________________________________________ */
@@ -349,10 +351,27 @@ double GCTAModelIrfBackground::eval(const GEvent&       event,
 
     // Set DETX and DETY in instrument direction
     GCTAInstDir inst_dir = pnt.instdir(dir.dir());
-    
-    // Evaluate function
+
+    // Evaluate spatial component
+    #if defined(G_USE_RATE_EBIN)
+    double spat = 0.0;
+    if (event.is_atom()) {
+        double logE = event.energy().log10TeV();
+        spat        = bgd(logE, inst_dir.detx(), inst_dir.dety());
+    }
+    else {
+        const GCTAEventBin* bin = static_cast<const GCTAEventBin*>(&event);
+        GEnergy emin  = bin->emin();
+        GEnergy emax  = emin + bin->ewidth();
+        double  norm  = 1.0 / bin->ewidth().MeV();
+        spat          = bgd.rate_ebin(inst_dir, emin, emax) * norm;
+    }
+    #else
     double logE = event.energy().log10TeV();
     double spat = bgd(logE, inst_dir.detx(), inst_dir.dety());
+    #endif
+
+    // Evaluate function
     double spec = (spectral() != NULL)
                   ? spectral()->eval(event.energy(), event.time(), gradients)
                   : 1.0;
