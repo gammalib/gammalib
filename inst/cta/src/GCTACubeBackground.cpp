@@ -466,44 +466,23 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
             // DETX/DETY coordinates
             GCTAInstDir dir = cta->pointing().instdir(bin->dir().dir());
 
-            // Initialise values for integration over energy bin
-            double f1 = 0.0;
-
             // Loop over all energy bins of the cube
             for (int iebin = 0, ibin = ipix; iebin < nebins; ++iebin, ibin += npix) {
 
-                // If this is the first bin then compute f1 at the lower bin edge
-                if (iebin == 0) {
+                // Compute background model value if the energy bin is fully
+                // contained in the observation interval. Add a small margin
+                // here to the energy bin boundaries to take provision for
+                // rounding errors.
+                if (obs_ebounds.contains(m_ebounds.emin(iebin) + energy_margin,
+                                         m_ebounds.emax(iebin) - energy_margin)) {
+
+                    // Set energy bin
                     GCTAEventBin* bin = eventcube[ibin];
                     bin->dir(dir); // Set instrument direction
-                    bin->energy(m_ebounds.emin(iebin));
-                    f1 = obs.models().eval(*bin, *cta);
-                }
+                    bin->energy(m_ebounds.elogmean(iebin));
 
-                // Compute f2 at the upper bin edge
-                GCTAEventBin* bin = eventcube[ibin];
-                bin->dir(dir); // Set instrument direction
-                bin->energy(m_ebounds.emax(iebin));
-                double f2 = obs.models().eval(*bin, *cta);
-
-                // Add background model value to cube if the energy bin is
-                // fully container in the observation interval and if both f1
-                // and f2 are positive. Add a small margin here to the energy
-                // bin boundaries to take provision for rounding errors.
-                if (obs_ebounds.contains(m_ebounds.emin(iebin) + energy_margin,
-                                         m_ebounds.emax(iebin) - energy_margin) &&
-                    (f1 > 0.0 && f2 > 0.0)) {
-
-                    // Compute background model value by integrating over the
-                    // bin and deviding the result by the bin width
-                    double x1    = m_ebounds.emin(iebin).MeV();
-                    double x2    = m_ebounds.emax(iebin).MeV();
-                    double model = gammalib::plaw_integral(x1, f1, x2, f2) / (x2 - x1);
-
-                    // Multiply by ontime to get the correct weighting for each
-                    // observation. We divide by the total ontime later to get
-                    // the background model in units of counts/(MeV s sr).
-                    model *= ontime;
+                    // Compute model
+                    double model = obs.models().eval(*bin, *cta) * ontime;
 
                     // Add existing number of counts
                     model += bin->counts();
@@ -513,10 +492,7 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
 
                 } // endif: added background model value to cube
 
-                // Set f1 to f2 for next energy layer
-                f1 = f2;
-
-            } // endfor: looped over energy layers
+            } // endfor: looped over energy bins
 
         } // endfor: looped over spatial pixels
 

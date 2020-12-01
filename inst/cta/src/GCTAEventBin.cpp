@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTAEventBin.cpp - CTA event bin class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -338,6 +338,40 @@ const double& GCTAEventBin::solidangle(void) const
 
     // Return solid angle
     return *m_solidangle;
+}
+
+
+/***********************************************************************//**
+ * @brief Return minimum energy of event bin
+ *
+ * @return Minimum energy of event bin
+ *
+ * Returns minimum energy of event bin, computed using
+ *
+ * \f[
+ *    E_{\rm min} = \frac{-\Delta E + sqrt{\Delta E^2 + 4 E^2}}{2}
+ * \f]
+ *
+ * where
+ * \f$\Delta E\f$ is the energy bin width, returned by ewidth() and
+ * \f$E\f$ is the energy, returned by energy().
+ ***************************************************************************/
+GEnergy GCTAEventBin::emin(void) const
+{
+    // Get energy and energy width in MeV
+    double energy = this->energy().MeV();
+    double ewidth = this->ewidth().MeV();
+
+    // Compute minimum energy in MeV
+    double arg   = ewidth * ewidth + 4.0 * energy * energy;
+    double e_min = 0.5 * (-ewidth + std::sqrt(arg));
+
+    // Set minimum energy
+    GEnergy emin;
+    emin.MeV(e_min);
+
+    // Return minimum energy
+    return emin;
 }
 
 

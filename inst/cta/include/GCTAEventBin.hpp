@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTAEventBin.hpp - CTA event bin class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -80,6 +80,8 @@ public:
     const int&     ipix(void) const;
     const int&     ieng(void) const;
     const double&  solidangle(void) const;
+    GEnergy        emin(void) const;
+    GEnergy        emax(void) const;
     const GEnergy& ewidth(void) const;
     const double&  ontime(void) const;
     const double&  weight(void) const;
@@ -183,6 +185,20 @@ void GCTAEventBin::ieng(const int& ieng)
 {
     m_ieng = ieng;
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return maximum energy of event bin
+ *
+ * @return Maximum energy of event bin.
+ *
+ * Returns the maximum energy of event bin.
+ ***************************************************************************/
+inline
+GEnergy GCTAEventBin::emax(void) const
+{
+    return (emin() + ewidth());
 }
 
 #endif /* GCTAEVENTBIN_HPP */

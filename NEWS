@@ -1,6 +1,6 @@
-New Features and Important Changes in GammaLib 1.7.2
+New Features and Important Changes in GammaLib 1.7.3
 
-15 October 2020
+2 December 2020
 
 
 1. Introduction
@@ -63,11 +63,7 @@ None
 
 8. Model module
 ---------------
-The copy constructors of the GModelSpatialDiffuse, GModelSpatialElliptical
-and GModelSpatialRadial classes did not properly copy the base class members
-in their copy constructors. This prevented specifically the fitting of
-diffuse maps in the stacked analysis. The code was modified to fix the
-issue.
+None
 
 
 9. Numerics module
@@ -127,7 +123,12 @@ None
 
 20. CTA interface
 -----------------
-None
+The GCTAModelIrfBackground::eval() method uses now the GCTABackground3D::rate_ebin()
+integrator method instead of the GCTABackground3D::operator() operator so that the
+background model evaluation is no longer sensitive to the number of energy bins.
+The GCTACubeBackground::fill() method was simplified, removing the power law
+integration which was not accurate enough, and using directly the
+GCTAModelIrfBackground::eval() method which is now exact (#3472).
 
 
 21. COMPTEL interface 
