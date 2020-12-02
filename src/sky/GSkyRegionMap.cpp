@@ -657,24 +657,24 @@ void GSkyRegionMap::set_region_circle(const GSkyRegionCircle* circle)
  * @param[in] rect Region rectangle
  *
  * Sets a region map from a region rectangle.
- * A skymap is allocated with a resolution goal of 0.01 degrees (same for both
- * axes).
- * The particular resolution of either axes depends on the w/h of the RoI of the
- * rotated rectangle.
- * The map extent is chosen dynamically to match the RoI of the rotated rectangle.
- * Three sparse pixels are added at either side of the map.
- * The sky map is created in celestial coordinates and TAN projection.
+ *
+ * A skymap is allocated with a resolution goal of 0.01 degrees (same for
+ * both axes). The particular resolution of either axes depends on the width
+ * over height of the RoI of the rotated rectangle. The map extent is chosen
+ * dynamically to match the RoI of the rotated rectangle. Three sparse pixels
+ * are added at either side of the map. The sky map is created in celestial
+ * coordinates and TAN projection.
  ***************************************************************************/
 void GSkyRegionMap::set_region_rect(const GSkyRegionRect* rect)
 {
     // Define desired resolution (in degrees)
-     const double resolution_goal = 0.01;
+    const double resolution_goal = 0.01;
 
     // Try to estimate extent of the (rotated) rectangle:
     // Loop over the rectangle corners to get the extension
-    double dxmax=0;
-    double dymax=0;
-    for(int icorner=0; icorner<4; ++icorner) {
+    double dxmax = 0.0;
+    double dymax = 0.0;
+    for (int icorner = 0; icorner < 4; ++icorner) {
 
         // Get skydir of current corner
         GSkyDir corner = rect->get_corner(icorner);
@@ -691,22 +691,19 @@ void GSkyRegionMap::set_region_rect(const GSkyRegionRect* rect)
         if (dy > dymax) {
             dymax = dy;
         }
-
         if (dx > dxmax) {
             dxmax = dx;
         }
-    }
+
+    } // endfor: looped over all corners
 
     // Compute width of map RoI in degrees
-    double map_width  = 2*dxmax *gammalib::rad2deg;
-    double map_height = 2*dymax *gammalib::rad2deg;
-    // std::cout<<"Generate map for rectangle:\n"<<(*rect)<<std::endl;
-    // std::cout<<"Found map extension: (w,h)=("<<map_width<<","<<map_height<<")\n";
+    double map_width  = 2.0 * dxmax * gammalib::rad2deg;
+    double map_height = 2.0 * dymax * gammalib::rad2deg;
 
     // Compute num of bins in x direction, round
-    int nbins_x = int(map_width  / resolution_goal +0.5);
-    int nbins_y = int(map_height / resolution_goal +0.5);
-    // std::cout<<"   nbins: x="<<nbins_x<<", y="<<nbins_y<<std::endl;
+    int nbins_x = int(map_width  / resolution_goal + 0.5);
+    int nbins_y = int(map_height / resolution_goal + 0.5);
 
     // Ensure a minimum num of bins
     if (nbins_x < 10) {
@@ -719,7 +716,6 @@ void GSkyRegionMap::set_region_rect(const GSkyRegionRect* rect)
     // Compute actual resolution using nbins
     double resolution_x = map_width  / nbins_x;
     double resolution_y = map_height / nbins_y;
-    // std::cout<<"   resolution for roi: x="<<resolution_x<<", y="<<resolution_y<<std::endl;
 
     // Add leakage pixels
     nbins_x += 6;
@@ -728,18 +724,14 @@ void GSkyRegionMap::set_region_rect(const GSkyRegionRect* rect)
     // Create fine sky map
     GSkyMap map_fine("TAN", "CEL", rect->ra(),   rect->dec(),
                                   -resolution_x, resolution_y,
-                                   nbins_x,      nbins_y
-                    );
+                                   nbins_x,      nbins_y);
 
-    // Set sky map pixels
+    // Set sky map pixels that are contained in rectangle to 1
     for (int ipix = 0; ipix < map_fine.npix(); ++ipix) {
-
-        // If pixel is contained in rectangle then set map pixel to 1
         if (rect->contains(map_fine.inx2dir(ipix))) {
             map_fine(ipix) = 1.0;
         }
-
-    } // endfor: looped over sky map pixels
+    }
 
     // Set sky map as region map
     this->map(map_fine);

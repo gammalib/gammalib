@@ -28,18 +28,19 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+//#include "GMath.hpp"
+#include "GTools.hpp"
 #include "GSkyRegionCircle.hpp"
 #include "GSkyRegionRect.hpp"
 #include "GSkyRegionMap.hpp"
-#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_WIDTH                            "GSkyRegionRect::width(double&)"
-#define G_HEIGHT                          "GSkyRegionRect::height(double&)"
-#define G_READ                         "GSkyRegionRect::read(std::string&)"
-#define G_CONTAINS                  "GSkyRegionRect::contains(GSkyRegion&)"
-#define G_OVERLAPS                  "GSkyRegionRect::overlaps(GSkyRegion&)"
-#define G_GET_CORNER                     "GSkyRegionRect::get_corner(int&)"
+#define G_WIDTH                              "GSkyRegionRect::width(double&)"
+#define G_HEIGHT                            "GSkyRegionRect::height(double&)"
+#define G_READ                           "GSkyRegionRect::read(std::string&)"
+#define G_CONTAINS                    "GSkyRegionRect::contains(GSkyRegion&)"
+#define G_OVERLAPS                    "GSkyRegionRect::overlaps(GSkyRegion&)"
+#define G_GET_CORNER                       "GSkyRegionRect::get_corner(int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -70,24 +71,26 @@ GSkyRegionRect::GSkyRegionRect(void) : GSkyRegion()
 
 
 /***********************************************************************//**
- * @brief Direction constructor
+ * @brief Sky direction constructor
  *
- * @param[in] centre Centre sky direction.
- * @param[in] w Region width [deg].
- * @param[in] h Region height [deg].
+ * @param[in] centre Centre of rectangle.
+ * @param[in] width Region width (degrees).
+ * @param[in] height Region height (degrees).
+ * @param[in] posang Position angle (degrees).
  ***************************************************************************/
-GSkyRegionRect::GSkyRegionRect(const GSkyDir& centre, const double& w,
-                                   const double& h, const double& posang_deg) :
-                  GSkyRegion()
+GSkyRegionRect::GSkyRegionRect(const GSkyDir& centre,
+                               const double&  width,
+                               const double&  height,
+                               const double&  posang) : GSkyRegion()
 {
     // Initialise members
     init_members();
 
     // Set members
     this->centre(centre);
-    this->width(w);
-    this->height(h);
-    this->posang_deg(posang_deg);
+    this->width(width);
+    this->height(height);
+    this->posang(posang);
 
     // Compute solid angle
     compute_solid_angle();
@@ -98,26 +101,28 @@ GSkyRegionRect::GSkyRegionRect(const GSkyDir& centre, const double& w,
 
 
 /***********************************************************************//**
- * @brief Direction constructor
+ * @brief Right Ascension and Declination constructor
  *
  * @param[in] ra Right Ascension of region centre [deg].
  * @param[in] dec Declination of region centre [deg].
- * @param[in] radius Region radius [deg].
- * @param[in] radius Region radius [deg].
+ * @param[in] width Region width (degrees).
+ * @param[in] height Region height (degrees).
+ * @param[in] posang Position angle (degrees).
  ***************************************************************************/
-GSkyRegionRect::GSkyRegionRect(const double& ra, const double& dec,
-                                   const double& w, const double& h,
-                                   const double& posang_deg) :
-                  GSkyRegion()
+GSkyRegionRect::GSkyRegionRect(const double& ra,
+                               const double& dec,
+                               const double& width,
+                               const double& height,
+                               const double& posang) : GSkyRegion()
 {
     // Initialise members
     init_members();
 
     // Set members
     this->centre(ra, dec);
-    this->width(w);
-    this->height(h);
-    this->posang_deg(posang_deg);
+    this->width(width);
+    this->height(height);
+    this->posang(posang);
 
     // Compute solid angle
     compute_solid_angle();
@@ -153,8 +158,7 @@ GSkyRegionRect::GSkyRegionRect(const std::string& line) : GSkyRegion()
  *
  * @param[in] region Rectangular sky region.
  ***************************************************************************/
-GSkyRegionRect::GSkyRegionRect(const GSkyRegionRect& region) :
-                  GSkyRegion(region)
+GSkyRegionRect::GSkyRegionRect(const GSkyRegionRect& region) : GSkyRegion(region)
 {
     // Initialise members
     init_members();
@@ -253,67 +257,29 @@ GSkyRegionRect* GSkyRegionRect::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Set position angle of rectangular region
- *
- * @param[in] posang Position angle [radians].
- *
- * Sets the position angle of the rectangular sky region. The position angle
- * is counted counterclockwise from cel. North and is aligned to the rect
- * height.
- ***************************************************************************/
-void GSkyRegionRect::posang(const double& posang)
-{
-    // Set the position angle
-    m_posang = posang;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Set position angle of rectangular region
- *
- * @param[in] posang Position angle [degrees].
- *
- * Sets the position angle of the rectangular sky region. The position angle
- * is counted counterclockwise from cel. North and is aligned to the rect
- * height.
- ***************************************************************************/
-void GSkyRegionRect::posang_deg(const double& posang)
-{
-    // Set the position angle
-    this->posang(posang * gammalib::deg2rad);
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Set width of rectangular region
  *
- * @param[in] width Width [deg].
+ * @param[in] width Width (degrees).
  *
  * @exception GException::invalid_argument
  *            Width value is less than 0.
  *
- * Sets the width of the rectangular sky region. Only non-negative radii are
- * allowed.
+ * Sets the @p width of the rectangular sky region. Only non-negative widths
+ * are allowed.
  ***************************************************************************/
 void GSkyRegionRect::width(const double& width)
 {
+    // Throw an exception if the width is less than zero
     if (width < 0.0) {
         std::string msg =
-            "A width of "+gammalib::str(width)+" degrees has been"
-            " specified for a rectangular sky region.\n"
-            "The width of a rectangular sky region can't be less than 0"
-            " degrees.";
+            "A negative width of "+gammalib::str(width)+" degrees has been "
+            "specified for a rectangular sky region. Please specify a "
+            "non-negative width.";
         throw GException::invalid_argument(G_WIDTH, msg);
     }
 
     // Set radius value
-    m_halfwidth = 0.5*width;
+    m_width = width;
 
     // Compute the solid angle
     compute_solid_angle();
@@ -326,27 +292,29 @@ void GSkyRegionRect::width(const double& width)
 /***********************************************************************//**
  * @brief Set height of rectangular region
  *
- * @param[in] height Height [deg].
+ * @param[in] height Height (degrees).
  *
  * @exception GException::invalid_argument
  *            Height value is less than 0.
  *
- * Sets the height of the rectangular sky region. Only non-negative radii are
- * allowed. For zero posang, the height axis is pointing to celestial north.
+ * Sets the @p height of the rectangular sky region. Only non-negative
+ * heights are allowed.
+ *
+ * Note that for a position angle of zero, the height axis is pointing to
+ * celestial north.
  ***************************************************************************/
 void GSkyRegionRect::height(const double& height)
 {
     if (height < 0.0) {
         std::string msg =
-            "A height of "+gammalib::str(height)+" degrees has been"
-            " specified for a rectangular sky region.\n"
-            "The height of a rectangular sky region can't be less than 0"
-            " degrees.";
+            "A negative height of "+gammalib::str(height)+" degrees has been "
+            "specified for a rectangular sky region. Please specify a "
+            "non-negative height.";
         throw GException::invalid_argument(G_HEIGHT, msg);
     }
 
     // Set radius value
-    m_halfheight = 0.5*height;
+    m_height = height;
 
     // Compute the solid angle
     compute_solid_angle();
@@ -377,9 +345,8 @@ void GSkyRegionRect::read(const std::string& line)
     // Finding the box
     if (region_def.find("box") == std::string::npos) {
         std::string msg =
-            "Unable to find the key word \"box\" in provided string"
-            " \""+line+"\".\n"
-            "The \"box\" key word is mandatory.";
+            "Unable to find the key word \"box\" in provided string "
+            "\""+line+"\". The \"box\" key word is mandatory.";
         throw GException::invalid_value(G_READ, msg);
     }
 
@@ -396,29 +363,29 @@ void GSkyRegionRect::read(const std::string& line)
     std::vector<std::string> values = gammalib::split(regionstring,",");
     if (values.size() != 5) {
         std::string msg =
-            "Invalid number of "+gammalib::str(values.size())+" arguments"
-            " after the \"box\" key word in provided string \""+line+"\".\n"
+            "Invalid number of "+gammalib::str(values.size())+" arguments "
+            "after the \"box\" key word in provided string \""+line+"\". "
             "Exactly 5 arguments are expected.";
         throw GException::invalid_value(G_READ, msg);
     }
     double x      = gammalib::todouble(values[0]);
     double y      = gammalib::todouble(values[1]);
-    double w      = gammalib::todouble(values[2]);
-    double h      = gammalib::todouble(values[3]);
+    double width  = gammalib::todouble(values[2]);
+    double height = gammalib::todouble(values[3]);
     double posang = gammalib::todouble(values[4]);
 
     // Get radius units
     if (gammalib::contains(values[2], "'")) {
-        w /= 60.0;
+        width /= 60.0;
     }
     else if (gammalib::contains(values[2], "\"")) {
-        w /= 3600.0;
+        width /= 3600.0;
     }
     if (gammalib::contains(values[3], "'")) {
-        h /= 60.0;
+        height /= 60.0;
     }
     else if (gammalib::contains(values[3], "\"")) {
-        h /= 3600.0;
+        height /= 3600.0;
     }
     if (gammalib::contains(values[4], "'")) {
         posang /= 60.0;
@@ -439,32 +406,31 @@ void GSkyRegionRect::read(const std::string& line)
     }
     else {
         std::string msg =
-            "Unsupported coordinate system \""+system+"\" in provided string"
-            " \""+line+"\".\n"
-            "Only the following coordinate systems are supported: "
-            "\"fk5\", \"icrs\" and \"galactic\".";
+            "Unsupported coordinate system \""+system+"\" in provided string "
+            "\""+line+"\". Only the following coordinate systems are "
+            "supported: \"fk5\", \"icrs\" and \"galactic\".";
         throw GException::invalid_value(G_READ, msg);
     }
 
     // Set members
     this->centre(centre);
-    this->width(w);
-    this->height(h);
-    this->posang_deg(posang);
+    this->width(width);
+    this->height(height);
+    this->posang(posang);
 
     // Compute solid angle
     compute_solid_angle();
 
     // Check if there is a given name for the region and set it
     std::vector<std::string>comments = gammalib::split(comment, " ");
-    for (int i = 0; i < comments.size(); i++) {
+    for (int i = 0; i < comments.size(); ++i) {
         if (gammalib::contains(comments[i], "text")) {
             std::vector<std::string> attributes = gammalib::split(comments[i], "=");
             if (attributes.size() < 2) {
                 std::string msg =
-                      "Invalid character sequence encountered in provided"
-                      " string \""+line+"\".\n"
-                      "An attribute of the type \"text=Name\" is expected.";
+                    "Invalid character sequence encountered in provided "
+                    "string \""+line+"\". An attribute of the type "
+                    "\"text=Name\" is expected.";
                 throw GException::invalid_value(G_READ, msg);
             }
             m_name = attributes[1];
@@ -495,11 +461,11 @@ std::string GSkyRegionRect::write(void) const
     result.append(",");
     result.append(gammalib::str(m_centre.dec_deg()));
     result.append(",");
-    result.append(gammalib::str(2*m_halfwidth));
+    result.append(gammalib::str(m_width));
     result.append(",");
-    result.append(gammalib::str(2*m_halfheight));
+    result.append(gammalib::str(m_height));
     result.append(",");
-    result.append(gammalib::str(m_posang*gammalib::rad2deg));
+    result.append(gammalib::str(m_posang));
     result.append(")");
 
     // Optionally add region name
@@ -512,41 +478,6 @@ std::string GSkyRegionRect::write(void) const
     return result;
 }
 
-
-/***********************************************************************//**
- * @brief Print rectangular region
- *
- * @param[in] chatter Chattiness
- * @return String containing region information.
- ***************************************************************************/
-std::string GSkyRegionRect::print(const GChatter& chatter) const
-{
-    // Initialise result string
-    std::string result;;
-
-    // Continue only if chatter is not silent
-    if (chatter != SILENT) {
-
-        // Append header
-        result.append("=== GSkyRegionRect ===");
-
-        // Append sky region information
-        result.append("\n"+gammalib::parformat("Right Ascension of centre"));
-        result.append(gammalib::str(m_centre.ra_deg())+" deg");
-        result.append("\n"+gammalib::parformat("Declination of centre"));
-        result.append(gammalib::str(m_centre.dec_deg())+" deg");
-        result.append("\n"+gammalib::parformat("Width"));
-        result.append(gammalib::str(2*m_halfwidth)+" deg");
-        result.append("\n"+gammalib::parformat("Height"));
-        result.append(gammalib::str(2*m_halfheight)+" deg");
-        result.append("\n"+gammalib::parformat("PA"));
-        result.append(gammalib::str(m_posang*gammalib::rad2deg)+" deg");
-
-    } // endif: chatter was not silent
-
-    // Return result
-    return result;
-}
 
 /***********************************************************************//**
  * @brief Checks if sky direction lies within region
@@ -572,7 +503,7 @@ bool GSkyRegionRect::contains(const GSkyDir& dir) const
 /***********************************************************************//**
  * @brief Checks if local direction lies within region
  *
- * @param[in] dir Direction in local coordinate system.
+ * @param[in] locdir Sky direction in local coordinate system.
  *
  * A local direction lies within a region when its distance to the region
  * centre is not larger than the region extension in both axes directions.
@@ -583,10 +514,10 @@ bool GSkyRegionRect::contains_local(const GSkyDir& locdir) const
     bool dir_is_in = false;
 
     // Check containment: declination axis
-    if ((std::abs(locdir.dec_deg()) - 1.0e-10) <= m_halfheight) {
+    if ((std::abs(locdir.dec_deg()) - 1.0e-10) <= 0.5 * m_height) {
 
         // Check containment: right ascension axis
-        if ((std::abs(locdir.ra_deg()) - 1.0e-10) <= m_halfwidth) {
+        if ((std::abs(locdir.ra_deg()) - 1.0e-10) <= 0.5 * m_width) {
 
             // Sky direction is inside the rectangle
             dir_is_in = true;
@@ -625,10 +556,10 @@ bool GSkyRegionRect::contains(const GSkyRegion& reg) const
         const double circ_rad = regcirc->radius();
 
         // Check extension of circle along declination axis
-        if ((std::abs(local_centre.dec_deg()) + circ_rad) <= m_halfheight) {
+        if ((std::abs(local_centre.dec_deg()) + circ_rad) <= 0.5 * m_height) {
 
             // Check extension of circle along right ascension axis
-            if ((std::abs(local_centre.ra_deg()) + circ_rad) <= m_halfwidth) {
+            if ((std::abs(local_centre.ra_deg()) + circ_rad) <= 0.5 * m_width) {
 
                 // Circle is fully contained in this rectangle
                 is_fully_inside = true;
@@ -644,7 +575,7 @@ bool GSkyRegionRect::contains(const GSkyRegion& reg) const
               dynamic_cast<const GSkyRegionRect*>(&reg);
 
         // Loop over the four corners of the rectangle :regrect:
-        for(int icorner=0; icorner<4; ++icorner) {
+        for (int icorner = 0; icorner < 4; ++icorner) {
 
             // Get skydir of current corner
             GSkyDir corner = regrect->get_corner(icorner);
@@ -654,7 +585,7 @@ bool GSkyRegionRect::contains(const GSkyRegion& reg) const
                 break;
             }
             // Did we arrive at the last corner?
-            else if (icorner==3) {
+            else if (icorner == 3) {
 
                 // As we reached this point, the three prior corners were inside
                 // and the last corner now is also inside:
@@ -705,10 +636,10 @@ bool GSkyRegionRect::overlaps(const GSkyRegion& reg) const
         const double circ_rad = regcirc->radius();
 
         // Check extension of circle along declination axis
-        if (std::abs(local_centre.dec_deg()) <= (m_halfheight + circ_rad)) {
+        if (std::abs(local_centre.dec_deg()) <= (0.5 * m_height + circ_rad)) {
 
             // Check extension of circle along right ascension axis
-            if (std::abs(local_centre.ra_deg()) <= (m_halfwidth + circ_rad)) {
+            if (std::abs(local_centre.ra_deg()) <= (0.5 * m_width + circ_rad)) {
 
                 // Circle is fully contained in this rectangle
                 is_overlapping = true;
@@ -722,7 +653,7 @@ bool GSkyRegionRect::overlaps(const GSkyRegion& reg) const
         const GSkyRegionRect* regrect =
               dynamic_cast<const GSkyRegionRect*>(&reg);
 
-        // Dirty cludge: compare vs map
+        // Dirty kludge: compare vs map
         GSkyRegionMap regmap = GSkyRegionMap(regrect);
         is_overlapping = regmap.overlaps(*this);
 
@@ -746,17 +677,17 @@ bool GSkyRegionRect::overlaps(const GSkyRegion& reg) const
  * @param[in] skydir Sky direction in global coordinate system.
  * @return Sky direction in local cartesian region object coordinates.
  *
- * Transform the sky direction :skydir: to the local cartesian coordinate system.
- * The origin of the local coordinate system is fixed to the center of the
- * rectangle and aligned in +ra (width) and +dec (height).
- * Please note, that a GSkyDir object is returned, even if the local coordsys
+ * Transform the sky direction @p skydir to the local cartesian coordinate
+ * system. The origin of the local coordinate system is fixed to the center
+ * of the rectangle and aligned in +ra (width) and +dec (height). Please
+ * note, that a GSkyDir object is returned, even if the local coordsys is
  * is cartesian.
  ***************************************************************************/
 GSkyDir GSkyRegionRect::transform_to_local(const GSkyDir& skydir) const
 {
     // Get distance and polar angle relative to rectangle centre
     double dist = m_centre.dist(skydir);
-    double pa   = m_centre.posang(skydir) - m_posang;
+    double pa   = m_centre.posang(skydir) - m_posang * gammalib::deg2rad;
 
     // Compute corresponding x and y coordinate from polar coords
     double x = dist * std::sin(pa);
@@ -777,7 +708,7 @@ GSkyDir GSkyRegionRect::transform_to_local(const GSkyDir& skydir) const
  * @param[in] locdir Direction in local coordinate system.
  * @return Sky direction in global coordinate system.
  *
- * Transform the local direction :locdir: to the global coordinate system.
+ * Transform the local direction @p locdir to the global coordinate system.
  * The origin of the local coordinate system is fixed to the center of the
  * rectangle and aligned in +ra (width) and +dec (height).
  ***************************************************************************/
@@ -793,11 +724,8 @@ GSkyDir GSkyRegionRect::transform_to_global(const GSkyDir& locdir) const
 
     // Compute dist and position angle in polar coords
     double dist = std::sqrt(x*x + y*y);
-    double pa   = gammalib::pihalf - std::atan2(y, x) + m_posang;
-
-    // // Compute distance and position angle for locdir in global coordinates
-    // double dist = centre_local.dist(locdir);
-    // double pa   = centre_local.posang(locdir) + m_posang;
+    double pa   = gammalib::pihalf - std::atan2(y, x) +
+                  m_posang  * gammalib::deg2rad;
 
     // Create output global sky direction
     GSkyDir transformed(m_centre);
@@ -822,14 +750,14 @@ GSkyDir GSkyRegionRect::transform_to_global(const GSkyDir& locdir) const
 GSkyDir GSkyRegionRect::get_corner(const int& index) const
 {
     // Assert index is in [0,3]
-    if ((index<0) || (index>3)) {
-        throw GException::out_of_range(G_GET_CORNER, index, 0, 3);
+    if ((index < 0) || (index > 3)) {
+        throw GException::out_of_range(G_GET_CORNER, "Corner index", index, 3);
     }
 
     // Compute the offset to the corners
     // Index counts CCW starting from +RA,+DEC: +R+D, +R-D, -R-D, -R+D
-    double dx = m_halfwidth  * (1 - 2*int(index >= 2));
-    double dy = m_halfheight * (1 - 2*int((index==1) || (index==2)));
+    double dx = 0.5 * m_width  * (1 - 2*int(index >= 2));
+    double dy = 0.5 * m_height * (1 - 2*int((index==1) || (index==2)));
 
     // Define local corner sky direction
     GSkyDir corner;
@@ -842,6 +770,41 @@ GSkyDir GSkyRegionRect::get_corner(const int& index) const
     return corner;
 }
 
+
+/***********************************************************************//**
+ * @brief Print rectangular region
+ *
+ * @param[in] chatter Chattiness
+ * @return String containing region information.
+ ***************************************************************************/
+std::string GSkyRegionRect::print(const GChatter& chatter) const
+{
+    // Initialise result string
+    std::string result;;
+
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GSkyRegionRect ===");
+
+        // Append sky region information
+        result.append("\n"+gammalib::parformat("Right Ascension of centre"));
+        result.append(gammalib::str(ra())+" deg");
+        result.append("\n"+gammalib::parformat("Declination of centre"));
+        result.append(gammalib::str(dec())+" deg");
+        result.append("\n"+gammalib::parformat("Width"));
+        result.append(gammalib::str(width())+" deg");
+        result.append("\n"+gammalib::parformat("Height"));
+        result.append(gammalib::str(height())+" deg");
+        result.append("\n"+gammalib::parformat("PA"));
+        result.append(gammalib::str(posang())+" deg");
+
+    } // endif: chatter was not silent
+
+    // Return result
+    return result;
+}
 
 
 /*==========================================================================
@@ -856,11 +819,11 @@ GSkyDir GSkyRegionRect::get_corner(const int& index) const
 void GSkyRegionRect::init_members(void)
 {
     // Initialise members
-    m_centre = GSkyDir();
-    m_halfwidth  = 0.0;
-    m_halfheight = 0.0;
-    m_posang     = 0.0;
     m_type   = "Rect";
+    m_centre.clear();
+    m_width  = 0.0;
+    m_height = 0.0;
+    m_posang = 0.0;
 
     //Return
     return;
@@ -875,10 +838,10 @@ void GSkyRegionRect::init_members(void)
 void GSkyRegionRect::copy_members(const GSkyRegionRect& region)
 {
     // Copy attributes
-    m_centre     = region.m_centre;
-    m_halfwidth  = region.m_halfwidth;
-    m_halfheight = region.m_halfheight;
-    m_posang     = region.m_posang;
+    m_centre = region.m_centre;
+    m_width  = region.m_width;
+    m_height = region.m_height;
+    m_posang = region.m_posang;
 
     // Return
     return;
@@ -896,13 +859,12 @@ void GSkyRegionRect::free_members(void)
 
 
 /***********************************************************************//**
- * @brief Compute solid angle [sr]
+ * @brief Compute solid angle (sr)
  ***************************************************************************/
 void GSkyRegionRect::compute_solid_angle(void)
 {
     // Compute solid angle
-    m_solid = (2*m_halfwidth) * (2*m_halfheight) * \
-                (gammalib::deg2rad * gammalib::deg2rad);
+    m_solid = m_width * m_height * gammalib::deg2rad * gammalib::deg2rad;
 
     // Return
     return;

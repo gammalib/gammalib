@@ -35,48 +35,47 @@
  * @brief Interface for the rectangular sky region class
  ***************************************************************************/
 class GSkyRegionRect : public GSkyRegion {
+
 public:
     // Constructors and destructors
     GSkyRegionRect(void);
-    GSkyRegionRect(const GSkyDir& centre
-                  ,const double& w, const double& h
-                  ,const double& posang_deg
-                  );
-    GSkyRegionRect(const double& ra, const double& dec
-                  ,const double& w, const double& h
-                  ,const double& posang_deg
-                  );
+    GSkyRegionRect(const GSkyDir& centre,
+                   const double&  width,
+                   const double&  height,
+                   const double&  posang);
+    GSkyRegionRect(const double& ra,
+                   const double& dec,
+                   const double& width,
+                   const double& height,
+                   const double& posang);
     explicit GSkyRegionRect(const std::string& line);
     GSkyRegionRect(const GSkyRegionRect& region);
     virtual ~GSkyRegionRect(void);
 
     // Implemented methods
-    void              clear(void);
-    GSkyRegionRect*   clone(void) const;
-    std::string       classname(void) const;
-    double            posang(void) const;
-    void              posang(const double& posang);
-    double            posang_deg(void) const;
-    void              posang_deg(const double& posang);
-    double            width(void) const;
-    void              width(const double& width);
-    double            height(void) const;
-    void              height(const double& height);
-    const GSkyDir&    centre(void) const;
-    void              centre(const GSkyDir& centre);
-    void              centre(const double& ra,const double& dec);
-    double            ra(void) const;
-    double            dec(void) const;
-    void              read(const std::string& line);
-    std::string       write(void) const;
-    bool              contains(const GSkyDir& dir) const;
-    bool              contains_local(const GSkyDir& locdir) const;
-    bool              contains(const GSkyRegion& reg) const;
-    bool              overlaps(const GSkyRegion& reg) const;
-
-    GSkyDir           transform_to_local(const GSkyDir& skydir) const;
-    GSkyDir           transform_to_global(const GSkyDir& localdir) const;
-    GSkyDir           get_corner(const int& index) const;
+    void            clear(void);
+    GSkyRegionRect* clone(void) const;
+    std::string     classname(void) const;
+    const GSkyDir&  centre(void) const;
+    void            centre(const GSkyDir& centre);
+    void            centre(const double& ra,const double& dec);
+    double          ra(void) const;
+    double          dec(void) const;
+    const double&   width(void) const;
+    void            width(const double& width);
+    const double&   height(void) const;
+    void            height(const double& height);
+    const double&   posang(void) const;
+    void            posang(const double& posang);
+    void            read(const std::string& line);
+    std::string     write(void) const;
+    bool            contains(const GSkyDir& dir) const;
+    bool            contains_local(const GSkyDir& locdir) const;
+    bool            contains(const GSkyRegion& reg) const;
+    bool            overlaps(const GSkyRegion& reg) const;
+    GSkyDir         transform_to_local(const GSkyDir& skydir) const;
+    GSkyDir         transform_to_global(const GSkyDir& locdir) const;
+    GSkyDir         get_corner(const int& index) const;
 };
 
 

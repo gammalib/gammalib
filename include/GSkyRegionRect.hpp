@@ -30,10 +30,12 @@
 /* __ Includes ___________________________________________________________ */
 #include <vector>
 #include <string>
-#include "GMath.hpp"
+//#include "GMath.hpp"
 #include "GSkyDir.hpp"
 #include "GSkyRegion.hpp"
-#include "GTools.hpp"
+//#include "GTools.hpp"
+
+/* __ Forward declarations _______________________________________________ */
 
 
 /***********************************************************************//**
@@ -63,14 +65,15 @@ class GSkyRegionRect : public GSkyRegion {
 public:
     // Constructors and destructors
     GSkyRegionRect(void);
-    GSkyRegionRect(const GSkyDir& centre
-                  ,const double& w, const double& h
-                  ,const double& posang_deg
-                  );
-    GSkyRegionRect(const double& ra, const double& dec
-                  ,const double& w, const double& h
-                  ,const double& posang_deg
-                  );
+    GSkyRegionRect(const GSkyDir& centre,
+                   const double&  width,
+                   const double&  height,
+                   const double&  posang);
+    GSkyRegionRect(const double& ra,
+                   const double& dec,
+                   const double& width,
+                   const double& height,
+                   const double& posang);
     explicit GSkyRegionRect(const std::string& line);
     GSkyRegionRect(const GSkyRegionRect& region);
     virtual ~GSkyRegionRect(void);
@@ -79,33 +82,30 @@ public:
     GSkyRegionRect& operator=(const GSkyRegionRect& region);
 
     // Implemented methods
-    void              clear(void);
-    GSkyRegionRect*   clone(void) const;
-    std::string       classname(void) const;
-    double            posang(void) const;
-    void              posang(const double& posang);
-    double            posang_deg(void) const;
-    void              posang_deg(const double& posang);
-    double            width(void) const;
-    void              width(const double& width);
-    double            height(void) const;
-    void              height(const double& height);
-    const GSkyDir&    centre(void) const;
-    void              centre(const GSkyDir& centre);
-    void              centre(const double& ra,const double& dec);
-    double            ra(void) const;
-    double            dec(void) const;
-    void              read(const std::string& line);
-    std::string       write(void) const;
-    bool              contains(const GSkyDir& dir) const;
-    bool              contains_local(const GSkyDir& locdir) const;
-    bool              contains(const GSkyRegion& reg) const;
-    bool              overlaps(const GSkyRegion& reg) const;
-    std::string       print(const GChatter& chatter = NORMAL) const;
-
-    GSkyDir           transform_to_local(const GSkyDir& skydir) const;
-    GSkyDir           transform_to_global(const GSkyDir& locdir) const;
-    GSkyDir           get_corner(const int& index) const;
+    void            clear(void);
+    GSkyRegionRect* clone(void) const;
+    std::string     classname(void) const;
+    const GSkyDir&  centre(void) const;
+    void            centre(const GSkyDir& centre);
+    void            centre(const double& ra,const double& dec);
+    double          ra(void) const;
+    double          dec(void) const;
+    const double&   width(void) const;
+    void            width(const double& width);
+    const double&   height(void) const;
+    void            height(const double& height);
+    const double&   posang(void) const;
+    void            posang(const double& posang);
+    void            read(const std::string& line);
+    std::string     write(void) const;
+    bool            contains(const GSkyDir& dir) const;
+    bool            contains_local(const GSkyDir& locdir) const;
+    bool            contains(const GSkyRegion& reg) const;
+    bool            overlaps(const GSkyRegion& reg) const;
+    GSkyDir         transform_to_local(const GSkyDir& skydir) const;
+    GSkyDir         transform_to_global(const GSkyDir& locdir) const;
+    GSkyDir         get_corner(const int& index) const;
+    std::string     print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods
@@ -116,9 +116,9 @@ protected:
 
     // Protected members
     GSkyDir m_centre;     //!< Centre or reference point of the region
-    double  m_halfwidth;  //!< Half width of the region [deg]
-    double  m_halfheight; //!< Half height of the region [deg]
-    double  m_posang;     //!< Position angle, counterclockwise from North [radians]
+    double  m_width;      //!< Width of the region (degrees)
+    double  m_height;      //!< Height of the region (degrees)
+    double  m_posang;     //!< Position angle, counterclockwise from North (degrees)
 };
 
 
@@ -131,68 +131,6 @@ inline
 std::string GSkyRegionRect::classname(void) const
 {
     return ("GSkyRegionRect");
-}
-
-
-/***********************************************************************//**
- * @brief Return region position angle (in radians)
- *
- * @return Region position angle [radians].
- *
- * Returns the region position angle in radians. The position angle is
- * counted counterclockwise from North.
- ***************************************************************************/
-inline
-double GSkyRegionRect::posang(void) const
-{
-    // Return
-    return (m_posang);
-}
-
-
-/***********************************************************************//**
- * @brief Return region position angle (in degrees)
- *
- * @return Region position angle [degrees].
- *
- * Returns the region position angle in degrees. The position angle is
- * counted counterclockwise from North.
- ***************************************************************************/
-inline
-double GSkyRegionRect::posang_deg(void) const
-{
-    // Return
-    return (m_posang * gammalib::rad2deg);
-}
-
-
-/***********************************************************************//**
- * @brief Return region width extension (in degrees)
- *
- * @return Region width [deg].
- *
- * Returns the region width extension in degrees.
- ***************************************************************************/
-inline
-double GSkyRegionRect::width(void) const
-{
-    double width = 2*m_halfwidth;
-    return (width);
-}
-
-
-/***********************************************************************//**
- * @brief Return region height extension (in degrees)
- *
- * @return Region height [deg].
- *
- * Returns the region height extension in degrees.
- ***************************************************************************/
-inline
-double GSkyRegionRect::height(void) const
-{
-    double height = 2*m_halfheight;
-    return (height);
 }
 
 
@@ -220,10 +158,7 @@ const GSkyDir& GSkyRegionRect::centre(void) const
 inline
 void GSkyRegionRect::centre(const GSkyDir& dir)
 {
-    // Set centre
     m_centre = dir;
-
-    // Return
     return;
 }
 
@@ -231,8 +166,8 @@ void GSkyRegionRect::centre(const GSkyDir& dir)
 /***********************************************************************//**
  * @brief Set rectangular region centre Right Ascension and Declincation
  *
- * @param[in] ra Right Ascension [deg].
- * @param[in] dec Declination [deg].
+ * @param[in] ra Right Ascension (degrees).
+ * @param[in] dec Declination (degrees).
  *
  * Sets the centre of the rectangular region to the specified Right Ascension
  * and Declination.
@@ -240,10 +175,7 @@ void GSkyRegionRect::centre(const GSkyDir& dir)
 inline
 void GSkyRegionRect::centre(const double& ra, const double& dec)
 {
-    // Set centre values
-    m_centre.radec_deg(ra,dec);
-
-    // Return
+    m_centre.radec_deg(ra, dec);
     return;
 }
 
@@ -251,7 +183,7 @@ void GSkyRegionRect::centre(const double& ra, const double& dec)
 /***********************************************************************//**
  * @brief Return rectangular region centre Right Ascension
  *
- * @return Region centre Right Ascension [deg].
+ * @return Region centre Right Ascension (degrees).
  *
  * Returns the region centre Right Ascension in degrees.
  ***************************************************************************/
@@ -265,7 +197,7 @@ double GSkyRegionRect::ra(void) const
 /***********************************************************************//**
  * @brief Return rectangular region centre Declination
  *
- * @return Region centre Declination [deg].
+ * @return Region centre Declination (degrees).
  *
  * Returns the region centre Declination in degrees.
  ***************************************************************************/
@@ -273,6 +205,66 @@ inline
 double GSkyRegionRect::dec(void) const
 {
     return (m_centre.dec_deg());
+}
+
+
+/***********************************************************************//**
+ * @brief Return region width extension (in degrees)
+ *
+ * @return Region width (degrees).
+ *
+ * Returns the region width extension in degrees.
+ ***************************************************************************/
+inline
+const double& GSkyRegionRect::width(void) const
+{
+    return (m_width);
+}
+
+
+/***********************************************************************//**
+ * @brief Return region height extension (in degrees)
+ *
+ * @return Region height (degrees).
+ *
+ * Returns the region height extension in degrees.
+ ***************************************************************************/
+inline
+const double& GSkyRegionRect::height(void) const
+{
+    return (m_height);
+}
+
+
+/***********************************************************************//**
+ * @brief Return region position angle (in degrees)
+ *
+ * @return Region position angle (degrees).
+ *
+ * Returns the region position angle in degrees. The position angle is
+ * counted counterclockwise from North.
+ ***************************************************************************/
+inline
+const double& GSkyRegionRect::posang(void) const
+{
+    return (m_posang);
+}
+
+
+/***********************************************************************//**
+ * @brief Set position angle of rectangular region
+ *
+ * @param[in] posang Position angle (degrees).
+ *
+ * Sets the position angle of the rectangular sky region. The position angle
+ * is counted counterclockwise from celestial North and is aligned to the
+ * rectangle height.
+ ***************************************************************************/
+inline
+void GSkyRegionRect::posang(const double& posang)
+{
+    m_posang = posang;
+    return;
 }
 
 #endif /* GSKYREGIONRECT_HPP */

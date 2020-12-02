@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GSkyRegionMap.hpp - Sky region map class                  *
  * ----------------------------------------------------------------------- *
- * copyright (C) 2017-2018 by Pierrick Martin                              *
+ * copyright (C) 2017-2020 by Pierrick Martin                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
