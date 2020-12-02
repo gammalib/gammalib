@@ -1913,7 +1913,7 @@ void TestGSky::test_GSkyRegionRect(void)
     test_try("Test posang assignment after");
     try {
         GSkyRegionRect rect(refdir_radeczerozero, ref_width, ref_height, ref_pa_deg);
-        rect.posang_deg(-1.0);
+        rect.posang(-1.0);
         test_try_success();
     }
     catch (GException::invalid_argument &e) {
@@ -1932,7 +1932,7 @@ void TestGSky::test_GSkyRegionRect(void)
     double check_height = rect.width();
     test_value(ref_height, check_height, 1.0e-10, "Test height assignment");
 
-    double check_pa_deg = rect.posang_deg();
+    double check_pa_deg = rect.posang();
     test_value(ref_pa_deg, check_pa_deg, 1.0e-10, "Test posang assignment");
 
     // Check solid angle assignment
@@ -1941,7 +1941,7 @@ void TestGSky::test_GSkyRegionRect(void)
     test_value(solidangle_check, solidangle, 1.0e-10, "Test solid angle");
 
     // Initialise objects
-    GSkyDir refdir_radeczerozero = GSkyDir();
+    refdir_radeczerozero = GSkyDir();
     GSkyDir test_dir_0 = GSkyDir();
     GSkyDir test_dir_1 = GSkyDir();
     GSkyDir test_dir_2 = GSkyDir();
@@ -2049,7 +2049,6 @@ void TestGSky::test_GSkyRegionRect(void)
     test_assert(refregion.overlaps(refregion_larger),"test2 for overlap");
     test_assert(refregion.overlaps(refregion_raoffset),"test3 for overlap");
     test_assert(!refregion.overlaps(refregion_decpole),"test4 for overlap");
-
 
     // Exit test
     return;

@@ -28,9 +28,10 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GTools.hpp"
 #include "GSkyRegionCircle.hpp"
 #include "GSkyRegionRect.hpp"
-#include "GTools.hpp"
+#include "GSkyRegionMap.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_RADIUS                          "GSkyRegionCircle::radius(double&)"
@@ -70,10 +71,10 @@ GSkyRegionCircle::GSkyRegionCircle(void) : GSkyRegion()
  * @brief Direction constructor
  *
  * @param[in] centre Centre sky direction.
- * @param[in] radius Region radius [deg].
+ * @param[in] radius Region radius (degrees).
  ***************************************************************************/
-GSkyRegionCircle::GSkyRegionCircle(const GSkyDir& centre, const double& radius) :
-                  GSkyRegion()
+GSkyRegionCircle::GSkyRegionCircle(const GSkyDir& centre,
+                                   const double& radius) : GSkyRegion()
 {
     // Initialise members
     init_members();
@@ -93,11 +94,12 @@ GSkyRegionCircle::GSkyRegionCircle(const GSkyDir& centre, const double& radius) 
 /***********************************************************************//**
  * @brief Direction constructor
  *
- * @param[in] ra Right Ascension of region centre [deg].
- * @param[in] dec Declination of region centre [deg].
- * @param[in] radius Region radius [deg].
+ * @param[in] ra Right Ascension of region centre (degrees).
+ * @param[in] dec Declination of region centre (degrees).
+ * @param[in] radius Region radius (degrees).
  ***************************************************************************/
-GSkyRegionCircle::GSkyRegionCircle(const double& ra, const double& dec,
+GSkyRegionCircle::GSkyRegionCircle(const double& ra,
+                                   const double& dec,
                                    const double& radius) : GSkyRegion()
 {
     // Initialise members
@@ -243,7 +245,7 @@ GSkyRegionCircle* GSkyRegionCircle::clone(void) const
 /***********************************************************************//**
  * @brief Set radius of circular region
  *
- * @param[in] radius Radius [deg].
+ * @param[in] radius Radius (degrees).
  *
  * @exception GException::invalid_argument
  *            Radius value is less than 0.
@@ -256,10 +258,9 @@ void GSkyRegionCircle::radius(const double& radius)
     // Check if radius is valid
     if (radius < 0.0) {
         std::string msg =
-            "A radius of "+gammalib::str(radius)+" degrees has been"
-            " specified for a circular sky region.\n"
-            "The radius of a circular sky region can't be less than 0"
-            " degrees.";
+            "A negative radius of "+gammalib::str(radius)+" degrees has been "
+            "specified for a circular sky region. Please specify a "
+            "non-negative radius.";
         throw GException::invalid_argument(G_RADIUS, msg);
     }
 
@@ -296,8 +297,7 @@ void GSkyRegionCircle::read(const std::string& line)
     if (region_def.find("circle") == std::string::npos) {
         std::string msg =
             "Unable to find the key word \"circle\" in provided string"
-            " \""+line+"\".\n"
-            "The \"circle\" key word is mandatory.";
+            " \""+line+"\". The \"circle\" key word is mandatory.";
         throw GException::invalid_value(G_READ, msg);
     }
 
@@ -314,8 +314,8 @@ void GSkyRegionCircle::read(const std::string& line)
     std::vector<std::string> values = gammalib::split(circlestring,",");
     if (values.size() != 3) {
         std::string msg =
-            "Invalid number of "+gammalib::str(values.size())+" arguments"
-            " after the \"circle\" key word in provided string \""+line+"\".\n"
+            "Invalid number of "+gammalib::str(values.size())+" arguments "
+            "after the \"circle\" key word in provided string \""+line+"\". "
             "Exactly 3 arguments are expected.";
         throw GException::invalid_value(G_READ, msg);
     }
@@ -343,10 +343,9 @@ void GSkyRegionCircle::read(const std::string& line)
     }
     else {
         std::string msg =
-            "Unsupported coordinate system \""+system+"\" in provided string"
-            " \""+line+"\".\n"
-            "Only the following coordinate systems are supported: "
-            "\"fk5\", \"icrs\" and \"galactic\".";
+            "Unsupported coordinate system \""+system+"\" in provided string "
+            "\""+line+"\". Only the following coordinate systems are "
+            "supported: \"fk5\", \"icrs\" and \"galactic\".";
         throw GException::invalid_value(G_READ, msg);
     }
 
@@ -479,11 +478,11 @@ std::string GSkyRegionCircle::print(const GChatter& chatter) const
 
         // Append sky circle information
         result.append("\n"+gammalib::parformat("Right Ascension of centre"));
-        result.append(gammalib::str(m_centre.ra_deg())+" deg");
+        result.append(gammalib::str(ra())+" deg");
         result.append("\n"+gammalib::parformat("Declination of centre"));
-        result.append(gammalib::str(m_centre.dec_deg())+" deg");
+        result.append(gammalib::str(dec())+" deg");
         result.append("\n"+gammalib::parformat("Radius"));
-        result.append(gammalib::str(m_radius)+" deg");
+        result.append(gammalib::str(radius())+" deg");
 
     } // endif: chatter was not silent
 
@@ -539,9 +538,6 @@ bool GSkyRegionCircle::contains(const GSkyRegion& reg) const
         // Calculate angular distance between the centres
         double ang_dist = m_centre.dist_deg(regcirc->centre());
 
-        // Calculate angular distance between the centres
-        double ang_dist = m_centre.dist_deg(regcirc->centre());
-
         // Check if the region is contained in this
         if ((ang_dist + regcirc->radius()) <= m_radius) {
             fully_inside = true;
@@ -557,16 +553,16 @@ bool GSkyRegionCircle::contains(const GSkyRegion& reg) const
               dynamic_cast<const GSkyRegionRect*>(&reg);
 
         // Check containment of all edges
-        fully_inside = contains(regrect->get_corner(0)) &
-                       contains(regrect->get_corner(1)) &
-                       contains(regrect->get_corner(2)) &
+        fully_inside = contains(regrect->get_corner(0)) &&
+                       contains(regrect->get_corner(1)) &&
+                       contains(regrect->get_corner(2)) &&
                        contains(regrect->get_corner(3));
     }
 
     // ... otherwise throw an exception
     else {
         throw GException::feature_not_implemented(G_CONTAINS,
-              "Cannot compare to region type \""+reg.type()+"\" yet");
+              "Cannot compare to region type \""+reg.type()+"\" yet.");
     }
 
     // Return value
@@ -581,13 +577,16 @@ bool GSkyRegionCircle::contains(const GSkyRegion& reg) const
  *
  * @exception GException::feature_not_implemented
  *            Regions differ in type.
+ *
+ * @todo Implement checks for rectangles and maps
  ***************************************************************************/
 bool GSkyRegionCircle::overlaps(const GSkyRegion& reg) const
 {
     // Initialise return value
     bool overlap = false;
 
-    // If other region is circle use a simple way to calculate
+    // If region is circle then check overlap by comparing the centre
+    // distances
     if (reg.type() == "Circle") {
 
         // Create circular region from reg
@@ -602,12 +601,36 @@ bool GSkyRegionCircle::overlaps(const GSkyRegion& reg) const
             overlap = true;
         }
 
-    }
+    } // endif: region was circle
+
+    // ... otherwise if region is rectangle then check overlap
+    else if (reg.type() == "Rect") {
+
+        // Create rectangular region from reg
+        const GSkyRegionRect* regrect =
+              dynamic_cast<const GSkyRegionRect*>(&reg);
+
+        // Check overlap with circle
+        overlap = regrect->overlaps(*this);
+
+    } // endif: region was rectangle
+
+    // ... otherwise if region is map then check overlap with map
+    else if (reg.type() == "Map") {
+
+        // Create map from reg
+        const GSkyRegionMap* regmap =
+              dynamic_cast<const GSkyRegionMap*>(&reg);
+
+        // Check overlap with circle
+        overlap = regmap->overlaps(*this);
+
+    } // endif: region was map
 
     // ... otherwise throw an exception
     else {
-        throw GException::feature_not_implemented(G_OVERLAPS,
-              "Cannot compare two different region types yet");
+        throw GException::feature_not_implemented(G_CONTAINS,
+              "Cannot compare to region type \""+reg.type()+"\" yet.");
     }
 
     // Return value

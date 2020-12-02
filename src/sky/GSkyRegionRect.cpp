@@ -28,7 +28,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#include "GMath.hpp"
 #include "GTools.hpp"
 #include "GSkyRegionCircle.hpp"
 #include "GSkyRegionRect.hpp"
@@ -598,8 +597,7 @@ bool GSkyRegionRect::contains(const GSkyRegion& reg) const
     // ... otherwise throw an exception
     else {
         throw GException::feature_not_implemented(G_CONTAINS,
-              "Cannot compare rectangular region with other than rectangle or"
-              " circle yet.");
+              "Cannot compare to region type \""+reg.type()+"\" yet.");
     }
 
     // Return value
@@ -615,14 +613,15 @@ bool GSkyRegionRect::contains(const GSkyRegion& reg) const
  * @exception GException::feature_not_implemented
  *            Regions differ in type.
  *
- * @todo: - Improve implementation for rectangle-rectangle
+ * @todo Improve implementation for rectangle-rectangle
+ * @todo Implement check for map
  ***************************************************************************/
 bool GSkyRegionRect::overlaps(const GSkyRegion& reg) const
 {
     // Initialise return value
-    bool is_overlapping = false;
+    bool overlap = false;
 
-    // If other region is circle use a simple way to calculate
+    // If region is circle then check overlap between circle and rectangle
     if (reg.type() == "Circle") {
 
         // Create circular region from reg
@@ -641,33 +640,46 @@ bool GSkyRegionRect::overlaps(const GSkyRegion& reg) const
             // Check extension of circle along right ascension axis
             if (std::abs(local_centre.ra_deg()) <= (0.5 * m_width + circ_rad)) {
 
-                // Circle is fully contained in this rectangle
-                is_overlapping = true;
+                // Circle is overlapping with rectangle
+                overlap = true;
             }
         }
-    } // Region was of type "Circle"
+    } // endif: region was of type "Circle"
 
+    // ... otherwise if region is a rectangle then check overlap between
+    // two rectangles
     else if (reg.type() == "Rect") {
 
         // Create rectangular region from reg
         const GSkyRegionRect* regrect =
               dynamic_cast<const GSkyRegionRect*>(&reg);
 
-        // Dirty kludge: compare vs map
+        // Dirty kludge: compare with map
         GSkyRegionMap regmap = GSkyRegionMap(regrect);
-        is_overlapping = regmap.overlaps(*this);
+        overlap = regmap.overlaps(*this);
 
-    } // Region was of type "Rect"
+    } // endif: region was of type "Rect"
+
+    // ... otherwise if region is map then check overlap with map
+    else if (reg.type() == "Map") {
+
+        // Create map from reg
+        const GSkyRegionMap* regmap =
+              dynamic_cast<const GSkyRegionMap*>(&reg);
+
+        // Check overlap with circle
+        overlap = regmap->overlaps(*this);
+
+    } // endif: region was map
 
     // ... otherwise throw an exception
     else {
-        throw GException::feature_not_implemented(G_OVERLAPS,
-              "Cannot compare rectangular region with other than rectangle or"
-              " circle yet.");
+        throw GException::feature_not_implemented(G_CONTAINS,
+              "Cannot compare to region type \""+reg.type()+"\" yet.");
     }
 
     // Return value
-    return is_overlapping;
+    return overlap;
 }
 
 

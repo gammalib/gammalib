@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GSkyRegions.cpp - Sky region container class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2018 by Pierrick Martin                             *
+ *  copyright (C) 2013-2020 by Pierrick Martin                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -536,7 +536,7 @@ void GSkyRegions::load(const GFilename& filename)
                 coordsys = "icrs";
             }
 
-            // If region is a circle
+            // If region is a circle then read circle
             if (std::string::npos != fileline.find("circle")) {
 
                 // Create instance of GSkyRegion object
@@ -558,32 +558,14 @@ void GSkyRegions::load(const GFilename& filename)
 					region.read(newfileline);
 					append(region);
 				}
-			}
 
-            // If region is a rectangle
-            if (std::string::npos != fileline.find("box")) {
+			} // endif: region was circle
+
+            // ... otherwise if region is a box then read rectangle
+            else if (std::string::npos != fileline.find("box")) {
 
                 // Create instance of GSkyRegion object
                 GSkyRegionRect region;
-
-                // If coordinate system and region defined on the same line
-                if ((std::string::npos != fileline.find("fk5")) ||
-                    (std::string::npos != fileline.find("icrs")) ||
-                    (std::string::npos != fileline.find("galactic"))) {
-                    region.read(fileline);
-                    append(region);
-                }
-
-                // else, prepend the coordinate system
-                else {
-                coordsys = "icrs";
-            }
-
-            // If region is a circle
-            if (std::string::npos != fileline.find("circle")) {
-
-                // Create instance of GSkyRegion object
-                GSkyRegionCircle region;
 
                 // If coordinate system and region defined on the same line
                 if ((std::string::npos != fileline.find("fk5")) ||
@@ -601,8 +583,10 @@ void GSkyRegions::load(const GFilename& filename)
                     region.read(newfileline);
                     append(region);
                 }
-            }
-        }
+
+            } // endif: region was box
+
+        } // endwhile: looped over file
 
         // Close file
         ds9file.close();

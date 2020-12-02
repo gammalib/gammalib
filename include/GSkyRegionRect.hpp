@@ -30,10 +30,8 @@
 /* __ Includes ___________________________________________________________ */
 #include <vector>
 #include <string>
-//#include "GMath.hpp"
 #include "GSkyDir.hpp"
 #include "GSkyRegion.hpp"
-//#include "GTools.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 
