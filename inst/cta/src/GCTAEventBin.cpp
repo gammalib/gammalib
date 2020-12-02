@@ -342,40 +342,6 @@ const double& GCTAEventBin::solidangle(void) const
 
 
 /***********************************************************************//**
- * @brief Return minimum energy of event bin
- *
- * @return Minimum energy of event bin
- *
- * Returns minimum energy of event bin, computed using
- *
- * \f[
- *    E_{\rm min} = \frac{-\Delta E + sqrt{\Delta E^2 + 4 E^2}}{2}
- * \f]
- *
- * where
- * \f$\Delta E\f$ is the energy bin width, returned by ewidth() and
- * \f$E\f$ is the energy, returned by energy().
- ***************************************************************************/
-GEnergy GCTAEventBin::emin(void) const
-{
-    // Get energy and energy width in MeV
-    double energy = this->energy().MeV();
-    double ewidth = this->ewidth().MeV();
-
-    // Compute minimum energy in MeV
-    double arg   = ewidth * ewidth + 4.0 * energy * energy;
-    double e_min = 0.5 * (-ewidth + std::sqrt(arg));
-
-    // Set minimum energy
-    GEnergy emin;
-    emin.MeV(e_min);
-
-    // Return minimum energy
-    return emin;
-}
-
-
-/***********************************************************************//**
  * @brief Return energy width of event bin
  *
  * @return Energy width of event bin

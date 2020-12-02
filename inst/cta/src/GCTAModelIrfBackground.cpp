@@ -360,11 +360,24 @@ double GCTAModelIrfBackground::eval(const GEvent&       event,
         spat        = bgd(logE, inst_dir.detx(), inst_dir.dety());
     }
     else {
+        // Get pointer to event bin
         const GCTAEventBin* bin = static_cast<const GCTAEventBin*>(&event);
-        GEnergy emin  = bin->emin();
-        GEnergy emax  = emin + bin->ewidth();
-        double  norm  = 1.0 / bin->ewidth().MeV();
-        spat          = bgd.rate_ebin(inst_dir, emin, emax) * norm;
+
+        // Get energy and energy width in MeV
+        double energy = bin->energy().MeV();
+        double ewidth = bin->ewidth().MeV();
+
+        // Compute minimum energy in MeV
+        double arg   = ewidth * ewidth + 4.0 * energy * energy;
+        double e_min = 0.5 * (-ewidth + std::sqrt(arg));
+
+        // Set minimum and maximumenergy
+        GEnergy emin;
+        emin.MeV(e_min);
+        GEnergy emax = emin + bin->ewidth();
+
+        // Compute spatial component
+        spat = bgd.rate_ebin(inst_dir, emin, emax) / ewidth;
     }
     #else
     double logE = event.energy().log10TeV();

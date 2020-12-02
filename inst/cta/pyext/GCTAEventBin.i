@@ -61,8 +61,6 @@ public:
     const int&     ipix(void) const;
     const int&     ieng(void) const;
     const double&  solidangle(void) const;
-    GEnergy        emin(void) const;
-    GEnergy        emax(void) const;
     const GEnergy& ewidth(void) const;
     const double&  ontime(void) const;
     const double&  weight(void) const;

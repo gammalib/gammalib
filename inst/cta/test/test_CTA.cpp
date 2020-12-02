@@ -2229,8 +2229,6 @@ void TestGCTAObservation::test_event_bin(void)
     test_value(bin.ieng(), 7, "Check ieng() for filled bin");
     test_value(bin.solidangle(), 3.14, 1.0e-10,
                "Check solidangle() for filled bin");
-    test_value(bin.emin().TeV(), 1.996503, "Check emin() for filled bin");
-    test_value(bin.emax().TeV(), 2.003503,  "Check emax() for filled bin");
     test_value(bin.ewidth().GeV(), 7.0, 1.0e-10,
                "Check ewidth() for filled bin");
     test_value(bin.ontime(), 101.0, 1.0e-10, "Check ontime() for filled bin");
