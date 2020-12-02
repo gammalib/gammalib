@@ -144,7 +144,7 @@ public:
     PyObject* pixels(void) {
         PyObject *list = PyList_New(self->npix());
         for (int i = 0; i < self->npix(); ++i) {
-            PyList_SetItem(list, i, PyInt_FromLong((static_cast<long long*>(self->pixels())[i])));
+            PyList_SetItem(list, i, PyInt_FromLong((long)(static_cast<long long*>(self->pixels())[i])));
         }
         return list;
     }
