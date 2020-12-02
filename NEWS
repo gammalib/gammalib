@@ -56,6 +56,8 @@ The following methods have been added:
 - GXmlElement::string()
 - GXmlElement::real()
 - GXmlElement::integer()
+- GCTAEventBin::emin()
+- GCTAEventBin::emax()
 - gammalib::tmpnam()
 
 The following methods have been removed:
@@ -212,6 +214,9 @@ Adapted the GLATResponse interface to the vectorised response computation (#3203
 
 20. CTA interface
 -----------------
+Added the GCTAEventBin::emin() and emax() methods that return the energy boundaries
+of the event bin (#3472).
+
 Added the GCTAModelSkyCube class that implements a data space model for CTA (#3442).
 
 Implement in GCTAResponseCube an optimised vectorised response computation for radial
