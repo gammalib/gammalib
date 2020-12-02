@@ -1,4 +1,4 @@
-2020-11-27
+2020-12-02
 
         * Version 2.0.0 released
         ========================
@@ -19,6 +19,7 @@
         Remove implicit conversion warnings (#3324)
         Add gammalib::tmpnam() function (#3324)
         Add GSkyDirs container class (#3324)
+        Add GSkyRegionRect class (#3248)
         Implement vectorised response computation (#3203)
         Implement analytical gradients for the radial Gaussian model in a
           stacked analysis (#3203)

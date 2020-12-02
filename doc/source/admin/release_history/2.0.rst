@@ -60,6 +60,8 @@ New features
   Add ``gammalib::tmpnam()`` function
 * [`3324 <https://cta-redmine.irap.omp.eu/issues/3324>`_] -
   Add ``GSkyDirs`` container class
+* [`3248 <https://cta-redmine.irap.omp.eu/issues/3248>`_] -
+  Add ``GSkyRegionRect`` class
 * [`3074 <https://cta-redmine.irap.omp.eu/issues/3074>`_] -
   Add ``GSkyModel`` ``flux_error()`` and ``eflux_error()`` methods
 
