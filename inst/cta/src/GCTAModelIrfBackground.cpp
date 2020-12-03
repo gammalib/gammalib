@@ -62,7 +62,7 @@ const GModelRegistry         g_cta_inst_background_registry(&g_cta_inst_backgrou
 #define G_USE_RATE_EBIN
 
 /* __ Debug definitions __________________________________________________ */
-#define G_DUMP_MC
+//#define G_DUMP_MC
 //#define G_DEBUG_NPRED
 
 /* __ Constants __________________________________________________________ */
