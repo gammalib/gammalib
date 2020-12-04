@@ -526,38 +526,69 @@ bool GSkyRegionCircle::contains(const GSkyDir& dir) const
 bool GSkyRegionCircle::contains(const GSkyRegion& reg) const
 {
     // Initialise return value
-    bool fully_inside = false;
+    bool contains = false;
 
-    // If other region is circle use a simple way to calculate
+    // If the other region is a circle then check whether it is fully
+    // container in the circle
     if (reg.type() == "Circle") {
 
         // Create circular region from reg
-        const GSkyRegionCircle* regcirc =
-              dynamic_cast<const GSkyRegionCircle*>(&reg);
+        const GSkyRegionCircle* circle = dynamic_cast<const GSkyRegionCircle*>(&reg);
 
         // Calculate angular distance between the centres
-        double ang_dist = m_centre.dist_deg(regcirc->centre());
+        double ang_dist = m_centre.dist_deg(circle->centre());
 
         // Check if the region is contained in this
-        if ((ang_dist + regcirc->radius()) <= m_radius) {
-            fully_inside = true;
+        if ((ang_dist + circle->radius()) <= m_radius) {
+            contains = true;
         }
 
-    }
+    } // endif: other region was of type "Circle"
 
-    // If other region is rectangle check corners
+    // ... otherwise, if the other region is a rectangle then check whether
+    // all four corners are contained within the circle
     else if (reg.type() == "Rect") {
 
         // Create rectangular region from reg
-        const GSkyRegionRect* regrect =
-              dynamic_cast<const GSkyRegionRect*>(&reg);
+        const GSkyRegionRect* rect = dynamic_cast<const GSkyRegionRect*>(&reg);
 
-        // Check containment of all edges
-        fully_inside = contains(regrect->get_corner(0)) &&
-                       contains(regrect->get_corner(1)) &&
-                       contains(regrect->get_corner(2)) &&
-                       contains(regrect->get_corner(3));
+        // Check containment of all corners
+        contains = this->contains(rect->corner(0)) &&
+                   this->contains(rect->corner(1)) &&
+                   this->contains(rect->corner(2)) &&
+                   this->contains(rect->corner(3));
+
     }
+
+    // ... otherwise, if the other region is a map then check whether it
+    // is contained within the rectangle
+    else if (reg.type() == "Map") {
+
+        // Create map from reg
+        const GSkyRegionMap* map = dynamic_cast<const GSkyRegionMap*>(&reg);
+
+        // Get non-zero indices
+        std::vector<int> indices = map->nonzero_indices();
+
+        // Initialise containment flag to true
+        contains = true;
+
+        // Loop over all indices
+        for (int i = 0; i < indices.size(); ++i) {
+
+            // Get sky direction of map pixel
+            GSkyDir dir = map->map().inx2dir(i);
+
+            // If pixel is not contained then set containment flag to false
+            // and break
+            if (!this->contains(dir)) {
+                contains = false;
+                break;
+            }
+
+        } // endfor: looped over non-zero map indices
+
+    } // endif: other region was of type "Map"
 
     // ... otherwise throw an exception
     else {
@@ -565,8 +596,8 @@ bool GSkyRegionCircle::contains(const GSkyRegion& reg) const
               "Cannot compare to region type \""+reg.type()+"\" yet.");
     }
 
-    // Return value
-    return fully_inside;
+    // Return containment flag
+    return contains;
 }
 
 
@@ -590,14 +621,13 @@ bool GSkyRegionCircle::overlaps(const GSkyRegion& reg) const
     if (reg.type() == "Circle") {
 
         // Create circular region from reg
-        const GSkyRegionCircle* regcirc =
-              dynamic_cast<const GSkyRegionCircle*>(&reg);
+        const GSkyRegionCircle* circle = dynamic_cast<const GSkyRegionCircle*>(&reg);
 
         // Calculate angular distance between the centres
-        double ang_dist = m_centre.dist_deg(regcirc->centre());
+        double ang_dist = m_centre.dist_deg(circle->centre());
 
         // Check if the distance is smaller than the sum of both radii
-        if (ang_dist <= (m_radius + regcirc->radius())) {
+        if (ang_dist <= (m_radius + circle->radius())) {
             overlap = true;
         }
 
@@ -607,11 +637,10 @@ bool GSkyRegionCircle::overlaps(const GSkyRegion& reg) const
     else if (reg.type() == "Rect") {
 
         // Create rectangular region from reg
-        const GSkyRegionRect* regrect =
-              dynamic_cast<const GSkyRegionRect*>(&reg);
+        const GSkyRegionRect* rect = dynamic_cast<const GSkyRegionRect*>(&reg);
 
         // Check overlap with circle
-        overlap = regrect->overlaps(*this);
+        overlap = rect->overlaps(*this);
 
     } // endif: region was rectangle
 
@@ -619,11 +648,10 @@ bool GSkyRegionCircle::overlaps(const GSkyRegion& reg) const
     else if (reg.type() == "Map") {
 
         // Create map from reg
-        const GSkyRegionMap* regmap =
-              dynamic_cast<const GSkyRegionMap*>(&reg);
+        const GSkyRegionMap* map = dynamic_cast<const GSkyRegionMap*>(&reg);
 
         // Check overlap with circle
-        overlap = regmap->overlaps(*this);
+        overlap = map->overlaps(*this);
 
     } // endif: region was map
 
@@ -636,7 +664,6 @@ bool GSkyRegionCircle::overlaps(const GSkyRegion& reg) const
     // Return value
     return overlap;
 }
-
 
 
 /*==========================================================================

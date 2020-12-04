@@ -677,7 +677,7 @@ void GSkyRegionMap::set_region_rect(const GSkyRegionRect* rect)
     for (int icorner = 0; icorner < 4; ++icorner) {
 
         // Get skydir of current corner
-        GSkyDir corner = rect->get_corner(icorner);
+        GSkyDir corner = rect->corner(icorner);
 
         // Compute polar props in global coords relative to rectangle centre
         double dist = rect->centre().dist(corner);

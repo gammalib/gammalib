@@ -34,6 +34,7 @@
 #include "GSkyRegion.hpp"
 
 /* __ Forward declarations _______________________________________________ */
+class GSkyPixel;
 
 
 /***********************************************************************//**
@@ -97,26 +98,26 @@ public:
     void            read(const std::string& line);
     std::string     write(void) const;
     bool            contains(const GSkyDir& dir) const;
-    bool            contains_local(const GSkyDir& locdir) const;
     bool            contains(const GSkyRegion& reg) const;
     bool            overlaps(const GSkyRegion& reg) const;
-    GSkyDir         transform_to_local(const GSkyDir& skydir) const;
-    GSkyDir         transform_to_global(const GSkyDir& locdir) const;
-    GSkyDir         get_corner(const int& index) const;
+    GSkyDir         corner(const int& index) const;
     std::string     print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GSkyRegionRect& region);
-    void free_members(void);
-    void compute_solid_angle(void);
+    void      init_members(void);
+    void      copy_members(const GSkyRegionRect& region);
+    void      free_members(void);
+    void      compute_solid_angle(void);
+    bool      contains(const GSkyPixel& local) const;
+    GSkyPixel dir_to_local(const GSkyDir& dir) const;
+    GSkyDir   local_to_dir(const GSkyPixel& local) const;
 
     // Protected members
-    GSkyDir m_centre;     //!< Centre or reference point of the region
-    double  m_width;      //!< Width of the region (degrees)
-    double  m_height;      //!< Height of the region (degrees)
-    double  m_posang;     //!< Position angle, counterclockwise from North (degrees)
+    GSkyDir m_centre;  //!< Centre or reference point of the region
+    double  m_width;   //!< Width of the region (degrees)
+    double  m_height;  //!< Height of the region (degrees)
+    double  m_posang;  //!< Position angle, counterclockwise from North (degrees)
 };
 
 

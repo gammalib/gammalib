@@ -39,7 +39,7 @@
 #define G_READ                           "GSkyRegionRect::read(std::string&)"
 #define G_CONTAINS                    "GSkyRegionRect::contains(GSkyRegion&)"
 #define G_OVERLAPS                    "GSkyRegionRect::overlaps(GSkyRegion&)"
-#define G_GET_CORNER                       "GSkyRegionRect::get_corner(int&)"
+#define G_CORNER                               "GSkyRegionRect::corner(int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -102,8 +102,8 @@ GSkyRegionRect::GSkyRegionRect(const GSkyDir& centre,
 /***********************************************************************//**
  * @brief Right Ascension and Declination constructor
  *
- * @param[in] ra Right Ascension of region centre [deg].
- * @param[in] dec Declination of region centre [deg].
+ * @param[in] ra Right Ascension of region centre (degrees).
+ * @param[in] dec Declination of region centre (degrees).
  * @param[in] width Region width (degrees).
  * @param[in] height Region height (degrees).
  * @param[in] posang Position angle (degrees).
@@ -258,7 +258,7 @@ GSkyRegionRect* GSkyRegionRect::clone(void) const
 /***********************************************************************//**
  * @brief Set width of rectangular region
  *
- * @param[in] width Width (degrees).
+ * @param[in] width Rectangle width (degrees).
  *
  * @exception GException::invalid_argument
  *            Width value is less than 0.
@@ -291,7 +291,7 @@ void GSkyRegionRect::width(const double& width)
 /***********************************************************************//**
  * @brief Set height of rectangular region
  *
- * @param[in] height Height (degrees).
+ * @param[in] height Rectangle height (degrees).
  *
  * @exception GException::invalid_argument
  *            Height value is less than 0.
@@ -488,43 +488,14 @@ std::string GSkyRegionRect::write(void) const
  ***************************************************************************/
 bool GSkyRegionRect::contains(const GSkyDir& dir) const
 {
-    // Compute sky direction in local coordinate system
-    GSkyDir locdir = transform_to_local(dir);
+    // Transform sky direction to local coordinate system
+    GSkyPixel local = dir_to_local(dir);
 
     // Check containment using local coordinate system
-    bool dir_is_in = contains_local(locdir);
+    bool contains = this->contains(local);
 
-    // Return bool
-    return dir_is_in;
-}
-
-
-/***********************************************************************//**
- * @brief Checks if local direction lies within region
- *
- * @param[in] locdir Sky direction in local coordinate system.
- *
- * A local direction lies within a region when its distance to the region
- * centre is not larger than the region extension in both axes directions.
- ***************************************************************************/
-bool GSkyRegionRect::contains_local(const GSkyDir& locdir) const
-{
-    // Initialise return value
-    bool dir_is_in = false;
-
-    // Check containment: declination axis
-    if ((std::abs(locdir.dec_deg()) - 1.0e-10) <= 0.5 * m_height) {
-
-        // Check containment: right ascension axis
-        if ((std::abs(locdir.ra_deg()) - 1.0e-10) <= 0.5 * m_width) {
-
-            // Sky direction is inside the rectangle
-            dir_is_in = true;
-        }
-    }
-
-    // Return bool
-    return dir_is_in;
+    // Return containment flag
+    return contains;
 }
 
 
@@ -539,60 +510,88 @@ bool GSkyRegionRect::contains_local(const GSkyDir& locdir) const
 bool GSkyRegionRect::contains(const GSkyRegion& reg) const
 {
     // Initialise return value
-    bool is_fully_inside = false;
+    bool contains = false;
 
-    // If other region is circle use a simple way to calculate
+    // If the other region is a circle then check whether it is fully
+    // contained within the rectangle
     if (reg.type() == "Circle") {
 
         // Create circular region from reg
-        const GSkyRegionCircle* regcirc =
-              dynamic_cast<const GSkyRegionCircle*>(&reg);
+        const GSkyRegionCircle* circle = dynamic_cast<const GSkyRegionCircle*>(&reg);
 
         // Transform circle center to local coordinate system
-        GSkyDir local_centre = transform_to_local(regcirc->centre());
+        GSkyPixel local = dir_to_local(circle->centre());
+        double    x_deg = local.x() * gammalib::rad2deg;
+        double    y_deg = local.y() * gammalib::rad2deg;
 
-        // Get circle radius
-        const double circ_rad = regcirc->radius();
+        // Get circle radius in degrees
+        double radius = circle->radius();
 
-        // Check extension of circle along declination axis
-        if ((std::abs(local_centre.dec_deg()) + circ_rad) <= 0.5 * m_height) {
-
-            // Check extension of circle along right ascension axis
-            if ((std::abs(local_centre.ra_deg()) + circ_rad) <= 0.5 * m_width) {
-
-                // Circle is fully contained in this rectangle
-                is_fully_inside = true;
+        // Check whether circle is contained within rectangle
+        if ((std::abs(y_deg) + radius) <= 0.5 * m_height) {
+            if ((std::abs(x_deg) + radius) <= 0.5 * m_width) {
+                contains = true;
             }
         }
-    } // Region was of type "Circle"
 
-    // If other region is rectangle use a simple way to calculate
+    } // endif: other region was of type "Circle"
+
+    // ... otherwise, if the other region is a rectangle then check whether
+    // all corners fall within the rectangle
     else if (reg.type() == "Rect") {
 
         // Create rectangular region from reg
-        const GSkyRegionRect* regrect =
-              dynamic_cast<const GSkyRegionRect*>(&reg);
+        const GSkyRegionRect* rect = dynamic_cast<const GSkyRegionRect*>(&reg);
+
+        // Initialise containment flag to true
+        contains = true;
 
         // Loop over the four corners of the rectangle :regrect:
-        for (int icorner = 0; icorner < 4; ++icorner) {
+        for (int i = 0; i < 4; ++i) {
 
-            // Get skydir of current corner
-            GSkyDir corner = regrect->get_corner(icorner);
+            // Get sky direction of current corner
+            GSkyDir corner = rect->corner(i);
 
-            // Check corner containment
-            if (!contains(corner)) {
+            // If corner is not contained then set containment flag to false
+            // and break
+            if (!this->contains(corner)) {
+                contains = false;
                 break;
             }
-            // Did we arrive at the last corner?
-            else if (icorner == 3) {
 
-                // As we reached this point, the three prior corners were inside
-                // and the last corner now is also inside:
-                // Rectangle is fully inside
-                is_fully_inside = true;
+        } // endfor: looped over the four corners
+
+    } // endif: other region was of type "Rect"
+
+    // ... otherwise, if the other region is a map then check whether it
+    // is contained within the rectangle
+    else if (reg.type() == "Map") {
+
+        // Create map from reg
+        const GSkyRegionMap* map = dynamic_cast<const GSkyRegionMap*>(&reg);
+
+        // Get non-zero indices
+        std::vector<int> indices = map->nonzero_indices();
+
+        // Initialise containment flag to true
+        contains = true;
+
+        // Loop over all indices
+        for (int i = 0; i < indices.size(); ++i) {
+
+            // Get sky direction of map pixel
+            GSkyDir dir = map->map().inx2dir(i);
+
+            // If pixel is not contained then set containment flag to false
+            // and break
+            if (!this->contains(dir)) {
+                contains = false;
+                break;
             }
-        } // Looped over the four corners
-    } // Region was of type "Rect"
+
+        } // endfor: looped over non-zero map indices
+
+    } // endif: other region was of type "Map"
 
     // ... otherwise throw an exception
     else {
@@ -600,8 +599,8 @@ bool GSkyRegionRect::contains(const GSkyRegion& reg) const
               "Cannot compare to region type \""+reg.type()+"\" yet.");
     }
 
-    // Return value
-    return is_fully_inside;
+    // Return containment flag
+    return contains;
 }
 
 
@@ -614,36 +613,34 @@ bool GSkyRegionRect::contains(const GSkyRegion& reg) const
  *            Regions differ in type.
  *
  * @todo Improve implementation for rectangle-rectangle
- * @todo Implement check for map
  ***************************************************************************/
 bool GSkyRegionRect::overlaps(const GSkyRegion& reg) const
 {
     // Initialise return value
     bool overlap = false;
 
-    // If region is circle then check overlap between circle and rectangle
+    // If the region is a circle then check overlap between circle and
+    // rectangle
     if (reg.type() == "Circle") {
 
         // Create circular region from reg
-        const GSkyRegionCircle* regcirc =
-              dynamic_cast<const GSkyRegionCircle*>(&reg);
+        const GSkyRegionCircle* circle = dynamic_cast<const GSkyRegionCircle*>(&reg);
 
         // Transform circle center to local coordinate system
-        GSkyDir local_centre = transform_to_local(regcirc->centre());
+        GSkyPixel local = dir_to_local(circle->centre());
+        double    x_deg = local.x() * gammalib::rad2deg;
+        double    y_deg = local.y() * gammalib::rad2deg;
 
-        // Get circle radius
-        const double circ_rad = regcirc->radius();
+        // Get circle radius in degrees
+        double radius = circle->radius();
 
-        // Check extension of circle along declination axis
-        if (std::abs(local_centre.dec_deg()) <= (0.5 * m_height + circ_rad)) {
-
-            // Check extension of circle along right ascension axis
-            if (std::abs(local_centre.ra_deg()) <= (0.5 * m_width + circ_rad)) {
-
-                // Circle is overlapping with rectangle
+        // Check whether circle overlaps within rectangle
+        if (std::abs(y_deg) <= (0.5 * m_height + radius)) {
+            if (std::abs(x_deg) <= (0.5 * m_width + radius)) {
                 overlap = true;
             }
         }
+
     } // endif: region was of type "Circle"
 
     // ... otherwise if region is a rectangle then check overlap between
@@ -651,12 +648,11 @@ bool GSkyRegionRect::overlaps(const GSkyRegion& reg) const
     else if (reg.type() == "Rect") {
 
         // Create rectangular region from reg
-        const GSkyRegionRect* regrect =
-              dynamic_cast<const GSkyRegionRect*>(&reg);
+        const GSkyRegionRect* rect = dynamic_cast<const GSkyRegionRect*>(&reg);
 
         // Dirty kludge: compare with map
-        GSkyRegionMap regmap = GSkyRegionMap(regrect);
-        overlap = regmap.overlaps(*this);
+        GSkyRegionMap map = GSkyRegionMap(rect);
+        overlap           = map.overlaps(*this);
 
     } // endif: region was of type "Rect"
 
@@ -664,11 +660,10 @@ bool GSkyRegionRect::overlaps(const GSkyRegion& reg) const
     else if (reg.type() == "Map") {
 
         // Create map from reg
-        const GSkyRegionMap* regmap =
-              dynamic_cast<const GSkyRegionMap*>(&reg);
+        const GSkyRegionMap* map = dynamic_cast<const GSkyRegionMap*>(&reg);
 
         // Check overlap with circle
-        overlap = regmap->overlaps(*this);
+        overlap = map->overlaps(*this);
 
     } // endif: region was map
 
@@ -684,99 +679,47 @@ bool GSkyRegionRect::overlaps(const GSkyRegion& reg) const
 
 
 /***********************************************************************//**
- * @brief Transform a sky direction to the local cartesian coordinate system.
- *
- * @param[in] skydir Sky direction in global coordinate system.
- * @return Sky direction in local cartesian region object coordinates.
- *
- * Transform the sky direction @p skydir to the local cartesian coordinate
- * system. The origin of the local coordinate system is fixed to the center
- * of the rectangle and aligned in +ra (width) and +dec (height). Please
- * note, that a GSkyDir object is returned, even if the local coordsys is
- * is cartesian.
- ***************************************************************************/
-GSkyDir GSkyRegionRect::transform_to_local(const GSkyDir& skydir) const
-{
-    // Get distance and polar angle relative to rectangle centre
-    double dist = m_centre.dist(skydir);
-    double pa   = m_centre.posang(skydir) - m_posang * gammalib::deg2rad;
-
-    // Compute corresponding x and y coordinate from polar coords
-    double x = dist * std::sin(pa);
-    double y = dist * std::cos(pa);
-
-    // Create output sky direction
-    GSkyDir transformed;
-    transformed.radec(x, y);
-
-    // Return
-    return transformed;
-}
-
-
-/***********************************************************************//**
- * @brief Transform a local coordinate to the global coordinate system.
- *
- * @param[in] locdir Direction in local coordinate system.
- * @return Sky direction in global coordinate system.
- *
- * Transform the local direction @p locdir to the global coordinate system.
- * The origin of the local coordinate system is fixed to the center of the
- * rectangle and aligned in +ra (width) and +dec (height).
- ***************************************************************************/
-GSkyDir GSkyRegionRect::transform_to_global(const GSkyDir& locdir) const
-{
-    // // Initialise centre in local coordinates (maybe make class member?)
-    GSkyDir centre_local;
-    centre_local.radec(0,0);
-
-    // Access x and y in local coordsys
-    double x = locdir.ra();
-    double y = locdir.dec();
-
-    // Compute dist and position angle in polar coords
-    double dist = std::sqrt(x*x + y*y);
-    double pa   = gammalib::pihalf - std::atan2(y, x) +
-                  m_posang  * gammalib::deg2rad;
-
-    // Create output global sky direction
-    GSkyDir transformed(m_centre);
-    transformed.rotate(pa, dist);
-
-    // Return
-    return transformed;
-}
-
-
-/***********************************************************************//**
- * @brief Get the sky direction of a corner of the rectangle, there are four.
+ * @brief Return sky direction of one corner of the rectangle
  *
  * @param[in] index Corner index [0,3]
- * @return Sky direction of corner in global coordinate system.
+ * @return Sky direction of corner.
  *
  * @exception GException::out_of_range
  *            Corner index is not in [0,3].
  *
- * The index counts CCW starting from +RA,+DEC: +R+D, +R-D, -R-D, -R+D.
+ * Returns the sky direction of one corner of the rectangle. The corner
+ * @p index is counted counterclockwise from the positive Right Ascension
+ * and Declination directions:
+ *
+ *  * `index = 0` : \f$(\alpha + \frac{\rm width}{2}, \delta + \frac{\rm height}{2})\f$
+ *  * `index = 1` : \f$(\alpha + \frac{\rm width}{2}, \delta - \frac{\rm height}{2})\f$
+ *  * `index = 2` : \f$(\alpha - \frac{\rm width}{2}, \delta + \frac{\rm height}{2})\f$
+ *  * `index = 3` : \f$(\alpha - \frac{\rm width}{2}, \delta - \frac{\rm height}{2})\f$
+ *
+ * where \f$\alpha\f$ and \f$\delta\f$ are the Right Ascension and
+ * Declination of the rectangle centre, and \f${\rm width}\f$ and
+ * \f${\rm height}\f$ are the width and height of the rectangle.
  ***************************************************************************/
-GSkyDir GSkyRegionRect::get_corner(const int& index) const
+GSkyDir GSkyRegionRect::corner(const int& index) const
 {
     // Assert index is in [0,3]
     if ((index < 0) || (index > 3)) {
-        throw GException::out_of_range(G_GET_CORNER, "Corner index", index, 3);
+        throw GException::out_of_range(G_CORNER, "Corner index", index, 3);
     }
 
-    // Compute the offset to the corners
-    // Index counts CCW starting from +RA,+DEC: +R+D, +R-D, -R-D, -R+D
+    // Compute the offset to the corners in degrees
     double dx = 0.5 * m_width  * (1 - 2*int(index >= 2));
     double dy = 0.5 * m_height * (1 - 2*int((index==1) || (index==2)));
 
-    // Define local corner sky direction
-    GSkyDir corner;
-    corner.radec_deg(dx,dy);
+    // Convert offset into radians
+    dx *= gammalib::deg2rad;
+    dy *= gammalib::deg2rad;
+
+    // Define corner in local coordinates
+    GSkyPixel local(dx,dy);
 
     // Transform to global sky direction
-    corner = transform_to_global(corner);
+    GSkyDir corner = local_to_dir(local);
 
     // Return
     return corner;
@@ -871,7 +814,19 @@ void GSkyRegionRect::free_members(void)
 
 
 /***********************************************************************//**
- * @brief Compute solid angle (sr)
+ * @brief Compute solid angle of rectangle
+ *
+ * This method computes the solid angle of the rectangle in steradians and
+ * stores the result in the `m_solid` member.
+ *
+ * The solid angle is computed using
+ *
+ * \f[
+ *    \Omega = {\rm width} \times {\rm height}
+ * \f]
+ *
+ * where \f${\rm width}\f$ and \f${\rm height}\f$ are the width and the
+ * height of the rectangle expressed in radians.
  ***************************************************************************/
 void GSkyRegionRect::compute_solid_angle(void)
 {
@@ -880,4 +835,111 @@ void GSkyRegionRect::compute_solid_angle(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Checks if local direction lies within region
+ *
+ * @param[in] locdir Sky direction in local coordinate system.
+ *
+ * A local direction lies within a region when its distance to the region
+ * centre is not larger than the region extension in both axes directions.
+ ***************************************************************************/
+bool GSkyRegionRect::contains(const GSkyPixel& local) const
+{
+    // Initialise return value
+    bool contains = false;
+
+    // Get local y coordinate in degrees
+    double y = local.y() * gammalib::rad2deg;
+
+    // Continue if the y coordinate is within half of the height
+    if ((std::abs(y) - 1.0e-10) <= 0.5 * m_height) {
+
+        // Get local x coordinate in degrees
+        double x = local.x() * gammalib::rad2deg;
+
+        // If the x coordinate is within half of the width the local
+        // coordinate is contained within the rectangle
+        if ((std::abs(x) - 1.0e-10) <= 0.5 * m_width) {
+            contains = true;
+        }
+
+    } // endif: y coordinate is within half of the height
+
+    // Return containment
+    return contains;
+}
+
+
+/***********************************************************************//**
+ * @brief Transform sky direction to local rectangle coordinates
+ *
+ * @param[in] dir Sky direction.
+ * @return Local cartesian region object coordinates.
+ *
+ * Transform the sky direction @p dir to the local cartesian coordinate
+ * system. The local coordinates \f$(x,y)\f$ are defined by
+ *
+ * \f[
+ *    x = d \sin(\phi)
+ * \f]
+ *
+ * and
+ *
+ * \f[
+ *    y = d \cos(\phi)
+ * \f]
+ *
+ * where \f$d\f$ is the angular distance between the sky direction @p dir
+ * and the centre of the rectangle in radians, and \f$\phi\f$ is the
+ * position angle of the sky direction @p dir with respect to the position
+ * angle of the rectangle, computed counter clockwise.
+ ***************************************************************************/
+GSkyPixel GSkyRegionRect::dir_to_local(const GSkyDir& dir) const
+{
+    // Get distance and polar angle relative to rectangle centre
+    double dist = m_centre.dist(dir);
+    double pa   = m_centre.posang(dir) - m_posang * gammalib::deg2rad;
+
+    // Compute corresponding x and y coordinate from polar coords
+    double x = dist * std::sin(pa);
+    double y = dist * std::cos(pa);
+
+    // Create local coordinates
+    GSkyPixel local(x,y);
+
+    // Return local coordinates
+    return local;
+}
+
+
+/***********************************************************************//**
+ * @brief Transform local rectangle coordinates to sky direction
+ *
+ * @param[in] local Local rectangle coordinates.
+ * @return Sky direction.
+ *
+ * Transform the local coordinates @p local to a sky direction. See
+ * GSkyRegionRect::dir_to_local for the relation between local rectangle
+ * coordinates and the sky direction.
+ ***************************************************************************/
+GSkyDir GSkyRegionRect::local_to_dir(const GSkyPixel& local) const
+{
+    // Get local coordinates (radians)
+    double x = local.x();
+    double y = local.y();
+
+    // Compute dist and position angle in polar coords
+    double dist = std::sqrt(x*x + y*y);
+    double pa   = gammalib::pihalf - std::atan2(y, x) +
+                  m_posang  * gammalib::deg2rad;
+
+    // Create output global sky direction
+    GSkyDir dir(m_centre);
+    dir.rotate(pa, dist);
+
+    // Return sky direction
+    return dir;
 }
