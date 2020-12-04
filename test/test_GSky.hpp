@@ -53,7 +53,7 @@ public:
     void                test_GSkyMap_io(void);
     void                test_GSkyRegions(void);
     void                test_GSkyRegionCircle(void);
-    void                test_GSkyRegionRect(void);
+    void                test_GSkyRegionRectangle(void);
     void                test_GSkyRegionMap(void);
     void                test_GHorizDir(void);
 

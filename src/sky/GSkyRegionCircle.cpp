@@ -30,7 +30,7 @@
 #endif
 #include "GTools.hpp"
 #include "GSkyRegionCircle.hpp"
-#include "GSkyRegionRect.hpp"
+#include "GSkyRegionRectangle.hpp"
 #include "GSkyRegionMap.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -547,10 +547,11 @@ bool GSkyRegionCircle::contains(const GSkyRegion& reg) const
 
     // ... otherwise, if the other region is a rectangle then check whether
     // all four corners are contained within the circle
-    else if (reg.type() == "Rect") {
+    else if (reg.type() == "Rectangle") {
 
         // Create rectangular region from reg
-        const GSkyRegionRect* rect = dynamic_cast<const GSkyRegionRect*>(&reg);
+        const GSkyRegionRectangle* rect =
+              dynamic_cast<const GSkyRegionRectangle*>(&reg);
 
         // Check containment of all corners
         contains = this->contains(rect->corner(0)) &&
@@ -634,10 +635,11 @@ bool GSkyRegionCircle::overlaps(const GSkyRegion& reg) const
     } // endif: region was circle
 
     // ... otherwise if region is rectangle then check overlap
-    else if (reg.type() == "Rect") {
+    else if (reg.type() == "Rectangle") {
 
         // Create rectangular region from reg
-        const GSkyRegionRect* rect = dynamic_cast<const GSkyRegionRect*>(&reg);
+        const GSkyRegionRectangle* rect =
+              dynamic_cast<const GSkyRegionRectangle*>(&reg);
 
         // Check overlap with circle
         overlap = rect->overlaps(*this);

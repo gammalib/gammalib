@@ -152,7 +152,7 @@
 #include "GSkyRegions.hpp"
 #include "GSkyRegion.hpp"
 #include "GSkyRegionCircle.hpp"
-#include "GSkyRegionRect.hpp"
+#include "GSkyRegionRectangle.hpp"
 #include "GSkyRegionMap.hpp"
 #include "GSkyProjection.hpp"
 #include "GHealpix.hpp"

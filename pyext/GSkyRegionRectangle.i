@@ -1,5 +1,5 @@
 /***************************************************************************
- *                      GSkyRegionRect.i - Sky region class                *
+ *          GSkyRegionRectangle.i - Rectangular sky region class           *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2019-2020 by Andreas Specovius                           *
  * ----------------------------------------------------------------------- *
@@ -19,68 +19,68 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GSkyRegionRect.i
+ * @file GSkyRegionRectangle.i
  * @brief Rectangular sky region class interface definition
  * @author Andreas Specovius
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GSkyRegionRect.hpp"
+#include "GSkyRegionRectangle.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GSkyRegionRect
+ * @class GSkyRegionRectangle
  *
  * @brief Interface for the rectangular sky region class
  ***************************************************************************/
-class GSkyRegionRect : public GSkyRegion {
+class GSkyRegionRectangle : public GSkyRegion {
 
 public:
     // Constructors and destructors
-    GSkyRegionRect(void);
-    GSkyRegionRect(const GSkyDir& centre,
-                   const double&  width,
-                   const double&  height,
-                   const double&  posang);
-    GSkyRegionRect(const double& ra,
-                   const double& dec,
-                   const double& width,
-                   const double& height,
-                   const double& posang);
-    explicit GSkyRegionRect(const std::string& line);
-    GSkyRegionRect(const GSkyRegionRect& region);
-    virtual ~GSkyRegionRect(void);
+    GSkyRegionRectangle(void);
+    GSkyRegionRectangle(const GSkyDir& centre,
+                        const double&  width,
+                        const double&  height,
+                        const double&  posang);
+    GSkyRegionRectangle(const double& ra,
+                        const double& dec,
+                        const double& width,
+                        const double& height,
+                        const double& posang);
+    explicit GSkyRegionRectangle(const std::string& line);
+    GSkyRegionRectangle(const GSkyRegionRectangle& region);
+    virtual ~GSkyRegionRectangle(void);
 
     // Implemented methods
-    void            clear(void);
-    GSkyRegionRect* clone(void) const;
-    std::string     classname(void) const;
-    const GSkyDir&  centre(void) const;
-    void            centre(const GSkyDir& centre);
-    void            centre(const double& ra,const double& dec);
-    double          ra(void) const;
-    double          dec(void) const;
-    const double&   width(void) const;
-    void            width(const double& width);
-    const double&   height(void) const;
-    void            height(const double& height);
-    const double&   posang(void) const;
-    void            posang(const double& posang);
-    void            read(const std::string& line);
-    std::string     write(void) const;
-    bool            contains(const GSkyDir& dir) const;
-    bool            contains(const GSkyRegion& reg) const;
-    bool            overlaps(const GSkyRegion& reg) const;
-    GSkyDir         corner(const int& index) const;
+    void                 clear(void);
+    GSkyRegionRectangle* clone(void) const;
+    std::string          classname(void) const;
+    const GSkyDir&       centre(void) const;
+    void                 centre(const GSkyDir& centre);
+    void                 centre(const double& ra,const double& dec);
+    double               ra(void) const;
+    double               dec(void) const;
+    const double&        width(void) const;
+    void                 width(const double& width);
+    const double&        height(void) const;
+    void                 height(const double& height);
+    const double&        posang(void) const;
+    void                 posang(const double& posang);
+    void                 read(const std::string& line);
+    std::string          write(void) const;
+    bool                 contains(const GSkyDir& dir) const;
+    bool                 contains(const GSkyRegion& reg) const;
+    bool                 overlaps(const GSkyRegion& reg) const;
+    GSkyDir              corner(const int& index) const;
 };
 
 
 /***********************************************************************//**
- * @brief GSkyRegionRect class extension
+ * @brief GSkyRegionRectangle class extension
  ***************************************************************************/
-%extend GSkyRegionRect {
-    GSkyRegionRect copy() {
+%extend GSkyRegionRectangle {
+    GSkyRegionRectangle copy() {
         return (*self);
     }
 %pythoncode {

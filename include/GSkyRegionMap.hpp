@@ -37,7 +37,7 @@
 /* __ Forward declarations _______________________________________________ */
 class GSkyDir;
 class GSkyRegionMap;
-class GSkyRegionRect;
+class GSkyRegionRectangle;
 
 
 /***********************************************************************//**
@@ -88,7 +88,7 @@ protected:
     void compute_solid_angle(void);
     void set_nonzero_indices(void);
     void set_region_circle(const GSkyRegionCircle* circle);
-    void set_region_rect(const GSkyRegionRect* rect);
+    void set_region_rectangle(const GSkyRegionRectangle* rect);
 
     // Protected members
     GSkyMap	          m_map;             //!< The region map

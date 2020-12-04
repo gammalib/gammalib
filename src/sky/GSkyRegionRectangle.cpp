@@ -1,5 +1,5 @@
 /***************************************************************************
- *              GSkyRegionRect.cpp - Rectangular sky region class          *
+ *           GSkyRegionRectangle.cpp - Rectangular sky region class        *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2019-2020 by Andreas Specovius                           *
  * ----------------------------------------------------------------------- *
@@ -19,7 +19,7 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GSkyRegionRect.hpp
+ * @file GSkyRegionRectangle.hpp
  * @brief Rectangular sky region implementation
  * @author Andreas Specovius
  */
@@ -30,16 +30,16 @@
 #endif
 #include "GTools.hpp"
 #include "GSkyRegionCircle.hpp"
-#include "GSkyRegionRect.hpp"
+#include "GSkyRegionRectangle.hpp"
 #include "GSkyRegionMap.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_WIDTH                              "GSkyRegionRect::width(double&)"
-#define G_HEIGHT                            "GSkyRegionRect::height(double&)"
-#define G_READ                           "GSkyRegionRect::read(std::string&)"
-#define G_CONTAINS                    "GSkyRegionRect::contains(GSkyRegion&)"
-#define G_OVERLAPS                    "GSkyRegionRect::overlaps(GSkyRegion&)"
-#define G_CORNER                               "GSkyRegionRect::corner(int&)"
+#define G_WIDTH                         "GSkyRegionRectangle::width(double&)"
+#define G_HEIGHT                       "GSkyRegionRectangle::height(double&)"
+#define G_READ                      "GSkyRegionRectangle::read(std::string&)"
+#define G_CONTAINS               "GSkyRegionRectangle::contains(GSkyRegion&)"
+#define G_OVERLAPS               "GSkyRegionRectangle::overlaps(GSkyRegion&)"
+#define G_CORNER                          "GSkyRegionRectangle::corner(int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -59,7 +59,7 @@
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GSkyRegionRect::GSkyRegionRect(void) : GSkyRegion()
+GSkyRegionRectangle::GSkyRegionRectangle(void) : GSkyRegion()
 {
     // Initialise members
     init_members();
@@ -77,10 +77,10 @@ GSkyRegionRect::GSkyRegionRect(void) : GSkyRegion()
  * @param[in] height Region height (degrees).
  * @param[in] posang Position angle (degrees).
  ***************************************************************************/
-GSkyRegionRect::GSkyRegionRect(const GSkyDir& centre,
-                               const double&  width,
-                               const double&  height,
-                               const double&  posang) : GSkyRegion()
+GSkyRegionRectangle::GSkyRegionRectangle(const GSkyDir& centre,
+                                         const double&  width,
+                                         const double&  height,
+                                         const double&  posang) : GSkyRegion()
 {
     // Initialise members
     init_members();
@@ -108,11 +108,11 @@ GSkyRegionRect::GSkyRegionRect(const GSkyDir& centre,
  * @param[in] height Region height (degrees).
  * @param[in] posang Position angle (degrees).
  ***************************************************************************/
-GSkyRegionRect::GSkyRegionRect(const double& ra,
-                               const double& dec,
-                               const double& width,
-                               const double& height,
-                               const double& posang) : GSkyRegion()
+GSkyRegionRectangle::GSkyRegionRectangle(const double& ra,
+                                         const double& dec,
+                                         const double& width,
+                                         const double& height,
+                                         const double& posang) : GSkyRegion()
 {
     // Initialise members
     init_members();
@@ -138,7 +138,7 @@ GSkyRegionRect::GSkyRegionRect(const double& ra,
  *
  * Constructs region from a DS9 region file line.
  ***************************************************************************/
-GSkyRegionRect::GSkyRegionRect(const std::string& line) : GSkyRegion()
+GSkyRegionRectangle::GSkyRegionRectangle(const std::string& line) : GSkyRegion()
 {
      // Initialise members
      init_members();
@@ -157,7 +157,8 @@ GSkyRegionRect::GSkyRegionRect(const std::string& line) : GSkyRegion()
  *
  * @param[in] region Rectangular sky region.
  ***************************************************************************/
-GSkyRegionRect::GSkyRegionRect(const GSkyRegionRect& region) : GSkyRegion(region)
+GSkyRegionRectangle::GSkyRegionRectangle(const GSkyRegionRectangle& region) :
+                     GSkyRegion(region)
 {
     // Initialise members
     init_members();
@@ -173,7 +174,7 @@ GSkyRegionRect::GSkyRegionRect(const GSkyRegionRect& region) : GSkyRegion(region
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GSkyRegionRect::~GSkyRegionRect(void)
+GSkyRegionRectangle::~GSkyRegionRectangle(void)
 {
     // Free members
     free_members();
@@ -195,7 +196,7 @@ GSkyRegionRect::~GSkyRegionRect(void)
  * @param[in] region Rectangular sky region.
  * @return Rectangular sky region.
  ***************************************************************************/
-GSkyRegionRect& GSkyRegionRect::operator=(const GSkyRegionRect& region)
+GSkyRegionRectangle& GSkyRegionRectangle::operator=(const GSkyRegionRectangle& region)
 {
     // Execute only if object is not identical
     if (this != &region) {
@@ -228,7 +229,7 @@ GSkyRegionRect& GSkyRegionRect::operator=(const GSkyRegionRect& region)
 /***********************************************************************//**
  * @brief Clear instance
  ***************************************************************************/
-void GSkyRegionRect::clear(void)
+void GSkyRegionRectangle::clear(void)
 {
     // Free members
     free_members();
@@ -248,10 +249,10 @@ void GSkyRegionRect::clear(void)
  *
  * @return Deep copy to rectangular sky region.
  ***************************************************************************/
-GSkyRegionRect* GSkyRegionRect::clone(void) const
+GSkyRegionRectangle* GSkyRegionRectangle::clone(void) const
 {
     // Clone rectangular sky region
-    return new GSkyRegionRect(*this);
+    return new GSkyRegionRectangle(*this);
 }
 
 
@@ -266,7 +267,7 @@ GSkyRegionRect* GSkyRegionRect::clone(void) const
  * Sets the @p width of the rectangular sky region. Only non-negative widths
  * are allowed.
  ***************************************************************************/
-void GSkyRegionRect::width(const double& width)
+void GSkyRegionRectangle::width(const double& width)
 {
     // Throw an exception if the width is less than zero
     if (width < 0.0) {
@@ -302,7 +303,7 @@ void GSkyRegionRect::width(const double& width)
  * Note that for a position angle of zero, the height axis is pointing to
  * celestial north.
  ***************************************************************************/
-void GSkyRegionRect::height(const double& height)
+void GSkyRegionRectangle::height(const double& height)
 {
     if (height < 0.0) {
         std::string msg =
@@ -331,7 +332,7 @@ void GSkyRegionRect::height(const double& height)
  * @exception GException::invalid_value
  *            Invalid value found in DS9 format string.
  ***************************************************************************/
-void GSkyRegionRect::read(const std::string& line)
+void GSkyRegionRectangle::read(const std::string& line)
 {
     // Clear the current instance
     clear();
@@ -449,7 +450,7 @@ void GSkyRegionRect::read(const std::string& line)
  * Writes a DS9 region into a string. The region name is only written if it
  * is defined.
  ***************************************************************************/
-std::string GSkyRegionRect::write(void) const
+std::string GSkyRegionRectangle::write(void) const
 {
     // Allocate string
     std::string result;
@@ -486,7 +487,7 @@ std::string GSkyRegionRect::write(void) const
  * A sky direction lies within a region when its distance to the region
  * centre is not larger than the region extension in both axes directions.
  ***************************************************************************/
-bool GSkyRegionRect::contains(const GSkyDir& dir) const
+bool GSkyRegionRectangle::contains(const GSkyDir& dir) const
 {
     // Transform sky direction to local coordinate system
     GSkyPixel local = dir_to_local(dir);
@@ -507,7 +508,7 @@ bool GSkyRegionRect::contains(const GSkyDir& dir) const
  * @exception GException::feature_not_implemented
  *            Not all region types supported currently.
  ***************************************************************************/
-bool GSkyRegionRect::contains(const GSkyRegion& reg) const
+bool GSkyRegionRectangle::contains(const GSkyRegion& reg) const
 {
     // Initialise return value
     bool contains = false;
@@ -517,7 +518,8 @@ bool GSkyRegionRect::contains(const GSkyRegion& reg) const
     if (reg.type() == "Circle") {
 
         // Create circular region from reg
-        const GSkyRegionCircle* circle = dynamic_cast<const GSkyRegionCircle*>(&reg);
+        const GSkyRegionCircle* circle =
+              dynamic_cast<const GSkyRegionCircle*>(&reg);
 
         // Transform circle center to local coordinate system
         GSkyPixel local = dir_to_local(circle->centre());
@@ -538,10 +540,11 @@ bool GSkyRegionRect::contains(const GSkyRegion& reg) const
 
     // ... otherwise, if the other region is a rectangle then check whether
     // all corners fall within the rectangle
-    else if (reg.type() == "Rect") {
+    else if (reg.type() == "Rectangle") {
 
         // Create rectangular region from reg
-        const GSkyRegionRect* rect = dynamic_cast<const GSkyRegionRect*>(&reg);
+        const GSkyRegionRectangle* rect =
+              dynamic_cast<const GSkyRegionRectangle*>(&reg);
 
         // Initialise containment flag to true
         contains = true;
@@ -561,7 +564,7 @@ bool GSkyRegionRect::contains(const GSkyRegion& reg) const
 
         } // endfor: looped over the four corners
 
-    } // endif: other region was of type "Rect"
+    } // endif: other region was a rectangle
 
     // ... otherwise, if the other region is a map then check whether it
     // is contained within the rectangle
@@ -614,7 +617,7 @@ bool GSkyRegionRect::contains(const GSkyRegion& reg) const
  *
  * @todo Improve implementation for rectangle-rectangle
  ***************************************************************************/
-bool GSkyRegionRect::overlaps(const GSkyRegion& reg) const
+bool GSkyRegionRectangle::overlaps(const GSkyRegion& reg) const
 {
     // Initialise return value
     bool overlap = false;
@@ -624,7 +627,8 @@ bool GSkyRegionRect::overlaps(const GSkyRegion& reg) const
     if (reg.type() == "Circle") {
 
         // Create circular region from reg
-        const GSkyRegionCircle* circle = dynamic_cast<const GSkyRegionCircle*>(&reg);
+        const GSkyRegionCircle* circle =
+              dynamic_cast<const GSkyRegionCircle*>(&reg);
 
         // Transform circle center to local coordinate system
         GSkyPixel local = dir_to_local(circle->centre());
@@ -645,16 +649,17 @@ bool GSkyRegionRect::overlaps(const GSkyRegion& reg) const
 
     // ... otherwise if region is a rectangle then check overlap between
     // two rectangles
-    else if (reg.type() == "Rect") {
+    else if (reg.type() == "Rectangle") {
 
         // Create rectangular region from reg
-        const GSkyRegionRect* rect = dynamic_cast<const GSkyRegionRect*>(&reg);
+        const GSkyRegionRectangle* rect =
+              dynamic_cast<const GSkyRegionRectangle*>(&reg);
 
         // Dirty kludge: compare with map
         GSkyRegionMap map = GSkyRegionMap(rect);
         overlap           = map.overlaps(*this);
 
-    } // endif: region was of type "Rect"
+    } // endif: region was a rectangle
 
     // ... otherwise if region is map then check overlap with map
     else if (reg.type() == "Map") {
@@ -700,7 +705,7 @@ bool GSkyRegionRect::overlaps(const GSkyRegion& reg) const
  * Declination of the rectangle centre, and \f${\rm width}\f$ and
  * \f${\rm height}\f$ are the width and height of the rectangle.
  ***************************************************************************/
-GSkyDir GSkyRegionRect::corner(const int& index) const
+GSkyDir GSkyRegionRectangle::corner(const int& index) const
 {
     // Assert index is in [0,3]
     if ((index < 0) || (index > 3)) {
@@ -732,7 +737,7 @@ GSkyDir GSkyRegionRect::corner(const int& index) const
  * @param[in] chatter Chattiness
  * @return String containing region information.
  ***************************************************************************/
-std::string GSkyRegionRect::print(const GChatter& chatter) const
+std::string GSkyRegionRectangle::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;;
@@ -741,7 +746,7 @@ std::string GSkyRegionRect::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append header
-        result.append("=== GSkyRegionRect ===");
+        result.append("=== GSkyRegionRectangle ===");
 
         // Append sky region information
         result.append("\n"+gammalib::parformat("Right Ascension of centre"));
@@ -771,10 +776,10 @@ std::string GSkyRegionRect::print(const GChatter& chatter) const
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GSkyRegionRect::init_members(void)
+void GSkyRegionRectangle::init_members(void)
 {
     // Initialise members
-    m_type   = "Rect";
+    m_type   = "Rectangle";
     m_centre.clear();
     m_width  = 0.0;
     m_height = 0.0;
@@ -790,7 +795,7 @@ void GSkyRegionRect::init_members(void)
  *
  * @param[in] region Rectangular sky region.
  ***************************************************************************/
-void GSkyRegionRect::copy_members(const GSkyRegionRect& region)
+void GSkyRegionRectangle::copy_members(const GSkyRegionRectangle& region)
 {
     // Copy attributes
     m_centre = region.m_centre;
@@ -806,7 +811,7 @@ void GSkyRegionRect::copy_members(const GSkyRegionRect& region)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GSkyRegionRect::free_members(void)
+void GSkyRegionRectangle::free_members(void)
 {
     // Return
     return;
@@ -828,7 +833,7 @@ void GSkyRegionRect::free_members(void)
  * where \f${\rm width}\f$ and \f${\rm height}\f$ are the width and the
  * height of the rectangle expressed in radians.
  ***************************************************************************/
-void GSkyRegionRect::compute_solid_angle(void)
+void GSkyRegionRectangle::compute_solid_angle(void)
 {
     // Compute solid angle
     m_solid = m_width * m_height * gammalib::deg2rad * gammalib::deg2rad;
@@ -846,7 +851,7 @@ void GSkyRegionRect::compute_solid_angle(void)
  * A local direction lies within a region when its distance to the region
  * centre is not larger than the region extension in both axes directions.
  ***************************************************************************/
-bool GSkyRegionRect::contains(const GSkyPixel& local) const
+bool GSkyRegionRectangle::contains(const GSkyPixel& local) const
 {
     // Initialise return value
     bool contains = false;
@@ -897,7 +902,7 @@ bool GSkyRegionRect::contains(const GSkyPixel& local) const
  * position angle of the sky direction @p dir with respect to the position
  * angle of the rectangle, computed counter clockwise.
  ***************************************************************************/
-GSkyPixel GSkyRegionRect::dir_to_local(const GSkyDir& dir) const
+GSkyPixel GSkyRegionRectangle::dir_to_local(const GSkyDir& dir) const
 {
     // Get distance and polar angle relative to rectangle centre
     double dist = m_centre.dist(dir);
@@ -922,10 +927,10 @@ GSkyPixel GSkyRegionRect::dir_to_local(const GSkyDir& dir) const
  * @return Sky direction.
  *
  * Transform the local coordinates @p local to a sky direction. See
- * GSkyRegionRect::dir_to_local for the relation between local rectangle
+ * GSkyRegionRectangle::dir_to_local for the relation between local rectangle
  * coordinates and the sky direction.
  ***************************************************************************/
-GSkyDir GSkyRegionRect::local_to_dir(const GSkyPixel& local) const
+GSkyDir GSkyRegionRectangle::local_to_dir(const GSkyPixel& local) const
 {
     // Get local coordinates (radians)
     double x = local.x();

@@ -45,7 +45,7 @@
 
 /* __ Constants __________________________________________________________ */
 const std::string datadir         = std::getenv("TEST_DATA");
-const std::string sky_region      = datadir + "/test_circle_region.reg";
+const std::string sky_region_circ = datadir + "/test_circle_region.reg";
 const std::string sky_region_rect = datadir + "/test_rect_region.reg";
 const std::string sky_region_map  = datadir + "/test_map_region.fits";
 const std::string sky_map         = datadir + "/cena_lobes_parkes.fits";
@@ -84,8 +84,8 @@ void TestGSky::set(void){
            "Test GSkyRegions");
     append(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle),
            "Test GSkyRegionCircle");
-    append(static_cast<pfunction>(&TestGSky::test_GSkyRegionRect),
-           "Test GSkyRegionRect");
+    append(static_cast<pfunction>(&TestGSky::test_GSkyRegionRectangle),
+           "Test GSkyRegionRectangle");
     append(static_cast<pfunction>(&TestGSky::test_GSkyRegionMap),
            "Test GSkyRegionMap");
     append(static_cast<pfunction>(&TestGSky::test_GHorizDir),
@@ -1650,7 +1650,7 @@ void TestGSky::test_GSkyMap_io(void)
     // Test regions loading
     test_try("Test regions loading");
     try {
-        regions.load(sky_region);
+        regions.load(sky_region_circ);
         test_try_success();
     }
     catch (std::exception &e) {
@@ -1821,9 +1821,9 @@ void TestGSky::test_GSkyRegionCircle(void)
 
 
 /***************************************************************************
- * @brief GSkyRegionRect
+ * @brief GSkyRegionRectangle
  ***************************************************************************/
-void TestGSky::test_GSkyRegionRect(void)
+void TestGSky::test_GSkyRegionRectangle(void)
 {
     // Define region for comparison
     GSkyDir refdir_radeczerozero = GSkyDir();
@@ -1835,7 +1835,7 @@ void TestGSky::test_GSkyRegionRect(void)
     // Test constructing
     test_try("Test constructor");
     try {
-        GSkyRegionRect rect(refdir_radeczerozero, ref_width, ref_height, ref_pa_deg);
+        GSkyRegionRectangle rect(refdir_radeczerozero, ref_width, ref_height, ref_pa_deg);
         test_try_success();
     }
     catch (std::exception &e) {
@@ -1845,7 +1845,7 @@ void TestGSky::test_GSkyRegionRect(void)
     // Test constructing with negative width (should be forbidden)
     test_try("Test constructor2");
     try {
-        GSkyRegionRect rect(refdir_radeczerozero, -1, ref_height, ref_pa_deg);
+        GSkyRegionRectangle rect(refdir_radeczerozero, -1, ref_height, ref_pa_deg);
         test_try_failure();
     }
     catch (GException::invalid_argument &e) {
@@ -1858,7 +1858,7 @@ void TestGSky::test_GSkyRegionRect(void)
     // Test constructing with negative height (should be forbidden)
     test_try("Test constructor3");
     try {
-        GSkyRegionRect rect(refdir_radeczerozero, ref_width, -1, ref_pa_deg);
+        GSkyRegionRectangle rect(refdir_radeczerozero, ref_width, -1, ref_pa_deg);
         test_try_failure();
     }
     catch (GException::invalid_argument &e) {
@@ -1871,7 +1871,7 @@ void TestGSky::test_GSkyRegionRect(void)
     // Test constructing with negative posang (should be allowed)
     test_try("Test constructor4");
     try {
-        GSkyRegionRect rect(refdir_radeczerozero, ref_width, ref_height, -1);
+        GSkyRegionRectangle rect(refdir_radeczerozero, ref_width, ref_height, -1);
         test_try_success();
     }
     catch (GException::invalid_argument &e) {
@@ -1884,7 +1884,7 @@ void TestGSky::test_GSkyRegionRect(void)
     // Test assignment of neg width after construction
     test_try("Test width assignment after");
     try {
-        GSkyRegionRect rect(refdir_radeczerozero, ref_width, ref_height, ref_pa_deg);
+        GSkyRegionRectangle rect(refdir_radeczerozero, ref_width, ref_height, ref_pa_deg);
         rect.width(-1.0);
         test_try_failure();
     }
@@ -1898,7 +1898,7 @@ void TestGSky::test_GSkyRegionRect(void)
     // Test assignment of neg height after construction
     test_try("Test height assignment after");
     try {
-        GSkyRegionRect rect(refdir_radeczerozero, ref_width, ref_height, ref_pa_deg);
+        GSkyRegionRectangle rect(refdir_radeczerozero, ref_width, ref_height, ref_pa_deg);
         rect.height(-1.0);
         test_try_failure();
     }
@@ -1912,7 +1912,7 @@ void TestGSky::test_GSkyRegionRect(void)
     // Test assignment of neg posang after construction
     test_try("Test posang assignment after");
     try {
-        GSkyRegionRect rect(refdir_radeczerozero, ref_width, ref_height, ref_pa_deg);
+        GSkyRegionRectangle rect(refdir_radeczerozero, ref_width, ref_height, ref_pa_deg);
         rect.posang(-1.0);
         test_try_success();
     }
@@ -1924,7 +1924,7 @@ void TestGSky::test_GSkyRegionRect(void)
     }
 
     // Check radius assignment
-    GSkyRegionRect rect(refdir_radeczerozero, ref_width, ref_height, ref_pa_deg);
+    GSkyRegionRectangle rect(refdir_radeczerozero, ref_width, ref_height, ref_pa_deg);
 
     double check_width  = rect.width();
     test_value(ref_width, check_width, 1.0e-10, "Test width assignment");
@@ -1947,7 +1947,7 @@ void TestGSky::test_GSkyRegionRect(void)
     GSkyDir test_dir_2 = GSkyDir();
 
     refdir_radeczerozero.radec_deg(0,0);
-    GSkyRegionRect refregion(refdir_radeczerozero, 10, 6, 0);
+    GSkyRegionRectangle refregion(refdir_radeczerozero, 10, 6, 0);
 
     // Check GSkyDir containment
     // Upper right
@@ -1990,7 +1990,7 @@ void TestGSky::test_GSkyRegionRect(void)
 
 
     // Check GSkyDir containment for rotated rectangle
-    GSkyRegionRect refregion_rot(refdir_radeczerozero, 10, 10, 45);
+    GSkyRegionRectangle refregion_rot(refdir_radeczerozero, 10, 10, 45);
 
     // Check corner containment
     test_assert(refregion_rot.contains(refregion_rot.corner(0)),"test for corner containment");
@@ -2028,11 +2028,11 @@ void TestGSky::test_GSkyRegionRect(void)
     GSkyDir refdir_ndecpole = GSkyDir();
     refdir_ndecpole.radec_deg(100,89);
 
-    GSkyRegionRect refregion_smaller(refdir_radeczerozero, 5,  3, 0);
-    GSkyRegionRect refregion_larger(refdir_radeczerozero, 20, 12, 0);
-    GSkyRegionRect refregion_raoffset(refdir_raoffset, 10, 6, 0);
-    GSkyRegionRect refregion_rapole(refdir_rapole,   3, 3, 0);
-    GSkyRegionRect refregion_decpole(refdir_decpole, 3, 3, 0);
+    GSkyRegionRectangle refregion_smaller(refdir_radeczerozero, 5,  3, 0);
+    GSkyRegionRectangle refregion_larger(refdir_radeczerozero, 20, 12, 0);
+    GSkyRegionRectangle refregion_raoffset(refdir_raoffset, 10, 6, 0);
+    GSkyRegionRectangle refregion_rapole(refdir_rapole,   3, 3, 0);
+    GSkyRegionRectangle refregion_decpole(refdir_decpole, 3, 3, 0);
 
     // Test contain dirs (same from circle)
     test_assert(refregion.contains(refdir_radeczerozero),"test for containment");
@@ -2114,9 +2114,9 @@ void TestGSky::test_GSkyRegionMap(void)
 
 
     // Test rectangles
-    GSkyRegionRect inrect(refdir_radeczerozero, 0.3, 0.3, 0);
-    GSkyRegionRect outrect(refdir_radeclargeshift, 0.3, 0.3, 0);
-    GSkyRegionRect overrect(refdir_radecsmallshift, 0.3, 0.3, 0);
+    GSkyRegionRectangle inrect(refdir_radeczerozero, 0.3, 0.3, 0);
+    GSkyRegionRectangle outrect(refdir_radeclargeshift, 0.3, 0.3, 0);
+    GSkyRegionRectangle overrect(refdir_radecsmallshift, 0.3, 0.3, 0);
 
     // Test contains regions
     test_assert(regmap.contains(inrect),"test for region containment");

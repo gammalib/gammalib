@@ -1,5 +1,5 @@
 /***************************************************************************
- *             GSkyRegionRect.hpp - rectangular sky region class           *
+ *         GSkyRegionRectangle.hpp - Rectangular sky region class          *
  * ----------------------------------------------------------------------- *
  * copyright (C) 2019-2020 by Andreas Specovius                            *
  * ----------------------------------------------------------------------- *
@@ -19,13 +19,13 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GSkyRegionRect.hpp
+ * @file GSkyRegionRectangle.hpp
  * @brief Rectangular sky region class interface definition
  * @author Andreas Specovius
  */
 
-#ifndef GSKYREGIONRECT_HPP
-#define GSKYREGIONRECT_HPP
+#ifndef GSKYREGIONRECTANGLE_HPP
+#define GSKYREGIONRECTANGLE_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include <vector>
@@ -38,7 +38,7 @@ class GSkyPixel;
 
 
 /***********************************************************************//**
- * @class GSkyRegionRect
+ * @class GSkyRegionRectangle
  *
  * @brief Interface for the rectangular sky region class
  *
@@ -59,54 +59,54 @@ class GSkyPixel;
  * be received via the method get_corner(index).
  *
  ***************************************************************************/
-class GSkyRegionRect : public GSkyRegion {
+class GSkyRegionRectangle : public GSkyRegion {
 
 public:
     // Constructors and destructors
-    GSkyRegionRect(void);
-    GSkyRegionRect(const GSkyDir& centre,
-                   const double&  width,
-                   const double&  height,
-                   const double&  posang);
-    GSkyRegionRect(const double& ra,
-                   const double& dec,
-                   const double& width,
-                   const double& height,
-                   const double& posang);
-    explicit GSkyRegionRect(const std::string& line);
-    GSkyRegionRect(const GSkyRegionRect& region);
-    virtual ~GSkyRegionRect(void);
+    GSkyRegionRectangle(void);
+    GSkyRegionRectangle(const GSkyDir& centre,
+                        const double&  width,
+                        const double&  height,
+                        const double&  posang);
+    GSkyRegionRectangle(const double& ra,
+                        const double& dec,
+                        const double& width,
+                        const double& height,
+                        const double& posang);
+    explicit GSkyRegionRectangle(const std::string& line);
+    GSkyRegionRectangle(const GSkyRegionRectangle& region);
+    virtual ~GSkyRegionRectangle(void);
 
     // Operators
-    GSkyRegionRect& operator=(const GSkyRegionRect& region);
+    GSkyRegionRectangle& operator=(const GSkyRegionRectangle& region);
 
     // Implemented methods
-    void            clear(void);
-    GSkyRegionRect* clone(void) const;
-    std::string     classname(void) const;
-    const GSkyDir&  centre(void) const;
-    void            centre(const GSkyDir& centre);
-    void            centre(const double& ra,const double& dec);
-    double          ra(void) const;
-    double          dec(void) const;
-    const double&   width(void) const;
-    void            width(const double& width);
-    const double&   height(void) const;
-    void            height(const double& height);
-    const double&   posang(void) const;
-    void            posang(const double& posang);
-    void            read(const std::string& line);
-    std::string     write(void) const;
-    bool            contains(const GSkyDir& dir) const;
-    bool            contains(const GSkyRegion& reg) const;
-    bool            overlaps(const GSkyRegion& reg) const;
-    GSkyDir         corner(const int& index) const;
-    std::string     print(const GChatter& chatter = NORMAL) const;
+    void                 clear(void);
+    GSkyRegionRectangle* clone(void) const;
+    std::string          classname(void) const;
+    const GSkyDir&       centre(void) const;
+    void                 centre(const GSkyDir& centre);
+    void                 centre(const double& ra,const double& dec);
+    double               ra(void) const;
+    double               dec(void) const;
+    const double&        width(void) const;
+    void                 width(const double& width);
+    const double&        height(void) const;
+    void                 height(const double& height);
+    const double&        posang(void) const;
+    void                 posang(const double& posang);
+    void                 read(const std::string& line);
+    std::string          write(void) const;
+    bool                 contains(const GSkyDir& dir) const;
+    bool                 contains(const GSkyRegion& reg) const;
+    bool                 overlaps(const GSkyRegion& reg) const;
+    GSkyDir              corner(const int& index) const;
+    std::string          print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods
     void      init_members(void);
-    void      copy_members(const GSkyRegionRect& region);
+    void      copy_members(const GSkyRegionRectangle& region);
     void      free_members(void);
     void      compute_solid_angle(void);
     bool      contains(const GSkyPixel& local) const;
@@ -114,22 +114,22 @@ protected:
     GSkyDir   local_to_dir(const GSkyPixel& local) const;
 
     // Protected members
-    GSkyDir m_centre;  //!< Centre or reference point of the region
-    double  m_width;   //!< Width of the region (degrees)
-    double  m_height;  //!< Height of the region (degrees)
-    double  m_posang;  //!< Position angle, counterclockwise from North (degrees)
+    GSkyDir m_centre; //!< Centre or reference point of the region
+    double  m_width;  //!< Width of the region (degrees)
+    double  m_height; //!< Height of the region (degrees)
+    double  m_posang; //!< Position angle, counterclockwise from North (degrees)
 };
 
 
 /***********************************************************************//**
  * @brief Return class name
  *
- * @return String containing the class name ("GSkyRegionRect").
+ * @return String containing the class name ("GSkyRegionRectangle").
  ***************************************************************************/
 inline
-std::string GSkyRegionRect::classname(void) const
+std::string GSkyRegionRectangle::classname(void) const
 {
-    return ("GSkyRegionRect");
+    return ("GSkyRegionRectangle");
 }
 
 
@@ -141,7 +141,7 @@ std::string GSkyRegionRect::classname(void) const
  * Returns the region centre.
  ***************************************************************************/
 inline
-const GSkyDir& GSkyRegionRect::centre(void) const
+const GSkyDir& GSkyRegionRectangle::centre(void) const
 {
     return (m_centre);
 }
@@ -155,7 +155,7 @@ const GSkyDir& GSkyRegionRect::centre(void) const
  * Sets the centre of the rectangular region to the specified sky direction.
  ***************************************************************************/
 inline
-void GSkyRegionRect::centre(const GSkyDir& dir)
+void GSkyRegionRectangle::centre(const GSkyDir& dir)
 {
     m_centre = dir;
     return;
@@ -172,7 +172,7 @@ void GSkyRegionRect::centre(const GSkyDir& dir)
  * and Declination.
  ***************************************************************************/
 inline
-void GSkyRegionRect::centre(const double& ra, const double& dec)
+void GSkyRegionRectangle::centre(const double& ra, const double& dec)
 {
     m_centre.radec_deg(ra, dec);
     return;
@@ -187,7 +187,7 @@ void GSkyRegionRect::centre(const double& ra, const double& dec)
  * Returns the region centre Right Ascension in degrees.
  ***************************************************************************/
 inline
-double GSkyRegionRect::ra(void) const
+double GSkyRegionRectangle::ra(void) const
 {
     return (m_centre.ra_deg());
 }
@@ -201,7 +201,7 @@ double GSkyRegionRect::ra(void) const
  * Returns the region centre Declination in degrees.
  ***************************************************************************/
 inline
-double GSkyRegionRect::dec(void) const
+double GSkyRegionRectangle::dec(void) const
 {
     return (m_centre.dec_deg());
 }
@@ -215,7 +215,7 @@ double GSkyRegionRect::dec(void) const
  * Returns the region width extension in degrees.
  ***************************************************************************/
 inline
-const double& GSkyRegionRect::width(void) const
+const double& GSkyRegionRectangle::width(void) const
 {
     return (m_width);
 }
@@ -229,7 +229,7 @@ const double& GSkyRegionRect::width(void) const
  * Returns the region height extension in degrees.
  ***************************************************************************/
 inline
-const double& GSkyRegionRect::height(void) const
+const double& GSkyRegionRectangle::height(void) const
 {
     return (m_height);
 }
@@ -244,7 +244,7 @@ const double& GSkyRegionRect::height(void) const
  * counted counterclockwise from North.
  ***************************************************************************/
 inline
-const double& GSkyRegionRect::posang(void) const
+const double& GSkyRegionRectangle::posang(void) const
 {
     return (m_posang);
 }
@@ -260,10 +260,10 @@ const double& GSkyRegionRect::posang(void) const
  * rectangle height.
  ***************************************************************************/
 inline
-void GSkyRegionRect::posang(const double& posang)
+void GSkyRegionRectangle::posang(const double& posang)
 {
     m_posang = posang;
     return;
 }
 
-#endif /* GSKYREGIONRECT_HPP */
+#endif /* GSKYREGIONRECTANGLE_HPP */

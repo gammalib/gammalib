@@ -34,7 +34,7 @@
 #include "GSkyDir.hpp"
 #include "GSkyRegion.hpp"
 #include "GSkyRegionCircle.hpp"
-#include "GSkyRegionRect.hpp"
+#include "GSkyRegionRectangle.hpp"
 #include "GSkyRegions.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -539,7 +539,7 @@ void GSkyRegions::load(const GFilename& filename)
             // If region is a circle then read circle
             if (std::string::npos != fileline.find("circle")) {
 
-                // Create instance of GSkyRegion object
+                // Create instance of GSkyRegionCircle object
                 GSkyRegionCircle region;
 
                 // If coordinate system and region defined on the same line
@@ -564,8 +564,8 @@ void GSkyRegions::load(const GFilename& filename)
             // ... otherwise if region is a box then read rectangle
             else if (std::string::npos != fileline.find("box")) {
 
-                // Create instance of GSkyRegion object
-                GSkyRegionRect region;
+                // Create instance of GSkyRegionRectangle object
+                GSkyRegionRectangle region;
 
                 // If coordinate system and region defined on the same line
                 if ((std::string::npos != fileline.find("fk5")) ||

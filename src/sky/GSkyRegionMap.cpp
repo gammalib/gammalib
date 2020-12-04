@@ -34,7 +34,7 @@
 #include "GSkyMap.hpp"
 #include "GSkyRegion.hpp"
 #include "GSkyRegionCircle.hpp"
-#include "GSkyRegionRect.hpp"
+#include "GSkyRegionRectangle.hpp"
 #include "GSkyRegionMap.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -119,9 +119,9 @@ GSkyRegionMap::GSkyRegionMap(const GSkyRegion* region) : GSkyRegion(*region)
     init_members();
 
     // Get dynamic casts
-    const GSkyRegionMap*    map    = dynamic_cast<const GSkyRegionMap*>(region);
-    const GSkyRegionCircle* circle = dynamic_cast<const GSkyRegionCircle*>(region);
-    const GSkyRegionRect*   rect   = dynamic_cast<const GSkyRegionRect*>(region);
+    const GSkyRegionMap*       map    = dynamic_cast<const GSkyRegionMap*>(region);
+    const GSkyRegionCircle*    circle = dynamic_cast<const GSkyRegionCircle*>(region);
+    const GSkyRegionRectangle* rect   = dynamic_cast<const GSkyRegionRectangle*>(region);
 
     // If region is of type GSkyRegionMap then copy class members
     if (map != NULL) {
@@ -134,9 +134,10 @@ GSkyRegionMap::GSkyRegionMap(const GSkyRegion* region) : GSkyRegion(*region)
         set_region_circle(circle);
     }
 
-    // If region is of type GSkyRegionRect than set region map fron region rect
+    // If region is of type GSkyRegionRectangle than set region map fron
+    // region rect
     else if (rect != NULL) {
-        set_region_rect(rect);
+        set_region_rectangle(rect);
     }
 
     // Return
@@ -447,10 +448,11 @@ bool GSkyRegionMap::contains(const GSkyRegion& reg) const
     } // endcase: circular region
 
     // Case of a rectangular region
-    else if (reg.type() == "Rect") {
+    else if (reg.type() == "Rectangle") {
 
         // Create rectangular region from reg
-        const GSkyRegionRect* rect = dynamic_cast<const GSkyRegionRect*>(&reg);
+        const GSkyRegionRectangle* rect =
+              dynamic_cast<const GSkyRegionRectangle*>(&reg);
 
         // Create region map from rectangle
         GSkyRegionMap rect_map(rect);
@@ -665,7 +667,7 @@ void GSkyRegionMap::set_region_circle(const GSkyRegionCircle* circle)
  * are added at either side of the map. The sky map is created in celestial
  * coordinates and TAN projection.
  ***************************************************************************/
-void GSkyRegionMap::set_region_rect(const GSkyRegionRect* rect)
+void GSkyRegionMap::set_region_rectangle(const GSkyRegionRectangle* rect)
 {
     // Define desired resolution (in degrees)
     const double resolution_goal = 0.01;
