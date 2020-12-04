@@ -483,6 +483,7 @@ std::string GSkyRegionRectangle::write(void) const
  * @brief Checks if sky direction lies within region
  *
  * @param[in] dir Sky direction.
+ * @return True if sky direction is contained in region.
  *
  * A sky direction lies within a region when its distance to the region
  * centre is not larger than the region extension in both axes directions.
@@ -504,6 +505,7 @@ bool GSkyRegionRectangle::contains(const GSkyDir& dir) const
  * @brief Checks if region is fully contained within this region
  *
  * @param[in] reg Sky region.
+ * @return True if region is contained in region.
  *
  * @exception GException::feature_not_implemented
  *            Not all region types supported currently.
@@ -611,9 +613,12 @@ bool GSkyRegionRectangle::contains(const GSkyRegion& reg) const
  * @brief Checks if region is overlapping with this region
  *
  * @param[in] reg Sky region.
+ * @return True if region overlaps with region.
  *
  * @exception GException::feature_not_implemented
  *            Regions differ in type.
+ *
+ * Checks whether a region overlaps with the rectangle.
  *
  * @todo Improve implementation for rectangle-rectangle
  ***************************************************************************/
@@ -623,7 +628,8 @@ bool GSkyRegionRectangle::overlaps(const GSkyRegion& reg) const
     bool overlap = false;
 
     // If the region is a circle then check overlap between circle and
-    // rectangle
+    // rectangle using the alogrithm given under #292 at
+    // https://stackoverflow.com/questions/401847/circle-rectangle-collision-detection-intersection
     if (reg.type() == "Circle") {
 
         // Create circular region from reg
@@ -632,15 +638,34 @@ bool GSkyRegionRectangle::overlaps(const GSkyRegion& reg) const
 
         // Transform circle center to local coordinate system
         GSkyPixel local = dir_to_local(circle->centre());
-        double    x_deg = local.x() * gammalib::rad2deg;
-        double    y_deg = local.y() * gammalib::rad2deg;
+        double    x_deg = std::abs(local.x() * gammalib::rad2deg);
+        double    y_deg = std::abs(local.y() * gammalib::rad2deg);
 
         // Get circle radius in degrees
         double radius = circle->radius();
 
-        // Check whether circle overlaps within rectangle
-        if (std::abs(y_deg) <= (0.5 * m_height + radius)) {
-            if (std::abs(x_deg) <= (0.5 * m_width + radius)) {
+        // Compute half width and height
+        double half_width  = 0.5 * width();
+        double half_height = 0.5 * height();
+
+        // Assess overlap
+        if (x_deg > (half_width + radius)) {
+            overlap = false;
+        }
+        else if (y_deg > (half_height + radius)) {
+            overlap = false;
+        }
+        else if (x_deg <= half_width) {
+            overlap = true;
+        }
+        else if (y_deg <= half_height) {
+            overlap = true;
+        }
+        else {
+            double dx = x_deg - half_width;
+            double dy = y_deg - half_height;
+            double d2 = dx * dx + dy * dy;
+            if (d2 <= radius*radius) {
                 overlap = true;
             }
         }

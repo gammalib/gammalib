@@ -1713,107 +1713,209 @@ void TestGSky::test_GSkyMap_io(void)
  ***************************************************************************/
 void TestGSky::test_GSkyRegionCircle(void)
 {
-	// Define region for comparison
-	GSkyDir refdir_radeczerozero;
-	refdir_radeczerozero.radec_deg(0,0);
-	double refradius = 10.;
+    // Test void constructor
+    GSkyRegionCircle circle0;
+    test_value(circle0.classname(), "GSkyRegionCircle", "Test classname of void constructor");
+    test_value(circle0.type(), "Circle", "Test type of void constructor");
+    test_value(circle0.centre().ra_deg(), 0.0, "Test Right Ascension of centre of void constructor");
+    test_value(circle0.centre().dec_deg(), 0.0, "Test Declination of centre of void constructor");
+    test_value(circle0.ra(), 0.0, "Test Right Ascension of void constructor");
+    test_value(circle0.dec(), 0.0, "Test Declination of void constructor");
+    test_value(circle0.radius(), 0.0, "Test radius of void constructor");
 
-    // Test constructing:
-    test_try("Test constructor");
+    // Test sky direction constructor
+    GSkyDir dir1;
+    dir1.radec_deg(83.6331,22.0145);
+    GSkyRegionCircle circle1(dir1, 3.1);
+    test_value(circle1.centre().ra_deg(), 83.6331, "Test Right Ascension of centre of sky direction constructor");
+    test_value(circle1.centre().dec_deg(), 22.0145, "Test Declination of centre of sky direction constructor");
+    test_value(circle1.ra(), 83.6331, "Test Right Ascension of sky direction constructor");
+    test_value(circle1.dec(), 22.0145, "Test Declination of sky direction constructor");
+    test_value(circle1.radius(), 3.1, "Test radius of sky direction constructor");
+
+    // Test Right Ascension and Declination constructor
+    GSkyRegionCircle circle2(83.6331, 22.0145, 3.1);
+    test_value(circle2.centre().ra_deg(), 83.6331, "Test Right Ascension of centre of (RA,Dec) constructor");
+    test_value(circle2.centre().dec_deg(), 22.0145, "Test Declination of centre of (RA,Dec) constructor");
+    test_value(circle2.ra(), 83.6331, "Test Right Ascension of (RA,Dec) constructor");
+    test_value(circle2.dec(), 22.0145, "Test Declination of (RA,Dec) constructor");
+    test_value(circle2.radius(), 3.1, "Test radius of (RA,Dec) constructor");
+
+    // Test line constructor
+    GSkyRegionCircle circle3("fk5;circle(83.6331, 22.0145, 3.1)");
+    test_value(circle3.centre().ra_deg(), 83.6331, "Test Right Ascension of centre of line constructor");
+    test_value(circle3.centre().dec_deg(), 22.0145, "Test Declination of centre of line constructor");
+    test_value(circle3.ra(), 83.6331, "Test Right Ascension of line constructor");
+    test_value(circle3.dec(), 22.0145, "Test Declination of line constructor");
+    test_value(circle3.radius(), 3.1, "Test radius of line constructor");
+
+    // Test copy constructor
+    GSkyRegionCircle circle4(circle3);
+    test_value(circle4.centre().ra_deg(), 83.6331, "Test Right Ascension of centre of copy constructor");
+    test_value(circle4.centre().dec_deg(), 22.0145, "Test Declination of centre of copy constructor");
+    test_value(circle4.ra(), 83.6331, "Test Right Ascension of copy constructor");
+    test_value(circle4.dec(), 22.0145, "Test Declination of copy constructor");
+    test_value(circle4.radius(), 3.1, "Test radius of copy constructor");
+
+    // Test assignment operator
+    GSkyRegionCircle circle5;
+    circle5 = circle3;
+    test_value(circle5.centre().ra_deg(), 83.6331, "Test Right Ascension of centre of assignment operator");
+    test_value(circle5.centre().dec_deg(), 22.0145, "Test Declination of centre of assignment operator");
+    test_value(circle5.ra(), 83.6331, "Test Right Ascension of assignment operator");
+    test_value(circle5.dec(), 22.0145, "Test Declination of assignment operator");
+    test_value(circle5.radius(), 3.1, "Test radius of assignment operator");
+
+    // Test clone method
+    GSkyRegionCircle* circle6 = circle3.clone();
+    test_value(circle6->centre().ra_deg(), 83.6331, "Test Right Ascension of centre of cloned instance");
+    test_value(circle6->centre().dec_deg(), 22.0145, "Test Declination of centre of cloned instance");
+    test_value(circle6->ra(), 83.6331, "Test Right Ascension of cloned instance");
+    test_value(circle6->dec(), 22.0145, "Test Declination of cloned instance");
+    test_value(circle6->radius(), 3.1, "Test radius of cloned instance");
+    delete circle6;
+
+    // Test constructor error modes
+    test_try("Test invalid radius in sky direction constructor");
     try {
-        GSkyRegionCircle circle(refdir_radeczerozero,refradius);
+        GSkyRegionCircle circle(dir1, -1.0);
+        test_try_failure();
+    }
+    catch (GException::invalid_argument &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    //
+    test_try("Test invalid radius in (RA,Dec) constructor");
+    try {
+        GSkyRegionCircle circle(83.6331, 22.0145, -1.0);
+        test_try_failure();
+    }
+    catch (GException::invalid_argument &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    //
+    test_try("Test invalid radius in line constructor");
+    try {
+        GSkyRegionCircle circle("fk5;circle(83.6331, 22.0145, -1.0)");
+        test_try_failure();
+    }
+    catch (GException::invalid_argument &e) {
         test_try_success();
     }
     catch (std::exception &e) {
         test_try_failure(e);
     }
 
-    // Test constructing with radius -1
-    test_try("Test constructor2");
+    // Test assignment methods
+    GSkyRegionCircle circle7;
+    circle7.radius(3.1);
+    test_value(circle7.radius(), 3.1, "Test radius() methods");
+
+    // Test assignment error modes
+    test_try("Test invalid radius() assignment");
     try {
-		GSkyRegionCircle circle(refdir_radeczerozero,-1);
-		test_try_failure();
-	}
-	catch (GException::invalid_argument &e) {
+        GSkyRegionCircle circle;
+        circle.radius(-1.0);
+        test_try_failure();
+    }
+    catch (GException::invalid_argument &e) {
         test_try_success();
-	}
-	catch (std::exception &e) {
+    }
+    catch (std::exception &e) {
         test_try_failure(e);
-	}
+    }
 
-    // Test constructing with radius 0
-    test_try("Test radius assignment after");
-    try {
-		GSkyRegionCircle circle(refdir_radeczerozero,refradius);
-		circle.radius(-1.0);
-		test_try_failure();
-	}
-	catch (GException::invalid_argument &e) {
-        test_try_success();
-	}
-	catch (std::exception &e) {
-        test_try_failure(e);
-	}
+    // Test solid angle computation
+    GSkyRegionCircle circle8(83.6331, 22.0145, 3.1);
+    double ref = 2.0 * gammalib::pi * (1.0 - std::cos(3.1 * gammalib::deg2rad));
+    test_value(circle8.solidangle(), ref, "Test solid angle computation");
 
-	// Check radius assignment
-	GSkyRegionCircle refregion(refdir_radeczerozero,refradius);
-	double refradius_check = refregion.radius();
-	test_value(refradius,refradius_check,1.0e-10, "Test radius assignment");
+    // Test sky direction contains() method
+    GSkyRegionCircle circle9(1.0, 1.0, 3.0);
+    GSkyDir          test_dir;
+    test_dir.radec_deg(1.0, 1.0);
+    test_assert(circle9.contains(test_dir), "Test whether (1,1) lies inside circle");
+    test_dir.radec_deg(1.0, 3.99999);
+    test_assert(circle9.contains(test_dir), "Test whether (1,4) lies inside circle");
+    test_dir.radec_deg(1.0, -2.0);
+    test_assert(circle9.contains(test_dir), "Test whether (1,-2) lies inside circle");
+    test_dir.radec_deg(4.0, 1.0);
+    test_assert(circle9.contains(test_dir), "Test whether (4,1) lies inside circle");
+    test_dir.radec_deg(4.0, 4.0);
+    test_assert(!circle9.contains(test_dir), "Test whether (4,4) lies outside circle");
+    test_dir.radec_deg(-4.0, 4.0);
+    test_assert(!circle9.contains(test_dir), "Test whether (-4,4) lies outside circle");
+    test_dir.radec_deg(4.0, -4.0);
+    test_assert(!circle9.contains(test_dir), "Test whether (4,-4) lies outside circle");
+    test_dir.radec_deg(-4.0, -4.0);
+    test_assert(!circle9.contains(test_dir), "Test whether (-4,-5) lies outside circle");
 
-	// Check solid angle assignment
-	double solidangle_check = refregion.solidangle();
-	double solidangle = 2*gammalib::pi*(1- std::cos(refradius /180 * gammalib::pi));
-	test_value(solidangle_check,solidangle,1.0e-10, "Test solid angle assignment");
+    // Test region contains() and overlaps() methods for circle
+    GSkyRegionCircle circle10(1.0, 1.0, 3.1);
+    GSkyRegionCircle circle11(1.0, 7.0, 3.0);
+    test_assert(circle9.contains(circle9), "Test whether circle is contained in circle");
+    test_assert(!circle9.contains(circle10), "Test whether circle is not contained in circle");
+    test_assert(circle9.overlaps(circle10), "Test whether circle overlaps with circle");
+    test_assert(!circle9.overlaps(circle11), "Test whether circle does not overlap with circle");
 
-    // Set reference sky directions
-    //GSkyDir refdir_radeczerozero;
-    GSkyDir refdir_lbzerozero;
-    GSkyDir refdir_outside_refregion;
-    GSkyDir refdir_raoffset;
-    GSkyDir refdir_decpole;
-    GSkyDir refdir_ndecpole;
-    GSkyDir refdir_rapole;
-    refdir_radeczerozero.radec_deg(0,0);
-    refdir_lbzerozero.lb_deg(0,0);
-    refdir_outside_refregion.radec_deg(100,80);
-    refdir_raoffset.radec_deg(5,0);
-    refdir_decpole.radec_deg(0,89);
-	refdir_ndecpole.radec_deg(100,89);
-    refdir_rapole.radec_deg(359,0);
+    // Test region contains() and overlaps() methods for rectangles
+    GSkyRegionRectangle rect1(1.0, 1.0, 4.24, 4.24, 45.0);
+    GSkyRegionRectangle rect2(1.0, 1.0, 4.25, 4.25, 45.0);
+    GSkyRegionRectangle rect3(1.0, 7.0, 4.23, 4.23, 45.0);
+    test_assert(circle9.contains(rect1), "Test whether rectangle is contained in circle");
+    test_assert(!circle9.contains(rect2), "Test whether rectangle is not contained in circle");
+    test_assert(circle9.overlaps(rect2), "Test whether circle overlaps with rectangle");
+    test_assert(!circle9.overlaps(rect3), "Test whether circle does not overlap with rectangle");
 
-    // Set reference sky regions
-    refregion = GSkyRegionCircle(refdir_radeczerozero, 10.0);
-    GSkyDir          centre = refregion.centre();
-    GSkyRegionCircle refregion_smaller(refdir_radeczerozero, 5.0);
-    GSkyRegionCircle refregion_larger(refdir_radeczerozero, 20.0);
-    GSkyRegionCircle refregion_raoffset(refdir_raoffset, 10.0);
-    GSkyRegionCircle refregion_rapole(refdir_rapole, 3.0);
-    GSkyRegionCircle refregion_decpole(refdir_decpole, 3.0);
+    // Test region contains() and overlaps() methods for maps. The map region
+    // is centred at (0,0) and has a radius of 0.3 deg.
+    GSkyRegionMap map1(sky_region_map);
+    GSkyRegionCircle circle12(0.0, 0.0, 0.31);
+    GSkyRegionCircle circle13(0.0, 0.0, 0.29);
+    GSkyRegionCircle circle14(0.6, 0.0, 0.3);
+    test_assert(circle12.contains(map1), "Test whether map is contained in circle");
+    test_assert(!circle13.contains(map1), "Test whether map is not contained in circle");
+    test_assert(circle13.overlaps(map1), "Test whether circle overlaps with map");
+    test_assert(!circle14.overlaps(map1), "Test whether circle does not overlap with map");
 
-    // Test contain dirs
-	test_assert(refregion.contains(refdir_radeczerozero),"Test for containment");
-    test_assert(refregion.contains(centre), "Test if centre in circle");
-	test_assert(!refregion.contains(refdir_outside_refregion), "Test2 for containment");
+    // Test print() method
+    test_assert(!circle9.print().empty(), "Test whether print() method returns something");
 
-	// Test contain regions
-	test_assert(refregion.contains(refregion_smaller),"Test for containment region");
-	test_assert(!refregion.contains(refregion_larger), "Test for containment region2 ");
-	test_assert(refregion.contains(refregion), "Test3 for containment region");
+    // Test read() and write() methods
+    GSkyRegionCircle circle15;
+    circle15.read("fk5;circle(83.6331, 22.0145, 3.1)");
+    test_value(circle15.centre().ra_deg(), 83.6331, "Test Right Ascension of centre after read()");
+    test_value(circle15.centre().dec_deg(), 22.0145, "Test Declination of centre after read()");
+    test_value(circle15.ra(), 83.6331, "Test Right Ascension after read()");
+    test_value(circle15.dec(), 22.0145, "Test Declination after read()");
+    test_value(circle15.radius(), 3.1, "Test radius after read()");
+    std::string region = circle15.write();
+    circle14.read(region);
+    test_value(circle14.centre().ra_deg(), 83.6331, "Test Right Ascension of centre after second read()");
+    test_value(circle14.centre().dec_deg(), 22.0145, "Test Declination of centre after second read()");
+    test_value(circle14.ra(), 83.6331, "Test Right Ascension after second read()");
+    test_value(circle14.dec(), 22.0145, "Test Declination after second read()");
+    test_value(circle14.radius(), 3.1, "Test width after second read()");
 
-	test_assert(refregion.contains(refdir_rapole), "Test rapole for containment region");
-	test_assert(refregion_decpole.contains(refdir_ndecpole), "Test rapole for containment region");
-
-    // Test overlaps
-	test_assert(refregion.overlaps(refregion_smaller),"Test for overlap");
-	test_assert(refregion.overlaps(refregion_larger),"Test2 for overlap");
-	test_assert(refregion.overlaps(refregion_raoffset),"Test3 for overlap");
-	test_assert(!refregion.overlaps(refregion_decpole),"Test4 for overlap");
+    // Test clear method
+    circle9.clear();
+    test_value(circle9.centre().ra_deg(), 0.0, "Test Right Ascension of centre after clear()");
+    test_value(circle9.centre().dec_deg(), 0.0, "Test Declination of centre after clear()");
+    test_value(circle9.ra(), 0.0, "Test Right Ascension after clear()");
+    test_value(circle9.dec(), 0.0, "Test Declination after clear()");
+    test_value(circle9.radius(), 0.0, "Test radius after clear()");
 
     // Test equality and non-equality operators
-	test_assert(refregion_smaller == refregion_smaller,"Test for equality");
-	test_assert(!(refregion_smaller == refregion_larger),"Test for equality");
-	test_assert(!(refregion_smaller != refregion_smaller),"Test for non-equality");
-	test_assert(refregion_smaller != refregion_larger,"Test for non-equality");
+    test_assert(circle15 == circle15, "Test equality operator for equal circles");
+    test_assert(!(circle15 == circle12), "Test equality operator for non-equal circles");
+    test_assert(!(circle15 != circle15), "Test for non-equality operator for equal circles");
+    test_assert(circle15 != circle12, "Test for non-equality operator for non-equal circles");
 
 	// Exit test
     return;
@@ -1916,7 +2018,7 @@ void TestGSky::test_GSkyRegionRectangle(void)
     //
     test_try("Test invalid width in (RA,Dec) constructor");
     try {
-        GSkyRegionRectangle rect(83.6331, 22.0145, 3.1, -1.0, 43.7);
+        GSkyRegionRectangle rect(83.6331, 22.0145, -1.0, 2.9, 43.7);
         test_try_failure();
     }
     catch (GException::invalid_argument &e) {
@@ -2152,70 +2254,108 @@ void TestGSky::test_GSkyRegionRectangle(void)
  ***************************************************************************/
 void TestGSky::test_GSkyRegionMap(void)
 {
-    // Test file constructor:
-    test_try("Test file constructor");
-    try {
-        GSkyRegionMap regmap(sky_region_map);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    // Test void constructor
+    GSkyRegionMap map0;
+    test_value(map0.classname(), "GSkyRegionMap", "Test classname of void constructor");
+    test_value(map0.type(), "Map", "Test type of void constructor");
+    test_assert(map0.map().is_empty(), "Test map() method of void constructor");
+
+    // Test filename constructor
+    GSkyRegionMap map1(sky_region_map);
+    test_assert(!map1.map().is_empty(), "Test map() method of filename constructor");
 
     // Test skymap constructor
-    GSkyMap skymap("TAN", "CEL", 0.0, 0.0, 0.1, 0.1, 100, 100);
-    test_try("Test skymap constructor");
-    try {
-      GSkyRegionMap regmap(skymap);
-      test_try_success();
-    }
-    catch (std::exception &e) {
-      test_try_failure(e);
-    }
+    GSkyMap       skymap(sky_region_map);
+    GSkyRegionMap map2(skymap);
+    test_assert(!map2.map().is_empty(), "Test map() method of skymap constructor");
 
-    // Load reference region map (a mask centred on (RA,Dec)=(0,0) with radius 0.3deg)
-    GSkyRegionMap regmap(sky_region_map);
+    // Test region constructors
+    GSkyRegionCircle    circle1(83.6331, 22.0145, 3.1);
+    GSkyRegionRectangle rect1(83.6331, 22.0145, 3.1, 2.9, 43.7);
+    GSkyRegionMap       map3(&circle1);
+    GSkyRegionMap       map4(&rect1);
+    test_assert(!map3.map().is_empty(), "Test map() method of circle region constructor");
+    test_assert(!map4.map().is_empty(), "Test map() method of rectangular region constructor");
 
-    // Set reference directions and regions
-    GSkyDir refdir_radeczerozero = GSkyDir();
-    GSkyDir refdir_radeclargeshift = GSkyDir();
-    GSkyDir refdir_radecsmallshift = GSkyDir();
-    refdir_radeczerozero.radec_deg(0.0,0.0);
-    refdir_radeclargeshift.radec_deg(2.0,0.0);
-    refdir_radecsmallshift.radec_deg(0.3,0.0);
+    // Test copy constructor
+    GSkyRegionMap map5(map2);
+    test_assert(!map5.map().is_empty(), "Test map() method of copy constructor");
 
-    // Test contains dirs
-    test_assert(regmap.contains(refdir_radeczerozero),"test for direction containment");
-    test_assert(!regmap.contains(refdir_radeclargeshift),"test2 for direction containment");
+    // Test assignment operator
+    GSkyRegionMap map6;
+    map6 = map5;
+    test_assert(!map6.map().is_empty(), "Test map() method of copy constructor");
 
+    // Test clone method
+    GSkyRegionMap* map7 = map6.clone();
+    test_assert(!map7->map().is_empty(), "Test map() method of copy constructor");
+    delete map7;
 
-    // Test circles
-    GSkyRegionCircle inregion(refdir_radeczerozero,0.2);
-    GSkyRegionCircle outregion(refdir_radeclargeshift,0.2);
-    GSkyRegionCircle overregion(refdir_radecsmallshift,0.3);
+    // Test constructor error modes
 
-    // Test contains regions
-    test_assert(regmap.contains(inregion),"test for region containment");
-    test_assert(!regmap.contains(outregion),"test2 for region containment");
+    // Test assignment methods
+    GSkyRegionMap map8;
+    map8.map(skymap);
+    test_assert(!map8.map().is_empty(), "Test map() method");
 
-    // Test overlaps regions
-    test_assert(regmap.overlaps(inregion),"test for region overlap");
-    test_assert(regmap.overlaps(overregion),"test2 for region overlap");
+    // Test solid angle computation
+    GSkyRegionMap map9(sky_region_map);
+    double ref = 8.72406098e-05 ;
+    test_value(map9.solidangle(), ref, "Test solid angle computation");
 
+    // Test sky direction contains() method
+    GSkyDir test_dir;
+    test_dir.radec_deg(0.0, 0.0);
+    test_assert(map9.contains(test_dir), "Test whether (0,0) lies inside map");
+    test_dir.radec_deg(0.29, 0.0);
+    test_assert(map9.contains(test_dir), "Test whether (0.29,0) lies inside map");
+    test_dir.radec_deg(0.0,-0.29);
+    test_assert(map9.contains(test_dir), "Test whether (0,-0.29) lies inside circle");
+    test_dir.radec_deg(0.0, 0.29);
+    test_assert(map9.contains(test_dir), "Test whether (0,0.29) lies inside circle");
+    test_dir.radec_deg(0.3, 0.3);
+    test_assert(!map9.contains(test_dir), "Test whether (0.3,0.3) lies outside circle");
+    test_dir.radec_deg(0.31, 0.0);
+    test_assert(!map9.contains(test_dir), "Test whether (0.31,0) lies outside circle");
+    test_dir.radec_deg(-0.31, 0.0);
+    test_assert(!map9.contains(test_dir), "Test whether (-0.31,0) lies outside circle");
 
-    // Test rectangles
-    GSkyRegionRectangle inrect(refdir_radeczerozero, 0.3, 0.3, 0);
-    GSkyRegionRectangle outrect(refdir_radeclargeshift, 0.3, 0.3, 0);
-    GSkyRegionRectangle overrect(refdir_radecsmallshift, 0.3, 0.3, 0);
+    // Test region contains() and overlaps() methods for circle
+    GSkyRegionCircle circle2(0.0, 0.0, 0.28);
+    GSkyRegionCircle circle3(0.0, 0.0, 0.31);
+    GSkyRegionCircle circle4(0.0, 0.6, 0.3);
+    test_assert(map9.contains(circle2), "Test whether circle is contained in map");
+    test_assert(!map9.contains(circle3), "Test whether circle is not contained in map");
+    test_assert(map9.overlaps(circle3), "Test whether map overlaps with circle");
+    test_assert(!map9.overlaps(circle4), "Test whether map does not overlap with circle");
 
-    // Test contains regions
-    test_assert(regmap.contains(inrect),"test for region containment");
-    test_assert(!regmap.contains(outrect),"test2 for region containment");
+    // Test region contains() and overlaps() methods for rectangles
+    GSkyRegionRectangle rect2(0.0, 0.0, 0.42, 0.42, 45.0);
+    GSkyRegionRectangle rect3(0.0, 0.0, 0.44, 0.44, 45.0);
+    GSkyRegionRectangle rect4(0.0, 6.0, 0.42, 0.42, 45.0);
+    test_assert(map9.contains(rect2), "Test whether rectangle is contained in map");
+    test_assert(!map9.contains(rect3), "Test whether rectangle is not contained in map");
+    test_assert(map9.overlaps(rect3), "Test whether map overlaps with rectangle");
+    test_assert(!map9.overlaps(rect4), "Test whether map does not overlap with rectangle");
 
-    // Test overlaps regions
-    test_assert(regmap.overlaps(inrect),"test for region overlap");
-    test_assert(regmap.overlaps(overrect),"test2 for region overlap");
+    // Test region contains() and overlaps() methods for maps
+    GSkyRegionMap map_circle2(&circle2);
+    GSkyRegionMap map_circle3(&circle3);
+    GSkyRegionMap map_circle4(&circle4);
+    test_assert(map9.contains(map_circle2), "Test whether map is contained in circle");
+    test_assert(!map9.contains(map_circle3), "Test whether map is not contained in circle");
+    test_assert(map9.overlaps(map_circle3), "Test whether circle overlaps with map");
+    test_assert(!map9.overlaps(map_circle4), "Test whether circle does not overlap with map");
 
+    // Test print() method
+    test_assert(!map9.print().empty(), "Test whether print() method returns something");
+
+    // Test read() and write() methods
+    // Not implemented
+
+    // Test clear method
+    map9.clear();
+    test_assert(map9.map().is_empty(), "Test map() method after clear()");
 
     // Exit test
     return;

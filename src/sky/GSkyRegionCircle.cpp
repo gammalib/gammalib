@@ -494,31 +494,33 @@ std::string GSkyRegionCircle::print(const GChatter& chatter) const
  * @brief Checks if sky direction lies within region
  *
  * @param[in] dir Sky direction.
+ * @return True if sky direction is contained in region.
  *
  * A sky direction lies within a region when its distance to the region
  * centre is not larger than the region radius.
  ***************************************************************************/
 bool GSkyRegionCircle::contains(const GSkyDir& dir) const
 {
-    // Initialise return value
-    bool dir_is_in = false;
+    // Initialise containment flag
+    bool contains = false;
 
     // calculate distance from dir to centre
     double distance = dir.dist_deg(m_centre);
 
     // Check if distance < radius
     if (distance <= radius()) {
-        dir_is_in = true;
+        contains = true;
     }
 
-    // Return bool
-    return dir_is_in;
+    // Return containment flag
+    return contains;
 }
 
 /***********************************************************************//**
  * @brief Checks if region is fully contained within this region
  *
  * @param[in] reg Sky region.
+ * @return True if region is contained in region.
  *
  * @exception GException::feature_not_implemented
  *            Regions differ in type.
@@ -570,7 +572,7 @@ bool GSkyRegionCircle::contains(const GSkyRegion& reg) const
         const GSkyRegionMap* map = static_cast<const GSkyRegionMap*>(&reg);
 
         // Get non-zero indices
-        std::vector<int> indices = map->nonzero_indices();
+        const std::vector<int>& indices = map->nonzero_indices();
 
         // Initialise containment flag to true
         contains = true;
@@ -579,7 +581,7 @@ bool GSkyRegionCircle::contains(const GSkyRegion& reg) const
         for (int i = 0; i < indices.size(); ++i) {
 
             // Get sky direction of map pixel
-            GSkyDir dir = map->map().inx2dir(i);
+            GSkyDir dir = map->map().inx2dir(indices[i]);
 
             // If pixel is not contained then set containment flag to false
             // and break
@@ -607,11 +609,10 @@ bool GSkyRegionCircle::contains(const GSkyRegion& reg) const
  * @brief Checks if region is overlapping with this region
  *
  * @param[in] reg Sky region.
+ * @return True if region overlaps with region.
  *
  * @exception GException::feature_not_implemented
  *            Regions differ in type.
- *
- * @todo Implement checks for rectangles and maps
  ***************************************************************************/
 bool GSkyRegionCircle::overlaps(const GSkyRegion& reg) const
 {
