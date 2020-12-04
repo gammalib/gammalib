@@ -97,7 +97,7 @@ GSkyDirs::GSkyDirs(const GSkyDir& dir)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] dir Sky directions.
+ * @param[in] dirs Sky directions.
  *
  * Construct sky directions container by copying from another sky directions
  * container.

@@ -115,11 +115,11 @@ bool GResponseVectorCache::is_empty(void) const
 
 
 /***********************************************************************//**
- * @brief Remove cache for source
+ * @brief Returns size of vector chache
  *
- * @param[in] name Source name.
+ * @return Size of vector cache.
  *
- * Remove cache for source with @p name.
+ * Returns the number of vectors that are stored in the vector cache.
  ***************************************************************************/
 inline
 int GResponseVectorCache::size(void) const

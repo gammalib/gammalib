@@ -619,15 +619,15 @@ double GResponse::irf_spatial(const GEvent&       event,
 
 
 /***********************************************************************//**
- * @brief Return instrument response integrated over the spatial model
+ * @brief Return instrument response vector integrated over the spatial model
  *
- * @param[in] source Source.
+ * @param[in] model Sky model.
  * @param[in] obs Observation.
  * @param[in] gradients Gradients matrix.
- * @return Instrument response to a spatial model.
+ * @return Instrument response vector to a spatial model.
  *
- * Returns the instrument response for a given event, source and observation
- * integrated over the spatial model component. The method computes
+ * Returns the instrument response to a sky model integrated over the spatial
+ * model component for all events in a given observation. The method computes
  *
  * \f[
  *    {\tt irf}(p', E', t') = \int_p M_{\rm S}(p | E, t) \,

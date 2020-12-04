@@ -80,7 +80,14 @@ int cta_psf_radial_kerns_delta::size(void) const
 /***********************************************************************//**
  * @brief Kernel constructor for PSF integration of radial model
  *
- * @param[in] delta PSF offset angle (radians).
+ * @param[in] rsp Pointer to CTA response cube.
+ * @param[in] model Pointer to radial spatial model.
+ * @param[in] obsDir Observed sky direction.
+ * @param[in] srcEngs True energies.
+ * @param[in] zeta Angular distance between event direction of model centre (radians).
+ * @param[in] theta_max Maximum model radius (radians).
+ * @param[in] iter Number of iterations for azimuth integration.
+ * @param[in] grad Compute parameter gradients?
  ***************************************************************************/
 cta_psf_radial_kerns_delta::cta_psf_radial_kerns_delta(const GCTAResponseCube*    rsp,
                                                        const GModelSpatialRadial* model,

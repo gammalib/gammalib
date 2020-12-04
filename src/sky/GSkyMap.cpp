@@ -2169,8 +2169,6 @@ GSkyMap GSkyMap::extract(const GSkyRegions& inclusions) const
 /***********************************************************************//**
  * @brief Stack all maps into a single map
  *
- * @return Stacked map.
- *
  * The methods replaces the sky map by a version with only a single map
  * by summing over the pixel values for all maps. If the sky map has no
  * pixels or there is only a single map in the object, the method does

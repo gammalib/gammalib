@@ -841,21 +841,19 @@ void GCOMResponse::free_members(void)
 
 
 /***********************************************************************//**
- * @brief Return instrument response
+ * @brief Return instrument response vector
  *
- * @param[in] event Event.
- * @param[in] source Source.
+ * @param[in] model Sky model.
  * @param[in] obs Observation.
- * @return Instrument response.
+ * @return Instrument response vector.
  *
  * @exception GException::invalid_argument
  *            Invalid observation or event type specified.
  * @exception GException::feature_not_implemented
  *            Computation for specified spatial model not implemented.
  *
- * Returns the instrument response for a given event, source and observation.
- * If all spatial model parameters are fixed a DRM cube stored in the COMPTEL
- * observation is used. The computation of this cube is handled by the
+ * Returns the instrument response to a sky model for all events in a given
+ * observation. The computation of the response is handled by the
  * GCOMObservation::drm() method that also will update the cube in case that
  * any of the parameters changes.
  ***************************************************************************/

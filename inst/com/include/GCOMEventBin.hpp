@@ -135,7 +135,7 @@ const int& GCOMEventBin::index(void) const
 /***********************************************************************//**
  * @brief Set bin index
  *
- * @return Bin index.
+ * @param[in] index Bin index.
  *
  * Set the index of the event bin if the bin is part of an event cube. If
  * the event is not part of an event cube the index should be set to -1.
