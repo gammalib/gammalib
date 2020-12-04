@@ -67,12 +67,12 @@ public:
     void                 height(const double& height);
     const double&        posang(void) const;
     void                 posang(const double& posang);
+    GSkyDir              corner(const int& index) const;
     void                 read(const std::string& line);
     std::string          write(void) const;
     bool                 contains(const GSkyDir& dir) const;
     bool                 contains(const GSkyRegion& reg) const;
     bool                 overlaps(const GSkyRegion& reg) const;
-    GSkyDir              corner(const int& index) const;
 };
 
 

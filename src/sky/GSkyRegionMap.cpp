@@ -406,7 +406,7 @@ bool GSkyRegionMap::contains(const GSkyRegion& reg) const
     if (reg.type() == "Map") {
 
         // Cast to map type
-        const GSkyRegionMap* inreg = dynamic_cast<const GSkyRegionMap*>(&reg);
+        const GSkyRegionMap* inreg = static_cast<const GSkyRegionMap*>(&reg);
 
         // Retrieve map data
         const GSkyMap&          regmap   = inreg->map();
@@ -426,7 +426,8 @@ bool GSkyRegionMap::contains(const GSkyRegion& reg) const
     else if (reg.type() == "Circle") {
 
         // Create circular region from reg
-        const GSkyRegionCircle* inreg = dynamic_cast<const GSkyRegionCircle*>(&reg);
+        const GSkyRegionCircle* inreg =
+              static_cast<const GSkyRegionCircle*>(&reg);
 
         // Retrieve circle data
         const GSkyDir& centre = inreg->centre();
@@ -452,7 +453,7 @@ bool GSkyRegionMap::contains(const GSkyRegion& reg) const
 
         // Create rectangular region from reg
         const GSkyRegionRectangle* rect =
-              dynamic_cast<const GSkyRegionRectangle*>(&reg);
+              static_cast<const GSkyRegionRectangle*>(&reg);
 
         // Create region map from rectangle
         GSkyRegionMap rect_map(rect);

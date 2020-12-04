@@ -533,7 +533,8 @@ bool GSkyRegionCircle::contains(const GSkyRegion& reg) const
     if (reg.type() == "Circle") {
 
         // Create circular region from reg
-        const GSkyRegionCircle* circle = dynamic_cast<const GSkyRegionCircle*>(&reg);
+        const GSkyRegionCircle* circle =
+              static_cast<const GSkyRegionCircle*>(&reg);
 
         // Calculate angular distance between the centres
         double ang_dist = m_centre.dist_deg(circle->centre());
@@ -551,7 +552,7 @@ bool GSkyRegionCircle::contains(const GSkyRegion& reg) const
 
         // Create rectangular region from reg
         const GSkyRegionRectangle* rect =
-              dynamic_cast<const GSkyRegionRectangle*>(&reg);
+              static_cast<const GSkyRegionRectangle*>(&reg);
 
         // Check containment of all corners
         contains = this->contains(rect->corner(0)) &&
@@ -566,7 +567,7 @@ bool GSkyRegionCircle::contains(const GSkyRegion& reg) const
     else if (reg.type() == "Map") {
 
         // Create map from reg
-        const GSkyRegionMap* map = dynamic_cast<const GSkyRegionMap*>(&reg);
+        const GSkyRegionMap* map = static_cast<const GSkyRegionMap*>(&reg);
 
         // Get non-zero indices
         std::vector<int> indices = map->nonzero_indices();
@@ -622,7 +623,8 @@ bool GSkyRegionCircle::overlaps(const GSkyRegion& reg) const
     if (reg.type() == "Circle") {
 
         // Create circular region from reg
-        const GSkyRegionCircle* circle = dynamic_cast<const GSkyRegionCircle*>(&reg);
+        const GSkyRegionCircle* circle =
+              static_cast<const GSkyRegionCircle*>(&reg);
 
         // Calculate angular distance between the centres
         double ang_dist = m_centre.dist_deg(circle->centre());
@@ -639,7 +641,7 @@ bool GSkyRegionCircle::overlaps(const GSkyRegion& reg) const
 
         // Create rectangular region from reg
         const GSkyRegionRectangle* rect =
-              dynamic_cast<const GSkyRegionRectangle*>(&reg);
+              static_cast<const GSkyRegionRectangle*>(&reg);
 
         // Check overlap with circle
         overlap = rect->overlaps(*this);
@@ -650,7 +652,7 @@ bool GSkyRegionCircle::overlaps(const GSkyRegion& reg) const
     else if (reg.type() == "Map") {
 
         // Create map from reg
-        const GSkyRegionMap* map = dynamic_cast<const GSkyRegionMap*>(&reg);
+        const GSkyRegionMap* map = static_cast<const GSkyRegionMap*>(&reg);
 
         // Check overlap with circle
         overlap = map->overlaps(*this);

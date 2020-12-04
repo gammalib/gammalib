@@ -1825,27 +1825,146 @@ void TestGSky::test_GSkyRegionCircle(void)
  ***************************************************************************/
 void TestGSky::test_GSkyRegionRectangle(void)
 {
-    // Define region for comparison
-    GSkyDir refdir_radeczerozero = GSkyDir();
-    refdir_radeczerozero.radec_deg(0,0);
-    double ref_width  = 1.;
-    double ref_height = 1.;
-    double ref_pa_deg = 0.;
+    // Test void constructor
+    GSkyRegionRectangle rect0;
+    test_value(rect0.classname(), "GSkyRegionRectangle", "Test classname of void constructor");
+    test_value(rect0.type(), "Rectangle", "Test type of void constructor");
+    test_value(rect0.centre().ra_deg(), 0.0, "Test Right Ascension of centre of void constructor");
+    test_value(rect0.centre().dec_deg(), 0.0, "Test Declination of centre of void constructor");
+    test_value(rect0.ra(), 0.0, "Test Right Ascension of void constructor");
+    test_value(rect0.dec(), 0.0, "Test Declination of void constructor");
+    test_value(rect0.width(), 0.0, "Test width of void constructor");
+    test_value(rect0.height(), 0.0, "Test height of void constructor");
+    test_value(rect0.posang(), 0.0, "Test position angle of void constructor");
 
-    // Test constructing
-    test_try("Test constructor");
+    // Test sky direction constructor
+    GSkyDir dir1;
+    dir1.radec_deg(83.6331,22.0145);
+    GSkyRegionRectangle rect1(dir1, 3.1, 2.9, 43.7);
+    test_value(rect1.centre().ra_deg(), 83.6331, "Test Right Ascension of centre of sky direction constructor");
+    test_value(rect1.centre().dec_deg(), 22.0145, "Test Declination of centre of sky direction constructor");
+    test_value(rect1.ra(), 83.6331, "Test Right Ascension of sky direction constructor");
+    test_value(rect1.dec(), 22.0145, "Test Declination of sky direction constructor");
+    test_value(rect1.width(), 3.1, "Test width of sky direction constructor");
+    test_value(rect1.height(), 2.9, "Test height of sky direction constructor");
+    test_value(rect1.posang(), 43.7, "Test position angle of sky direction constructor");
+
+    // Test Right Ascension and Declination constructor
+    GSkyRegionRectangle rect2(83.6331, 22.0145, 3.1, 2.9, 43.7);
+    test_value(rect2.centre().ra_deg(), 83.6331, "Test Right Ascension of centre of (RA,Dec) constructor");
+    test_value(rect2.centre().dec_deg(), 22.0145, "Test Declination of centre of (RA,Dec) constructor");
+    test_value(rect2.ra(), 83.6331, "Test Right Ascension of (RA,Dec) constructor");
+    test_value(rect2.dec(), 22.0145, "Test Declination of (RA,Dec) constructor");
+    test_value(rect2.width(), 3.1, "Test width of (RA,Dec) constructor");
+    test_value(rect2.height(), 2.9, "Test height of (RA,Dec) constructor");
+    test_value(rect2.posang(), 43.7, "Test position angle of (RA,Dec) constructor");
+
+    // Test line constructor
+    GSkyRegionRectangle rect3("fk5;box(83.6331, 22.0145, 3.1, 2.9, 43.7)");
+    test_value(rect3.centre().ra_deg(), 83.6331, "Test Right Ascension of centre of line constructor");
+    test_value(rect3.centre().dec_deg(), 22.0145, "Test Declination of centre of line constructor");
+    test_value(rect3.ra(), 83.6331, "Test Right Ascension of line constructor");
+    test_value(rect3.dec(), 22.0145, "Test Declination of line constructor");
+    test_value(rect3.width(), 3.1, "Test width of line constructor");
+    test_value(rect3.height(), 2.9, "Test height of line constructor");
+    test_value(rect3.posang(), 43.7, "Test position angle of line constructor");
+
+    // Test copy constructor
+    GSkyRegionRectangle rect4(rect3);
+    test_value(rect4.centre().ra_deg(), 83.6331, "Test Right Ascension of centre of copy constructor");
+    test_value(rect4.centre().dec_deg(), 22.0145, "Test Declination of centre of copy constructor");
+    test_value(rect4.ra(), 83.6331, "Test Right Ascension of copy constructor");
+    test_value(rect4.dec(), 22.0145, "Test Declination of copy constructor");
+    test_value(rect4.width(), 3.1, "Test width of copy constructor");
+    test_value(rect4.height(), 2.9, "Test height of copy constructor");
+    test_value(rect4.posang(), 43.7, "Test position angle of copy constructor");
+
+    // Test assignment operator
+    GSkyRegionRectangle rect5;
+    rect5 = rect3;
+    test_value(rect5.centre().ra_deg(), 83.6331, "Test Right Ascension of centre of assignment operator");
+    test_value(rect5.centre().dec_deg(), 22.0145, "Test Declination of centre of assignment operator");
+    test_value(rect5.ra(), 83.6331, "Test Right Ascension of assignment operator");
+    test_value(rect5.dec(), 22.0145, "Test Declination of assignment operator");
+    test_value(rect5.width(), 3.1, "Test width of assignment operator");
+    test_value(rect5.height(), 2.9, "Test height of assignment operator");
+    test_value(rect5.posang(), 43.7, "Test position angle of assignment operator");
+
+    // Test clone method
+    GSkyRegionRectangle* rect6 = rect3.clone();
+    test_value(rect6->centre().ra_deg(), 83.6331, "Test Right Ascension of centre of cloned instance");
+    test_value(rect6->centre().dec_deg(), 22.0145, "Test Declination of centre of cloned instance");
+    test_value(rect6->ra(), 83.6331, "Test Right Ascension of cloned instance");
+    test_value(rect6->dec(), 22.0145, "Test Declination of cloned instance");
+    test_value(rect6->width(), 3.1, "Test width of cloned instance");
+    test_value(rect6->height(), 2.9, "Test height of cloned instance");
+    test_value(rect6->posang(), 43.7, "Test position angle of cloned instance");
+    delete rect6;
+
+    // Test constructor error modes
+    test_try("Test invalid width in sky direction constructor");
     try {
-        GSkyRegionRectangle rect(refdir_radeczerozero, ref_width, ref_height, ref_pa_deg);
+        GSkyRegionRectangle rect(dir1, -1.0, 2.9, 43.7);
+        test_try_failure();
+    }
+    catch (GException::invalid_argument &e) {
         test_try_success();
     }
     catch (std::exception &e) {
         test_try_failure(e);
     }
-
-    // Test constructing with negative width (should be forbidden)
-    test_try("Test constructor2");
+    //
+    test_try("Test invalid width in (RA,Dec) constructor");
     try {
-        GSkyRegionRectangle rect(refdir_radeczerozero, -1, ref_height, ref_pa_deg);
+        GSkyRegionRectangle rect(83.6331, 22.0145, 3.1, -1.0, 43.7);
+        test_try_failure();
+    }
+    catch (GException::invalid_argument &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    //
+    test_try("Test invalid width in line constructor");
+    try {
+        GSkyRegionRectangle rect("fk5;box(83.6331, 22.0145, -1.0, 2.9, 43.7)");
+        test_try_failure();
+    }
+    catch (GException::invalid_argument &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    //
+    test_try("Test invalid height in sky direction constructor");
+    try {
+        GSkyRegionRectangle rect(dir1, 3.1, -1.0, 43.7);
+        test_try_failure();
+    }
+    catch (GException::invalid_argument &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    //
+    test_try("Test invalid height in (RA,Dec) constructor");
+    try {
+        GSkyRegionRectangle rect(83.6331, 22.0145, 3.1, -1.0, 43.7);
+        test_try_failure();
+    }
+    catch (GException::invalid_argument &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    //
+    test_try("Test invalid height in line constructor");
+    try {
+        GSkyRegionRectangle rect("fk5;box(83.6331, 22.0145, 3.1, -1.0, 43.7)");
         test_try_failure();
     }
     catch (GException::invalid_argument &e) {
@@ -1855,36 +1974,19 @@ void TestGSky::test_GSkyRegionRectangle(void)
         test_try_failure(e);
     }
 
-    // Test constructing with negative height (should be forbidden)
-    test_try("Test constructor3");
-    try {
-        GSkyRegionRectangle rect(refdir_radeczerozero, ref_width, -1, ref_pa_deg);
-        test_try_failure();
-    }
-    catch (GException::invalid_argument &e) {
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    // Test assignment methods
+    GSkyRegionRectangle rect7;
+    rect7.width(3.1);
+    rect7.height(2.9);
+    rect7.posang(43.7);
+    test_value(rect7.width(), 3.1, "Test width() methods");
+    test_value(rect7.height(), 2.9, "Test height() methods");
+    test_value(rect7.posang(), 43.7, "Test posang() methods");
 
-    // Test constructing with negative posang (should be allowed)
-    test_try("Test constructor4");
+    // Test assignment error modes
+    test_try("Test invalid width() assignment");
     try {
-        GSkyRegionRectangle rect(refdir_radeczerozero, ref_width, ref_height, -1);
-        test_try_success();
-    }
-    catch (GException::invalid_argument &e) {
-        test_try_failure();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
-    // Test assignment of neg width after construction
-    test_try("Test width assignment after");
-    try {
-        GSkyRegionRectangle rect(refdir_radeczerozero, ref_width, ref_height, ref_pa_deg);
+        GSkyRegionRectangle rect;
         rect.width(-1.0);
         test_try_failure();
     }
@@ -1894,11 +1996,9 @@ void TestGSky::test_GSkyRegionRectangle(void)
     catch (std::exception &e) {
         test_try_failure(e);
     }
-
-    // Test assignment of neg height after construction
-    test_try("Test height assignment after");
+    test_try("Test invalid height() assignment");
     try {
-        GSkyRegionRectangle rect(refdir_radeczerozero, ref_width, ref_height, ref_pa_deg);
+        GSkyRegionRectangle rect;
         rect.height(-1.0);
         test_try_failure();
     }
@@ -1909,148 +2009,138 @@ void TestGSky::test_GSkyRegionRectangle(void)
         test_try_failure(e);
     }
 
-    // Test assignment of neg posang after construction
-    test_try("Test posang assignment after");
+    // Test corner() method
+    rect7.width(1.0);
+    rect7.height(1.0);
+    rect7.posang(0.0);
+    test_value(rect7.corner(0).ra_deg(),   0.50001269, "Test Right Ascension of corner 0");
+    test_value(rect7.corner(0).dec_deg(),  0.49999365, "Test Declination of corner 0");
+    test_value(rect7.corner(1).ra_deg(),   0.50001269, "Test Right Ascension of corner 1");
+    test_value(rect7.corner(1).dec_deg(), -0.49999365, "Test Declination of corner 1");
+    test_value(rect7.corner(2).ra_deg(),  -0.50001269, "Test Right Ascension of corner 2");
+    test_value(rect7.corner(2).dec_deg(), -0.49999365, "Test Declination of corner 2");
+    test_value(rect7.corner(3).ra_deg(),  -0.50001269, "Test Right Ascension of corner 3");
+    test_value(rect7.corner(3).dec_deg(),  0.49999365, "Test Declination of corner 3");
+
+    // Test corner() method error modes
+    test_try("Test corner() index < 0");
     try {
-        GSkyRegionRectangle rect(refdir_radeczerozero, ref_width, ref_height, ref_pa_deg);
-        rect.posang(-1.0);
+        GSkyRegionRectangle rect;
+        GSkyDir dir = rect.corner(-1);
+        test_try_failure();
+    }
+    catch (GException::out_of_range &e) {
         test_try_success();
     }
-    catch (GException::invalid_argument &e) {
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    test_try("Test corner() index > 3");
+    try {
+        GSkyRegionRectangle rect;
+        GSkyDir dir = rect.corner(4);
         test_try_failure();
+    }
+    catch (GException::out_of_range &e) {
+        test_try_success();
     }
     catch (std::exception &e) {
         test_try_failure(e);
     }
 
-    // Check radius assignment
-    GSkyRegionRectangle rect(refdir_radeczerozero, ref_width, ref_height, ref_pa_deg);
+    // Test solid angle computation
+    GSkyRegionRectangle rect8(83.6331, 22.0145, 3.1, 2.9, 43.7);
+    double ref = 3.1*gammalib::deg2rad * 2.9*gammalib::deg2rad;
+    test_value(rect8.solidangle(), ref, "Test solid angle computation");
 
-    double check_width  = rect.width();
-    test_value(ref_width, check_width, 1.0e-10, "Test width assignment");
+    // Test sky direction contains() method
+    GSkyRegionRectangle rect9(1.0, 1.0, 6.0, 10.0, 45.0);
+    GSkyDir             test_dir;
+    test_dir.radec_deg(-3.0, 0.0);
+    test_assert(rect9.contains(test_dir), "Test whether (-3,0) lies inside rectangle");
+    test_dir.radec_deg(2.0, 6.0);
+    test_assert(rect9.contains(test_dir), "Test whether (2,6) lies inside rectangle");
+    test_dir.radec_deg(5.0, 4.0);
+    test_assert(rect9.contains(test_dir), "Test whether (5,4) lies inside rectangle");
+    test_dir.radec_deg(1.0, -3.0);
+    test_assert(rect9.contains(test_dir), "Test whether (1,-3) lies inside rectangle");
+    test_dir.radec_deg(-2.0, 3.0);
+    test_assert(!rect9.contains(test_dir), "Test whether (-2,3) lies outside rectangle");
+    test_dir.radec_deg(3.0, 7.0);
+    test_assert(!rect9.contains(test_dir), "Test whether (3,7) lies outside rectangle");
+    test_dir.radec_deg(7.0, 3.0);
+    test_assert(!rect9.contains(test_dir), "Test whether (7,3) lies outside rectangle");
+    test_dir.radec_deg(2.0, -5.0);
+    test_assert(!rect9.contains(test_dir), "Test whether (2,-5) lies outside rectangle");
+    test_dir.radec_deg(-2.0, -4.0);
+    test_assert(!rect9.contains(test_dir), "Test whether (-2,-4) lies outside rectangle");
 
-    double check_height = rect.width();
-    test_value(ref_height, check_height, 1.0e-10, "Test height assignment");
+    // Test whether corners are contained
+    test_assert(rect9.contains(rect9.corner(0)), "Test whether corner(0) lies inside rectangle");
+    test_assert(rect9.contains(rect9.corner(1)), "Test whether corner(1) lies inside rectangle");
+    test_assert(rect9.contains(rect9.corner(2)), "Test whether corner(2) lies inside rectangle");
+    test_assert(rect9.contains(rect9.corner(3)), "Test whether corner(3) lies inside rectangle");
 
-    double check_pa_deg = rect.posang();
-    test_value(ref_pa_deg, check_pa_deg, 1.0e-10, "Test posang assignment");
+    // Test region contains() and overlaps() methods for circle
+    GSkyRegionCircle circle1(1.0, 1.0, 3.0);
+    GSkyRegionCircle circle2(1.0, 1.0, 3.1);
+    GSkyRegionCircle circle3(7.0, 5.0, 0.5);
+    test_assert(rect9.contains(circle1), "Test whether circle is contained in rectangle");
+    test_assert(!rect9.contains(circle2), "Test whether circle is not contained in rectangle");
+    test_assert(rect9.overlaps(circle2), "Test whether circle overlaps with rectangle");
+    test_assert(!rect9.overlaps(circle3), "Test whether circle does not overlap with rectangle");
 
-    // Check solid angle assignment
-    double solidangle_check = rect.solidangle();
-    double solidangle = ref_width*gammalib::deg2rad * ref_height*gammalib::deg2rad;
-    test_value(solidangle_check, solidangle, 1.0e-10, "Test solid angle");
+    // Test region contains() and overlaps() methods for rectangles
+    GSkyRegionRectangle rect10(1.0,  1.0, 6.1, 10.1, 45.0);
+    GSkyRegionRectangle rect11(6.0, -4.0, 6.0, 10.0, 45.0);
+    test_assert(rect9.contains(rect9), "Test whether rectangle is contained in rectangle");
+    test_assert(!rect9.contains(rect10), "Test whether rectangle is not contained in rectangle");
+    test_assert(rect9.overlaps(rect10), "Test whether rectangle overlaps with rectangle");
+    test_assert(!rect9.overlaps(rect11), "Test whether rectangle does not overlap with rectangle");
 
-    // Initialise objects
-    refdir_radeczerozero = GSkyDir();
-    GSkyDir test_dir_0 = GSkyDir();
-    GSkyDir test_dir_1 = GSkyDir();
-    GSkyDir test_dir_2 = GSkyDir();
+    // Test region contains() and overlaps() methods for maps. The map region
+    // is centred at (0,0) and has a radius of 0.3 deg.
+    GSkyRegionMap map1(sky_region_map);
+    GSkyRegionRectangle rect12(0.0, 0.0, 0.6,  0.6,  45.0);
+    GSkyRegionRectangle rect13(0.0, 0.0, 0.59, 0.59, 45.0);
+    GSkyRegionRectangle rect14(0.6, 0.0, 0.6,  0.6,   0.0);
+    test_assert(rect12.contains(map1), "Test whether map is contained in rectangle");
+    test_assert(!rect13.contains(map1), "Test whether map is not contained in rectangle");
+    test_assert(rect13.overlaps(map1), "Test whether map overlaps with rectangle");
+    test_assert(!rect14.overlaps(map1), "Test whether map does not overlap with rectangle");
 
-    refdir_radeczerozero.radec_deg(0,0);
-    GSkyRegionRectangle refregion(refdir_radeczerozero, 10, 6, 0);
+    // Test print() method
+    test_assert(!rect9.print().empty(), "Test whether print() method returns something");
 
-    // Check GSkyDir containment
-    // Upper right
-    test_dir_0.radec_deg(6, 2);
-    test_dir_1.radec_deg(4, 2);
-    test_dir_2.radec_deg(4, 4);
-    test_assert(!refregion.contains(test_dir_0),"test for containment");
-    test_assert(refregion.contains(test_dir_1),"test for containment");
-    test_assert(!refregion.contains(test_dir_2),"test for containment");
+    // Test read() and write() methods
+    GSkyRegionRectangle rect15;
+    rect15.read("fk5;box(83.6331, 22.0145, 3.1, 2.9, 43.7)");
+    test_value(rect15.centre().ra_deg(), 83.6331, "Test Right Ascension of centre after read()");
+    test_value(rect15.centre().dec_deg(), 22.0145, "Test Declination of centre after read()");
+    test_value(rect15.ra(), 83.6331, "Test Right Ascension after read()");
+    test_value(rect15.dec(), 22.0145, "Test Declination after read()");
+    test_value(rect15.width(), 3.1, "Test width after read()");
+    test_value(rect15.height(), 2.9, "Test height after read()");
+    test_value(rect15.posang(), 43.7, "Test position angle after read()");
+    std::string region = rect15.write();
+    rect14.read(region);
+    test_value(rect14.centre().ra_deg(), 83.6331, "Test Right Ascension of centre after second read()");
+    test_value(rect14.centre().dec_deg(), 22.0145, "Test Declination of centre after second read()");
+    test_value(rect14.ra(), 83.6331, "Test Right Ascension after second read()");
+    test_value(rect14.dec(), 22.0145, "Test Declination after second read()");
+    test_value(rect14.width(), 3.1, "Test width after second read()");
+    test_value(rect14.height(), 2.9, "Test height after second read()");
+    test_value(rect14.posang(), 43.7, "Test position angle after second read()");
 
-    // Upper left
-    test_dir_0.radec_deg(-6, 2);
-    test_dir_1.radec_deg(-4, 2);
-    test_dir_2.radec_deg(-4, 4);
-    test_assert(!refregion.contains(test_dir_0),"test for containment");
-    test_assert(refregion.contains(test_dir_1),"test for containment");
-    test_assert(!refregion.contains(test_dir_2),"test for containment");
-
-    // Lower left
-    test_dir_0.radec_deg(-6, -2);
-    test_dir_1.radec_deg(-4, -2);
-    test_dir_2.radec_deg(-4, -4);
-    test_assert(!refregion.contains(test_dir_0),"test for containment");
-    test_assert(refregion.contains(test_dir_1),"test for containment");
-    test_assert(!refregion.contains(test_dir_2),"test for containment");
-
-    // Lower right
-    test_dir_0.radec_deg(6, -2);
-    test_dir_1.radec_deg(4, -2);
-    test_dir_2.radec_deg(4, -4);
-    test_assert(!refregion.contains(test_dir_0),"test for containment");
-    test_assert(refregion.contains(test_dir_1),"test for containment");
-    test_assert(!refregion.contains(test_dir_2),"test for containment");
-
-    // Corners
-    test_assert(refregion.contains(refregion.corner(0)),"test for corner containment");
-    test_assert(refregion.contains(refregion.corner(1)),"test for corner containment");
-    test_assert(refregion.contains(refregion.corner(2)),"test for corner containment");
-    test_assert(refregion.contains(refregion.corner(3)),"test for corner containment");
-
-
-    // Check GSkyDir containment for rotated rectangle
-    GSkyRegionRectangle refregion_rot(refdir_radeczerozero, 10, 10, 45);
-
-    // Check corner containment
-    test_assert(refregion_rot.contains(refregion_rot.corner(0)),"test for corner containment");
-    test_assert(refregion_rot.contains(refregion_rot.corner(1)),"test for corner containment");
-    test_assert(refregion_rot.contains(refregion_rot.corner(2)),"test for corner containment");
-    test_assert(refregion_rot.contains(refregion_rot.corner(3)),"test for corner containment");
-
-    // Check GSkyDir containment
-    test_dir_0.radec_deg(refregion_rot.corner(0).ra_deg()+1, 0);
-    test_dir_1.radec_deg(refregion_rot.corner(0).ra_deg()  , 0);
-    test_dir_2.radec_deg(refregion_rot.corner(0).ra_deg()-1, 0);
-    test_assert(!refregion_rot.contains(test_dir_0),"test for containment");
-    test_assert(refregion_rot.contains(test_dir_1),"test for containment");
-    test_assert(refregion_rot.contains(test_dir_2),"test for containment");
-
-    // Check local<->global coordinate transformations
-    /*
-    test_dir_0.radec_deg(50,50);
-    test_dir_1 = refregion_rot.transform_to_local(test_dir_0);
-    test_dir_2 = refregion_rot.transform_to_global(test_dir_1);
-    test_value(test_dir_0.ra(),  test_dir_2.ra(),  1.0e-10, "Test coord trafo");
-    test_value(test_dir_0.dec(), test_dir_2.dec(), 1.0e-10, "Test coord trafo");
-    */
-
-    // Check other rects containment
-    GSkyDir refdir_raoffset = GSkyDir();
-    refdir_raoffset.radec_deg(5,0);
-
-    GSkyDir refdir_rapole = GSkyDir();
-    refdir_rapole.radec_deg(359,0);
-
-    GSkyDir refdir_decpole = GSkyDir();
-    refdir_decpole.radec_deg(0,89);
-
-    GSkyDir refdir_ndecpole = GSkyDir();
-    refdir_ndecpole.radec_deg(100,89);
-
-    GSkyRegionRectangle refregion_smaller(refdir_radeczerozero, 5,  3, 0);
-    GSkyRegionRectangle refregion_larger(refdir_radeczerozero, 20, 12, 0);
-    GSkyRegionRectangle refregion_raoffset(refdir_raoffset, 10, 6, 0);
-    GSkyRegionRectangle refregion_rapole(refdir_rapole,   3, 3, 0);
-    GSkyRegionRectangle refregion_decpole(refdir_decpole, 3, 3, 0);
-
-    // Test contain dirs (same from circle)
-    test_assert(refregion.contains(refdir_radeczerozero),"test for containment");
-    test_assert(refregion.contains(refregion.centre()), "test if centre in rectangle");
-
-    // Test contain regions (same from circle)
-    test_assert(refregion.contains(refregion_smaller),"test for containment region");
-    test_assert(!refregion.contains(refregion_larger), "test for containment region2 ");
-    test_assert(refregion.contains(refregion), "test3 for containment region");
-
-    test_assert(refregion.contains(refdir_rapole), "rapole for containment region");
-    test_assert(refregion_decpole.contains(refdir_ndecpole), "rapole for containment region");
-
-    // Test overlaps (same from circle)
-    test_assert(refregion.overlaps(refregion_smaller),"test for overlap");
-    test_assert(refregion.overlaps(refregion_larger),"test2 for overlap");
-    test_assert(refregion.overlaps(refregion_raoffset),"test3 for overlap");
-    test_assert(!refregion.overlaps(refregion_decpole),"test4 for overlap");
+    // Test clear method
+    rect9.clear();
+    test_value(rect9.centre().ra_deg(), 0.0, "Test Right Ascension of centre after clear()");
+    test_value(rect9.centre().dec_deg(), 0.0, "Test Declination of centre after clear()");
+    test_value(rect9.ra(), 0.0, "Test Right Ascension after clear()");
+    test_value(rect9.dec(), 0.0, "Test Declination after clear()");
+    test_value(rect9.width(), 0.0, "Test width after clear()");
+    test_value(rect9.height(), 0.0, "Test height after clear()");
+    test_value(rect9.posang(), 0.0, "Test position angle after clear()");
 
     // Exit test
     return;

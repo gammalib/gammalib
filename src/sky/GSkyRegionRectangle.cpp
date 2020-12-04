@@ -519,7 +519,7 @@ bool GSkyRegionRectangle::contains(const GSkyRegion& reg) const
 
         // Create circular region from reg
         const GSkyRegionCircle* circle =
-              dynamic_cast<const GSkyRegionCircle*>(&reg);
+              static_cast<const GSkyRegionCircle*>(&reg);
 
         // Transform circle center to local coordinate system
         GSkyPixel local = dir_to_local(circle->centre());
@@ -544,7 +544,7 @@ bool GSkyRegionRectangle::contains(const GSkyRegion& reg) const
 
         // Create rectangular region from reg
         const GSkyRegionRectangle* rect =
-              dynamic_cast<const GSkyRegionRectangle*>(&reg);
+              static_cast<const GSkyRegionRectangle*>(&reg);
 
         // Initialise containment flag to true
         contains = true;
@@ -571,10 +571,10 @@ bool GSkyRegionRectangle::contains(const GSkyRegion& reg) const
     else if (reg.type() == "Map") {
 
         // Create map from reg
-        const GSkyRegionMap* map = dynamic_cast<const GSkyRegionMap*>(&reg);
+        const GSkyRegionMap* map = static_cast<const GSkyRegionMap*>(&reg);
 
         // Get non-zero indices
-        std::vector<int> indices = map->nonzero_indices();
+        const std::vector<int>& indices = map->nonzero_indices();
 
         // Initialise containment flag to true
         contains = true;
@@ -583,7 +583,7 @@ bool GSkyRegionRectangle::contains(const GSkyRegion& reg) const
         for (int i = 0; i < indices.size(); ++i) {
 
             // Get sky direction of map pixel
-            GSkyDir dir = map->map().inx2dir(i);
+            GSkyDir dir = map->map().inx2dir(indices[i]);
 
             // If pixel is not contained then set containment flag to false
             // and break
@@ -628,7 +628,7 @@ bool GSkyRegionRectangle::overlaps(const GSkyRegion& reg) const
 
         // Create circular region from reg
         const GSkyRegionCircle* circle =
-              dynamic_cast<const GSkyRegionCircle*>(&reg);
+              static_cast<const GSkyRegionCircle*>(&reg);
 
         // Transform circle center to local coordinate system
         GSkyPixel local = dir_to_local(circle->centre());
@@ -653,7 +653,7 @@ bool GSkyRegionRectangle::overlaps(const GSkyRegion& reg) const
 
         // Create rectangular region from reg
         const GSkyRegionRectangle* rect =
-              dynamic_cast<const GSkyRegionRectangle*>(&reg);
+              static_cast<const GSkyRegionRectangle*>(&reg);
 
         // Dirty kludge: compare with map
         GSkyRegionMap map = GSkyRegionMap(rect);
@@ -665,7 +665,7 @@ bool GSkyRegionRectangle::overlaps(const GSkyRegion& reg) const
     else if (reg.type() == "Map") {
 
         // Create map from reg
-        const GSkyRegionMap* map = dynamic_cast<const GSkyRegionMap*>(&reg);
+        const GSkyRegionMap* map = static_cast<const GSkyRegionMap*>(&reg);
 
         // Check overlap with circle
         overlap = map->overlaps(*this);
