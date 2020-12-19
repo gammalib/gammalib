@@ -25,7 +25,7 @@ Getting GammaLib
 
 The latest version of the GammaLib source code, documentation, and
 example programs are available on the World-Wide Web from
-`http://cta.irap.omp.eu/gammalib/download.html <http://cta.irap.omp.eu/gammalib/download.html>`_.
+`http://cta.irap.omp.eu/gammalib/admin/download.html <http://cta.irap.omp.eu/gammalib/admin/download.html>`_.
 
 
 Prerequisites
