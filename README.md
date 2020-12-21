@@ -80,6 +80,12 @@ To build, verify and install GammaLib, simply type the following:
      $ make check
      $ make install
 
+If the folder does not contain any `configure` file, please run
+
+     $ ./autogen.sh 
+
+before invoking `configure`.
+
 By default GammaLib installs itself in `/usr/local/gamma`.  If you need to
 install GammaLib in a different location or in your home directory, use
 the `--prefix` option to `./configure`.  For example:
