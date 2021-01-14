@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GObservation.cpp - Abstract observation base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1181,13 +1181,16 @@ double GObservation::npred_grad(const GModel& model, const GModelPar& par) const
  *
  * @param[in] name Model name.
  *
- * This is a response cache removal hook that is called by the
- * GObservations::remove_response_cache() methods and that can be used to
- * remove the model @p name from a response cache, if implemented in the
- * derived class.
+ * Remove response cache for model @p name from response cache.
  ***************************************************************************/
 void GObservation::remove_response_cache(const std::string& name)
 {
+    // Build model name
+    std::string model_name  = id() + ":" + name;
+
+    // Remove response cache
+    const_cast<GResponse*>(this->response())->remove_response_cache(model_name);
+
     // Return
     return;
 }

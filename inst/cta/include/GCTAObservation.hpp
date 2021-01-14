@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAObservation.hpp - CTA Observation class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -96,9 +96,6 @@ public:
     virtual void                read(const GXmlElement& xml);
     virtual void                write(GXmlElement& xml) const;
     virtual std::string         print(const GChatter& chatter = NORMAL) const;
-
-    // Implement virtual methods
-    virtual void                remove_response_cache(const std::string& name);
 
     // Other methods
     void                instrument(const std::string& instrument);

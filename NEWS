@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-2 December 2020
+14 January 2021
 
 
 1. Introduction
@@ -136,6 +136,9 @@ of functions (#3328).
 
 10. Observation module
 ----------------------
+Add source removal from vector cache to GResponse::remove_response_cache()
+method (#3499).
+
 The GResponseVectorCache class was added to handle caching of the vector response.
 Only non-zero IRF values are stored by the class. The class was integrated in the
 GResponse class (#3403).

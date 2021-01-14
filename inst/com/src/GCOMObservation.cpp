@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCOMObservation.cpp - COMPTEL Observation class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -733,6 +733,12 @@ void GCOMObservation::remove_response_cache(const std::string& name)
     if (index < m_drms.size()) {
         m_drms.erase(m_drms.begin()+index);
     }
+
+    // Build model name
+    std::string model_name  = id() + ":" + name;
+
+    // Remove response cache
+    const_cast<GCOMResponse*>(this->response())->remove_response_cache(model_name);
 
     // Return
     return;

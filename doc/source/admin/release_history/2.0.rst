@@ -1,7 +1,7 @@
 .. _2.0:
 
-GammaLib 2.0 release (27 November 2020)
-=======================================
+GammaLib 2.0 release (14 January 2021)
+======================================
 
 Overview
 --------
@@ -17,6 +17,8 @@ In particular, this release provides:
 Bug fixes
 ---------
 
+* [`3499 <https://cta-redmine.irap.omp.eu/issues/3499>`_] -
+  Fix response cache removal for vector cache
 * Fix ``GSkyMap::stack_maps()`` method for WCS maps
 * [`3417 <https://cta-redmine.irap.omp.eu/issues/3417>`_] -
   Correct application elapsed CPU time for OpenMP

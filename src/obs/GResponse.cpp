@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GResponse.cpp - Abstract response base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -736,6 +736,7 @@ void GResponse::remove_response_cache(const std::string& name)
     // Remove model from response caches
     m_irf_cache.remove(name);
     m_nroi_cache.remove(name);
+    m_irf_vector_cache.remove(name);
 
     // Return
     return;

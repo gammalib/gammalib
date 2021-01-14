@@ -1,8 +1,9 @@
-2020-12-02
+2021-01-14
 
         * Version 2.0.0 released
         ========================
 
+        Fix response cache removal for vector cache (#3499)
         Add GModelAssociation and GModelAssociations classes (#3469)
         Add GSkyMap::correlate() method (#3461)
         Add GModels::eval() vector evaluation method (#3455)
