@@ -71,6 +71,17 @@ readline installed).  readline requires the ncurses library.  Both
 libraries can be downloaded from http://ftp.gnu.org/gnu/.
 
 
+Conda Installation
+==================
+The easiest is to install GammaLib via conda.  This also takes care of the
+installation of cfitsio.  Assuming that you have installed anaconda, type
+the following:
+
+     $ conda config --append channels conda-forge
+     $ conda config --append channels cta-observatory
+     $ conda install gammalib
+
+
 Linux Installation
 ==================
 To build, verify and install GammaLib, simply type the following:

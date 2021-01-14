@@ -619,8 +619,6 @@ void GCOMDri::compute_drg(const GCOMObservation& obs,
  *
  * @param[in] obs COMPTEL observation.
  *
- * Compute DRG cube for a COMPTEL observation.
- *
  * Compute DRX exposure map for a COMPTEL observation.
  *
  * For a given superpacket, the exposure is computed using
@@ -1244,14 +1242,20 @@ void GCOMDri::read_attributes(const GFitsHDU* hdu)
  ***************************************************************************/
 void GCOMDri::write_attributes(GFitsHDU* hdu) const
 {
-    // Set Phibar keywords
-    double crval3 = m_phimin + 0.5 * m_phibin;
+    // Write 3rd dimension keywords in case that a third dimension exists.
+    // This avoids writing a Phibar layer for DRX.
+    if (m_phibin > 0.0) {
 
-    // Write Phibar keywords
-    hdu->card("CTYPE3", "Phibar", "Compton scatter angle");
-    hdu->card("CRPIX3", 1.0, "Pixel coordinate of reference point (starting from 1)");
-    hdu->card("CRVAL3", crval3, "[deg] Coordinate value at reference point");
-    hdu->card("CDELT3", m_phibin, "[deg] Coordinate increment at reference point");
+        // Set Phibar keywords
+        double crval3 = m_phimin + 0.5 * m_phibin;
+
+        // Write Phibar keywords
+        hdu->card("CTYPE3", "Phibar", "Compton scatter angle");
+        hdu->card("CRPIX3", 1.0, "Pixel coordinate of reference point (starting from 1)");
+        hdu->card("CRVAL3", crval3, "[deg] Coordinate value at reference point");
+        hdu->card("CDELT3", m_phibin, "[deg] Coordinate increment at reference point");
+
+    } // endif: DRI was 3D
 
     // Write OGIP time keywords
     m_gti.reference().write(*hdu);
