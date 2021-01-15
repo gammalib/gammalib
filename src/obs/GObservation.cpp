@@ -62,6 +62,7 @@ const double minerr = 1.0e-100;                //!< Minimum statistical error
 
 /* __ Coding definitions _________________________________________________ */
 #define G_LN_ENERGY_INT   //!< ln(E) variable substitution for integration
+#define G_TRANSPOSE_MATRIX     //!< Transpose matrix in likelihood methods
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_OPT_DEBUG                       //!< Debug likelihood computation
@@ -1394,6 +1395,11 @@ double GObservation::likelihood_poisson_unbinned(const GModels& models,
     // Compute model and derivative
     GVector model_vector = this->model(models, &wrk_matrix);
 
+    // Compile option: transpose matrix
+    #if defined(G_TRANSPOSE_MATRIX)
+    wrk_matrix = wrk_matrix.transpose();
+    #endif
+
     // Iterate over all events
     for (int i = 0; i < nevents; ++i) {
 
@@ -1409,7 +1415,11 @@ double GObservation::likelihood_poisson_unbinned(const GModels& models,
         }
 
         // Extract working gradient multiplied by bin size
+        #if defined(G_TRANSPOSE_MATRIX)
+        GVector wrk_grad = wrk_matrix.column(i);
+        #else
         GVector wrk_grad = wrk_matrix.row(i);
+        #endif
 
         // Create index array of non-zero derivatives and initialise working
         // array
@@ -1525,6 +1535,11 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
     // Compute model and derivative
     GVector model_vector = this->model(models, &wrk_matrix);
 
+    // Compile option: transpose matrix
+    #if defined(G_TRANSPOSE_MATRIX)
+    wrk_matrix = wrk_matrix.transpose();
+    #endif
+
     // Iterate over all bins
     for (int i = 0; i < nevents; ++i) {
 
@@ -1570,7 +1585,11 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
         *npred += model;
 
         // Extract working gradient multiplied by bin size
+        #if defined(G_TRANSPOSE_MATRIX)
+        GVector wrk_grad = wrk_matrix.column(i) * bin->size();
+        #else
         GVector wrk_grad = wrk_matrix.row(i) * bin->size();
+        #endif
 
         // Create index array of non-zero derivatives and initialise working
         // array
@@ -1724,6 +1743,11 @@ double GObservation::likelihood_gaussian_binned(const GModels& models,
     // Compute model and derivative
     GVector model_vector = this->model(models, &wrk_matrix);
 
+    // Compile option: transpose matrix
+    #if defined(G_TRANSPOSE_MATRIX)
+    wrk_matrix = wrk_matrix.transpose();
+    #endif
+
     // Iterate over all bins
     for (int i = 0; i < nevents; ++i) {
 
@@ -1759,7 +1783,11 @@ double GObservation::likelihood_gaussian_binned(const GModels& models,
         *npred += model;
 
         // Extract working gradient multiplied by bin size
+        #if defined(G_TRANSPOSE_MATRIX)
+        GVector wrk_grad = wrk_matrix.column(i) * bin->size();
+        #else
         GVector wrk_grad = wrk_matrix.row(i) * bin->size();
+        #endif
 
         // Create index array of non-zero derivatives and initialise working
         // array

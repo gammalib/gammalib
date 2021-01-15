@@ -136,6 +136,10 @@ of functions (#3328).
 
 10. Observation module
 ----------------------
+The sparse gradient matrix is now transposed in the likelihood method so that the
+elements can be access column-wise instead of row-wise, which speeds-up the element
+access (#3501).
+
 Add source removal from vector cache to GResponse::remove_response_cache()
 method (#3499).
 
