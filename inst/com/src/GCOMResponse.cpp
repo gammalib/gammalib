@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCOMResponse.cpp - COMPTEL Response class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -47,6 +47,7 @@
 #include "GModelSpectralConst.hpp"
 #include "GCOMResponse.hpp"
 #include "GCOMObservation.hpp"
+#include "GCOMEventCube.hpp"
 #include "GCOMEventBin.hpp"
 #include "GCOMInstDir.hpp"
 
@@ -57,7 +58,8 @@
 #define G_NROI            "GCOMResponse::nroi(GModelSky&, GEnergy&, GTime&, "\
                                                              "GObservation&)"
 #define G_EBOUNDS                           "GCOMResponse::ebounds(GEnergy&)"
-#define G_IRF_DRM          "GCOMResponse::irf_drm(GModelSky&, GObservation&)"
+#define G_IRF_PTSRC     "GCOMResponse::irf_ptsrc(GModelSky&, GObservation&, "\
+                                                                  "GMatrix*)"
 #define G_IRF_RADIAL   "GCOMResponse::irf_radial(GModelSky&, GObservation&, "\
                                                                   "GMatrix*)"
 #define G_IRF_ELLIPTICAL          "GCOMResponse::irf_elliptical(GModelSky&, "\
@@ -841,122 +843,155 @@ void GCOMResponse::free_members(void)
 
 
 /***********************************************************************//**
- * @brief Return instrument response vector
+ * @brief Return instrument response to point source
  *
  * @param[in] model Sky model.
  * @param[in] obs Observation.
- * @return Instrument response vector.
+ * @param[out] gradients Gradients matrix.
+ * @return Instrument response to point source for all events in
+ *         observation.
  *
- * @exception GException::invalid_argument
- *            Invalid observation or event type specified.
- * @exception GException::feature_not_implemented
- *            Computation for specified spatial model not implemented.
+ * Returns the instrument response to a point source for all events in the
+ * observations.
  *
- * Returns the instrument response to a sky model for all events in a given
- * observation. The computation of the response is handled by the
- * GCOMObservation::drm() method that also will update the cube in case that
- * any of the parameters changes.
- ***************************************************************************/
-GVector GCOMResponse::irf_drm(const GModelSky&    model,
-                              const GObservation& obs) const
-{
-    // Get number of events
-    int nevents = obs.events()->size();
-
-    // Initialise result
-    GVector irfs(nevents);
-
-    // Get pointer to COMPTEL observation
-    const GCOMObservation* comobs = dynamic_cast<const GCOMObservation*>(&obs);
-    if (comobs == NULL) {
-        std::string cls = std::string(typeid(&obs).name());
-        std::string msg = "Observation of type \""+cls+"\" is not a "
-                          "COMPTEL observation. Please specify a COMPTEL "
-                          "observation as argument.";
-        throw GException::invalid_argument(G_IRF_DRM, msg);
-    }
-
-    // Get reference to DRM
-    const GCOMDri& drm = comobs->drm(model);
-
-    // Extract model values from DRM cache
-    for (int k = 0; k < nevents; ++k) {
-        irfs[k] = drm[k];
-    }
-
-    // Return
-    return irfs;
-}
-
-
-/***********************************************************************//**
- * @brief Return instrument response to point source sky model
- *
- * @param[in] model Sky model.
- * @param[in] obs Observation.
- * @param[in] gradients Gradients matrix.
- * @return Instrument response to point source sky model.
- *
- * Returns the instrument response to a point source sky model for all
- * events.
+ * @p gradients is an optional matrix where the number of rows corresponds
+ * to the number of events in the observation and the number of columns
+ * corresponds to the number of spatial model parameters. ince for point
+ * sources no gradients are computed, the method does not alter the
+ * content of @p gradients.
  ***************************************************************************/
 GVector GCOMResponse::irf_ptsrc(const GModelSky&    model,
                                 const GObservation& obs,
                                 GMatrix*            gradients) const
 {
-    // Get number of events
-    int nevents = obs.events()->size();
+    // Extract COMPTEL observation
+    const GCOMObservation* obs_ptr = dynamic_cast<const GCOMObservation*>(&obs);
+    if (obs_ptr == NULL) {
+        std::string cls = std::string(typeid(&obs).name());
+        std::string msg = "Observation of type \""+cls+"\" is not a COMPTEL "
+                          "observations. Please specify a COMPTEL observation "
+                          "as argument.";
+        throw GException::invalid_argument(G_IRF_PTSRC, msg);
+    }
+
+    // Extract COMPTEL event cube
+    const GCOMEventCube* cube = dynamic_cast<const GCOMEventCube*>(obs_ptr->events());
+    if (cube == NULL) {
+        std::string msg = "Observation \""+obs.name()+"\" ("+obs.id()+") does "
+                          "not contain a COMPTEL event cube. Please specify "
+                          "a COMPTEL observation containing and event cube.";
+        throw GException::invalid_argument(G_IRF_PTSRC, msg);
+    }
+
+    // Get number of Chi/Psi pixels, Phibar layers and event bins
+    int npix    = cube->naxis(0) * cube->naxis(1);
+    int nphibar = cube->naxis(2);
+    int nevents = cube->size();
 
     // Initialise result
     GVector irfs(nevents);
 
-    // Check if spatial model has free parameters
-    bool has_free_pars = model.spatial()->has_free_pars();
+    // Get point source direction
+    GSkyDir srcDir =
+    static_cast<const GModelSpatialPointSource*>(model.spatial())->dir();
 
-    // If model has free parameters then compute IRF value for all events
-    if (has_free_pars) {
+    // Get IAQ normalisation (cm2): DRX (cm2 s) * DEADC / ONTIME (s)
+    double iaq_norm = obs_ptr->drx()(srcDir) * obs_ptr->deadc() /
+                      obs_ptr->ontime();
+
+    // Get pointer to DRG pixels
+    const double* drg = obs_ptr->drg().pixels();
+
+    // Loop over Chi and Psi
+    for (int ipix = 0; ipix < npix; ++ipix) {
+
+        // Get pointer to event bin
+        const GCOMEventBin* bin = (*cube)[ipix];
+
+        // Get reference to instrument direction
+        const GCOMInstDir& obsDir = bin->dir();
+
+        // Get reference to Phigeo sky direction
+        const GSkyDir& phigeoDir = obsDir.dir();
+
+        // Compute angle between true photon arrival direction and scatter
+        // direction (Chi,Psi)
+        double phigeo = srcDir.dist_deg(phigeoDir);
+
+        // Compute interpolation factors
+        double phirat  = phigeo / m_phigeo_bin_size; // 0.5 at bin centre
+        int    iphigeo = int(phirat);                // index into which Phigeo falls
+        double eps     = phirat - iphigeo - 0.5;     // 0.0 at bin centre [-0.5, 0.5[
+
+        // If Phigeo is in range then compute the IRF value for all
+        // Phibar layers
+        if (iphigeo < m_phigeo_bins) {
+
+            // Loop over Phibar
+            for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
+
+                // Get IAQ index
+                int i = iphibar * m_phigeo_bins + iphigeo;
+
+                // Initialise IAQ
+                double iaq = 0.0;
+
+                // Compute IAQ
+                if (eps < 0.0) { // interpolate towards left
+                    if (iphigeo > 0) {
+                        iaq = (1.0 + eps) * m_iaq[i] - eps * m_iaq[i-1];
+                    }
+                    else {
+                        iaq = (1.0 - eps) * m_iaq[i] + eps * m_iaq[i+1];
+                    }
+                }
+                else {           // interpolate towards right
+                    if (iphigeo < m_phigeo_bins-1) {
+                        iaq = (1.0 - eps) * m_iaq[i] + eps * m_iaq[i+1];
+                    }
+                    else {
+                        iaq = (1.0 + eps) * m_iaq[i] - eps * m_iaq[i-1];
+                    }
+                }
+
+                // Continue only if IAQ is positive
+                if (iaq > 0.0) {
+
+                    // Get DRI index
+                    int idri = ipix + iphibar * npix;
+
+                    // Compute IRF value
+                    double irf = iaq * drg[idri] * iaq_norm;
+
+                    // Make sure that IRF is positive
+                    if (irf < 0.0) {
+                        irf = 0.0;
+                    }
+
+                    // Store IRF value
+                    irfs[idri] = irf;
+
+                } // endif: IAQ was positive
+
+            } // endfor: looped over Phibar
+
+        } // endif: Phigeo was in valid range
+
+    } // endfor: looped over Chi and Psi
  
-        // Get point source direction
-        GSkyDir srcDir =
-        static_cast<const GModelSpatialPointSource*>(model.spatial())->dir();
- 
-        // Loop over events
-        for (int k = 0; k < nevents; ++k) {
-
-            // Get reference to event
-            const GEvent& event = *((*obs.events())[k]);
-
-            // Get source energy and time (no dispersion)
-            GEnergy srcEng  = event.energy();
-            GTime   srcTime = event.time();
-
-            // Setup photon
-            GPhoton photon(srcDir, srcEng, srcTime);
-
-            // Get IRF value
-            irfs[k] = this->irf(event, photon, obs);
-
-        } // endfor: looped over events
-
-    } // endif: model had free parameters
-
-    // ... otherwise extract model from DRM cache
-    else {
-        irfs = irf_drm(model, obs);
-    }
-
-    // Return IRF value
+    // Return IRF vector
     return irfs;
 }
 
 
 /***********************************************************************//**
- * @brief Return instrument response to radial source sky model
+ * @brief Return instrument response to radial source
  *
  * @param[in] model Sky model.
  * @param[in] obs Observation.
- * @param[in] gradients Gradients matrix.
- * @return Instrument response to radial source sky model.
+ * @param[out] gradients Gradients matrix.
+ * @return Instrument response to radial source  for all events in
+ *         observation.
  *
  * @todo Implement method.
  ***************************************************************************/
@@ -982,12 +1017,13 @@ GVector GCOMResponse::irf_radial(const GModelSky&    model,
 
 
 /***********************************************************************//**
- * @brief Return instrument response to elliptical source sky model
+ * @brief Return instrument response to elliptical source
  *
  * @param[in] model Sky model.
  * @param[in] obs Observation.
- * @param[in] gradients Gradients matrix.
- * @return Instrument response to elliptical source sky model.
+ * @param[out] gradients Gradients matrix.
+ * @return Instrument response to elliptical source for all events in
+ *         observation.
  *
  * @todo Implement method.
  ***************************************************************************/
@@ -1013,12 +1049,13 @@ GVector GCOMResponse::irf_elliptical(const GModelSky&    model,
 
 
 /***********************************************************************//**
- * @brief Return instrument response to diffuse source sky model
+ * @brief Return instrument response to diffuse source
  *
  * @param[in] model Sky model.
  * @param[in] obs Observation.
- * @param[in] gradients Gradients matrix.
- * @return Instrument response to diffuse source sky model.
+ * @param[out] gradients Gradients matrix.
+ * @return Instrument response to diffuse source for all events in
+ *         observation.
  *
  * @todo Implement method.
  ***************************************************************************/

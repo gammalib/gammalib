@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCOMResponse.hpp - COMPTEL Response class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -101,8 +101,6 @@ private:
     void    init_members(void);
     void    copy_members(const GCOMResponse& rsp);
     void    free_members(void);
-    GVector irf_drm(const GModelSky&    model,
-                            const GObservation& obs) const;
 
     // Overloaded virtual base class methods
     virtual GVector irf_ptsrc(const GModelSky&    model,

@@ -1618,9 +1618,9 @@ double GCTAResponseCube::irf_diffuse(const GEvent&       event,
  *
  * Returns the instrument response to a specified radial source.
  *
- * @p gradients is an optional sparse matrix where the number of rows
- * corresponds to the number of events in the observation and the number
- * of columns corresponds to the number of spatial model parameters.
+ * @p gradients is an optional matrix where the number of rows corresponds
+ * to the number of events in the observation and the number of columns
+ * corresponds to the number of spatial model parameters.
  ***************************************************************************/
 GVector GCTAResponseCube::irf_radial(const GModelSky&    model,
                                      const GObservation& obs,

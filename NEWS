@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-14 January 2021
+15 January 2021
 
 
 1. Introduction
@@ -232,7 +232,7 @@ spatial model gradients (#3203).
 
 21. COMPTEL interface
 ---------------------
-None
+Implement vectorised response computation in GCOMResponse::irf_ptsrc() method (#3501).
 
 
 22. INTEGRAL/SPI interface

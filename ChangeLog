@@ -1,8 +1,9 @@
-2021-01-14
+2021-01-15
 
         * Version 2.0.0 released
         ========================
 
+        Implement vectorised response computation for COMPTEL (#3501)
         Fix response cache removal for vector cache (#3499)
         Add GModelAssociation and GModelAssociations classes (#3469)
         Add GSkyMap::correlate() method (#3461)
