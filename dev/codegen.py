@@ -2,7 +2,7 @@
 # ==========================================================================
 # GammaLib code generator
 #
-# Copyright (C) 2017-2018 Juergen Knoedlseder
+# Copyright (C) 2017-2021 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,6 +26,12 @@ import fileinput
 from datetime import date
 import gammalib
 
+# Fix Python 2.x.
+try:
+    input = raw_input
+except NameError:
+    pass
+
 
 # ================= #
 # Confirm something #
@@ -47,7 +53,7 @@ def confirm(text):
     # Confirmation loop
     waiting = True
     while waiting:
-        confirmation = str(raw_input(text+' (y/n): '))
+        confirmation = str(input(text+' (y/n): '))
         if confirmation == 'q':
             sys.exit()
         elif confirmation == 'y':
@@ -87,7 +93,7 @@ def response(text, confirm_response=False):
         # Get response from input
         waiting = True
         while waiting:
-            response = str(raw_input('%s: ' % text))
+            response = str(input('%s: ' % text))
             if response == 'q':
                 sys.exit()
             else:
@@ -811,7 +817,7 @@ def main_menu():
     # Wait for the input
     waiting = True
     while waiting:
-        choice = str(raw_input('Enter your choice: '))
+        choice = str(input('Enter your choice: '))
         if choice == '1' or choice == '2' or choice == '3' or choice == 'q':
             waiting = False
 

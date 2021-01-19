@@ -2,7 +2,7 @@
 # ==========================================================================
 # GammaLib release manager
 #
-# Copyright (C) 2016-2019 Juergen Knoedlseder
+# Copyright (C) 2016-2021 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,6 +21,12 @@
 import os
 import sys
 import commands
+
+# Fix Python 2.x.
+try:
+    input = raw_input
+except NameError:
+    pass
 
 
 # ================= #
@@ -43,7 +49,7 @@ def confirm(text):
     # Confirmation loop
     waiting = True
     while waiting:
-        confirmation = str(raw_input(text+' (y/n): '))
+        confirmation = str(input(text+' (y/n): '))
         if confirmation == 'q':
             sys.exit()
         elif confirmation == 'y':
@@ -78,7 +84,7 @@ def commit(message):
 
         # Optionally enter a commit message
         if len(message) == 0:
-            message = str(raw_input("Please enter a commit message: "))
+            message = str(input("Please enter a commit message: "))
 
         # Stage all files
         os.system('git add -u')
@@ -513,7 +519,7 @@ def main_menu():
     # Wait for the input
     waiting = True
     while waiting:
-        choice = str(raw_input('Enter your choice: '))
+        choice = str(input('Enter your choice: '))
         if choice == '1' or choice == '2' or choice == '3' or choice == '4' or \
            choice == '5' or choice == '6' or choice == 'q':
             waiting = False
@@ -617,8 +623,8 @@ def package_version_menu():
         # Get package version from input
         waiting = True
         while waiting:
-            version = str(raw_input("Current GammaLib version is '%s'. Please "
-                                    "enter new GammaLib version: " % current))
+            version = str(input("Current GammaLib version is '%s'. Please "
+                                "enter new GammaLib version: " % current))
             if version == "q":
                 sys.exit()
             if check_version(version) == False:
