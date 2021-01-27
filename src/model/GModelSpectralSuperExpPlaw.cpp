@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpectralSuperExpPlaw.cpp - Super exp. cut off power law model   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2016 by Michael Mayer                               *
+ *  copyright (C) 2014-2021 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -305,7 +305,7 @@ GModelSpectralSuperExpPlaw* GModelSpectralSuperExpPlaw::clone(void) const
  * \f[
  *    S_{\rm E}(E | t) = {\tt m\_norm}
  *    \left( \frac{E}{\tt m\_pivot} \right)^{\tt m\_index1}
- *    \exp \left( - \left(\frac{-E}{\tt m\_ecut} \right)^{\tt m_index2}
+ *    \exp \left( - \left( \frac{E}{\tt m\_ecut} \right)^{\tt m\_index2}
  *         \right)
  * \f]
  *
@@ -314,7 +314,7 @@ GModelSpectralSuperExpPlaw* GModelSpectralSuperExpPlaw::clone(void) const
  * - \f${\tt m\_pivot}\f$ is the pivot energy,
  * - \f${\tt m\_index1}\f$ is the spectral index
  * - \f${\tt m\_ecut}\f$ is the cut off energy, and
- * - \f${\tt m\_index2}\f$ is the index of the cut off
+ * - \f${\tt m\_index2}\f$ is the index of the cut off.
  *
  * If the @p gradients flag is true the method will also compute the
  * partial derivatives of the model with respect to the parameters using

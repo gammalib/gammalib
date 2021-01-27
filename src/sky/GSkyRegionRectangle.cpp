@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GSkyRegionRectangle.cpp - Rectangular sky region class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2019-2020 by Andreas Specovius                           *
+ *  copyright (C) 2019-2021 by Andreas Specovius                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -871,7 +871,7 @@ void GSkyRegionRectangle::compute_solid_angle(void)
 /***********************************************************************//**
  * @brief Checks if local direction lies within region
  *
- * @param[in] locdir Sky direction in local coordinate system.
+ * @param[in] local Sky direction in local coordinate system.
  *
  * A local direction lies within a region when its distance to the region
  * centre is not larger than the region extension in both axes directions.

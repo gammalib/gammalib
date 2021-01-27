@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GModelSpatial.cpp - Abstract spatial model base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -570,7 +570,7 @@ double GModelSpatial::circle_int_kern_rho::eval(const double& rho)
  * \f]
  *
  * where
- * \fM(\omega | \rho)\f$ is the spatial model,
+ * \f$M(\omega | \rho)\f$ is the spatial model,
  * \f$\rho\f$ is the distance from the region centre, and
  * \f$\omega\f$ is the position angle with respect to the connecting line
  * between the region centre and the direction on the sky.

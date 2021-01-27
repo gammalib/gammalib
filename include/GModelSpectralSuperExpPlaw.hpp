@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpectralSuperExpPlaw.hpp - Super exp. cut off power law model   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2018 by Michael Mayer                               *
+ *  copyright (C) 2014-2021 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,7 +33,6 @@
 #include "GFunction.hpp"
 #include "GEnergy.hpp"
 #include "GModelPar.hpp"
-//#include "GXmlElement.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GRan;
@@ -52,16 +51,16 @@ class GXmlElement;
  * \f[
  *    S_{\rm E}(E | t) = {\tt m\_norm}
  *    \left( \frac{E}{\tt m\_pivot} \right)^{\tt m\_index1}
- *    \exp \left( \frac{-E}{\tt m\_ecut}^{\tt m\_index2} \right)
+ *    \exp \left( - \left( \frac{E}{\tt m\_ecut} \right)^{\tt m\_index2}
+ *         \right)
  * \f]
  *
  * where
- *
- *      \f${\tt m\_norm}\f$ is the normalization or prefactor,
- *      \f${\tt m\_index1}\f$ is the spectral index,
- *      \f${\tt m\_ecut}\f$ is the cut off energy, and
- *      \f${\tt m\_pivot}\f$ is the pivot energy.
- *      \f${\tt m\_index2}\f$ is index defining the cutoff shape,
+ * - \f${\tt m\_norm}\f$ is the normalization or prefactor,
+ * - \f${\tt m\_pivot}\f$ is the pivot energy,
+ * - \f${\tt m\_index1}\f$ is the spectral index
+ * - \f${\tt m\_ecut}\f$ is the cut off energy, and
+ * - \f${\tt m\_index2}\f$ is the index of the cut off.
  ***************************************************************************/
 class GModelSpectralSuperExpPlaw : public GModelSpectral {
 
