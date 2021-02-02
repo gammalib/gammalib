@@ -1634,6 +1634,11 @@ void GCTAObservation::read_attributes(const GFitsHDU& hdu)
     m_instrument   = (hdu.has_card("TELESCOP")) ? hdu.string("TELESCOP") : "CTA";
     m_n_tels       = (hdu.has_card("N_TELS"))   ? hdu.integer("N_TELS") : 0;
 
+    // Kluge: deal with "H.E.S.S." telescope name
+    if (m_instrument == "H.E.S.S.") {
+        m_instrument = "HESS";
+    }
+
     // Set attributes
     this->id(id);
 

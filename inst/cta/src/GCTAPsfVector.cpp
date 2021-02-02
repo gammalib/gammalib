@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAPsfVector.cpp - CTA point spread function vector class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -503,7 +503,7 @@ double GCTAPsfVector::containment_radius(const double& fraction,
 /***********************************************************************//**
  * @brief Print point spread function information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing point spread function information.
  ***************************************************************************/
 std::string GCTAPsfVector::print(const GChatter& chatter) const
@@ -526,7 +526,7 @@ std::string GCTAPsfVector::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Filename")+m_filename);
         result.append("\n"+gammalib::parformat("Number of energy bins") +
                       gammalib::str(num));
-        result.append("\n"+gammalib::parformat("Log10(Energy) range"));
+        result.append("\n"+gammalib::parformat("Energy range"));
         result.append(gammalib::str(emin)+" - "+gammalib::str(emax)+" TeV");
 
     } // endif: chatter was not silent

@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for cta module                                                #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016-2020 Juergen Knoedlseder                               #
+# Copyright (C) 2016-2021 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -64,6 +64,7 @@ sources = src/cta_helpers_response_stacked_vector.cpp \
           src/GCTAEdisp2D.cpp \
           src/GCTABackground.cpp \
           src/GCTABackgroundPerfTable.cpp \
+          src/GCTABackground2D.cpp \
           src/GCTABackground3D.cpp \
           src/GCTACubeExposure.cpp \
           src/GCTACubeBackground.cpp \
@@ -123,6 +124,7 @@ pkginclude_HEADERS = include/GCTATypemaps.hpp \
                      include/GCTAEdisp2D.hpp \
                      include/GCTABackground.hpp \
                      include/GCTABackgroundPerfTable.hpp \
+                     include/GCTABackground2D.hpp \
                      include/GCTABackground3D.hpp \
                      include/GCTACubeExposure.hpp \
                      include/GCTACubePsf.hpp \
@@ -175,6 +177,7 @@ testdatacta       = test/data/irf_1dc.xml \
                     test/data/irf_unbinned.xml \
                     test/data/irf_hess_aeff.fits.gz \
                     test/data/irf_hess_bkg.fits.gz \
+                    test/data/irf_hess_bkg2.fits.gz \
                     test/data/irf_hess_edisp.fits.gz \
                     test/data/irf_hess_psf.fits.gz \
                     test/data/crab_irf.xml \

@@ -44,6 +44,8 @@ Improvements
 New features
 ------------
 
+* [`3527 <https://cta-redmine.irap.omp.eu/issues/3527>`_] -
+  Add ``GCTABackground2D`` class
 * [`3469 <https://cta-redmine.irap.omp.eu/issues/3469>`_] -
   Add ``GModelAssociation`` and ``GModelAssociations`` classes
 * [`3461 <https://cta-redmine.irap.omp.eu/issues/3461>`_] -

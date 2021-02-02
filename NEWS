@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-15 January 2021
+2 February 2021
 
 
 1. Introduction
@@ -20,6 +20,7 @@ The following classes have been added:
 - GModelAssociation
 - GModelAssociations
 - GCTAModelSkyCube
+- GCTABackground2D
 
 The following classes have been removed:
 - none
@@ -224,6 +225,9 @@ Adapted the GLATResponse interface to the vectorised response computation (#3203
 
 20. CTA interface
 -----------------
+Added the GCTABackground2D class that implements a two-dimensional background model
+spanned by energy and offset angle (#3527).
+
 Added the GCTAEventBin::emin() and emax() methods that return the energy boundaries
 of the event bin (#3472).
 

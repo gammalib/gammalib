@@ -1,8 +1,9 @@
-2021-01-15
+2021-02-02
 
         * Version 2.0.0 released
         ========================
 
+        Add GCTABackground2D class (#3527)
         Implement vectorised response computation for COMPTEL (#3501)
         Fix response cache removal for vector cache (#3499)
         Add GModelAssociation and GModelAssociations classes (#3469)

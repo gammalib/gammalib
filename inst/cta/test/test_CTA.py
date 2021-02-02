@@ -389,6 +389,7 @@ class Test(gammalib.GPythonTestSuite):
         test_support.pickeling(self, gammalib.GCTAAeff2D())
         #test_support.pickeling(self, gammalib.GCTAAeffArf())
         #test_support.pickeling(self, gammalib.GCTAAeffPerfTable())
+        test_support.pickeling(self, gammalib.GCTABackground2D())
         test_support.pickeling(self, gammalib.GCTABackground3D())
         #test_support.pickeling(self, gammalib.GCTABackgroundPerfTable())
         test_support.pickeling(self, gammalib.GCTACubeBackground())
@@ -487,6 +488,7 @@ class Test(gammalib.GPythonTestSuite):
         hesspsf   = self._data  + '/irf_hess_psf.fits.gz'
         hessedisp = self._data  + '/irf_hess_edisp.fits.gz'
         hessbkg   = self._data  + '/irf_hess_bkg.fits.gz'
+        hessbkg2  = self._data  + '/irf_hess_bkg2.fits.gz'
         hessirf   = gammalib.GCTAResponseIrf()
         hessirf.load_aeff(hessaeff)
         hessirf.load_psf(hesspsf)
@@ -498,6 +500,7 @@ class Test(gammalib.GPythonTestSuite):
         test_support.pickeling(self, gammalib.GCTAAeff2D(irfname))
         #test_support.pickeling(self, gammalib.GCTAAeffArf())
         #test_support.pickeling(self, gammalib.GCTAAeffPerfTable())
+        test_support.pickeling(self, gammalib.GCTABackground2D(hessbkg2))
         test_support.pickeling(self, gammalib.GCTABackground3D(irfname))
         #test_support.pickeling(self, gammalib.GCTABackgroundPerfTable())
         test_support.pickeling(self, gammalib.GCTACubeBackground(bgdcube))

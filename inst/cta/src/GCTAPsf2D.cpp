@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GCTAPsf2D.cpp - CTA 2D point spread function class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -721,7 +721,7 @@ std::string GCTAPsf2D::print(const GChatter& chatter) const
                       gammalib::str(nebins));
         result.append("\n"+gammalib::parformat("Number of offset bins") +
                       gammalib::str(nthetabins));
-        result.append("\n"+gammalib::parformat("Log10(Energy) range"));
+        result.append("\n"+gammalib::parformat("Energy range"));
         result.append(gammalib::str(emin)+" - "+gammalib::str(emax)+" TeV");
         result.append("\n"+gammalib::parformat("Offset angle range"));
         result.append(gammalib::str(omin)+" - "+gammalib::str(omax)+" deg");

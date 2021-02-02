@@ -1,7 +1,7 @@
 /***************************************************************************
- *              GCTABackground3D.cpp - CTA 3D background class             *
+ *              GCTABackground2D.cpp - CTA 2D background class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2021 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,8 +19,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTABackground3D.cpp
- * @brief CTA 3D background class implementation
+ * @file GCTABackground2D.cpp
+ * @brief CTA 2D background class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -36,13 +36,13 @@
 #include "GFits.hpp"
 #include "GFitsBinTable.hpp"
 #include "GCTAInstDir.hpp"
-#include "GCTABackground3D.hpp"
+#include "GCTABackground2D.hpp"
 #include "GCTASupport.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_MC                  "GCTABackground3D::mc(GEnergy&, GTime&, GRan&)"
-#define G_SET_MEMBERS                       "GCTABackground3D::set_members()"
-#define G_INIT_MC_CACHE                   "GCTABackground3D::init_mc_cache()"
+#define G_MC                  "GCTABackground2D::mc(GEnergy&, GTime&, GRan&)"
+#define G_SET_MEMBERS                       "GCTABackground2D::set_members()"
+#define G_INIT_MC_CACHE                   "GCTABackground2D::init_mc_cache()"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -66,7 +66,7 @@
  *
  * Constructs empty background.
  ***************************************************************************/
-GCTABackground3D::GCTABackground3D(void) : GCTABackground()
+GCTABackground2D::GCTABackground2D(void) : GCTABackground()
 {
     // Initialise class members
     init_members();
@@ -83,7 +83,7 @@ GCTABackground3D::GCTABackground3D(void) : GCTABackground()
  *
  * Constructs background from a FITS file.
  ***************************************************************************/
-GCTABackground3D::GCTABackground3D(const GFilename& filename) :
+GCTABackground2D::GCTABackground2D(const GFilename& filename) :
                   GCTABackground()
 {
     // Initialise class members
@@ -104,7 +104,7 @@ GCTABackground3D::GCTABackground3D(const GFilename& filename) :
  *
  * Constructs background by copying from another background.
  ***************************************************************************/
-GCTABackground3D::GCTABackground3D(const GCTABackground3D& bgd) :
+GCTABackground2D::GCTABackground2D(const GCTABackground2D& bgd) :
                   GCTABackground(bgd)
 {
     // Initialise class members
@@ -123,7 +123,7 @@ GCTABackground3D::GCTABackground3D(const GCTABackground3D& bgd) :
  *
  * Destructs background.
  ***************************************************************************/
-GCTABackground3D::~GCTABackground3D(void)
+GCTABackground2D::~GCTABackground2D(void)
 {
     // Free members
     free_members();
@@ -147,7 +147,7 @@ GCTABackground3D::~GCTABackground3D(void)
  *
  * Assigns background.
  ***************************************************************************/
-GCTABackground3D& GCTABackground3D::operator=(const GCTABackground3D& bgd)
+GCTABackground2D& GCTABackground2D::operator=(const GCTABackground2D& bgd)
 {
     // Execute only if object is not identical
     if (this != &bgd) {
@@ -181,49 +181,58 @@ GCTABackground3D& GCTABackground3D::operator=(const GCTABackground3D& bgd)
  * @return Background rate (events MeV\f$^{-1}\f$ s\f$^{-1}\f$ sr\f$^{-1}\f$).
  *
  * Returns the background rate for a given energy and detector coordinates.
- * The rate is given per ontime. The operator interpolates linearly in
- * ``DETX`` and ``DETY``, and logarithmically in energy.
+ * The rate is given per ontime. The operator computes the offset angle
+ *
+ * \f[\theta = \sqrt{ {\rm DETX}^2 + {\rm DETY}^2 }\f]
+ *
+ * and interpolates linearly in \f$\theta\f$ and logarithmically in energy.
  *
  * The operator assures that the background rate never becomes negative. For
  * invalid background models or detector coordinates outside the range
  * covered by the response cube, the operator returns a rate of zero.
  ***************************************************************************/
-double GCTABackground3D::operator()(const double& logE, 
+double GCTABackground2D::operator()(const double& logE,
                                     const double& detx, 
                                     const double& dety) const
 {
     // Initialise background rate
     double rate = 0.0;
 
-    // Continue only if background model is valid and if the DETX and DETY
-    // values are in validity range
-    if (is_valid() && (detx >= m_detx_min) && (detx <= m_detx_max) &&
-                      (dety >= m_dety_min) && (dety <= m_dety_max)) {
+    // Continue only if background model is valid
+    if (is_valid()) {
 
-        // Retrieve references to energy node array
-        const GNodeArray& energy_nodes = m_background.axis_nodes(m_inx_energy);
+        // Compute theta in radians
+        double theta = std::sqrt(detx * detx + dety * dety);
 
-        // Set energy for node array interpolation
-        energy_nodes.set_value(logE);
+        // Continue only if theta is within validity range
+        if ((theta >= m_theta_min) && (theta <= m_theta_max)) {
 
-        // Bi-linearly interpolate the rates in both energy layers
-        double rate_emin = this->rate(energy_nodes.inx_left(),  detx, dety);
-        double rate_emax = this->rate(energy_nodes.inx_right(), detx, dety);
+            // Retrieve references to energy node array
+            const GNodeArray& energy_nodes = m_background.axis_nodes(m_inx_energy);
 
-        // If both rates are positive then perform a logarithmic interpolation
-        // in energy
-        if (rate_emin > 0.0 && rate_emax > 0.0) {
+            // Set energy for node array interpolation
+            energy_nodes.set_value(logE);
 
-            // Perform energy interpolation
-            rate = std::exp(energy_nodes.wgt_left()  * std::log(rate_emin) +
-                            energy_nodes.wgt_right() * std::log(rate_emax));
+            // Bi-linearly interpolate the rates in both energy layers
+            double rate_emin = this->rate(energy_nodes.inx_left(),  theta);
+            double rate_emax = this->rate(energy_nodes.inx_right(), theta);
 
-            // Make sure that background rate is not negative
-            if (rate < 0.0) {
-                rate = 0.0;
-            }
+            // If both rates are positive then perform a logarithmic interpolation
+            // in energy
+            if (rate_emin > 0.0 && rate_emax > 0.0) {
 
-        } // endif: both rates were positive
+                // Perform energy interpolation
+                rate = std::exp(energy_nodes.wgt_left()  * std::log(rate_emin) +
+                                energy_nodes.wgt_right() * std::log(rate_emax));
+
+                // Make sure that background rate is not negative
+                if (rate < 0.0) {
+                    rate = 0.0;
+                }
+
+            } // endif: both rates were positive
+
+        } // endif: theta was valid
 
     } // endif: background model was valid
 
@@ -243,7 +252,7 @@ double GCTABackground3D::operator()(const double& logE,
  *
  * Clears background.
  ***************************************************************************/
-void GCTABackground3D::clear(void)
+void GCTABackground2D::clear(void)
 {
     // Free class members
     free_members();
@@ -265,9 +274,9 @@ void GCTABackground3D::clear(void)
  *
  * Returns a pointer to a deep copy of the background.
  ***************************************************************************/
-GCTABackground3D* GCTABackground3D::clone(void) const
+GCTABackground2D* GCTABackground2D::clone(void) const
 {
-    return new GCTABackground3D(*this);
+    return new GCTABackground2D(*this);
 }
 
 
@@ -279,37 +288,32 @@ GCTABackground3D* GCTABackground3D::clone(void) const
  * Reads the background form the FITS @p table. The following column names
  * are mandatory:
  *
- *     DETX_LO  - DETX lower bin boundaries
- *     DETX_HI  - DETX upper bin boundaries
- *     DETY_LO  - DETY lower bin boundaries
- *     DETY_HI  - DETY upper bin boundaries
+ *     THETA_LO - THETA lower bin boundaries
+ *     THETA_HI - THETA upper bin boundaries
  *     ENERG_LO - Energy lower bin boundaries
  *     ENERG_HI - Energy upper bin boundaries
- *     BKG      - Background template (or BGD as legacy column name)
+ *     BKG      - Background template
  *
- * The data are stored in the m_background member. The ``DETX`` and ``DETY``
- * axes will be set to radians, the energy axis will be set to log10. The
- * data are expected to be given in unit of events per MeV, second and
- * steradian, where the time is the real ontime.
+ * The data are stored in the m_background member. The ``THETA`` axis will
+ * be set to radians, the energy axis will be set to log10. The data are
+ * expected to be given in unit of events per MeV, second and steradian,
+ * where the time is the real ontime.
  *
  * This method ignores all column names that are not the mandatory column
  * names in the FITS @p table.
  ***************************************************************************/
-void GCTABackground3D::read(const GFitsTable& table)
+void GCTABackground2D::read(const GFitsTable& table)
 {
     // Clear response table
     m_background.clear();
 
-    // Copy response table and skip all columns that are not mandatory. This
-    // kludge is needed to get rid of additional columns in the HESS
-    // background model.
+    // Copy response table and skip all columns that are not mandatory
     GFitsTable *ptr = table.clone();  // Make sure that table is of same type
     for (int i = 0; i < table.ncols(); ++i) {
         std::string colname = table[i]->name();
-        if ((colname != "DETX_LO")  && (colname != "DETX_HI")  &&
-            (colname != "DETY_LO")  && (colname != "DETY_HI")  &&
+        if ((colname != "THETA_LO") && (colname != "THETA_HI") &&
             (colname != "ENERG_LO") && (colname != "ENERG_HI") &&
-            (colname != "BKG")      && (colname != "BGD")) {
+            (colname != "BKG")) {
             ptr->remove(colname);
         }
     }
@@ -338,7 +342,7 @@ void GCTABackground3D::read(const GFitsTable& table)
  *
  * @todo Add necessary keywords.
  ***************************************************************************/
-void GCTABackground3D::write(GFitsBinTable& table) const
+void GCTABackground2D::write(GFitsBinTable& table) const
 {
     // Write background table
     m_background.write(table);
@@ -357,21 +361,20 @@ void GCTABackground3D::write(GFitsBinTable& table) const
  *
  * If no extension name is given the method scans the `HDUCLASS` keywords
  * of all extensions and loads the background from the first extension
- * for which `HDUCLAS4=BKG_3D`.
+ * for which `HDUCLAS4=BKG_2D`.
  *
- * Otherwise, the background will be loaded from the `BACKGROUND`
- * extension.
+ * Otherwise, the background will be loaded from the `BKG` extension.
  ***************************************************************************/
-void GCTABackground3D::load(const GFilename& filename)
+void GCTABackground2D::load(const GFilename& filename)
 {
     // Open FITS file
     GFits fits(filename);
 
     // Get the default extension name. If no GADF compliant name was found
-    // then set the default extension name to "BACKGROUND".
-    std::string extname = gammalib::gadf_hduclas4(fits, "BKG_3D");
+    // then set the default extension name to "BKG".
+    std::string extname = gammalib::gadf_hduclas4(fits, "BKG_2D");
     if (extname.empty()) {
-        extname = gammalib::extname_cta_background3d;
+        extname = gammalib::extname_cta_background2d;
     }
 
     // Get background table
@@ -395,22 +398,22 @@ void GCTABackground3D::load(const GFilename& filename)
  * @brief Save background into FITS file
  *
  * @param[in] filename Background table FITS file name.
- * @param[in] clobber Overwrite existing file? (default: false)
+ * @param[in] clobber Overwrite existing file?
  *
  * Saves background into a FITS file. If a file with the given @p filename
  * does not yet exist it will be created, otherwise the method opens the
  * existing file. The method will create a (or replace an existing)
  * background extension. The extension name can be specified as part
  * of the @p filename, or if no extension name is given, is assumed to be
- * `BACKGROUND`.
+ * `BKG`.
  *
  * An existing file will only be modified if the @p clobber flag is set to
  * true.
  ***************************************************************************/
-void GCTABackground3D::save(const GFilename& filename, const bool& clobber) const
+void GCTABackground2D::save(const GFilename& filename, const bool& clobber) const
 {
     // Get extension name
-    std::string extname = filename.extname(gammalib::extname_cta_background3d);
+    std::string extname = filename.extname(gammalib::extname_cta_background2d);
 
     // Open or create FITS file (without extension name since the requested
     // extension may not yet exist in the file)
@@ -455,7 +458,7 @@ void GCTABackground3D::save(const GFilename& filename, const bool& clobber) cons
  * that the simulation is consistent with the background rate interpolation
  * that is done by the access operator.
  ***************************************************************************/
-GCTAInstDir GCTABackground3D::mc(const GEnergy& energy,
+GCTAInstDir GCTABackground2D::mc(const GEnergy& energy,
                                  const GTime&   time,
                                  GRan&          ran) const
 {
@@ -503,17 +506,16 @@ GCTAInstDir GCTABackground3D::mc(const GEnergy& energy,
         }
         max_rate *= 1.5;
 
-        // Get detx and dety widths
-        double detx_width = m_detx_max - m_detx_min;
-        double dety_width = m_dety_max - m_dety_min;
+        // Get theta width
+        double theta_width = 2.0 * m_theta_max;
 
         // Get instrument direction using a rejection method. This assures
         // that the Monte Carlo sample follows the model distribution
         while (true) {
 
             // Get randomized detx and dety in radians
-            double detx = ran.uniform() * detx_width + m_detx_min;
-            double dety = ran.uniform() * dety_width + m_dety_min;
+            double detx = ran.uniform() * theta_width - m_theta_max;
+            double dety = ran.uniform() * theta_width - m_theta_max;
 
             // Get background rate for these coordinates. If the background
             // rate is zero then get other coordinates.
@@ -571,75 +573,78 @@ GCTAInstDir GCTABackground3D::mc(const GEnergy& energy,
  * If the energy interval is not positive, a zero background rate is
  * returned.
  ***************************************************************************/
-double GCTABackground3D::rate_ebin(const GCTAInstDir& dir,
+double GCTABackground2D::rate_ebin(const GCTAInstDir& dir,
                                    const GEnergy&     emin,
                                    const GEnergy&     emax) const
 {
     // Initialise rate
     double rate = 0.0;
 
-    // Continue only if the background template is valid, the DETX and DETY
-    // values are comprised in template range and the energy interval is
+    // Continue only if background model is valid and the energy interval is
     // positive
-    if (is_valid() && (dir.detx() >= m_detx_min) &&
-                      (dir.detx() <= m_detx_max) &&
-                      (dir.dety() >= m_dety_min) &&
-                      (dir.dety() <= m_dety_max) &&
-                      (emax > emin)) {
+    if (is_valid() && (emax > emin)) {
 
-        // Initialise first and second node
-        double x1 = emin.MeV();
-        double x2 = 0.0;
-        double f1 = (*this)(emin.log10TeV(), dir.detx(), dir.dety());
-        double f2 = 0.0;
+        // Compute theta in radians
+        double theta = std::sqrt(dir.detx() * dir.detx() + dir.dety() * dir.dety());
 
-        // Loop over all nodes
-        for (int i = 0; i < m_energy.size(); ++i) {
+        // Continue only if theta is within validity range
+        if ((theta >= m_theta_min) && (theta <= m_theta_max)) {
 
-            // If node energy is below x1 then skip node
-            if (m_energy[i].MeV() <= x1) {
-                continue;
+            // Initialise first and second node
+            double x1 = emin.MeV();
+            double x2 = 0.0;
+            double f1 = (*this)(emin.log10TeV(), dir.detx(), dir.dety());
+            double f2 = 0.0;
+
+            // Loop over all nodes
+            for (int i = 0; i < m_energy.size(); ++i) {
+
+                // If node energy is below x1 then skip node
+                if (m_energy[i].MeV() <= x1) {
+                    continue;
+                }
+
+                // If node energy is above emax then use emax as energy
+                if (m_energy[i] > emax) {
+                    x2 = emax.MeV();
+                    f2 = (*this)(emax.log10TeV(), dir.detx(), dir.dety());
+                }
+
+                // ... otherwise use node energy
+                else {
+                    x2 = m_energy[i].MeV();
+                    f2 = this->rate(i, theta);
+                }
+
+                // Compute integral
+                if (f1 > 0.0 && f2 > 0.0) {
+                    rate += gammalib::plaw_integral(x1, f1, x2, f2);
+                }
+
+                // Set second node as first node
+                x1 = x2;
+                f1 = f2;
+
+                // If node energy is above emax then break now
+                if (m_energy[i] > emax) {
+                    break;
+                }
+
+            } // endfor: looped over all nodes
+
+            // If last node energy is below emax then compute last part of
+            // integral up to emax
+            if (x1 < emax.MeV()) {
+                x2    = emax.MeV();
+                f2    = (*this)(emax.log10TeV(), dir.detx(), dir.dety());
+                if (f1 > 0.0 && f2 > 0.0) {
+                    rate += gammalib::plaw_integral(x1, f1, x2, f2);
+                }
             }
 
-            // If node energy is above emax then use emax as energy
-            if (m_energy[i] > emax) {
-                x2 = emax.MeV();
-                f2 = (*this)(emax.log10TeV(), dir.detx(), dir.dety());
-            }
+        } // endif: theta was in valid range
 
-            // ... otherwise use node energy
-            else {
-                x2 = m_energy[i].MeV();
-                f2 = this->rate(i, dir.detx(), dir.dety());
-            }
-
-            // Compute integral
-            if (f1 > 0.0 && f2 > 0.0) {
-                rate += gammalib::plaw_integral(x1, f1, x2, f2);
-            }
-
-            // Set second node as first node
-            x1 = x2;
-            f1 = f2;
-
-            // If node energy is above emax then break now
-            if (m_energy[i] > emax) {
-                break;
-            }
-
-        } // endfor: looped over all nodes
-
-        // If last node energy is below emax then compute last part of
-        // integral up to emax
-        if (x1 < emax.MeV()) {
-            x2    = emax.MeV();
-            f2    = (*this)(emax.log10TeV(), dir.detx(), dir.dety());
-            if (f1 > 0.0 && f2 > 0.0) {
-                rate += gammalib::plaw_integral(x1, f1, x2, f2);
-            }
-        }
-
-    } // endif: energy interval was positive
+    } // endif: background model was valid and energy interval was positive
 
     // Return background rate
     return rate;
@@ -652,7 +657,7 @@ double GCTABackground3D::rate_ebin(const GCTAInstDir& dir,
  * @param[in] chatter Chattiness.
  * @return String containing background information.
  ***************************************************************************/
-std::string GCTABackground3D::print(const GChatter& chatter) const
+std::string GCTABackground2D::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
@@ -661,7 +666,7 @@ std::string GCTABackground3D::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append header
-        result.append("=== GCTABackground3D ===");
+        result.append("=== GCTABackground2D ===");
 
         // Append information
         result.append("\n"+gammalib::parformat("Filename")+m_filename);
@@ -669,39 +674,29 @@ std::string GCTABackground3D::print(const GChatter& chatter) const
         // If background model is valid then print information
         if (is_valid()) {
 
-            // Compute DETX boundaries in deg
-            double detx_min = m_background.axis_lo(m_inx_detx, 0);
-            double detx_max = m_background.axis_hi(m_inx_detx, m_num_detx-1);
-
-            // Compute DETY boundaries in deg
-            double dety_min = m_background.axis_lo(m_inx_dety,0);
-            double dety_max = m_background.axis_hi(m_inx_dety, m_num_dety-1);
+            // Compute THETA boundaries in deg
+            double theta_min = m_background.axis_lo(m_inx_theta, 0);
+            double theta_max = m_background.axis_hi(m_inx_theta, m_num_theta-1);
 
             // Compute energy boundaries in TeV
             double emin = m_background.axis_lo(m_inx_energy, 0);
             double emax = m_background.axis_hi(m_inx_energy, m_num_energy-1);
 
             // Append information
+            result.append("\n"+gammalib::parformat("Number of THETA bins") +
+                          gammalib::str(m_num_theta));
             result.append("\n"+gammalib::parformat("Number of energy bins") +
                           gammalib::str(m_num_energy));
-            result.append("\n"+gammalib::parformat("Number of DETX bins") +
-                          gammalib::str(m_num_detx));
-            result.append("\n"+gammalib::parformat("Number of DETY bins") +
-                          gammalib::str(m_num_dety));
             result.append("\n"+gammalib::parformat("Energy range"));
             result.append(gammalib::str(emin)+" - "+gammalib::str(emax)+" TeV");
-            result.append("\n"+gammalib::parformat("DETX range"));
-            result.append(gammalib::str(detx_min)+" - "+gammalib::str(detx_max)+" deg");
-            result.append("\n"+gammalib::parformat("DETX range"));
-            result.append(gammalib::str(dety_min)+" - "+gammalib::str(dety_max)+" deg");
+            result.append("\n"+gammalib::parformat("Offset angle range"));
+            result.append(gammalib::str(theta_min)+" - "+gammalib::str(theta_max)+" deg");
 
-        } // endif: there were 3 axis
+        } // endif: there were 2 axis
 
         // ... otherwise show empty array
         else {
-            result.append("\n"+gammalib::parformat("Number of DETX bins") +
-                          gammalib::str(0));
-            result.append("\n"+gammalib::parformat("Number of DETY bins") +
+            result.append("\n"+gammalib::parformat("Number of THETA bins") +
                           gammalib::str(0));
             result.append("\n"+gammalib::parformat("Number of energy bins") +
                           gammalib::str(0));
@@ -723,26 +718,21 @@ std::string GCTABackground3D::print(const GChatter& chatter) const
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GCTABackground3D::init_members(void)
+void GCTABackground2D::init_members(void)
 {
     // Initialise members
     m_filename.clear();
     m_background.clear();
     m_energy.clear();
-    m_inx_detx   = 0;
-    m_inx_dety   = 1;
-    m_inx_energy = 2;
+    m_inx_theta  = 0;
+    m_inx_energy = 1;
     m_inx_bgd    = 0;
-    m_num_detx   = 0;
-    m_num_dety   = 0;
+    m_num_theta  = 0;
     m_num_energy = 0;
     m_num[0]     = 0;
     m_num[1]     = 0;
-    m_num[2]     = 0;
-    m_detx_min   = 0.0;
-    m_detx_max   = 0.0;
-    m_dety_min   = 0.0;
-    m_dety_max   = 0.0;
+    m_theta_min  = 0.0;
+    m_theta_max  = 0.0;
     m_logE_min   = 0.0;
     m_logE_max   = 0.0;
 
@@ -760,26 +750,21 @@ void GCTABackground3D::init_members(void)
  *
  * @param[in] bgd Background.
  ***************************************************************************/
-void GCTABackground3D::copy_members(const GCTABackground3D& bgd)
+void GCTABackground2D::copy_members(const GCTABackground2D& bgd)
 {
     // Copy members
     m_filename   = bgd.m_filename;
     m_background = bgd.m_background;
     m_energy     = bgd.m_energy;
-    m_inx_detx   = bgd.m_inx_detx;
-    m_inx_dety   = bgd.m_inx_dety;
+    m_inx_theta  = bgd.m_inx_theta;
     m_inx_energy = bgd.m_inx_energy;
     m_inx_bgd    = bgd.m_inx_bgd;
-    m_num_detx   = bgd.m_num_detx;
-    m_num_dety   = bgd.m_num_dety;
+    m_num_theta  = bgd.m_num_theta;
     m_num_energy = bgd.m_num_energy;
     m_num[0]     = bgd.m_num[0];
     m_num[1]     = bgd.m_num[1];
-    m_num[2]     = bgd.m_num[2];
-    m_detx_min   = bgd.m_detx_min;
-    m_detx_max   = bgd.m_detx_max;
-    m_dety_min   = bgd.m_dety_min;
-    m_dety_max   = bgd.m_dety_max;
+    m_theta_min  = bgd.m_theta_min;
+    m_theta_max  = bgd.m_theta_max;
     m_logE_min   = bgd.m_logE_min;
     m_logE_max   = bgd.m_logE_max;
 
@@ -795,7 +780,7 @@ void GCTABackground3D::copy_members(const GCTABackground3D& bgd)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GCTABackground3D::free_members(void)
+void GCTABackground2D::free_members(void)
 {
     // Return
     return;
@@ -808,60 +793,45 @@ void GCTABackground3D::free_members(void)
  * @exception GException::invalid_value
  *            Response table is not three-dimensional.
  *
- * Set class members based on the background table. The DETX and DETY axes
+ * Set class members based on the background table. The THETA axis
  * will be set to radians, the energy axis will be set to log10.
  ***************************************************************************/
-void GCTABackground3D::set_members(void)
+void GCTABackground2D::set_members(void)
 {
-    // Throw an exception if the table is not three-dimensional
-    if (m_background.axes() != 3) {
-        std::string msg = "Expected three-dimensional background "
+    // Throw an exception if the table is not two-dimensional
+    if (m_background.axes() != 2) {
+        std::string msg = "Expected two-dimensional background "
                           "response table but found "+
                           gammalib::str(m_background.axes())+
-                          " dimensions. Please specify a three-dimensional "
+                          " dimensions. Please specify a two-dimensional "
                           "background.";
         throw GException::invalid_value(G_SET_MEMBERS, msg);
     }
 
     // Get mandatory indices (throw exception if not found)
-    m_inx_detx   = m_background.axis("DETX");
-    m_inx_dety   = m_background.axis("DETY");
+    m_inx_theta  = m_background.axis("THETA");
     m_inx_energy = m_background.axis("ENERG");
-    if (m_background.has_table("BKG")) {
-        m_inx_bgd = m_background.table("BKG");
-    }
-    else {
-        m_inx_bgd = m_background.table("BGD"); // Old name, should not be used
-    }
+    m_inx_bgd    = m_background.table("BKG");
 
     // Get axes dimensions
-    m_num_detx   = m_background.axis_bins(m_inx_detx);
-    m_num_dety   = m_background.axis_bins(m_inx_dety);
+    m_num_theta  = m_background.axis_bins(m_inx_theta);
     m_num_energy = m_background.axis_bins(m_inx_energy);
 
     // Set dimension array
-    m_num[m_inx_detx]   = m_num_detx;
-    m_num[m_inx_dety]   = m_num_dety;
+    m_num[m_inx_theta]  = m_num_theta;
     m_num[m_inx_energy] = m_num_energy;
 
-    // Set DETX and DETY axis to radians
-    m_background.axis_radians(m_inx_detx);
-    m_background.axis_radians(m_inx_dety);
+    // Set THETA axis to radians
+    m_background.axis_radians(m_inx_theta);
 
     // Set energy axis to logarithmic scale
     m_background.axis_log10(m_inx_energy);
 
-    // Compute DETX boundaries in radians
-    m_detx_min = m_background.axis_lo(m_inx_detx, 0) *
-                 gammalib::deg2rad;
-    m_detx_max = m_background.axis_hi(m_inx_detx, m_num_detx-1) *
-                 gammalib::deg2rad;
-
-    // Compute DETY boundaries in radians
-    m_dety_min = m_background.axis_lo(m_inx_dety, 0) *
-                 gammalib::deg2rad;
-    m_dety_max = m_background.axis_hi(m_inx_dety, m_num_dety-1) *
-                 gammalib::deg2rad;
+    // Compute THETA boundaries in radians
+    m_theta_min = m_background.axis_lo(m_inx_theta, 0) *
+                  gammalib::deg2rad;
+    m_theta_max = m_background.axis_hi(m_inx_theta, m_num_theta-1) *
+                  gammalib::deg2rad;
 
     // Compute energy boundaries in log10(TeV)
     GEnergy emin(m_background.axis_lo(m_inx_energy, 0),
@@ -890,25 +860,22 @@ void GCTABackground3D::set_members(void)
 /***********************************************************************//**
  * @brief Return background rate bin index
  *
- * @param[in] idetx DETX index.
- * @param[in] idety DETY index.
+ * @param[in] itheta THETA index.
  * @param[in] iebin Energy index.
  * @return Background rate bin index.
  *
  * Returns the background rate bin index independent of the ordering.
  ***************************************************************************/
-int GCTABackground3D::index(const int& idetx,
-                            const int& idety,
+int GCTABackground2D::index(const int& itheta,
                             const int& iebin) const
 {
     // Set index arrays
-    int inx[3];
-    inx[m_inx_detx]   = idetx;
-    inx[m_inx_dety]   = idety;
+    int inx[2];
+    inx[m_inx_theta]  = itheta;
     inx[m_inx_energy] = iebin;
 
     // Compute index
-    int index = inx[0] + (inx[1] + inx[2] * m_num[1]) * m_num[0];
+    int index = inx[0] + inx[1] * m_num[0];
 
     // Return index
     return index;
@@ -923,7 +890,7 @@ int GCTABackground3D::index(const int& idetx,
  *
  * Initialises the cache for Monte Carlo sampling.
  ***************************************************************************/
-void GCTABackground3D::init_mc_cache(void) const
+void GCTABackground2D::init_mc_cache(void) const
 {
     // Set number of subbins per energy bin of response cube
     const int nsubbins = 10;
@@ -936,8 +903,8 @@ void GCTABackground3D::init_mc_cache(void) const
     init_mc_max_rate();
 
     // Compute DETX and DETY binsize in radians
-    double detx_bin = (m_detx_max - m_detx_min) / m_num_detx;
-    double dety_bin = (m_dety_max - m_dety_min) / m_num_dety;
+    double detx_bin = 2.0 * m_theta_max / m_num_theta;
+    double dety_bin = 2.0 * m_theta_max / m_num_theta;
 
     // Set energy bins for Monte Carlo cache spectrum. Make sure that the
     // actual energy nodes are part of the energy bins to avoid that sharp
@@ -986,10 +953,10 @@ void GCTABackground3D::init_mc_cache(void) const
         double total_flux = 0.0; // units: events/s/MeV
         double dx         = 0.5 * detx_bin;
         double dy         = 0.5 * dety_bin;
-        double detx       = m_detx_min + dx;
-        for (int ix = 0; ix < m_num_detx; ++ix, detx += detx_bin) {
-            double dety = m_dety_min + dy;
-            for (int iy = 0; iy < m_num_dety; ++iy, dety += dety_bin) {
+        double detx       = -m_theta_max + dx;
+        for (int ix = 0; ix < 2*m_num_theta; ++ix, detx += detx_bin) {
+            double dety = -m_theta_max + dy;
+            for (int iy = 0; iy < 2*m_num_theta; ++iy, dety += dety_bin) {
 
                 // Compute intensities
                 double i0 = (*this)(logE, detx,    dety);
@@ -1063,10 +1030,10 @@ void GCTABackground3D::init_mc_cache(void) const
 /***********************************************************************//**
  * @brief Initialise array of maximum background rate
  *
- * Initialises the array m_mc_max that holds the maximum background rate in
- * each DETX-DETY plane of the background model.
+ * Initialises the array m_mc_max that holds the maximum background rate for
+ * each energy of the background model.
  ***************************************************************************/
-void GCTABackground3D::init_mc_max_rate(void) const
+void GCTABackground2D::init_mc_max_rate(void) const
 {
     // Initialise cache
     m_mc_max.clear();
@@ -1078,24 +1045,22 @@ void GCTABackground3D::init_mc_max_rate(void) const
         // Initialise maximum rate
         double max_rate = 0.0;
 
-        // Loop over DETX-DETY plane
-        for (int ix = 0; ix < m_num_detx; ++ix) {
-            for (int iy = 0; iy < m_num_dety; ++iy) {
+        // Loop over THETA angles
+        for (int itheta = 0; itheta < m_num_theta; ++itheta) {
 
-                // Get bin index
-                int inx = index(ix, iy, iebin);
+            // Get bin index
+            int inx = index(itheta, iebin);
 
-                // Get background rate
-                double rate = m_background(m_inx_bgd, inx);
+            // Get background rate
+            double rate = m_background(m_inx_bgd, inx);
 
-                // If background rate is larger than maximum then store the
-                // background rate as new maximum
-                if (rate > max_rate) {
-                    max_rate = rate;
-                }
+            // If background rate is larger than maximum then store the
+            // background rate as new maximum
+            if (rate > max_rate) {
+                max_rate = rate;
+            }
 
-            } // endfor: looped over DETY
-        } // endfor: looped over DETX
+        } // endfor: looped over THETA
 
         // Append maximum rate
         m_mc_max.push_back(max_rate);
@@ -1138,7 +1103,7 @@ void GCTABackground3D::init_mc_max_rate(void) const
  *         3
  *
  ***************************************************************************/
-double GCTABackground3D::solid_angle(const double& detx1, const double& dety1,
+double GCTABackground2D::solid_angle(const double& detx1, const double& dety1,
                                      const double& detx2, const double& dety2,
                                      const double& detx3, const double& dety3) const
 {
@@ -1174,38 +1139,28 @@ double GCTABackground3D::solid_angle(const double& detx1, const double& dety1,
 
 
 /***********************************************************************//**
- * @brief Return background rate for a given energy bin and DETX-DETY value
- *        (events/s/MeV/sr)
+ * @brief Return background rate for a given energy bin and offset angle
+ *        value (events/s/MeV/sr)
  *
  * @param[in] iebin Energy index.
- * @param[in] detx Tangential X coordinate in nominal system (radians).
- * @param[in] dety Tangential Y coordinate in nominal system (radians).
+ * @param[in] theta Offset angle in nominal system (radians).
  * @return Background rate (events/s/MeV/sr)
  ***************************************************************************/
-double GCTABackground3D::rate(const int& iebin, const double& detx,
-                                                const double& dety) const
+double GCTABackground2D::rate(const int& iebin, const double& theta) const
 {
-    // Retrieve references to node arrays
-    const GNodeArray& detxs = m_background.axis_nodes(m_inx_detx);
-    const GNodeArray& detys = m_background.axis_nodes(m_inx_dety);
+    // Retrieve reference to node array
+    const GNodeArray& thetas = m_background.axis_nodes(m_inx_theta);
 
-    // Set DETX and DETY values for node array interpolation
-    detxs.set_value(detx);
-    detys.set_value(dety);
+    // Set offset angle value for node array interpolation
+    thetas.set_value(theta);
 
     // Get bin indices
-    int inx_ll = index(detxs.inx_left(),  detys.inx_left(),  iebin);
-    int inx_lr = index(detxs.inx_left(),  detys.inx_right(), iebin);
-    int inx_rl = index(detxs.inx_right(), detys.inx_left(),  iebin);
-    int inx_rr = index(detxs.inx_right(), detys.inx_right(), iebin);
+    int inx_left  = index(thetas.inx_left(),  iebin);
+    int inx_right = index(thetas.inx_right(), iebin);
 
     // Bi-linearly interpolate the rates
-    double rate = detxs.wgt_left()  *
-                  (m_background(m_inx_bgd, inx_ll) * detys.wgt_left() +
-                   m_background(m_inx_bgd, inx_lr) * detys.wgt_right()) +
-                  detxs.wgt_right() *
-                  (m_background(m_inx_bgd, inx_rl) * detys.wgt_left() +
-                   m_background(m_inx_bgd, inx_rr) * detys.wgt_right());
+    double rate = thetas.wgt_left()  * m_background(m_inx_bgd, inx_left) +
+                  thetas.wgt_right() * m_background(m_inx_bgd, inx_right);
 
     // Make sure that background rate is not negative
     if (rate < 0.0) {

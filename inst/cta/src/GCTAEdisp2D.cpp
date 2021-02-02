@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCTAEdisp2D.cpp - CTA 2D energy dispersion class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015-2020 by Florent Forest                              *
+ *  copyright (C) 2015-2021 by Florent Forest                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1005,7 +1005,7 @@ std::string GCTAEdisp2D::print(const GChatter& chatter) const
                       gammalib::str(nmigrabins));
         result.append("\n"+gammalib::parformat("Number of offset bins") +
                       gammalib::str(nthetabins));
-        result.append("\n"+gammalib::parformat("Log10(Energy) range"));
+        result.append("\n"+gammalib::parformat("Energy range"));
         result.append(gammalib::str(emin)+" - "+gammalib::str(emax)+" TeV");
         result.append("\n"+gammalib::parformat("Migration range"));
         result.append(gammalib::str(mmin)+" - "+gammalib::str(mmax));

@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAResponseIrf.cpp - CTA instrument response function class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -72,6 +72,7 @@
 #include "GCTAEdispPerfTable.hpp"
 #include "GCTABackground.hpp"
 #include "GCTABackgroundPerfTable.hpp"
+#include "GCTABackground2D.hpp"
 #include "GCTABackground3D.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -1453,8 +1454,9 @@ void GCTAResponseIrf::load_edisp(const GFilename& filename)
  *
  * Loads the background model from a response file.
  *
- * If the file is a FITS file the method allocates a GCTABackground3D
- * response and loads the information from the FITS file.
+ * If the file is a FITS file the method will check whether the file contains
+ * a BKG_2D or BKG_3D table, and load correspondingly a GCTABackground2D
+ * or GCTABackground3D response.
  *
  * If the file is not a FITS file it will be interpreted as a
  * GCTABackgroundPerfTable performance table.
@@ -1474,8 +1476,63 @@ void GCTAResponseIrf::load_background(const GFilename& filename)
 
     // If file is a FITS file than load background as 3D background
     if (filename.is_fits()) {
-        m_background = new GCTABackground3D(filename);
-    }
+
+        // Open FITS file
+        GFits fits(filename);
+
+        // Get the extension name. If an extension name has been specified
+        // then use this name, otherwise preset the extension name according
+        // to the GADF specifications. If no GADF compliant name was found,
+        // search either for "BACKGROUND" or the "BKG" extension.
+        std::string extname;
+        if (filename.has_extname()) {
+            extname = filename.extname();
+        }
+        if (extname.empty()) {
+            if (fits.contains(gammalib::extname_cta_background3d)) {
+                extname = gammalib::extname_cta_background3d;
+            }
+            else if (fits.contains(gammalib::extname_cta_background2d)) {
+                extname = gammalib::extname_cta_background2d;
+            }
+        }
+
+        // Initialise pointer to FITS table
+        const GFitsTable* table = NULL;
+
+        // If an extension name is given then get the respective FITS table,
+        // otherwise get the first FITS table
+        if (!extname.empty()) {
+            table = fits.table(extname);
+        }
+        else {
+            table = fits.table(1);
+        }
+
+        // If THETA_LO and THETA_HI columns are present then allocate a
+        // 2D background model
+        if (table->contains("THETA_LO") && table->contains("THETA_HI")) {
+
+            // Close FITS file
+            fits.close();
+
+            // Allocate 2D background model
+            m_background = new GCTABackground2D(filename);
+
+        }
+
+        // ... otherwise allocate 3D background model
+        else {
+
+            // Close FITS file
+            fits.close();
+
+            // Allocate Gaussian profile PSF
+            m_background = new GCTABackground3D(filename);
+
+        }
+        
+    } // endif: file was a FITS file
 
     // ... otherwise load background as performance table
     else {

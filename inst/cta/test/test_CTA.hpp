@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    test_CTA.hpp  -  Test CTA classes                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -84,6 +84,7 @@ public:
     void                      test_response_edisp_RMF(void);
     void                      test_response_edisp_2D(void);
     void                      test_response_bgd_PerfTable(void);
+    void                      test_response_bgd_2D(void);
     void                      test_response_bgd_3D(void);
     void                      test_response_expcube(void);
     void                      test_response_psfcube(void);

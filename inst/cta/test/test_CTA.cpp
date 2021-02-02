@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       test_CTA.cpp - Test CTA classes                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -36,11 +36,8 @@
 #include "GCTALib.hpp"
 #include "GTools.hpp"
 #include "GNodeArray.hpp"
-#include "test_CTA.hpp"
-#include "GCTAEdisp2D.hpp"
-#include "GCTAEdispPerfTable.hpp"
-#include "GCTAResponseTable.hpp"
 #include "GMath.hpp"
+#include "test_CTA.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -89,6 +86,9 @@ const std::string cta_stacked_bkgcube   = datadir+"/stacked_bkgcube.fits";
 const std::string cta_onoff_obs   = datadir+"/onoff_obs.xml";
 const std::string cta_onoff_model = datadir+"/onoff_model.xml";
 const std::string cta_onoff_onreg = datadir+"/onoff_region_on.reg";
+
+/* __ Test files for HESS analysis _______________________________________ */
+const std::string hess_bgd_2D = datadir+"/irf_hess_bkg2.fits";
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_COMPUTE_REF_RATE_EBIN    //!< Compute reference rate
@@ -148,6 +148,8 @@ void TestGCTAResponse::set(void)
            "Test GCTAEdisp2D class");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_bgd_PerfTable),
            "Test GCTABackgroundPerfTable class");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_bgd_2D),
+           "Test GCTABackground2D class");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_bgd_3D),
            "Test GCTABackground3D class");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_expcube),
@@ -1148,6 +1150,60 @@ void TestGCTAResponse::test_response_bgd_PerfTable(void)
     }
     std::cout << rate << std::endl;
     #endif
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GCTABackground2D class
+ ***************************************************************************/
+void TestGCTAResponse::test_response_bgd_2D(void)
+{
+    // Set instrument direction
+    const GSkyDir     dir;
+    const GCTAInstDir instdir(dir, 0.0, 0.0);
+
+    // Set energy range for integration
+    const GEnergy emin(1.0, "TeV");
+    const GEnergy emax(10.0, "TeV");
+
+    // Test empty constructor
+    GCTABackground2D bkg1;
+    test_assert(!bkg1.is_valid(), "Test validity of empty background model");
+    test_value(bkg1.table().axes(), 0, "Test number of response table axes for empty background model");
+    test_value(bkg1(0.0, 0.0, 0.0), 0.0, "Test onaxis operator value for empty background model");
+    test_value(bkg1(0.0, 0.01, 0.02), 0.0, "Test offaxis operator value for empty background model");
+    test_value(bkg1.rate_ebin(instdir, emin, emax), 0.0, "Test rate integration for empty background model");
+
+    // Test load constructor
+    GCTABackground2D bkg2(hess_bgd_2D);
+    test_assert(bkg2.is_valid(), "Test validity of loaded background model");
+    test_value(bkg2.filename(), hess_bgd_2D, "Test filename for loaded background model");
+    test_value(bkg2.table().axes(), 2, "Test number of response table axes for loaded background model");
+    test_value(bkg2(0.0, 0.0, 0.0), 0.000250777016726374, "Test onaxis operator value for loaded background model");
+    test_value(bkg2(0.0, 0.01, 0.02), 0.000170681426482629, "Test offaxis operator value for loaded background model");
+    test_value(bkg2.rate_ebin(instdir, emin, emax), 247.443560666938, "Test rate integration for loaded background model");
+
+    // Test copy constructor
+    GCTABackground2D bkg3(bkg2);
+    test_assert(bkg3.is_valid(), "Test validity of copied background model");
+    test_value(bkg3.filename(), hess_bgd_2D, "Test filename for copied background model");
+    test_value(bkg3.table().axes(), 2, "Test number of response table axes for copied background model");
+    test_value(bkg3(0.0, 0.0, 0.0), 0.000250777016726374, "Test onaxis operator value for copied background model");
+    test_value(bkg3(0.0, 0.01, 0.02), 0.000170681426482629, "Test offaxis operator value for copied background model");
+    test_value(bkg3.rate_ebin(instdir, emin, emax), 247.443560666938, "Test rate integration for copied background model");
+
+    // Test loading from saved background model
+    bkg3.save("test_hess_bkg2.fits");
+    GCTABackground2D bkg4("test_hess_bkg2.fits");
+    test_assert(bkg4.is_valid(), "Test validity of saved background model");
+    test_value(bkg4.filename(), "test_hess_bkg2.fits", "Test filename for saved background model");
+    test_value(bkg4.table().axes(), 2, "Test number of response table axes for saved background model");
+    test_value(bkg4(0.0, 0.0, 0.0), 0.000250777016726374, "Test onaxis operator value for saved background model");
+    test_value(bkg4(0.0, 0.01, 0.02), 0.000170681426482629, "Test offaxis operator value for saved background model");
+    test_value(bkg4.rate_ebin(instdir, emin, emax), 247.443560666938, "Test rate integration for saved background model");
 
     // Return
     return;

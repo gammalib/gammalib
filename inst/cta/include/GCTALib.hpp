@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTALib.hpp - CTA Support Header files                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -64,6 +64,7 @@
 #include "GCTAEdisp2D.hpp"
 #include "GCTABackground.hpp"
 #include "GCTABackgroundPerfTable.hpp"
+#include "GCTABackground2D.hpp"
 #include "GCTABackground3D.hpp"
 #include "GCTACubeExposure.hpp"
 #include "GCTACubeBackground.hpp"

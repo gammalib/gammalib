@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GCTAEdispPerfTable.cpp - CTA performance table energy dispersion class *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2018 by Christoph Deil & Ellis Owen                 *
+ *  copyright (C) 2014-2021 by Christoph Deil & Ellis Owen                 *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -506,7 +506,7 @@ std::string GCTAEdispPerfTable::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Filename")+m_filename);
         result.append("\n"+gammalib::parformat("Number of energy bins") +
                       gammalib::str(num));
-        result.append("\n"+gammalib::parformat("Log10(Energy) range"));
+        result.append("\n"+gammalib::parformat("Energy range"));
         result.append(gammalib::str(emin)+" - "+gammalib::str(emax)+" TeV");
 
         // Append detailed information

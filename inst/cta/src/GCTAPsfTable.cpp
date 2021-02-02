@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCTAPsfTable.cpp - CTA point spread function table class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2016-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -641,7 +641,7 @@ std::string GCTAPsfTable::print(const GChatter& chatter) const
                       gammalib::str(nthetabins));
         result.append("\n"+gammalib::parformat("Number of delta bins") +
                       gammalib::str(ndeltabins));
-        result.append("\n"+gammalib::parformat("Log10(Energy) range"));
+        result.append("\n"+gammalib::parformat("Energy range"));
         result.append(gammalib::str(emin)+" - "+gammalib::str(emax)+" TeV");
         result.append("\n"+gammalib::parformat("Offset angle range"));
         result.append(gammalib::str(omin)+" - "+gammalib::str(omax)+" deg");
