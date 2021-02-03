@@ -3,24 +3,33 @@
 Installing the development version
 ==================================
 
-The current development version of the code can be downloaded as source
-tarballs or directly from the `Git <https://git-scm.com/>`_ repository.
+Alternatively to stable releases you can also install the development version
+of the code which includes the latest features that will become available
+with the next stable release. Installing the development version is recommended if
+you want to use latest code features and if you cannot wait for the next
+stable release. The current GammaLib development release is
+``gammalib-2.0.0.dev``.
 
-The current GammaLib development release is ``gammalib-2.0.0.dev``.
-
-
-Source tarball
---------------
-
-Download the source tarball from the following link
-
-- `GammaLib <http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-2.0.0.dev.tar.gz>`_
-
-and follow the instructions on :ref:`install_source`.
+Installing the development version is also necessary **if you want to contribute
+to code development. In that case please follow the instructions on**
+:ref:`using_git` **and ignore the rest of this page.**
 
 
-Git repository
---------------
+Getting the development version
+-------------------------------
+
+The first step is to get the development version of the code. There are two
+options for that first step: either get the source tarball or clone the
+source code from the `Git <https://git-scm.com/>`_ repository.
+
+Getting the source tarball
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Download the source tarball from the following link:
+`GammaLib <http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-2.0.0.dev.tar.gz>`_
+
+Cloning the Git repository
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To clone the gammalib source code, type
 
@@ -28,9 +37,9 @@ To clone the gammalib source code, type
 
    $ git clone https://cta-gitlab.irap.omp.eu/gammalib/gammalib.git
 
-This will create a directory named gammalib under the current
-working directory that will contain the gammalib source code.
-In case that the cloning does not work you may try adding
+This will create a directory named gammalib under the current working directory
+that will contain the gammalib source code. In case that the cloning does not
+work you may try adding
 
 .. code-block:: bash
 
@@ -42,19 +51,35 @@ or
 
    $ git config --global http.sslverify "false"
 
-before retrieving the code.
-Before you will be able to compile the code you need to generate the
-configuration file using the ``autogen.sh`` script.
-Also make sure that you're actually on the devel branch of the git
-repository. GammaLib can be compiled and configured using
-the following command sequence (the code will be installed into the 
-``/usr/local/gamma`` directory):
+before retrieving the code. Before you will be able to compile the code directly
+you need to generate the configuration file using the ``autogen.sh`` script.
+Also make sure that you're actually on the devel branch of the git repository.
+You do this by typing:
 
 .. code-block:: bash
 
    $ cd gammalib
    $ git checkout devel
    $ ./autogen.sh
+
+
+Compiling the development version
+---------------------------------
+
+The second step is to compile the development version. You can either
+compile the code directly using ``make`` or you can build a conda package.
+The latter is preferred if you want to use GammaLib in a conda environment.
+We do not recommend to compile the development version directly against a
+conda version of Python.
+
+Compiling the development version
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+GammaLib can be compiled and configured using the following sequence of
+commands (the code will be installed into the ``/usr/local/gamma`` directory):
+
+.. code-block:: bash
+
    $ ./configure
    $ make
    $ make check
@@ -63,7 +88,7 @@ the following command sequence (the code will be installed into the
    $ source $GAMMALIB/bin/gammalib-init.sh
 
 Please read the :ref:`install_source` section if you need more information
-on how to install GammaLib.
+on how to compile and install GammaLib.
 
 .. note::
    You need `swig <http://www.swig.org/>`_ on your system to build the
@@ -71,28 +96,18 @@ on how to install GammaLib.
    not stored in the Git repository but are built using
    `swig <http://www.swig.org/>`_ from interface files located in the
    pyext folder. However, you do not need `swig <http://www.swig.org/>`_
-   when fetching a release as the Python wrappers are bundled with the
-   release tarballs.
+   when fetching a tarball as the Python wrappers are bundled with the
+   tarballs.
 
 
-Making a conda package
-----------------------
+Building a conda package
+~~~~~~~~~~~~~~~~~~~~~~~~
 
-To create a conda package for the development version, clone the gammalib
-source code using
-
-.. code-block:: bash
-
-   $ git clone https://cta-gitlab.irap.omp.eu/gammalib/gammalib.git
-
-and type the following to create the conda packages (make sure that anaconda is
-included in your ``$PATH`` environment):
+Alternatively you can create a conda package using the following sequence
+of commands (make sure that anaconda is included in your ``$PATH`` environment):
 
 .. code-block:: bash
 
-   $ cd gammalib
-   $ git checkout devel
-   $ ./autogen.sh
    $ ./configure
    $ conda-build dev/conda.recipe
 
@@ -105,6 +120,10 @@ version as follows:
    $ source activate gammalib-devel
    $ conda install --use-local gammalib=2.0.0.dev
 
-Note that you can chose between Python 2.7, 3.5, 3.6, 3.7 and 3.8 for your
-conda environment.
+Note that you can choose between Python 2.7, 3.5, 3.6, 3.7, 3.8 and 3.9 for
+your conda environment. If you only need the conda package for one specific
+Python version you can build the conda package as follows:
 
+.. code-block:: bash
+
+   $ conda-build dev/conda.recipe --python 3.6

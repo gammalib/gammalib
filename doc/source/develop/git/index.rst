@@ -1,4 +1,4 @@
-.. _git:
+.. _using_git:
 
 Using Git and GitLab
 ====================
