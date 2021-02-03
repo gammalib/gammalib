@@ -83,6 +83,15 @@ public:
                          const GSkyRegions&     on,
                          const GSkyRegions&     off,
                          const bool&            use_model_bkg = true);
+    GCTAOnOffObservation(const GCTAObservation& obs_on,
+			 const GCTAObservation& obs_off,
+                         const GModels&         models,
+                         const std::string&     srcname,
+                         const GEbounds&        etrue,
+                         const GEbounds&        ereco,
+                         const GSkyRegions&     on,
+                         const GSkyRegions&     off,
+                         const bool&            use_model_bkg = true);
     GCTAOnOffObservation(const GCTAOnOffObservation& obs);
     virtual ~GCTAOnOffObservation(void);
 

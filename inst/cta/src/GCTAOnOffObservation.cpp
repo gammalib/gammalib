@@ -215,7 +215,7 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GPha& pha_on,
 
 
 /***********************************************************************//**
- * @brief CTA observation constructor
+ * @brief CTA observation constructor (same observation for On and Off)
  *
  * @param[in] obs CTA observation.
  * @param[in] models Models including source and background model.
@@ -228,8 +228,7 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GPha& pha_on,
  *
  * Constructs On/Off observation from one osbervation by filling the On and
  * Off spectra and computing the Auxiliary Response File (ARF) and
- * Redistribution Matrix File (RMF). This constructor is used when On and 
- * Off are taken from the same observation.
+ * Redistribution Matrix File (RMF).
  *
  * The method requires the specification of the true and reconstructed energy
  * boundaries, as well as the definition of On and Off regions.
@@ -263,6 +262,61 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GCTAObservation& obs,
     // Set On/Off observation from CTA observation
     // In this case On and Off are the same observation
     set(obs, obs, models, srcname, on, off, use_model_bkg);
+
+    // Return
+    return;
+}
+
+/***********************************************************************//**
+ * @brief CTA observation constructor (different On and Off observations)
+ *
+ * @param[in] obs_on On CTA observation.
+ * @param[in] obs_off Off CTA observation.
+ * @param[in] models Models including source and background models.
+ * @param[in] srcname Name of source in models.
+ * @param[in] etrue True energy boundaries.
+ * @param[in] ereco Reconstructed energy boundaries.
+ * @param[in] on On regions.
+ * @param[in] off Off regions.
+ * @param[in] use_model_bkg Use model background.
+ *
+ * Constructs On/Off observation from two osbervations by filling the On and
+ * Off spectra and computing the Auxiliary Response File (ARF) and
+ * Redistribution Matrix File (RMF). 
+ *
+ * The method requires the specification of the true and reconstructed energy
+ * boundaries, as well as the definition of On and Off regions.
+ *
+ * The @p use_model_bkg flag controls whether a background model should be
+ * used for the computations or not. This impacts the computations of the
+ * @c BACKSCAL column in the On spectrum and the @c BACKRESP column in
+ * the Off spectrum. See the compute_alpha() and compute_bgd() methods for
+ * more information on the applied formulae.
+ ***************************************************************************/
+GCTAOnOffObservation::GCTAOnOffObservation(const GCTAObservation& obs_on,
+					   const GCTAObservation& obs_off,
+                                           const GModels&         models,
+                                           const std::string&     srcname,
+                                           const GEbounds&        etrue,
+                                           const GEbounds&        ereco,
+                                           const GSkyRegions&     on,
+                                           const GSkyRegions&     off,
+                                           const bool&            use_model_bkg)
+{
+    // Initialise private
+    init_members();
+
+    // Initialise spectra
+    m_on_spec  = GPha(ereco);
+    m_off_spec = GPha(ereco);
+
+    // Initialise response information
+    m_arf = GArf(etrue);
+    m_rmf = GRmf(etrue, ereco);
+
+    // Set On/Off observation from CTA observation
+    // In this case On and Off are the same observation
+    set(obs_on, obs_off, models, srcname, on, off, use_model_bkg);
 
     // Return
     return;

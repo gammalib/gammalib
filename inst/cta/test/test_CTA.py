@@ -477,6 +477,8 @@ class Test(gammalib.GPythonTestSuite):
         obs4.events(cube)
         obs4.response(rspcube2)
         obs5      = gammalib.GCTAOnOffObservation(obs1, models, 'Crab', ebds, ebds, regs, regs)
+        obs6      = gammalib.GCTAOnOffObservation(obs1, obs1, models,
+                                                  'Crab', ebds, ebds, regs, regs)
         radgauss  = gammalib.GCTAModelRadialGauss(1.0)
         radacc    = gammalib.GCTAModelRadialAcceptance(radgauss, plaw)
         multi     = gammalib.GCTAModelSpatialMultiplicative()
