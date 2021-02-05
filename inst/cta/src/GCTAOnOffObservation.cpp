@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTAOnOffObservation.cpp - CTA On/Off observation class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2020 by Chia-Chun Lu & Christoph Deil               *
+ *  copyright (C) 2013-2021 by Chia-Chun Lu & Christoph Deil               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -215,7 +215,7 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GPha& pha_on,
 
 
 /***********************************************************************//**
- * @brief CTA observation constructor (same observation for On and Off)
+ * @brief CTA observation constructor (same On and Off observation)
  *
  * @param[in] obs CTA observation.
  * @param[in] models Models including source and background model.
@@ -267,6 +267,7 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GCTAObservation& obs,
     return;
 }
 
+
 /***********************************************************************//**
  * @brief CTA observation constructor (different On and Off observations)
  *
@@ -294,7 +295,7 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GCTAObservation& obs,
  * more information on the applied formulae.
  ***************************************************************************/
 GCTAOnOffObservation::GCTAOnOffObservation(const GCTAObservation& obs_on,
-					   const GCTAObservation& obs_off,
+                                           const GCTAObservation& obs_off,
                                            const GModels&         models,
                                            const std::string&     srcname,
                                            const GEbounds&        etrue,
@@ -393,7 +394,7 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
     bool first = true;
 
     // Initialise total exposure
-    double total_exposure_on = 0.0;
+    double total_exposure_on  = 0.0;
     double total_exposure_off = 0.0;
 
     // Allocate observation energy range
@@ -437,8 +438,8 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
         GRmf rmf_stacked = onoff->rmf();
 
         // Get exposure for observation
-        double exposure_on = onoff->on_spec().exposure();
-	double exposure_off = onoff->off_spec().exposure();
+        double exposure_on  = onoff->on_spec().exposure();
+        double exposure_off = onoff->off_spec().exposure();
 
         // If this is the first On/Off observation then store the data to
         // initialise the data definition
@@ -450,7 +451,7 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
             m_arf              = arf_stacked * exposure_on;
             m_rmf              = rmf_stacked;
             total_exposure_on  = exposure_on;
-	    total_exposure_off = exposure_off;
+            total_exposure_off = exposure_off;
             m_ontime           = onoff->ontime();
             m_livetime         = onoff->livetime();
 
@@ -550,7 +551,7 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GObservations& obs) :
 
             // Add exposure, ontime and livetime
             total_exposure_on  += exposure_on;
-	    total_exposure_off += exposure_off;
+            total_exposure_off += exposure_off;
             m_ontime           += onoff->ontime();
             m_livetime         += onoff->livetime();
 
@@ -1315,7 +1316,8 @@ GRmf GCTAOnOffObservation::rmf_stacked(const GRmf&    rmf,
 /***********************************************************************//**
  * @brief Set On/Off observation from a CTA observation
  *
- * @param[in] obs CTA observation.
+ * @param[in] obs_on CTA On observation.
+ * @param[in] obs_off CTA Off observation.
  * @param[in] models Models including source and background model.
  * @param[in] srcname Name of soucre in models.
  * @param[in] on On regions.
@@ -1336,7 +1338,7 @@ GRmf GCTAOnOffObservation::rmf_stacked(const GRmf&    rmf,
  * information on the applied formulae.
  ***************************************************************************/
 void GCTAOnOffObservation::set(const GCTAObservation& obs_on,
-			       const GCTAObservation& obs_off,
+                               const GCTAObservation& obs_off,
                                const GModels&         models,
                                const std::string&     srcname,
                                const GSkyRegions&     on,
@@ -1346,14 +1348,14 @@ void GCTAOnOffObservation::set(const GCTAObservation& obs_on,
     // Get CTA event list pointers
     const GCTAEventList* events_on = dynamic_cast<const GCTAEventList*>(obs_on.events());
     if (events_on == NULL) {
-        std::string msg = "No event list found in CTA observation \""+
+        std::string msg = "No event list found in CTA On observation \""+
                           obs_on.name()+"\" (ID="+obs_on.id()+"). ON/OFF observation "
                           "can only be filled from event list.";
         throw GException::invalid_value(G_SET, msg);
     }
-     const GCTAEventList* events_off = dynamic_cast<const GCTAEventList*>(obs_off.events());
+    const GCTAEventList* events_off = dynamic_cast<const GCTAEventList*>(obs_off.events());
     if (events_off == NULL) {
-        std::string msg = "No event list found in CTA observation \""+
+        std::string msg = "No event list found in CTA Off observation \""+
                           obs_off.name()+"\" (ID="+obs_off.id()+"). ON/OFF observation "
                           "can only be filled from event list.";
         throw GException::invalid_value(G_SET, msg);
@@ -1391,10 +1393,10 @@ void GCTAOnOffObservation::set(const GCTAObservation& obs_on,
 		if (on.contains(dir)) {
 			m_on_spec.fill(atom->energy());
 		}
-		
+
 	} // endfor: looped over all On events
 
-        // Loop over all events
+    // Loop over all events and fill Off spectrum
     for (int i = 0; i < events_off->size(); ++i) {
 
         // Get measured event direction
@@ -1406,7 +1408,7 @@ void GCTAOnOffObservation::set(const GCTAObservation& obs_on,
 			m_off_spec.fill(atom->energy());
 		}
 
-	} // endfor: looped over all events
+	} // endfor: looped over all Off events
 
     // Store the livetime as exposures of the spectra
     m_on_spec.exposure(obs_on.livetime());
@@ -1915,7 +1917,7 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs,
  *       bins and not at the bin centre.
  ***************************************************************************/
 void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs_on,
-					 const GCTAObservation& obs_off,
+                                         const GCTAObservation& obs_off,
                                          const GSkyRegions&     on,
                                          const GSkyRegions&     off,
                                          const GModels&         models,
@@ -1929,8 +1931,8 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs_on,
     if (nreco > 0) {
 
         // Get CTA observation pointing direction, zenith, and azimuth
-        GCTAPointing obsonpnt = obs_on.pointing();
-	GCTAPointing obsoffpnt = obs_on.pointing();
+        GCTAPointing obs_on_pnt  = obs_on.pointing();
+        GCTAPointing obs_off_pnt = obs_on.pointing();
 
         // If IRF background templates shall be used then compute the
         // energy dependent alpha factors
@@ -1963,7 +1965,7 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs_on,
                         GSkyDir pixdir = on_map->map().inx2dir(pixidx);
 
                         // Translate sky direction into instrument direction
-                        GCTAInstDir pixinstdir = obsonpnt.instdir(pixdir);
+                        GCTAInstDir pixinstdir = obs_on_pnt.instdir(pixdir);
 
                         // Get solid angle subtended by this pixel
                         double pixsolid = on_map->map().solidangle(pixidx);
@@ -1995,7 +1997,7 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs_on,
                         GSkyDir pixdir = off_map->map().inx2dir(pixidx);
 
                         // Translate sky direction into instrument direction
-                        GCTAInstDir pixinstdir = obsoffpnt.instdir(pixdir);
+                        GCTAInstDir pixinstdir = obs_off_pnt.instdir(pixdir);
 
                         // Get solid angle subtended by this pixel
                         double pixsolid = off_map->map().solidangle(pixidx);
@@ -2012,8 +2014,9 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs_on,
 
                 // Compute alpha for this energy bin
                 double alpha = (aoff > 0.0) ? aon/aoff : 1.0;
-		// Correct for different livetime in On and Off
-	        alpha *= obs_on.livetime() / obs_off.livetime();
+
+                // Correct for different livetime in On and Off
+                alpha *= obs_on.livetime() / obs_off.livetime();
 
                 // Set background scaling in On spectra
                 m_on_spec.backscal(i, alpha);
@@ -2046,7 +2049,7 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs_on,
                     GSkyDir pixdir = on_map->map().inx2dir(pixidx);
 
                     // Translate sky direction into instrument direction
-                    GCTAInstDir pixinstdir = obsonpnt.instdir(pixdir);
+                    GCTAInstDir pixinstdir = obs_on_pnt.instdir(pixdir);
 
                     // Add up solid angle subtended by this pixel
                     aon += on_map->map().solidangle(pixidx);
@@ -2072,7 +2075,7 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs_on,
                     GSkyDir pixdir = off_map->map().inx2dir(pixidx);
 
                     // Translate sky direction into instrument direction
-                    GCTAInstDir pixinstdir = obsoffpnt.instdir(pixdir);
+                    GCTAInstDir pixinstdir = obs_off_pnt.instdir(pixdir);
 
                     // Add up solid angle subtended by this pixel
                     aoff += off_map->map().solidangle(pixidx);
@@ -2083,8 +2086,9 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs_on,
 
             // Compute alpha from acceptance for this energy bin
             double alpha = (aoff > 0.0) ? aon/aoff : 1.0;
-	    // Correct for different livetime in On and Off
-	    alpha *= obs_on.livetime() / obs_off.livetime();
+
+            // Correct for different livetime in On and Off
+            alpha *= obs_on.livetime() / obs_off.livetime();
 
             // Set background scaling in On spectra
             for (int i = 0; i < nreco; ++i) {

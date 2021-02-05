@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTAOnOffObservation.hpp - CTA On/Off observation class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2018 by Chia-Chun Lu & Christoph Deil               *
+ *  copyright (C) 2013-2021 by Chia-Chun Lu & Christoph Deil               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -84,7 +84,7 @@ public:
                          const GSkyRegions&     off,
                          const bool&            use_model_bkg = true);
     GCTAOnOffObservation(const GCTAObservation& obs_on,
-			 const GCTAObservation& obs_off,
+                         const GCTAObservation& obs_off,
                          const GModels&         models,
                          const std::string&     srcname,
                          const GEbounds&        etrue,
