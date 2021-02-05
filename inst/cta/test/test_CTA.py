@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib CTA module.
 #
-# Copyright (C) 2012-2020 Juergen Knoedlseder
+# Copyright (C) 2012-2021 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -478,6 +478,8 @@ class Test(gammalib.GPythonTestSuite):
         obs4.events(cube)
         obs4.response(rspcube2)
         obs5      = gammalib.GCTAOnOffObservation(obs1, models, 'Crab', ebds, ebds, regs, regs)
+        obs6      = gammalib.GCTAOnOffObservation(obs1, obs1, models,
+                                                  'Crab', ebds, ebds, regs, regs)
         radgauss  = gammalib.GCTAModelRadialGauss(1.0)
         radacc    = gammalib.GCTAModelRadialAcceptance(radgauss, plaw)
         multi     = gammalib.GCTAModelSpatialMultiplicative()
@@ -533,6 +535,7 @@ class Test(gammalib.GPythonTestSuite):
         test_support.pickeling(self, gammalib.GCTAObservation(obs3))
         test_support.pickeling(self, gammalib.GCTAObservation(obs4))
         test_support.pickeling(self, gammalib.GCTAOnOffObservation(obs5))
+        test_support.pickeling(self, gammalib.GCTAOnOffObservation(obs6))
         test_support.pickeling(self, gammalib.GCTAPointing(dir))
         test_support.pickeling(self, gammalib.GCTAPsf2D(irfname))
         test_support.pickeling(self, gammalib.GCTAPsfKing(kingname))

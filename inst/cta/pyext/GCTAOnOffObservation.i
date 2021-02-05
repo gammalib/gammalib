@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GCTAOnOffObservation.i - CTA on-off observation class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2018 by Michael Mayer                               *
+ *  copyright (C) 2013-2021 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -89,6 +89,15 @@ public:
                          const GSkyRegions&     on,
                          const GSkyRegions&     off,
                          const bool&            use_bkg_model = true);
+    GCTAOnOffObservation(const GCTAObservation& obs_on,
+                         const GCTAObservation& obs_off,
+                         const GModels&         models,
+                         const std::string&     srcname,
+                         const GEbounds&        etrue,
+                         const GEbounds&        ereco,
+                         const GSkyRegions&     on,
+                         const GSkyRegions&     off,
+                         const bool&            use_bkg_model = true);
     GCTAOnOffObservation(const GCTAOnOffObservation& obs);
     virtual ~GCTAOnOffObservation(void);
  
@@ -125,7 +134,7 @@ public:
 
 
 /***********************************************************************//**
- * @brief GCTOnOffAObservation class extension
+ * @brief GCTAOnOffAObservation class extension
  ***************************************************************************/
 %extend GCTAOnOffObservation {
     GCTAOnOffObservation copy() {

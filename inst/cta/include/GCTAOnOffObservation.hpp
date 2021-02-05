@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTAOnOffObservation.hpp - CTA On/Off observation class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2018 by Chia-Chun Lu & Christoph Deil               *
+ *  copyright (C) 2013-2021 by Chia-Chun Lu & Christoph Deil               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -83,6 +83,15 @@ public:
                          const GSkyRegions&     on,
                          const GSkyRegions&     off,
                          const bool&            use_model_bkg = true);
+    GCTAOnOffObservation(const GCTAObservation& obs_on,
+                         const GCTAObservation& obs_off,
+                         const GModels&         models,
+                         const std::string&     srcname,
+                         const GEbounds&        etrue,
+                         const GEbounds&        ereco,
+                         const GSkyRegions&     on,
+                         const GSkyRegions&     off,
+                         const bool&            use_model_bkg = true);
     GCTAOnOffObservation(const GCTAOnOffObservation& obs);
     virtual ~GCTAOnOffObservation(void);
 
@@ -129,7 +138,8 @@ protected:
     void   check_consistency(const std::string& method) const;
     GArf   arf_stacked(const GArf& arf, const GEnergy& emin, const GEnergy& emax) const;
     GRmf   rmf_stacked(const GRmf& rmf, const GEnergy& emin, const GEnergy& emax) const;
-    void   set(const GCTAObservation& obs,
+    void   set(const GCTAObservation& obs_on,
+	       const GCTAObservation& obs_off,
                const GModels&         models,
                const std::string&     srcname,
                const GSkyRegions&     on,
@@ -145,7 +155,8 @@ protected:
                        const GSkyRegions&     off,
                        const GModels&         models,
                        const bool&            use_model_bkg);
-    void   compute_alpha(const GCTAObservation& obs,
+    void   compute_alpha(const GCTAObservation& obs_on,
+			 const GCTAObservation& obs_off,
                          const GSkyRegions&     on,
                          const GSkyRegions&     off,
                          const GModels&         models,
@@ -178,8 +189,8 @@ protected:
     // Protected data members
     std::string   m_instrument; //!< Instrument name
     GCTAResponse* m_response;   //!< Pointer to IRFs
-    double        m_ontime;     //!< Ontime (seconds)
-    double        m_livetime;   //!< Livetime (seconds)
+    double        m_ontime;     //!< Ontime of On observation (seconds)
+    double        m_livetime;   //!< Livetime of On observation (seconds)
     double        m_deadc;      //!< Deadtime correction (livetime/ontime)
     GPha          m_on_spec;    //!< On counts spectrum
     GPha          m_off_spec;   //!< Off counts spectrum
