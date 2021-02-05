@@ -57,6 +57,7 @@ The following methods have been added:
 - GModelSpectralFunc::extend()
 - GModelSpectralFunc::energy()
 - GModelSpectralFunc::intensity()
+- GModelSpectralFunc::save()
 - GSkyMap::correlate()
 - GOptimizerLM::npars()
 - GOptimizerLM::nfree()
