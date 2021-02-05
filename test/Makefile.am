@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for unit test module                                          #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016-2020 Juergen Knoedlseder                               #
+# Copyright (C) 2016-2021 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -219,6 +219,7 @@ clean-local:
 	rm -rf $(top_builddir)/test/*.xml
 	rm -rf $(top_builddir)/test/*.reg
 	rm -rf $(top_builddir)/test/*.dat
+	rm -rf $(top_builddir)/test/*.txt
 	rm -rf $(top_builddir)/test/reports/*.xml
 
 # Tests to be done on installed version
