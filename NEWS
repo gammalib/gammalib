@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-2 February 2021
+5 February 2021
 
 
 1. Introduction
@@ -48,6 +48,15 @@ The following methods have been added:
 - GModelSky::eflux_error(GSkyRegion&, GEnergy&, GEnergy&)
 - GModelSpatialRadial::is_energy_dependent()
 - GModelSpatialRadial::is_time_dependent()
+- GModelSpectralFunc::nodes()
+- GModelSpectralFunc::is_empty()
+- GModelSpectralFunc::append()
+- GModelSpectralFunc::insert()
+- GModelSpectralFunc::remove()
+- GModelSpectralFunc::reserve()
+- GModelSpectralFunc::extend()
+- GModelSpectralFunc::energy()
+- GModelSpectralFunc::intensity()
 - GSkyMap::correlate()
 - GOptimizerLM::npars()
 - GOptimizerLM::nfree()
@@ -106,6 +115,9 @@ Implemented GMatrixSparse::row() and GMatrixSparse::add_to_row() methods.
 
 8. Model module
 ---------------
+Added methods to GModelSpectralFunc to allow building of a file function
+in memort (#3535).
+
 Added GModelAssociation class to implement a model association and the
 GModelAssociations container class to hold a list of model associations.
 The GModelAssociations class was added as a member of GModel, and

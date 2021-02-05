@@ -195,6 +195,9 @@ class Test(gammalib.GPythonTestSuite):
         xml3    = gammalib.GXmlElement('associations')
         xml3.append(xml1)
         xml3.append(xml2)
+        filefct = gammalib.GModelSpectralFunc()
+        filefct.append(gammalib.GEnergy(1.0, 'MeV'),  1.0)
+        filefct.append(gammalib.GEnergy(10.0, 'MeV'), 10.0)
 
         # Perform pickeling tests of filled classes
         test_support.pickeling(self, gammalib.GModelPar('Par',2.0,5.0))
@@ -224,6 +227,7 @@ class Test(gammalib.GPythonTestSuite):
         test_support.pickeling(self, gammalib.GModelSpectralExponential(speexp))
         test_support.pickeling(self, gammalib.GModelSpectralExpPlaw(1.0,-2.0,pivot,pivot))
         test_support.pickeling(self, gammalib.GModelSpectralFunc(fct, 2.0))
+        test_support.pickeling(self, gammalib.GModelSpectralFunc(filefct))
         test_support.pickeling(self, gammalib.GModelSpectralGauss(1.0,pivot,pivot))
         test_support.pickeling(self, gammalib.GModelSpectralLogParabola(1.0,-2.0,pivot,0.9))
         test_support.pickeling(self, gammalib.GModelSpectralMultiplicative(spemul))

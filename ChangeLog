@@ -1,8 +1,9 @@
-2021-02-02
+2021-02-05
 
         * Version 2.0.0 released
         ========================
 
+        Add GModelSpectralFunc methods to build file function in memory (#3535)
         Add GCTABackground2D class (#3527)
         Implement vectorised response computation for COMPTEL (#3501)
         Fix response cache removal for vector cache (#3499)

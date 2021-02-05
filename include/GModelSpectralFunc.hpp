@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectralFunc.hpp - Spectral function model class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -62,8 +62,7 @@ class GModelSpectralFunc : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralFunc(void);
-    GModelSpectralFunc(const GFilename& filename,
-                       const double&    norm);
+    GModelSpectralFunc(const GFilename& filename, const double& norm);
     explicit GModelSpectralFunc(const GXmlElement& xml);
     GModelSpectralFunc(const GModelSpectralFunc& model);
     virtual ~GModelSpectralFunc(void);
@@ -92,10 +91,23 @@ public:
     virtual std::string         print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
+    int              nodes(void) const;
+    bool             is_empty(void) const;
+    void             append(const GEnergy& energy, const double& intensity);
+    void             insert(const GEnergy& energy, const double& intensity);
+    void             remove(const int& index);
+    void             reserve(const int& num);
+    void             extend(const GModelSpectralFunc& filefct);
+    GEnergy          energy(const int& index) const;
+    void             energy(const int& index, const GEnergy& energy);
+    double           intensity(const int& index) const;
+    void             intensity(const int& index, const double& intensity);
     const GFilename& filename(void) const;
     void             filename(const GFilename& filename);
     double           norm(void) const;
     void             norm(const double& norm);
+    void             save(const GFilename& filename,
+                          const bool&      clobber = false) const;
 
 protected:
     // Protected methods
@@ -112,7 +124,7 @@ protected:
     mutable GNodeArray  m_log_nodes;  //!< log10(Energy) nodes of function
     std::vector<double> m_lin_values; //!< Function values at nodes
     std::vector<double> m_log_values; //!< log10(Function) values at nodes
-    GFilename           m_filename;   //!< Name of file function
+    mutable GFilename   m_filename;   //!< Name of file function
 
     // Cached members used for pre-computations
     mutable std::vector<double> m_prefactor; //!< Power-law normalisations
@@ -154,6 +166,52 @@ inline
 std::string GModelSpectralFunc::type(void) const
 {
     return "FileFunction";
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of nodes in file function
+ *
+ * @return Number of nodes in file function.
+ *
+ * Returns the number of nodes in the file function model.
+ ***************************************************************************/
+inline
+int GModelSpectralFunc::nodes(void) const
+{
+    return (int)m_lin_nodes.size();
+}
+
+
+/***********************************************************************//**
+ * @brief Signals if there are nodes in file function
+ *
+ * @return True if file function is empty, false otherwise.
+ *
+ * Signals if the file function does not contain any node.
+ ***************************************************************************/
+inline
+bool GModelSpectralFunc::is_empty(void) const
+{
+    return (m_lin_nodes.is_empty());
+}
+
+
+/***********************************************************************//**
+ * @brief Reserves space for nodes in file function
+ *
+ * @param[in] num Number of nodes
+ *
+ * Reserves space for @p num nodes in file function.
+ ***************************************************************************/
+inline
+void GModelSpectralFunc::reserve(const int& num)
+{
+    m_lin_nodes.reserve(num);
+    m_log_nodes.reserve(num);
+    m_lin_values.reserve(num);
+    m_log_values.reserve(num);
+    return;
 }
 
 

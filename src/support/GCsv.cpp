@@ -494,8 +494,8 @@ void GCsv::load(const GFilename& filename, const std::string& sep)
  * @brief Save CSV table
  *
  * @param[in] filename Filename.
- * @param[in] sep Column separator (default: whitespace).
- * @param[in] clobber Overwrite existing file? (default: false).
+ * @param[in] sep Column separator.
+ * @param[in] clobber Overwrite existing file?
  *
  * @exception GException::invalid_value
  *            Attempt to overwrite existing file.

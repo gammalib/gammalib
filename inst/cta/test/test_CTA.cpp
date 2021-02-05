@@ -1196,7 +1196,7 @@ void TestGCTAResponse::test_response_bgd_2D(void)
     test_value(bkg3.rate_ebin(instdir, emin, emax), 247.443560666938, "Test rate integration for copied background model");
 
     // Test loading from saved background model
-    bkg3.save("test_hess_bkg2.fits");
+    bkg3.save("test_hess_bkg2.fits", true);
     GCTABackground2D bkg4("test_hess_bkg2.fits");
     test_assert(bkg4.is_valid(), "Test validity of saved background model");
     test_value(bkg4.filename(), "test_hess_bkg2.fits", "Test filename for saved background model");

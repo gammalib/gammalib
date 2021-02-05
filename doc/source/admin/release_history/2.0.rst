@@ -1,6 +1,6 @@
 .. _2.0:
 
-GammaLib 2.0 release (15 January 2021)
+GammaLib 2.0 release (5 February 2021)
 ======================================
 
 Overview
@@ -27,6 +27,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`3535 <https://cta-redmine.irap.omp.eu/issues/3535>`_] -
+  Add GModelSpectralFunc methods to build file function in memory
 * [`3501 <https://cta-redmine.irap.omp.eu/issues/3501>`_] -
   Implement vectorised response computation for COMPTEL
 * [`3333 <https://cta-redmine.irap.omp.eu/issues/3333>`_] -

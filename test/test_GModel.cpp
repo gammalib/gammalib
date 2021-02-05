@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   test_GModel.cpp - test GModel class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -34,6 +34,32 @@
 #include <cstdlib>     // getenv
 #include "test_GModel.hpp"
 #include "GTools.hpp"
+
+/* __ Test macros ________________________________________________________ */
+#define TEST_INVALID_ARGUMENT(ACTION, TEST, MESSAGE) \
+    test_try(TEST); \
+    try { \
+        ACTION; \
+    test_try_failure(MESSAGE); \
+    } \
+    catch (GException::invalid_argument &e) { \
+        test_try_success(); \
+    } \
+    catch (std::exception &e) { \
+        test_try_failure(e); \
+    }
+#define TEST_OUT_OF_RANGE(ACTION, TEST, MESSAGE) \
+    test_try(TEST); \
+    try { \
+        ACTION; \
+    test_try_failure(MESSAGE); \
+    } \
+    catch (GException::out_of_range &e) { \
+        test_try_success(); \
+    } \
+    catch (std::exception &e) { \
+        test_try_failure(e); \
+    }
 
 
 /***********************************************************************//**
@@ -2518,32 +2544,151 @@ void TestGModel::test_filefct(void)
 {
     // Test void constructor
     GModelSpectralFunc model1;
-    test_value(model1.type(), "FileFunction", "Check void model type");
+    test_value(model1.type(), "FileFunction", "Check type of void model");
+    test_value(model1.size(), 1, "Check size of void model");
+    test_value(model1.nodes(), 0, "Check number of nodes in void model");
+    test_assert(model1.is_empty(), "Check that void model is empty");
+    test_value(model1.norm(), 1.0, "Check normalisation of void model");
+    test_value(model1.filename().url(), "", "Check filename of void model");
+    model1.save("test_filefct_empty.txt", true);
 
     // Test value constructor
     GModelSpectralFunc model2(m_filefct, 2.0);
-    test_value(model2.filename().url(), m_filefct,
-                "Check file function data file name");
-    test_value(model2.norm(), 2.0);
+    test_value(model2.size(), 1, "Check size of loaded model");
+    test_value(model2.nodes(), 30, "Check number of nodes in loaded model");
+    test_assert(!model2.is_empty(), "Check that loaded model is not empty");
+    test_value(model2.norm(), 2.0, "Check normalisation of loaded model");
+    test_value(model2.filename().url(), m_filefct, "Check filename of loaded model");
 
     // Test XML constructor
     GXml               xml(m_xml_model_point_filefct);
     GXmlElement*       element = xml.element(0)->element(0)->element("spectrum", 0);
     GModelSpectralFunc model3(*element);
-    test_value(model3.size(), 1);
-    test_value(model3.type(), "FileFunction", "Check model type");
-    test_value(model3.filename().url(), m_filefct,
-               "Check file function data file name");
-    test_value(model3.norm(), 1.0);
+    test_value(model3.size(), 1, "Check size of model loaded from XML");
+    test_value(model3.nodes(), 30, "Check number of nodes in model loaded from XML");
+    test_assert(!model3.is_empty(), "Check that model loaded from XML is not empty");
+    test_value(model3.norm(), 1.0, "Check normalisation of model loaded from XML");
+    test_value(model3.filename().url(), m_filefct, "Check filename of model loaded from XML");
+
+    // Test copy constructor
+    GModelSpectralFunc model4(model2);
+    test_value(model4.size(), 1, "Check size of copied model");
+    test_value(model4.nodes(), 30, "Check number of nodes in copied model");
+    test_assert(!model4.is_empty(), "Check that copied model is not empty");
+    test_value(model4.norm(), 2.0, "Check normalisation of copied model");
+    test_value(model4.filename().url(), m_filefct, "Check filename of copied model");
+
+    // Test in-memory building of file function
+    GModelSpectralFunc model5;
+    model5.reserve(10);
+    model5.append(GEnergy(10.0, "MeV"), 10.0);
+    model5.append(GEnergy(20.0, "MeV"), 20.0);
+    test_value(model5.nodes(), 2, "Check number of nodes after appending two");
+    test_value(model5.energy(0).MeV(), 10.0, "Check first appended energy");
+    test_value(model5.energy(1).MeV(), 20.0, "Check second appended energy");
+    test_value(model5.intensity(0), 10.0, "Check first appended intensity");
+    test_value(model5.intensity(1), 20.0, "Check second appended intensity");
+    model5.insert(GEnergy(15.0, "MeV"), 15.0);
+    model5.insert(GEnergy(16.0, "MeV"), 16.0);
+    test_value(model5.nodes(), 4, "Check number of nodes after inserting two");
+    model5.remove(3);
+    model5.remove(2);
+    test_value(model5.nodes(), 2, "Check number of nodes after removing two");
+    test_value(model5.energy(0).MeV(), 10.0, "Check first energy");
+    test_value(model5.energy(1).MeV(), 15.0, "Check second energy");
+    test_value(model5.intensity(0), 10.0, "Check first intensity");
+    test_value(model5.intensity(1), 15.0, "Check second intensity");
+    GModelSpectralFunc model6;
+    model6.append(GEnergy(10.0, "GeV"), 10.0);
+    model6.append(GEnergy(20.0, "GeV"), 20.0);
+    model5.extend(model6);
+    test_value(model5.nodes(), 4, "Check number of nodes after extension");
+    test_value(model5.energy(0).MeV(), 10.0, "Check first energy");
+    test_value(model5.energy(1).MeV(), 15.0, "Check second energy");
+    test_value(model5.energy(2).GeV(), 10.0, "Check third energy");
+    test_value(model5.energy(3).GeV(), 20.0, "Check forth energy");
+    test_value(model5.intensity(0), 10.0, "Check first intensity");
+    test_value(model5.intensity(1), 15.0, "Check second intensity");
+    test_value(model5.intensity(2), 10.0, "Check third intensity");
+    test_value(model5.intensity(3), 20.0, "Check forth intensity");
+    model5.save("test_filefct_filled.txt", true);
+    GModelSpectralFunc model7("test_filefct_filled.txt", 1.0);
+    test_value(model7.nodes(), 4, "Check number of nodes after loading from saved");
+    test_value(model7.energy(0).MeV(), 10.0, "Check first energy after loading from saved");
+    test_value(model7.energy(1).MeV(), 15.0, "Check second energy after loading from saved");
+    test_value(model7.energy(2).GeV(), 10.0, "Check third energy after loading from saved");
+    test_value(model7.energy(3).GeV(), 20.0, "Check forth energy after loading from saved");
+    test_value(model7.intensity(0), 10.0, "Check first intensity after loading from saved");
+    test_value(model7.intensity(1), 15.0, "Check second intensity after loading from saved");
+    test_value(model7.intensity(2), 10.0, "Check third intensity after loading from saved");
+    test_value(model7.intensity(3), 20.0, "Check forth intensity after loading from saved");
+
+    // Test failure modes
+    TEST_INVALID_ARGUMENT(model5.append(GEnergy(1.0, "MeV"), 1.0),
+                          "Test appending an invalid energy",
+                          "Appending node with energy lower than that of last node is not refused")
+    TEST_INVALID_ARGUMENT(model5.append(GEnergy(0.0, "MeV"), 1.0),
+                          "Test appending non-positive energy",
+                          "Appending node with non-positive energy is not refused")
+    TEST_INVALID_ARGUMENT(model5.append(GEnergy(1.0, "MeV"), 0.0),
+                          "Test appending non-positive intensity",
+                          "Appending node with non-positive intensity is not refused")
+    TEST_INVALID_ARGUMENT(model5.insert(GEnergy(0.0, "MeV"), 1.0),
+                          "Test inserting non-positive energy",
+                          "Inserting node with non-positive energy is not refused")
+    TEST_INVALID_ARGUMENT(model5.insert(GEnergy(1.0, "MeV"), 0.0),
+                          "Test inserting non-positive intensity",
+                          "Inserting node with non-positive intensity is not refused")
+    TEST_INVALID_ARGUMENT(model5.insert(GEnergy(10.0, "MeV"), 10.0),
+                          "Test inserting existing energy",
+                          "Inserting node with existing energy is not refused")
+    TEST_OUT_OF_RANGE(model5.remove(-1),
+                      "Test removing negative index",
+                      "Remove node at index=-1 is not refused")
+    TEST_OUT_OF_RANGE(model5.remove(4),
+                      "Test removing too large index",
+                      "Remove node at index=4 is not refused")
+    TEST_OUT_OF_RANGE(model5.energy(-1),
+                      "Test accessing energy with negative index",
+                      "Accessing energy of node at index=-1 is not refused")
+    TEST_OUT_OF_RANGE(model5.energy(4),
+                      "Test accessing energy with too large index",
+                      "Accessing energy of node at index=4 is not refused")
+    TEST_OUT_OF_RANGE(model5.energy(-1, GEnergy(10.0, "MeV")),
+                      "Test setting energy with negative index",
+                      "Accessing energy of node at index=-1 is not refused")
+    TEST_OUT_OF_RANGE(model5.energy(4, GEnergy(10.0, "MeV")),
+                      "Test setting energy with too large index",
+                      "Accessing energy of node at index=4 is not refused")
+    TEST_OUT_OF_RANGE(model5.intensity(-1),
+                      "Test accessing intensity with negative index",
+                      "Accessing intensity of node at index=-1 is not refused")
+    TEST_OUT_OF_RANGE(model5.intensity(4),
+                      "Test accessing intensity with too large index",
+                      "Accessing intensity of node at index=4 is not refused")
+    TEST_OUT_OF_RANGE(model5.intensity(-1, 10.0),
+                      "Test setting intensity with negative index",
+                      "Accessing intensity of node at index=-1 is not refused")
+    TEST_OUT_OF_RANGE(model5.intensity(4, 10.0),
+                      "Test setting intensity with too large index",
+                      "Accessing intensity of node at index=4 is not refused")
+    TEST_INVALID_ARGUMENT(model5.energy(1, GEnergy(10.0, "MeV")),
+                          "Test setting existing energy 10 MeV ",
+                          "Setting node with existing energy is not refused")
+    TEST_INVALID_ARGUMENT(model5.energy(1, GEnergy(10.0, "GeV")),
+                          "Test setting existing energy 10 GeV",
+                          "Setting node with existing energy is not refused")
+    TEST_INVALID_ARGUMENT(model5.intensity(1, 0.0),
+                          "Test setting node with non-positive intensity",
+                          "Setting node with with non-positive intensity is not refused")
 
     // Test filename method
     model3.filename(m_filefct);
-    test_value(model3.filename().url(), m_filefct,
-               "Check file function data file name");
+    test_value(model3.filename().url(), m_filefct, "Check filename after calling filename");
 
     // Test norm method
     model3.norm(3.0);
-    test_value(model3.norm(), 3.0);
+    test_value(model3.norm(), 3.0, "Check normalisation after calling norm");
 
     // Test operator access
     const char* strarray[] = {"Normalization"};

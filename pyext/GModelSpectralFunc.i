@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GModelSpectralFunc.i - Spectral function model class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,8 +38,7 @@ class GModelSpectralFunc : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralFunc(void);
-    GModelSpectralFunc(const GFilename& filename,
-                       const double&    norm);
+    GModelSpectralFunc(const GFilename& filename, const double& norm);
     explicit GModelSpectralFunc(const GXmlElement& xml);
     GModelSpectralFunc(const GModelSpectralFunc& model);
     virtual ~GModelSpectralFunc(void);
@@ -64,10 +63,23 @@ public:
     virtual void                write(GXmlElement& xml) const;
 
     // Other methods
+    int              nodes(void) const;
+    bool             is_empty(void) const;
+    void             append(const GEnergy& energy, const double& intensity);
+    void             insert(const GEnergy& energy, const double& intensity);
+    void             remove(const int& index);
+    void             reserve(const int& num);
+    void             extend(const GModelSpectralFunc& filefct);
+    GEnergy          energy(const int& index) const;
+    void             energy(const int& index, const GEnergy& energy);
+    double           intensity(const int& index) const;
+    void             intensity(const int& index, const double& intensity);
     const GFilename& filename(void) const;
     void             filename(const GFilename& filename);
     double           norm(void) const;
     void             norm(const double& norm);
+    void             save(const GFilename& filename,
+                          const bool&      clobber = false) const;
 };
 
 
@@ -80,11 +92,19 @@ public:
     }
 %pythoncode {
     def __getstate__(self):
-        xml = gammalib.GXmlElement()
-        self.write(xml)
-        state = xml,
+        state       = {'nodes':       self.nodes(),
+                       'energies':    [self.energy(i)    for i in range(self.nodes())],
+                       'intensities': [self.intensity(i) for i in range(self.nodes())],
+                       'filename':    self.filename(),
+                       'norm':        self.norm()}
         return state
     def __setstate__(self, state):
-        self.__init__(state[0])
+        self.__init__()
+        if state['filename'].is_empty():
+            for i in range(state['nodes']):
+                self.append(state['energies'][i], state['intensities'][i])
+        else:
+            self.filename(state['filename'])
+        self.norm(state['norm'])
 }
 };

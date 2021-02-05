@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectralFunc.cpp - Spectral function model class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -48,6 +48,13 @@ const GModelSpectralRegistry g_spectral_func_registry(&g_spectral_func_seed);
 #define G_MC      "GModelSpectralFunc::mc(GEnergy&, GEnergy&, GTime&, GRan&)"
 #define G_READ                       "GModelSpectralFunc::read(GXmlElement&)"
 #define G_WRITE                     "GModelSpectralFunc::write(GXmlElement&)"
+#define G_APPEND              "GModelSpectralFunc::append(GEnergy&, double&)"
+#define G_INSERT              "GModelSpectralFunc::insert(GEnergy&, double&)"
+#define G_REMOVE                           "GModelSpectralFunc::remove(int&)"
+#define G_ENERGY1                          "GModelSpectralFunc::energy(int&)"
+#define G_ENERGY2                "GModelSpectralFunc::energy(int&, GEnergy&)"
+#define G_INTENSITY1                    "GModelSpectralFunc::intensity(int&)"
+#define G_INTENSITY2           "GModelSpectralFunc::intensity(int&, double&)"
 #define G_LOAD_NODES             "GModelSpectralFunc::load_nodes(GFilename&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -654,9 +661,377 @@ void GModelSpectralFunc::write(GXmlElement& xml) const
 
 
 /***********************************************************************//**
+ * @brief Append node to file function
+ *
+ * @param[in] energy Energy.
+ * @param[in] intensity Intensity.
+ *
+ * @exception GException::invalid_argument
+ *            Energy not larger than energy of last node or energy or
+ *            intensity are not positive.
+ *
+ * Appends one node to the file function.
+ ***************************************************************************/
+void GModelSpectralFunc::append(const GEnergy& energy, const double& intensity)
+{
+    // Check that energy is larger than energy of last node
+    if (nodes() > 0) {
+        if (energy.MeV() <= m_lin_nodes[nodes()-1]) {
+            GEnergy last(m_lin_nodes[nodes()-1], "MeV");
+            std::string msg = "Specified energy "+energy.print()+" is not "
+                              "larger than the energy "+last.print()+" of the "
+                              "last node of the file function. Please append "
+                              "nodes in increasing order of energy.";
+            throw GException::invalid_argument(G_APPEND, msg);
+        }
+    }
+
+    // Check that energy is positive
+    if (energy.MeV() <= 0.0) {
+        std::string msg = "Specified energy "+energy.print()+" is  not "
+                          "positive. Please append only nodes with positive "
+                          "energies.";
+        throw GException::invalid_argument(G_APPEND, msg);
+    }
+
+    // Check that intensity is positive
+    if (intensity <= 0.0) {
+        std::string msg = "Specified intensity "+gammalib::str(intensity)+" is "
+                          "not positive. Please append only nodes with positive "
+                          "intensities.";
+        throw GException::invalid_argument(G_APPEND, msg);
+    }
+
+    // Append node
+    m_lin_nodes.append(energy.MeV());
+    m_log_nodes.append(energy.log10MeV());
+    m_lin_values.push_back(intensity);
+    m_log_values.push_back(std::log10(intensity));
+
+    // Set pre-computation cache
+    set_cache();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Insert node into file function
+ *
+ * @param[in] energy Energy.
+ * @param[in] intensity Intensity.
+ *
+ * @exception GException::invalid_argument
+ *            Energy or intensity are not positive, or energy does already
+ *            exist in file function.
+ *
+ * Inserts one node at the appropriate location into the file function.
+ ***************************************************************************/
+void GModelSpectralFunc::insert(const GEnergy& energy, const double& intensity)
+{
+    // Get energy in MeV
+    double energy_MeV = energy.MeV();
+
+    // Check that energy is positive
+    if (energy_MeV <= 0.0) {
+        std::string msg = "Specified energy "+energy.print()+" is  not "
+                          "positive. Please append only nodes with positive "
+                          "energies.";
+        throw GException::invalid_argument(G_INSERT, msg);
+    }
+
+    // Check that intensity is positive
+    if (intensity <= 0.0) {
+        std::string msg = "Specified intensity "+gammalib::str(intensity)+" is "
+                          "not positive. Please append only nodes with positive "
+                          "intensities.";
+        throw GException::invalid_argument(G_INSERT, msg);
+    }
+
+    // Find index before which the node should be inserted
+    int index = 0;
+    for (int i = 0; i < nodes(); ++i) {
+        if (m_lin_nodes[i] == energy_MeV) {
+            std::string msg = "A node with the specified energy "+
+                              energy.print()+" exists already in the file "
+                              "function. Please insert only nodes with "
+                              "energies that do not yet exist.";
+            throw GException::invalid_argument(G_INSERT, msg);
+        }
+        else if (m_lin_nodes[i] > energy_MeV) {
+            break;
+        }
+        index++;
+    }
+
+    // Insert node
+    m_lin_nodes.insert(index, energy_MeV);
+    m_log_nodes.insert(index, energy.log10MeV());
+    m_lin_values.insert(m_lin_values.begin()+index, intensity);
+    m_log_values.insert(m_log_values.begin()+index, std::log10(intensity));
+
+    // Set pre-computation cache
+    set_cache();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Remove node from file function
+ *
+ * @param[in] index Node index [0,...,nodes()-1].
+ *
+ * @exception GException::out_of_range
+ *            Node index is out of range.
+ *
+ * Removes the node of specified @p index from the file function.
+ ***************************************************************************/
+void GModelSpectralFunc::remove(const int& index)
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= nodes()) {
+        throw GException::out_of_range(G_REMOVE, "Node index", index, nodes());
+    }
+    #endif
+
+    // Delete node
+    m_lin_nodes.remove(index);
+    m_log_nodes.remove(index);
+    m_lin_values.erase(m_lin_values.begin() + index);
+    m_log_values.erase(m_log_values.begin() + index);
+
+    // Set pre-computation cache
+    set_cache();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Append file function
+ *
+ * @param[in] filefct File function.
+ *
+ * Appends file function to the existing file function.
+ ***************************************************************************/
+void GModelSpectralFunc::extend(const GModelSpectralFunc& filefct)
+{
+    // Do nothing if file function is empty
+    if (!filefct.is_empty()) {
+
+        // Get file function size
+        int num = filefct.nodes();
+
+        // Reserve enough space
+        reserve(nodes() + num);
+
+        // Append all nodes
+        for (int i = 0; i < num; ++i) {
+            append(filefct.energy(i), filefct.intensity(i));
+        }
+
+    } // endif: file function was not empty
+
+    // Set pre-computation cache
+    set_cache();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return energy of node
+ *
+ * @param[in] index Node index [0,...,nodes()-1].
+ *
+ * @exception GException::out_of_range
+ *            Node index is out of range.
+ *
+ * Returns the energy of node with specified @p index in the file function.
+ ***************************************************************************/
+GEnergy GModelSpectralFunc::energy(const int& index) const
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= nodes()) {
+        throw GException::out_of_range(G_ENERGY1, "Node index", index, nodes());
+    }
+    #endif
+
+    // Set energy
+    GEnergy energy;
+    energy.MeV(m_lin_nodes[index]);
+
+    // Return energy
+    return energy;
+}
+
+
+/***********************************************************************//**
+ * @brief Set energy of node
+ *
+ * @param[in] index Node index [0,...,nodes()-1].
+ * @param[in] energy Energy.
+ *
+ * @exception GException::out_of_range
+ *            Node index is out of range.
+ * @exception GException::invalid_argument
+ *            Specified energy is not larger than energy of preceeding node
+ *            or not smaller than energy of following node.
+ *
+ * Sets the energy of node with specified @p index in the file function.
+ ***************************************************************************/
+void GModelSpectralFunc::energy(const int& index, const GEnergy& energy)
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= nodes()) {
+        throw GException::out_of_range(G_ENERGY2, "Node index", index, nodes());
+    }
+    #endif
+
+    // Check that energy is larger than energy of precedent node
+    if (index > 0) {
+        if (energy.MeV() <= m_lin_nodes[index-1]) {
+            GEnergy precedent(m_lin_nodes[index-1], "MeV");
+            std::string msg = "Specified energy "+energy.print()+" is not "
+                              "larger than energy "+precedent.print()+" of "
+                              "precedent node. Please specify an energy that "
+                              "is larger than "+precedent.print()+".";
+            throw GException::invalid_argument(G_ENERGY2, msg);
+        }
+    }
+
+    // Check that energy is smaller than energy of following node
+    if (index < nodes()-1) {
+        if (energy.MeV() >= m_lin_nodes[index+1]) {
+            GEnergy following(m_lin_nodes[index+1], "MeV");
+            std::string msg = "Specified energy "+energy.print()+" is not "
+                              "smaller than energy "+following.print()+" of "
+                              "following node. Please specify an energy that "
+                              "is smaller than "+following.print()+".";
+            throw GException::invalid_argument(G_ENERGY2, msg);
+        }
+    }
+
+    // Set node
+    m_lin_nodes[index] = energy.MeV();
+    m_log_nodes[index] = energy.log10MeV();
+
+    // Set pre-computation cache
+    set_cache();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return intensity of node
+ *
+ * @param[in] index Node index [0,...,nodes()-1].
+ * @return Intensity (ph/cm2/s/MeV).
+ *
+ * @exception GException::out_of_range
+ *            Node index is out of range.
+ *
+ * Returns the intensity of node with specified @p index in the file function.
+ ***************************************************************************/
+double GModelSpectralFunc::intensity(const int& index) const
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= nodes()) {
+        throw GException::out_of_range(G_INTENSITY1, "Node index", index, nodes());
+    }
+    #endif
+
+    // Return intensity
+    return (m_lin_values[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Set intensity of node
+ *
+ * @param[in] index Node index [0,...,nodes()-1].
+ * @param[in] intensity Intensity (ph/cm2/s/MeV).
+ *
+ * @exception GException::out_of_range
+ *            Node index is out of range.
+ * @exception GException::invalid_argument
+ *            Intensity is not positive.
+ *
+ * Sets the intensity of node with specified @p index in the file function.
+ ***************************************************************************/
+void GModelSpectralFunc::intensity(const int& index, const double& intensity)
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= nodes()) {
+        throw GException::out_of_range(G_INTENSITY2, "Node index", index, nodes());
+    }
+    #endif
+
+    // Check that intensity is positive
+    if (intensity <= 0.0) {
+        std::string msg = "Specified intensity "+gammalib::str(intensity)+" is "
+                          "not positive. Please set only positive intensities.";
+        throw GException::invalid_argument(G_INTENSITY2, msg);
+    }
+
+    // Set intensity
+    m_lin_values[index] = intensity;
+    m_log_values[index] = std::log10(intensity);
+
+    // Set pre-computation cache
+    set_cache();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Save file function in ASCII file
+ *
+ * @param[in] filename ASCII filename.
+ * @param[in] clobber Overwrite existing file?
+ *
+ * Saves file function in ASCII file.
+ ***************************************************************************/
+void GModelSpectralFunc::save(const GFilename& filename, const bool& clobber) const
+{
+    // Allocate CSV file
+    GCsv csv(nodes(), 2);
+
+    // Fill CSV file
+    for (int i = 0; i < nodes(); ++i) {
+        csv(i,0) = gammalib::str(m_lin_nodes[i]);
+        csv(i,1) = gammalib::str(m_lin_values[i]);
+    }
+    
+    // Save CSV file
+    csv.save(filename, " ", clobber);
+
+    // Store filename
+    m_filename = filename;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Print file function information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing file function information.
  ***************************************************************************/
 std::string GModelSpectralFunc::print(const GChatter& chatter) const
@@ -674,7 +1049,7 @@ std::string GModelSpectralFunc::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Function file"));
         result.append(m_filename.url());
         result.append("\n"+gammalib::parformat("Number of nodes"));
-        result.append(gammalib::str(m_lin_nodes.size()));
+        result.append(gammalib::str(nodes()));
         result.append("\n"+gammalib::parformat("Number of parameters"));
         result.append(gammalib::str(size()));
         for (int i = 0; i < size(); ++i) {
@@ -815,6 +1190,7 @@ void GModelSpectralFunc::free_members(void)
  * ASCII file with (at least) 2 columns. The first column specifies the
  * energy in MeV while the second column specifies the intensity at this
  * energy in units of ph/cm2/s/MeV.
+ *
  * The node energies and values will be stored both linearly and as log10.
  * The log10 storing requires that node energies and node values are
  * positive. Also, at least 2 nodes and 2 columns are required in the file
@@ -911,7 +1287,7 @@ void GModelSpectralFunc::set_cache(void) const
     m_eflux.clear();
 
     // Loop over all nodes-1
-    for (int i = 0; i < m_lin_nodes.size()-1; ++i) {
+    for (int i = 0; i < nodes()-1; ++i) {
 
         // Get energies and function values
         double emin = m_lin_nodes[i];
