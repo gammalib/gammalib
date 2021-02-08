@@ -1924,15 +1924,15 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs_on,
                                          const bool&            use_model_bkg)
 {
     // Get reconstructed energy boundaries from RMF
-	const GEbounds& ereco = m_rmf.emeasured();
+    const GEbounds& ereco = m_rmf.emeasured();
     int             nreco = ereco.size();
 
     // Continue only if there are reconstructed energy bins
     if (nreco > 0) {
 
-        // Get CTA observation pointing direction, zenith, and azimuth
+        // Get pointing directions of CTA On and Off observations
         GCTAPointing obs_on_pnt  = obs_on.pointing();
-        GCTAPointing obs_off_pnt = obs_on.pointing();
+        GCTAPointing obs_off_pnt = obs_off.pointing();
 
         // If IRF background templates shall be used then compute the
         // energy dependent alpha factors
@@ -1940,9 +1940,6 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs_on,
 
             // Loop over reconstructed energies
             for (int i = 0; i < nreco; ++i) {
-
-                // Get mean log10 energy in TeV of bin
-                //double logEreco = ereco.elogmean(i).log10TeV();
 
                 // Initialise background rate totals
                 double aon  = 0.0;
@@ -2016,7 +2013,9 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs_on,
                 double alpha = (aoff > 0.0) ? aon/aoff : 1.0;
 
                 // Correct for different livetime in On and Off
-                alpha *= obs_on.livetime() / obs_off.livetime();
+                if (obs_off.livetime() > 0.0) {
+                     alpha *= obs_on.livetime() / obs_off.livetime();
+                }
 
                 // Set background scaling in On spectra
                 m_on_spec.backscal(i, alpha);
@@ -2088,7 +2087,9 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs_on,
             double alpha = (aoff > 0.0) ? aon/aoff : 1.0;
 
             // Correct for different livetime in On and Off
-            alpha *= obs_on.livetime() / obs_off.livetime();
+            if (obs_off.livetime() > 0.0) {
+                alpha *= obs_on.livetime() / obs_off.livetime();
+            }
 
             // Set background scaling in On spectra
             for (int i = 0; i < nreco; ++i) {
