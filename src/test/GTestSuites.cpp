@@ -628,7 +628,6 @@ void GTestSuites::write(GXml& xml) const
         GXmlElement* element_testsuite = testsuites->append("testsuite");
 
         // Set attributes
-        //JK element_testsuite->attribute("disabled","");  // not used
         element_testsuite->attribute("errors",gammalib::str(testsuite->errors()));
         element_testsuite->attribute("failures",gammalib::str(testsuite->failures()));
         element_testsuite->attribute("hostname","");  // not used
@@ -650,10 +649,8 @@ void GTestSuites::write(GXml& xml) const
             GXmlElement* element_testcase = element_testsuite->append("testcase");
 
             // Set attributes
-            //JK element_testcase->attribute("assertions",""); // not used
             element_testcase->attribute("classname",name());
             element_testcase->attribute("name",testcase.name());
-            //JK element_testcase->attribute("status","");  // not used
             element_testcase->attribute("time",gammalib::str(testcase.duration(), 3));
 
             // If a failure or error occured then append the message to the
