@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GTestSuites.cpp - Test suite container class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2018 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2021 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -628,7 +628,6 @@ void GTestSuites::write(GXml& xml) const
         GXmlElement* element_testsuite = testsuites->append("testsuite");
 
         // Set attributes
-        element_testsuite->attribute("disabled","");  // not used
         element_testsuite->attribute("errors",gammalib::str(testsuite->errors()));
         element_testsuite->attribute("failures",gammalib::str(testsuite->failures()));
         element_testsuite->attribute("hostname","");  // not used
@@ -637,7 +636,7 @@ void GTestSuites::write(GXml& xml) const
         element_testsuite->attribute("package","");  // not used
         element_testsuite->attribute("skipped","");  // not used
         element_testsuite->attribute("tests",gammalib::str(testsuite->size()));
-        element_testsuite->attribute("time",gammalib::str(testsuite->duration()));
+        element_testsuite->attribute("time",gammalib::str(testsuite->duration(), 3));
         element_testsuite->attribute("timestamp",gammalib::str(testsuite->timestamp()));
 
         // Loop over all test cases in the test suite
@@ -650,11 +649,9 @@ void GTestSuites::write(GXml& xml) const
             GXmlElement* element_testcase = element_testsuite->append("testcase");
 
             // Set attributes
-            element_testcase->attribute("assertions",""); // not used
             element_testcase->attribute("classname",name());
             element_testcase->attribute("name",testcase.name());
-            element_testcase->attribute("status","");  // not used
-            element_testcase->attribute("time",gammalib::str(testcase.duration()));
+            element_testcase->attribute("time",gammalib::str(testcase.duration(), 3));
 
             // If a failure or error occured then append the message to the
             // XML element.
