@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-5 February 2021
+15 February 2021
 
 
 1. Introduction
@@ -70,6 +70,10 @@ The following methods have been added:
 - GXmlElement::integer()
 - GCTAEventBin::emin()
 - GCTAEventBin::emax()
+- GCOMObservation::drename()
+- GCOMObservation::drbname()
+- GCOMObservation::drgname()
+- GCOMObservation::drxname()
 - gammalib::tmpnam()
 
 The following methods have been removed:
@@ -253,6 +257,8 @@ spatial model gradients (#3203).
 
 21. COMPTEL interface
 ---------------------
+Added methods to access DRI filenames in GCOMObservation.
+
 Implement vectorised response computation in GCOMResponse::irf_ptsrc() method (#3501).
 
 

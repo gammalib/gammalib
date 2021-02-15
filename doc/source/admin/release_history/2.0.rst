@@ -27,6 +27,7 @@ Bug fixes
 Improvements
 ------------
 
+* Add methods to ``GCOMObservation`` class to access DRI filenames
 * [`3535 <https://cta-redmine.irap.omp.eu/issues/3535>`_] -
   Add GModelSpectralFunc methods to build file function in memory
 * [`3501 <https://cta-redmine.irap.omp.eu/issues/3501>`_] -

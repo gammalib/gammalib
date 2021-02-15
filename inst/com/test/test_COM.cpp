@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       test_COM.cpp - test COM classes                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -365,47 +365,33 @@ void TestGCOM::test_response(void)
  ***************************************************************************/
 void TestGCOM::test_binned_obs(void)
 {
-    // Test constructors
-    test_try("Test constructors");
-    try {
-        // Void constructor
-        GCOMObservation obs1;
+    // Test void constructor
+    GCOMObservation obs1;
+    test_assert(!obs1.is_unbinned(), "Test if void observation is not unbinned");
+    test_assert(!obs1.is_binned(), "Test if void observation is not binned");
+    test_value(obs1.drename().url(), "", "Test DRE filename for void observation");
+    test_value(obs1.drbname().url(), "", "Test DRB filename for void observation");
+    test_value(obs1.drgname().url(), "", "Test DRG filename for void observation");
+    test_value(obs1.drxname().url(), "", "Test DRX filename for void observation");
 
-        // Copy constructor
-        GCOMObservation obs2(obs1);
-
-        // If we arrived here, signal success
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
-    // Test observation loading
-    test_try("Test observation loading");
-    try {
-        // Construct observation from datasets
-        GCOMObservation obs(com_dre, com_drb, com_drg, com_drx);
-
-        // If we arrived here, signal success
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    // Test DRI constructor
+    GCOMObservation obs2(com_dre, com_drb, com_drg, com_drx);
+    test_assert(!obs2.is_unbinned(), "Test if DRI observation is not unbinned");
+    test_assert(obs2.is_binned(), "Test if DRI observation is binned");
+    test_value(obs2.drename().url(), com_dre, "Test DRE filename for DRI observation");
+    test_value(obs2.drbname().url(), com_drb, "Test DRB filename for DRI observation");
+    test_value(obs2.drgname().url(), com_drg, "Test DRG filename for DRI observation");
+    test_value(obs2.drxname().url(), com_drx, "Test DRX filename for DRI observation");
 
     // Test XML constructor
-    test_try("Test XML constructor");
-    try {
-        // Construct observation from datasets
-        GObservations obs(com_obs);
-
-        // If we arrived here, signal success
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GObservations    obs(com_obs);
+    GCOMObservation* obs3 = static_cast<GCOMObservation*>(obs[0]);
+    test_assert(!obs3->is_unbinned(), "Test if XML observation is not unbinned");
+    test_assert(obs3->is_binned(), "Test if XML observation is binned");
+    test_value(obs3->drename().url(), com_dre, "Test DRE filename for XML observation");
+    test_value(obs3->drbname().url(), com_drb, "Test DRB filename for XML observation");
+    test_value(obs3->drgname().url(), com_drg, "Test DRG filename for XML observation");
+    test_value(obs3->drxname().url(), com_drx, "Test DRX filename for XML observation");
 
     // Exit test
     return;

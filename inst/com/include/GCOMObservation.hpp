@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCOMObservation.hpp - COMPTEL observation class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -98,30 +98,38 @@ public:
     virtual void                remove_response_cache(const std::string& name);
 
     // Other methods
-    bool            is_unbinned(void) const;
-    bool            is_binned(void) const;
-    void            load(const GFilename& drename,
-                         const GFilename& drbname,
-                         const GFilename& drgname,
-                         const GFilename& drxname);
-    void            load(const GFilename&              evpname,
-                         const GFilename&              timname,
-                         const std::vector<GFilename>& oadnames);
-    void            response(const GCaldb& caldb, const std::string& rspname);
-    void            obs_id(const double& id);
-    void            ontime(const double& ontime);
-    void            livetime(const double& livetime);
-    void            deadc(const double& deadc);
-    void            ewidth(const double& ewidth);
-    const double&   obs_id(void) const;
-    const double&   ewidth(void) const;
-    const GSkyMap&  drb(void) const;
-    const GSkyMap&  drg(void) const;
-    const GSkyMap&  drx(void) const;
-    const GCOMDri&  drm(const GModelSky& model) const;
-    GCOMDri         drm(const GModels& models) const;
-    const GCOMTim&  tim(void) const;
-    const GCOMOads& oads(void) const;
+    bool             is_unbinned(void) const;
+    bool             is_binned(void) const;
+    void             load(const GFilename& drename,
+                          const GFilename& drbname,
+                          const GFilename& drgname,
+                          const GFilename& drxname);
+    void             load(const GFilename&              evpname,
+                          const GFilename&              timname,
+                          const std::vector<GFilename>& oadnames);
+    void             response(const GCaldb& caldb, const std::string& rspname);
+    void             obs_id(const double& id);
+    void             ontime(const double& ontime);
+    void             livetime(const double& livetime);
+    void             deadc(const double& deadc);
+    void             ewidth(const double& ewidth);
+    const double&    obs_id(void) const;
+    const double&    ewidth(void) const;
+    const GSkyMap&   drb(void) const;
+    const GSkyMap&   drg(void) const;
+    const GSkyMap&   drx(void) const;
+    const GCOMDri&   drm(const GModelSky& model) const;
+    GCOMDri          drm(const GModels& models) const;
+    const GCOMTim&   tim(void) const;
+    const GCOMOads&  oads(void) const;
+    const GFilename& drename(void) const;
+    const GFilename& drbname(void) const;
+    const GFilename& drgname(void) const;
+    const GFilename& drxname(void) const;
+    void             drename(const GFilename& drename);
+    void             drbname(const GFilename& drbname);
+    void             drgname(const GFilename& drgname);
+    void             drxname(const GFilename& drxname);
 
 protected:
     // Protected methods
@@ -423,6 +431,110 @@ inline
 bool GCOMObservation::is_binned(void) const
 {
     return (dynamic_cast<const GCOMEventCube*>(m_events) != NULL);
+}
+
+
+/***********************************************************************//**
+ * @brief Return DRE filename
+ *
+ * @return DRE filename
+ ***************************************************************************/
+inline
+const GFilename& GCOMObservation::drename(void) const
+{
+    // Return DRE filename
+    return (m_drename);
+}
+
+
+/***********************************************************************//**
+ * @brief Return DRB filename
+ *
+ * @return DRB filename
+ ***************************************************************************/
+inline
+const GFilename& GCOMObservation::drbname(void) const
+{
+    // Return DRB filename
+    return (m_drbname);
+}
+
+
+/***********************************************************************//**
+ * @brief Return DRG filename
+ *
+ * @return DRG filename
+ ***************************************************************************/
+inline
+const GFilename& GCOMObservation::drgname(void) const
+{
+    // Return DRG filename
+    return (m_drgname);
+}
+
+
+/***********************************************************************//**
+ * @brief Return DRX filename
+ *
+ * @return DRX filename
+ ***************************************************************************/
+inline
+const GFilename& GCOMObservation::drxname(void) const
+{
+    // Return DRX filename
+    return (m_drxname);
+}
+
+
+/***********************************************************************//**
+ * @brief Set DRE filename
+ *
+ * @param[in] drename DRE filename
+ ***************************************************************************/
+inline
+void GCOMObservation::drename(const GFilename& drename)
+{
+    m_drename = drename;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set DRB filename
+ *
+ * @param[in] drbname DRB filename
+ ***************************************************************************/
+inline
+void GCOMObservation::drbname(const GFilename& drbname)
+{
+    m_drbname = drbname;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set DRG filename
+ *
+ * @param[in] drgname DRG filename
+ ***************************************************************************/
+inline
+void GCOMObservation::drgname(const GFilename& drgname)
+{
+    m_drgname = drgname;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set DRX filename
+ *
+ * @param[in] drxname DRX filename
+ ***************************************************************************/
+inline
+void GCOMObservation::drxname(const GFilename& drxname)
+{
+    m_drxname = drxname;
+    return;
 }
 
 #endif /* GCOMOBSERVATION_HPP */

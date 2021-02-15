@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCOMObservation.i - COMPTEL observation class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -66,30 +66,38 @@ public:
     virtual void                remove_response_cache(const std::string& name);
 
     // Other methods
-    bool            is_unbinned(void) const;
-    bool            is_binned(void) const;
-    void            load(const GFilename& drename,
-                         const GFilename& drbname,
-                         const GFilename& drgname,
-                         const GFilename& drxname);
-    void            load(const GFilename&              evpname,
-                         const GFilename&              timname,
-                         const std::vector<GFilename>& oadnames);
-    void            response(const GCaldb& caldb, const std::string& rspname);
-    void            obs_id(const double& id);
-    void            ontime(const double& ontime);
-    void            livetime(const double& livetime);
-    void            deadc(const double& deadc);
-    void            ewidth(const double& ewidth);
-    const double&   obs_id(void) const;
-    const double&   ewidth(void) const;
-    const GSkyMap&  drb(void) const;
-    const GSkyMap&  drg(void) const;
-    const GSkyMap&  drx(void) const;
-    const GCOMDri&  drm(const GModelSky& model) const;
-    GCOMDri         drm(const GModels& models) const;
-    const GCOMTim&  tim(void) const;
-    const GCOMOads& oads(void) const;
+    bool             is_unbinned(void) const;
+    bool             is_binned(void) const;
+    void             load(const GFilename& drename,
+                          const GFilename& drbname,
+                          const GFilename& drgname,
+                          const GFilename& drxname);
+    void             load(const GFilename&              evpname,
+                          const GFilename&              timname,
+                          const std::vector<GFilename>& oadnames);
+    void             response(const GCaldb& caldb, const std::string& rspname);
+    void             obs_id(const double& id);
+    void             ontime(const double& ontime);
+    void             livetime(const double& livetime);
+    void             deadc(const double& deadc);
+    void             ewidth(const double& ewidth);
+    const double&    obs_id(void) const;
+    const double&    ewidth(void) const;
+    const GSkyMap&   drb(void) const;
+    const GSkyMap&   drg(void) const;
+    const GSkyMap&   drx(void) const;
+    const GCOMDri&   drm(const GModelSky& model) const;
+    GCOMDri          drm(const GModels& models) const;
+    const GCOMTim&   tim(void) const;
+    const GCOMOads&  oads(void) const;
+    const GFilename& drename(void) const;
+    const GFilename& drbname(void) const;
+    const GFilename& drgname(void) const;
+    const GFilename& drxname(void) const;
+    void             drename(const GFilename& drename);
+    void             drbname(const GFilename& drbname);
+    void             drgname(const GFilename& drgname);
+    void             drxname(const GFilename& drxname);
 };
 
 
