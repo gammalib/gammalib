@@ -257,6 +257,8 @@ spatial model gradients (#3203).
 
 21. COMPTEL interface
 ---------------------
+Implement ToF correction when reading EVP version 2 datasets (#3549).
+
 Set the COMPTEL average deadtime to 0.965 as quoted in Rob van Dijk's thesis on page
 62 (#3547).
 

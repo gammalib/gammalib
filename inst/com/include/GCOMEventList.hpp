@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GCOMEventList.hpp - COMPTEL event list class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Juergen Knoedlseder                              *
+ *  copyright (C) 2017-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -90,6 +90,7 @@ protected:
     virtual void set_energies(void);
     virtual void set_times(void);
     void         read_events(const GFitsTable& table);
+    double       tofcor(const double& d1e, const double& d2e, double tof) const;
 
     // Protected members
     GCOMRoi                    m_roi;    //!< Region of interest

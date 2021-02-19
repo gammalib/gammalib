@@ -26,9 +26,12 @@ Bug fixes
   Correct application elapsed CPU time for OpenMP
 
 
+
 Improvements
 ------------
 
+* [`3549 <https://cta-redmine.irap.omp.eu/issues/3549>`_] -
+  Implement ToF correction for COMPTEL EVP version 2 datasets
 * Add methods to ``GCOMObservation`` class to access DRI filenames
 * [`3535 <https://cta-redmine.irap.omp.eu/issues/3535>`_] -
   Add GModelSpectralFunc methods to build file function in memory

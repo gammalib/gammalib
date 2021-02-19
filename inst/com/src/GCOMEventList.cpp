@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GCOMEventList.cpp - COMPTEL event list class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,6 +44,7 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+#define G_DEBUG_TOFCOR                            //!< Debug TOF correction
 
 
 /*==========================================================================
@@ -554,6 +555,13 @@ void GCOMEventList::read_events(const GFitsTable& table)
         GSkyDir centre;
         centre.lb_deg(table.real("GLON_SCZ"), table.real("GLAT_SCZ"));
 
+        // Get data set representation version
+        int verno = table.real("DSD_REP");
+        #if defined(G_DEBUG_TOFCOR)
+        std::cout << "GCOMEventList::read_events: DSD_REP = ";
+        std::cout << verno << std::endl;
+        #endif
+
         // Initialise boundaries
         double radius_max = 0.0;
         double phibar_min = 0.0;
@@ -589,6 +597,11 @@ void GCOMEventList::read_events(const GFitsTable& table)
         GEnergy emin;
         GEnergy emax;
 
+        // Debug TOFCOR: initialise flag for first notice
+        #if defined(G_DEBUG_TOFCOR)
+        bool noticed = false;
+        #endif
+
         // Copy data from columns into GCOMEventAtom objects
         for (int i = 0; i < num; ++i) {
 
@@ -611,6 +624,32 @@ void GCOMEventList::read_events(const GFitsTable& table)
             // Set phibar value (deg)
             double phibar = ptr_phibar->real(i) * gammalib::rad2deg;
 
+            // Set PSD and TOF values
+            double psd = double(ptr_psd->integer(i))/128.0;
+            double tof = double(ptr_tof->integer(i))/128.0;
+
+            // Correct TOF if data representation flag is less than 3 and
+            // rejection flag is >=4 (see dalaaa19.pevpsr.f)
+            if (verno < 3) {
+                if (ptr_reflag->integer(i) >= 4) {
+                    #if defined(G_DEBUG_TOFCOR)
+                    double tof_raw = tof;
+                    #endif
+                    tof = tofcor(ptr_e1->real(i), ptr_e2->real(i), tof);
+                    #if defined(G_DEBUG_TOFCOR)
+                    if (!noticed) {
+                        std::cout << "GCOMEventList::read_events: ";
+                        std::cout << "apply TOF correction (";
+                        std::cout << tof_raw;
+                        std::cout << " => ";
+                        std::cout << tof;
+                        std::cout << ")" << std::endl;
+                        noticed = true;
+                    }
+                    #endif
+                }
+            }
+
             // Set event information
             event.time(ptr_tjd->integer(i), ptr_tics->integer(i));
             event.energy(etot);
@@ -621,8 +660,8 @@ void GCOMEventList::read_events(const GFitsTable& table)
             event.eha(ptr_eha->real(i) * gammalib::rad2deg);          // rad -> deg
             event.e1(ptr_e1->real(i) * 1.0e-3);                       // keV -> MeV
             event.e2(ptr_e2->real(i) * 1.0e-3);                       // keV -> MeV
-            event.psd(ptr_psd->integer(i)/128.0);
-            event.tof(ptr_tof->integer(i)/128.0);
+            event.psd(psd);
+            event.tof(tof);
             event.modcom(ptr_modcom->integer(i));
             event.reflag(ptr_reflag->integer(i));
             event.veto(ptr_veto->integer(i));
@@ -673,4 +712,146 @@ void GCOMEventList::read_events(const GFitsTable& table)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Compute TOF correction
+ *
+ * @param[in] d1e D1 energy deposit (keV).
+ * @param[in] d2e D2 energy deposit (keV).
+ * @param[in] tof TOF value from EVP dataset (version < 3).
+ *
+ * Computes the TOF correction for EVP data sets with representation version
+ * < 3.
+ ***************************************************************************/
+double GCOMEventList::tofcor(const double& d1e, const double& d2e, double tof) const
+{
+    // Begin and end of D1E-range for which fit is valid
+    const double d1sta =    50.0;
+    const double d1end = 20000.0;
+
+    // Begin and end of D2E-range for which fit is valid
+    const double d2sta =   600.0;
+    const double d2end = 30000.0;
+
+    // Degree of polynomial fit to ToF(D1E) for which fit is valid
+    const int ndegd1 = 6;
+
+    // D1-energy 'breaking' the D1E-fit range in 2 intervals
+    const double d1ebrk = 2250.0;
+
+    // Degree of polynomial fit to ToF(D2E) for which fit is valid
+    const int ndegd2 = 4;
+
+    // D2-energy 'breaking' the D2E-fit range in 3 intervals
+    const double d2ebrk1 = 1400.0;
+    const double d2ebrk2 = 5500.0;
+
+    // Reference ToF: the ToF corrections are calculated with respect to this TOF
+    const double tofref = 118.30;
+
+    // ToF the corrected peak will be centered at
+    const double tofcen = 120.0;
+
+    // Polynomial coefficients of ToF(D1E) for interval 1: D1E < D1EBRK
+    const double d11cof[] = {111.74858,
+                              28.280247,
+                             -45.024305,
+                              35.183210,
+                             -14.639463,
+                               3.1342536,
+                              -0.2711735};
+
+    // Polynomial coefficients of ToF(D1E) for interval 2: D1E > D1EBRK
+    const double d12cof[] = {116.25374,
+                               0.500407092,
+                               0.38182720,
+                              -0.080145513,
+                               0.0065569790,
+                              -0.00024650067,
+                               3.5077240e-6};
+
+    // Polynomial coefficients of ToF(D2E) for interval 1: D2E < D2EBRK1
+    const double d21cof[] = { 181.77024,
+                             -252.41070,
+                              371.09898,
+                             -232.83985,
+                               52.918785};
+
+    // Polynomial coefficients of ToF(D2E) for interval 2: D2EBRK1 < D2E < D2EBRK2
+    const double d22cof[] = { 120.91608,
+                               -0.15048490,
+                               -0.45526025,
+                                0.11710009,
+                               -0.0082172427};
+
+    // Polynomial coefficients of ToF(D2E) for interval 3: D2EBRK2 < D2E
+    const double d23cof[] = { 119.24278,
+                               -0.43134699,
+                                0.060183080,
+                               -0.0026847790,
+                                3.7720986e-5};
+
+    // Make sure that D1 and D2 energies are within fit range
+    double d1ener = d1e;
+    double d2ener = d2e;
+    if (d1ener < d1sta) {
+        d1ener = d1sta;
+    }
+    if (d1ener > d1end) {
+        d1ener = d1end;
+    }
+    if (d2ener < d2sta) {
+        d2ener = d2sta;
+    }
+    if (d2ener > d2end) {
+        d2ener = d2end;
+    }
+
+    // Compute D1 correction
+    double d1ecor = -tofref;
+    double d1emev = d1ener * 1.0e-3;
+    double d1edum = 1.0;
+    if (d1ener <= d1ebrk) {
+        for (int i = 0; i <= ndegd1; ++i) {
+            d1ecor += d11cof[i] * d1edum;
+            d1edum *= d1emev;
+        }
+    }
+    else {
+        for (int i = 0; i <= ndegd1; ++i) {
+            d1ecor += d12cof[i] * d1edum;
+            d1edum *= d1emev;
+        }
+    }
+
+    // Compute D2 correction
+    double d2ecor = -tofref;
+    double d2emev = d2ener * 1.0e-3;
+    double d2edum = 1.0;
+    if (d2ener <= d2ebrk1) {
+        for (int i = 0; i <= ndegd2; ++i) {
+            d2ecor += d21cof[i] * d2edum;
+            d2edum *= d2emev;
+        }
+    }
+    else if (d2ener > d2ebrk2) {
+        for (int i = 0; i <= ndegd2; ++i) {
+            d2ecor += d23cof[i] * d2edum;
+            d2edum *= d2emev;
+        }
+    }
+    else {
+        for (int i = 0; i <= ndegd2; ++i) {
+            d2ecor += d22cof[i] * d2edum;
+            d2edum *= d2emev;
+        }
+    }
+
+    // Compute total correction
+    tof += tofcen - (tofref + d1ecor + d2ecor);
+
+    // Return corrected TOF
+    return tof;
 }
