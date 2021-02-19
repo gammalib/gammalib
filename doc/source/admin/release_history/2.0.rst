@@ -1,7 +1,7 @@
 .. _2.0:
 
-GammaLib 2.0 release (5 February 2021)
-======================================
+GammaLib 2.0 release (19 February 2021)
+=======================================
 
 Overview
 --------
@@ -17,6 +17,8 @@ In particular, this release provides:
 Bug fixes
 ---------
 
+* [`3547 <https://cta-redmine.irap.omp.eu/issues/3547>`_] -
+  Correct COMPTEL average deadtime to 0.965 (Rob van Dijk's thesis)
 * [`3499 <https://cta-redmine.irap.omp.eu/issues/3499>`_] -
   Fix response cache removal for vector cache
 * Fix ``GSkyMap::stack_maps()`` method for WCS maps

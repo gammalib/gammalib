@@ -584,9 +584,10 @@ void GCOMObservation::load(const GFilename&              evpname,
     // Load TIM data
     m_tim.load(timname);
 
-    // Extract ontime from TIM and compute livetime assuming 15% deadtime
+    // Extract ontime from TIM and compute livetime assuming the value of
+    // 0.965 from Rob van Dijk's thesis, page 62
     m_ontime   = m_tim.gti().ontime();
-    m_deadc    = 0.85;
+    m_deadc    = 0.965;
     m_livetime = m_deadc * m_ontime;
 
     // Initialise intermediate vector for OADs
@@ -940,8 +941,8 @@ void GCOMObservation::load_dre(const GFilename& drename)
     // Extract ontime
     m_ontime = m_events->gti().ontime();
 
-    // Set fixed deadtime fraction
-    m_deadc = 0.85;
+    // Set fixed deadtime fraction (see Rob van Dijk's thesis, page 62)
+    m_deadc = 0.965;
 
     // Compute livetime
     m_livetime = m_deadc * m_ontime;

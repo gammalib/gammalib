@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-15 February 2021
+19 February 2021
 
 
 1. Introduction
@@ -257,6 +257,9 @@ spatial model gradients (#3203).
 
 21. COMPTEL interface
 ---------------------
+Set the COMPTEL average deadtime to 0.965 as quoted in Rob van Dijk's thesis on page
+62 (#3547).
+
 Added methods to access DRI filenames in GCOMObservation.
 
 Implement vectorised response computation in GCOMResponse::irf_ptsrc() method (#3501).

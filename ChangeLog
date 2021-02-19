@@ -1,8 +1,9 @@
-2021-02-15
+2021-02-19
 
         * Version 2.0.0 released
         ========================
 
+        Correct COMPTEL average deadtime to 0.965 (#3547)
         Add methods to GCOMObservation class to access DRI filenames
         Add GModelSpectralFunc methods to build file function in memory (#3535)
         Add GCTABackground2D class (#3527)
