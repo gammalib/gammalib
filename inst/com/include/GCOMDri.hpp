@@ -114,8 +114,6 @@ public:
     void               read(const GFitsImage& image);
     void               write(GFits&             fits,
                              const std::string& extname = "") const;
-    void               read_attributes(const GFitsHDU& hdu);
-    void               write_attributes(GFitsHDU& hdu) const;
 
 protected:
     // Protected methods
