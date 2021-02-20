@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-19 February 2021
+20 February 2021
 
 
 1. Introduction
@@ -258,6 +258,9 @@ spatial model gradients (#3203).
 21. COMPTEL interface
 ---------------------
 Implement ToF correction when reading EVP version 2 datasets (#3549).
+
+Implement ToF correction in IRF computation. The ToF correction is based on table 1
+in COM-RP-ROL-DRG-057 (#3548).
 
 Set the COMPTEL average deadtime to 0.965 as quoted in Rob van Dijk's thesis on page
 62 (#3547).

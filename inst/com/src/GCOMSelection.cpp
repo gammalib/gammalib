@@ -488,10 +488,10 @@ void GCOMSelection::init_members(void)
     m_e1_max       =  20.0;  //!< Maximum D1 energy deposit (MeV)
     m_e2_min       = 0.650;  //!< Minimum D2 energy deposit (MeV)
     m_e2_max       =  30.0;  //!< Maximum D2 energy deposit (MeV)
-    m_tof_min      = 115.0;  //!< Minimum TOF window
-    m_tof_max      = 130.0;  //!< Maximum TOF window
-    m_psd_min      =   0.0;  //!< Minimum PSD window
-    m_psd_max      = 110.0;  //!< Maximum PSD window
+    m_tof_min      =   115;  //!< Minimum TOF window
+    m_tof_max      =   130;  //!< Maximum TOF window
+    m_psd_min      =     0;  //!< Minimum PSD window
+    m_psd_max      =   110;  //!< Maximum PSD window
     m_zeta_min     =   0.0;  //!< Minimum Earth horizon angle - Phibar window
     m_zeta_max     = 180.0;  //!< Maximum Earth horizon angle - Phibar window
     m_reflag_min   =     1;  //!< Minimum rejection flag

@@ -48,10 +48,38 @@ public:
     virtual std::string    classname(void) const;
 
     // Other methods
-    void init_statistics(void) const;
-    bool use_event(const GCOMEventAtom& event) const;
-    void read(const GFitsHDU& hdu);
-    void write(GFitsHDU& hdu) const;
+    void          init_statistics(void) const;
+    bool          use_event(const GCOMEventAtom& event) const;
+    const double& e1_min(void) const;
+    void          e1_min(const double& e1_min);
+    const double& e1_max(void) const;
+    void          e1_max(const double& e1_max);
+    const double& e2_min(void) const;
+    void          e2_min(const double& e2_min);
+    const double& e2_max(void) const;
+    void          e2_max(const double& e2_max);
+    const int&    tof_min(void) const;
+    void          tof_min(const int& tof_min);
+    const int&    tof_max(void) const;
+    void          tof_max(const int& tof_max);
+    const int&    psd_min(void) const;
+    void          psd_min(const int& psd_min);
+    const int&    psd_max(void) const;
+    void          psd_max(const int& psd_max);
+    const double& zeta_min(void) const;
+    void          zeta_min(const double& zeta_min);
+    const double& zeta_max(void) const;
+    void          zeta_max(const double& zeta_max);
+    const int&    reflag_min(void) const;
+    void          reflag_min(const int& reflag_min);
+    const int&    reflag_max(void) const;
+    void          reflag_max(const int& reflag_max);
+    const int&    vetoflag_min(void) const;
+    void          vetoflag_min(const int& vetoflag_min);
+    const int&    vetoflag_max(void) const;
+    void          vetoflag_max(const int& vetoflag_max);
+    void          read(const GFitsHDU& hdu);
+    void          write(GFitsHDU& hdu) const;
 };
 
 

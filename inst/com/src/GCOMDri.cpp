@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCOMDri.cpp - COMPTEL Data Space class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,6 +33,7 @@
 #include "GWcs.hpp"
 #include "GFits.hpp"
 #include "GFitsImage.hpp"
+#include "GNodeArray.hpp"
 #include "GModelSky.hpp"
 #include "GModelSpatial.hpp"
 #include "GModelSpatialPointSource.hpp"
@@ -52,6 +53,7 @@
 #define G_COMPUTE_DRM       "GCOMDri::compute_drm(GCOMObservation&, GModel&)"
 #define G_COMPUTE_DRE_PTSRC   "GCOMDri::compute_drm_ptsrc(GCOMObservation&, "\
                                                                 "GModelSky&)"
+#define G_COMPUTE_TOF_CORRECTION          "GCOMDri::compute_tof_correction()"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -297,6 +299,9 @@ void GCOMDri::compute_dre(const GCOMObservation& obs,
     // the FITS HDU) and store Earth horizon cut
     m_has_selection = true;
     m_zetamin       = zetamin;
+
+    // Compute ToF correction
+    compute_tof_correction();
 
     // Initialise statistics
     int num_used_events           = 0;
@@ -1578,6 +1583,78 @@ void GCOMDri::compute_drm_ptsrc(const GCOMObservation& obs,
         } // endif: Phigeo was inside IAQ
 
     } // endfor: looped over all scatter angle pixels
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Compute ToF correction
+ *
+ * Compute the ToF correction according to COM-RP-ROL-DRG-057.
+ ***************************************************************************/
+void GCOMDri::compute_tof_correction(void)
+{
+    // ToF correction factors according to Table 1 of COM-RP-ROL-DRG-057
+    const double  tofcoreng[] = {0.8660, 1.7321, 5.4772, 17.3205};
+    const double  tofcor110[] = {1.14,   1.07,   1.02,    1.01};
+    const double  tofcor111[] = {1.17,   1.09,   1.03,    1.01};
+    const double  tofcor112[] = {1.21,   1.11,   1.05,    1.02};
+    const double  tofcor113[] = {1.26,   1.15,   1.07,    1.04};
+    const double  tofcor114[] = {1.32,   1.20,   1.11,    1.06};
+    const double  tofcor115[] = {1.40,   1.27,   1.17,    1.11};
+    const double  tofcor116[] = {1.50,   1.36,   1.24,    1.17};
+    const double  tofcor117[] = {1.63,   1.47,   1.35,    1.28};
+    const double  tofcor118[] = {1.79,   1.63,   1.51,    1.43};
+    const double  tofcor119[] = {2.01,   1.85,   1.73,    1.67};
+    const double* tofcor[]    = {tofcor110, tofcor111, tofcor112,
+                                 tofcor113, tofcor114, tofcor115,
+                                 tofcor116, tofcor117, tofcor118,
+                                 tofcor119};
+
+    // Determine ToF correction
+    if (m_selection.tof_min() < 110) {
+        std::string msg = "Minimum of ToF selection window "+
+                          gammalib::str(m_selection.tof_min())+
+                          " is smaller than 110. No ToF correction is "
+                          "available for this value.";
+        gammalib::warning(G_COMPUTE_TOF_CORRECTION, msg);
+    }
+    else if (m_selection.tof_min() > 119) {
+        std::string msg = "Minimum of ToF selection window "+
+                          gammalib::str(m_selection.tof_min())+
+                          " is larger than 119. No ToF correction is "
+                          "available for this value.";
+        gammalib::warning(G_COMPUTE_TOF_CORRECTION, msg);
+    }
+    else if (m_selection.tof_max() != 130) {
+        std::string msg = "Maximum of ToF selection window "+
+                          gammalib::str(m_selection.tof_max())+
+                          " is not 130. No ToF correction is available for "
+                          "this value.";
+        gammalib::warning(G_COMPUTE_TOF_CORRECTION, msg);
+    }
+    else {
+
+        // Compute mean energy of DRE
+        double energy = std::sqrt(m_ebounds.emin().MeV() *
+                                  m_ebounds.emax().MeV());
+
+        // Set node array
+        GNodeArray nodes(4, tofcoreng);
+
+        // Set interpolation value
+        nodes.set_value(energy);
+
+        // Get ToF correction index
+        int i = m_selection.tof_min() - 110;
+
+        // Interpolate
+        m_tofcor = tofcor[i][nodes.inx_left()]  * nodes.wgt_left() +
+                   tofcor[i][nodes.inx_right()] * nodes.wgt_right();
+
+    }
 
     // Return
     return;

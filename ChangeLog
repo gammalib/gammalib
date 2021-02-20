@@ -1,9 +1,10 @@
-2021-02-19
+2021-02-20
 
         * Version 2.0.0 released
         ========================
 
         Implement ToF correction for COMPTEL EVP version 2 datasets (#3549)
+        Implement ToF correction in IRF computation (#3548)
         Correct COMPTEL average deadtime to 0.965 (#3547)
         Add methods to GCOMObservation class to access DRI filenames
         Add GModelSpectralFunc methods to build file function in memory (#3535)

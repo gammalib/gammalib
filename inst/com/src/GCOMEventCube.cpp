@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCOMEventCube.cpp - COMPTEL event bin container class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -478,6 +478,11 @@ std::string GCOMEventCube::print(const GChatter& chatter) const
         result.append(m_time.print(chatter));
         result.append("\n"+gammalib::parformat("Ontime"));
         result.append(gammalib::str(m_ontime)+" s");
+
+        // Append ToF correction
+        double tofcor = m_dri.tof_correction();
+        result.append("\n"+gammalib::parformat("ToF correction"));
+        result.append(gammalib::str(tofcor));
 
         // EXPLICIT: Append DRI
         if (chatter >= EXPLICIT) {

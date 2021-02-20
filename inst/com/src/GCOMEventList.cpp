@@ -44,7 +44,7 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-#define G_DEBUG_TOFCOR                            //!< Debug TOF correction
+//#define G_DEBUG_TOFCOR                            //!< Debug TOF correction
 
 
 /*==========================================================================

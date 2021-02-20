@@ -132,6 +132,7 @@ protected:
                                             const GCOMStatus& status) const;
     void   compute_drm_ptsrc(const GCOMObservation& obs,
                              const GModelSky&       model);
+    void   compute_tof_correction(void);
 
     // Protected members
     std::string m_name;     //!< Data cube name

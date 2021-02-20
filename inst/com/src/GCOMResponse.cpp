@@ -278,6 +278,16 @@ double GCOMResponse::irf(const GEvent&       event,
         throw GException::invalid_argument(G_IRF, msg);
     }
 
+    // Extract COMPTEL event cube
+    const GCOMEventCube* cube = dynamic_cast<const GCOMEventCube*>(observation->events());
+    if (cube == NULL) {
+        std::string cls = std::string(typeid(&cube).name());
+        std::string msg = "Event cube of type \""+cls+"\" is  not a COMPTEL "
+                          "event cube. Please specify a COMPTEL event cube "
+                          "as argument.";
+        throw GException::invalid_argument(G_IRF, msg);
+    }
+
     // Extract COMPTEL event bin
     const GCOMEventBin* bin = dynamic_cast<const GCOMEventBin*>(&event);
     if (bin == NULL) {
@@ -343,8 +353,11 @@ double GCOMResponse::irf(const GEvent&       event,
         // Get ontime
         double ontime = observation->ontime(); // sec
 
+        // Get ToF correction
+        double tofcor = cube->dre().tof_correction();
+
         // Compute IRF value
-        irf = iaq * drg * drx / ontime;
+        irf = iaq * drg * drx / (ontime * tofcor);
 
         // Apply deadtime correction
         irf *= obs.deadc(srcTime);
@@ -897,7 +910,7 @@ GVector GCOMResponse::irf_ptsrc(const GModelSky&    model,
 
     // Get IAQ normalisation (cm2): DRX (cm2 s) * DEADC / ONTIME (s)
     double iaq_norm = obs_ptr->drx()(srcDir) * obs_ptr->deadc() /
-                      obs_ptr->ontime();
+                      (obs_ptr->ontime() * cube->dre().tof_correction());
 
     // Get pointer to DRG pixels
     const double* drg = obs_ptr->drg().pixels();

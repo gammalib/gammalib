@@ -1,6 +1,6 @@
 .. _2.0:
 
-GammaLib 2.0 release (19 February 2021)
+GammaLib 2.0 release (20 February 2021)
 =======================================
 
 Overview
@@ -32,6 +32,8 @@ Improvements
 
 * [`3549 <https://cta-redmine.irap.omp.eu/issues/3549>`_] -
   Implement ToF correction for COMPTEL EVP version 2 datasets
+* [`3548 <https://cta-redmine.irap.omp.eu/issues/3548>`_] -
+  Implement ToF correction in IRF computation
 * Add methods to ``GCOMObservation`` class to access DRI filenames
 * [`3535 <https://cta-redmine.irap.omp.eu/issues/3535>`_] -
   Add GModelSpectralFunc methods to build file function in memory
