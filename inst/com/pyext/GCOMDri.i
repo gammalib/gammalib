@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GCOMDri.i - COMPTEL Data Space class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -65,6 +65,7 @@ public:
     void               gti(const GGti& gti);
     const double&      phimin(void) const;
     const double&      phibin(void) const;
+    const double&      tof_correction(void) const;
     void               compute_dre(const GCOMObservation& obs,
                                    const GCOMSelection&   select = GCOMSelection(),
                                    const double&          zetamin = 5.0);
@@ -83,6 +84,8 @@ public:
     void               read(const GFitsImage& image);
     void               write(GFits&             fits,
                              const std::string& extname = "") const;
+    void               read_attributes(const GFitsHDU& hdu);
+    void               write_attributes(GFitsHDU& hdu) const;
 };
 
 

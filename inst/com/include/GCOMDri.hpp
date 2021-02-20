@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCOMDri.hpp - COMPTEL Data Space class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,6 +38,7 @@
 /* __ Forward declarations _______________________________________________ */
 class GFilename;
 class GFits;
+class GFitsHDU;
 class GFitsImage;
 class GModel;
 class GModelSky;
@@ -94,6 +95,7 @@ public:
     void               gti(const GGti& gti);
     const double&      phimin(void) const;
     const double&      phibin(void) const;
+    const double&      tof_correction(void) const;
     void               compute_dre(const GCOMObservation& obs,
                                    const GCOMSelection&   select = GCOMSelection(),
                                    const double&          zetamin = 5.0);
@@ -112,6 +114,8 @@ public:
     void               read(const GFitsImage& image);
     void               write(GFits&             fits,
                              const std::string& extname = "") const;
+    void               read_attributes(const GFitsHDU& hdu);
+    void               write_attributes(GFitsHDU& hdu) const;
 
 protected:
     // Protected methods
@@ -136,6 +140,7 @@ protected:
     GGti        m_gti;      //!< Good Time Intervals of data cube
     double      m_phimin;   //!< Phibar minimum (deg)
     double      m_phibin;   //!< Phibar binsize (deg)
+    double      m_tofcor;   //!< ToF correction
 
     // Computation statistics
     GTime m_tstart;                   //!< Selection start time
@@ -145,6 +150,7 @@ protected:
     int   m_num_skipped_superpackets; //!< Number of skipped superpackets
 
     // Selection parameters
+    bool          m_has_selection;    //!< Signal that selection was applied
     GCOMSelection m_selection;        //!< Selection parameters
     double        m_zetamin;          //!< Minimum zeta angle
 };
@@ -350,6 +356,21 @@ inline
 const double& GCOMDri::phibin(void) const
 {
     return (m_phibin);
+}
+
+
+/***********************************************************************//**
+ * @brief Return ToF correction factor
+ *
+ * @return ToF correction factor.
+ *
+ * Returns the ToF correction factor that corrects for the event selection
+ * in a ToF window.
+ ***************************************************************************/
+inline
+const double& GCOMDri::tof_correction(void) const
+{
+    return (m_tofcor);
 }
 
 #endif /* GCOMDRI_HPP */

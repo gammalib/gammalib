@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCOMSelection.hpp - COMPTEL selection set class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Juergen Knoedlseder                              *
+ *  copyright (C) 2017-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,6 +32,7 @@
 #include "GBase.hpp"
 
 /* __ Forward declarations _______________________________________________ */
+class GFitsHDU;
 class GCOMEventAtom;
 
 /* __ Constants __________________________________________________________ */
@@ -64,13 +65,15 @@ public:
     // Other methods
     void init_statistics(void) const;
     bool use_event(const GCOMEventAtom& event) const;
+    void read(const GFitsHDU& hdu);
+    void write(GFitsHDU& hdu) const;
 
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GCOMSelection& select);
     void free_members(void);
-    
+
     // Protected members
     double m_e1_min;       //!< Minimum D1 energy deposit (MeV)
     double m_e1_max;       //!< Maximum D1 energy deposit (MeV)
@@ -103,8 +106,8 @@ protected:
     mutable int m_num_zeta_max;        //!< Number of events above Zeta threshold
     mutable int m_num_reflag_min;      //!< Number of events below rejection flag threshold
     mutable int m_num_reflag_max;      //!< Number of events above rejection flag threshold
-    mutable int m_num_vetoflag_min;    //!< Number of events below rejection flag threshold
-    mutable int m_num_vetoflag_max;    //!< Number of events above rejection flag threshold
+    mutable int m_num_vetoflag_min;    //!< Number of events below veto flag threshold
+    mutable int m_num_vetoflag_max;    //!< Number of events above veto flag threshold
     mutable int m_num_no_scatter;      //!< Number of events without scatter angle
     mutable int m_num_invalid_modcom;  //!< Number of events with invalid minitelescopes
 };

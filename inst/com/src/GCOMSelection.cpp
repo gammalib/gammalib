@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCOMSelection.cpp - COMPTEL selection set class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,6 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GFitsHDU.hpp"
 #include "GCOMSelection.hpp"
 #include "GCOMEventAtom.hpp"
 
@@ -290,6 +291,101 @@ bool GCOMSelection::use_event(const GCOMEventAtom& event) const
 
 
 /***********************************************************************//**
+ * @brief Read selection set from FITS HDU keywords
+ *
+ * @param[in] hdu FITS HDU.
+ ***************************************************************************/
+void GCOMSelection::read(const GFitsHDU& hdu)
+{
+    // Read D1 energy selection
+    if (hdu.has_card("D1EMIN") && hdu.has_card("D1EMAX")) {
+        m_e1_min = hdu.real("D1EMIN");
+        m_e1_max = hdu.real("D1EMAX");
+    }
+
+    // Read D2 energy selection
+    if (hdu.has_card("D2EMIN") && hdu.has_card("D2EMAX")) {
+        m_e2_min = hdu.real("D2EMIN");
+        m_e2_max = hdu.real("D2EMAX");
+    }
+
+    // Read ToF selection
+    if (hdu.has_card("TOFMIN") && hdu.has_card("TOFMAX")) {
+        m_tof_min = hdu.real("TOFMIN");
+        m_tof_max = hdu.real("TOFMAX");
+    }
+
+    // Read PSD selection
+    if (hdu.has_card("PSDMIN") && hdu.has_card("PSDMAX")) {
+        m_psd_min = hdu.real("PSDMIN");
+        m_psd_max = hdu.real("PSDMAX");
+    }
+
+
+    // Read Earth horizon angle - Phibar selection
+    if (hdu.has_card("ZETMIN") && hdu.has_card("ZETMAX")) {
+        m_zeta_min = hdu.real("ZETMIN");
+        m_zeta_max = hdu.real("ZETMAX");
+    }
+
+    // Read rejection flag selection
+    if (hdu.has_card("RFLMIN") && hdu.has_card("RFLMAX")) {
+        m_reflag_min = hdu.integer("RFLMIN");
+        m_reflag_max = hdu.integer("RFLMAX");
+    }
+
+    // Read veto flag selection
+    if (hdu.has_card("VFLMIN") && hdu.has_card("VFLMAX")) {
+        m_vetoflag_min = hdu.integer("VFLMIN");
+        m_vetoflag_max = hdu.integer("VFLMAX");
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write selection set keywords into FITS HDU
+ *
+ * @param[in] hdu FITS HDU.
+ ***************************************************************************/
+void GCOMSelection::write(GFitsHDU& hdu) const
+{
+    // Write D1 energy selection
+    hdu.card("D1EMIN",  m_e1_min, "[MeV] Minimum D1 energy deposit");
+    hdu.card("D1EMAX",  m_e1_max, "[MeV] Maximum D1 energy deposit");
+
+    // Write D2 energy selection
+    hdu.card("D2EMIN",  m_e2_min, "[MeV] Minimum D2 energy deposit");
+    hdu.card("D2EMAX",  m_e2_max, "[MeV] Maximum D2 energy deposit");
+
+    // Write ToF selection
+    hdu.card("TOFMIN",  m_tof_min, "ToF selection minimum");
+    hdu.card("TOFMAX",  m_tof_max, "ToF selection maximum");
+
+    // Write PSD selection
+    hdu.card("PSDMIN",  m_psd_min, "PSD selection minimum");
+    hdu.card("PSDMAX",  m_psd_max, "PSD selection maximum");
+
+    // Write Earth horizon angle - Phibar selection
+    hdu.card("ZETMIN",  m_zeta_min, "[deg] Earth horizon angle - Phibar minimum");
+    hdu.card("ZETMAX",  m_zeta_max, "[deg] Earth horizon angle - Phibar maximum");
+
+    // Write rejection flag selection
+    hdu.card("RFLMIN",  m_reflag_min, "Rejection flag minimum");
+    hdu.card("RFLMAX",  m_reflag_max, "Rejection flag maximum");
+
+    // Write veto flag selection
+    hdu.card("VFLMIN",  m_vetoflag_min, "Veto flag minimum");
+    hdu.card("VFLMAX",  m_vetoflag_max, "Veto flag maximum");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Print COMPTEL selection set
  *
  * @param[in] chatter Chattiness.
@@ -402,10 +498,10 @@ void GCOMSelection::init_members(void)
     m_reflag_max   =  1000;  //!< Maximum rejection flag
     m_vetoflag_min =     0;  //!< Minimum veto flag
     m_vetoflag_max =     0;  //!< Maximum veto flag
-   
+
     // Initialise statistics
     init_statistics();
-    
+
     // Return
     return;
 }

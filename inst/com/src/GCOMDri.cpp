@@ -293,6 +293,11 @@ void GCOMDri::compute_dre(const GCOMObservation& obs,
     // Initialise selection statistics
     select.init_statistics();
 
+    // Signal that event selection was used (this will enable writing into
+    // the FITS HDU) and store Earth horizon cut
+    m_has_selection = true;
+    m_zetamin       = zetamin;
+
     // Initialise statistics
     int num_used_events           = 0;
     int num_event_outside_sp      = 0;
@@ -379,7 +384,7 @@ void GCOMDri::compute_dre(const GCOMObservation& obs,
                 continue;
             }
 
-            // Apply event selectio
+            // Apply event selection
             if (!select.use_event(*event)) {
                 continue;
             }
@@ -978,6 +983,10 @@ std::string GCOMDri::print(const GChatter& chatter) const
         result.append(gammalib::str(phimax)+" deg");
         result.append("\n"+gammalib::parformat("Phibar bin size"));
         result.append(gammalib::str(m_phibin)+" deg");
+        if (m_tofcor > 1.0) {
+            result.append("\n"+gammalib::parformat("ToF correction"));
+            result.append(gammalib::str(m_tofcor));
+        }
 
         // Append energy boundaries
         result.append("\n"+m_ebounds.print(gammalib::reduce(chatter)));
@@ -997,6 +1006,11 @@ std::string GCOMDri::print(const GChatter& chatter) const
         result.append(gammalib::str(m_num_used_superpackets));
         result.append("\n"+gammalib::parformat("Skipped superpackets"));
         result.append(gammalib::str(m_num_skipped_superpackets));
+
+        // Append selection
+        if (m_has_selection) {
+            result.append("\n"+m_selection.print(gammalib::reduce(chatter)));
+        }
 
     } // endif: chatter was not silent
 
@@ -1023,11 +1037,13 @@ void GCOMDri::init_members(void)
     m_gti.clear();
     m_phimin = 0.0;
     m_phibin = 0.0;
+    m_tofcor = 1.0;
 
     // Initialise statistics
     init_statistics();
 
     // Initialise selection parameters
+    m_has_selection = false;
     m_selection.clear();
     m_zetamin = -90.0;   // Signals no selection
 
@@ -1050,6 +1066,7 @@ void GCOMDri::copy_members(const GCOMDri& dri)
     m_gti     = dri.m_gti;
     m_phimin  = dri.m_phimin;
     m_phibin  = dri.m_phibin;
+    m_tofcor  = dri.m_tofcor;
 
     // Copy statistics
     m_tstart                   = dri.m_tstart;
@@ -1059,8 +1076,9 @@ void GCOMDri::copy_members(const GCOMDri& dri)
     m_num_skipped_superpackets = dri.m_num_skipped_superpackets;
 
     // Copy selection parameters
-    m_selection = dri.m_selection;
-    m_zetamin   = dri.m_zetamin;
+    m_has_selection = dri.m_has_selection;
+    m_selection     = dri.m_selection;
+    m_zetamin       = dri.m_zetamin;
 
     // Return
     return;
@@ -1219,6 +1237,19 @@ void GCOMDri::read_attributes(const GFitsHDU* hdu)
         m_ebounds.clear();
     }
 
+    // Read selection set
+    m_selection.read(*hdu);
+
+    // Optionally read Earth horizon cut
+    if (hdu->has_card("EHAMIN")) {
+        m_zetamin = hdu->real("EHAMIN");
+    }
+
+    // Optionally read ToF correction
+    if (hdu->has_card("TOFCOR")) {
+        m_tofcor = hdu->real("TOFCOR");
+    }
+
     // Optionally read superpacket statistics
     if (hdu->has_card("NSPINP")) {
         m_num_superpackets = hdu->integer("NSPINP");
@@ -1280,6 +1311,21 @@ void GCOMDri::write_attributes(GFitsHDU* hdu) const
     if (m_ebounds.size() > 0) {
         hdu->card("E_MIN", m_ebounds.emin().MeV(), "[MeV] Lower bound of energy range");
         hdu->card("E_MAX", m_ebounds.emax().MeV(), "[MeV] Upper bound of energy range");
+    }
+
+    // If there was an event seletion then write selection set
+    if (m_has_selection) {
+        m_selection.write(*hdu);
+    }
+
+    // If there was a valid Earth horizon cut then write it
+    if (m_zetamin != -90.0) {
+        hdu->card("EHAMIN", m_zetamin, "[deg] Minimum Earth horizon - Phibar cut");
+    }
+
+    // If there is a ToF correction then write it
+    if (m_tofcor > 1.0) {
+        hdu->card("TOFCOR", m_tofcor, "ToF correction");
     }
 
     // Write superpacket statistics

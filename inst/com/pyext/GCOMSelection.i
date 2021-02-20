@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCOMSelection.i - COMPTEL selection set class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Juergen Knoedlseder                              *
+ *  copyright (C) 2017-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -50,6 +50,8 @@ public:
     // Other methods
     void init_statistics(void) const;
     bool use_event(const GCOMEventAtom& event) const;
+    void read(const GFitsHDU& hdu);
+    void write(GFitsHDU& hdu) const;
 };
 
 
