@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GNodeArray.cpp - Array of nodes class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -326,10 +326,10 @@ void GNodeArray::nodes(const int& num, const double* array)
 {
     // Free any existing memory
     free_members();
-    
+
     // Initialise members
     init_members();
-    
+
     // Set node values
     for (int i = 0; i < num; ++i) {
         m_node.push_back(array[i]);
@@ -352,7 +352,7 @@ void GNodeArray::append(const double& node)
 {
     // Add node
     m_node.push_back(node);
-    
+
     // Setup node distances and linear array handling
     setup();
 
@@ -391,7 +391,7 @@ void GNodeArray::insert(const int& index, const double& node)
 
     // Inserts node
     m_node.insert(m_node.begin()+index, node);
-    
+
     // Setup node distances and linear array handling
     setup();
 
@@ -421,7 +421,7 @@ void GNodeArray::remove(const int& index)
 
     // Remove node
     m_node.erase(m_node.begin() + index);
-    
+
     // Setup node distances and linear array handling
     setup();
 
@@ -476,10 +476,10 @@ void GNodeArray::nodes(const GVector& vector)
 {
     // Free any existing memory
     free_members();
-    
+
     // Initialise members
     init_members();
-    
+
     // Set node values
     for (int i = 0; i < vector.size(); ++i) {
         m_node.push_back(vector[i]);
@@ -504,10 +504,10 @@ void GNodeArray::nodes(const std::vector<double>& vector)
 {
     // Free any existing memory
     free_members();
-    
+
     // Initialise members
     init_members();
-    
+
     // Set node values
     m_node = vector;
 
@@ -546,8 +546,8 @@ double GNodeArray::interpolate(const double& value,
         throw GException::vector_mismatch(G_INTERPOLATE, m_node.size(),
                                           vector.size());
     }
-    
-    // Set interpolation value (circumvent const correctness)
+
+    // Set interpolation value
     set_value(value);
 
     // Interpolate
@@ -626,7 +626,7 @@ void GNodeArray::set_value(const double& value) const
 
                 // Set left index
                 m_inx_left = int(m_linear_slope * value + m_linear_offset);
-        
+
                 // Keep index in valid range
                 if (m_inx_left < 0) {
                     m_inx_left = 0;
@@ -639,7 +639,7 @@ void GNodeArray::set_value(const double& value) const
 
             // ... otherwise search the relevant indices by bisection
             else {
-    
+
                 // Set left index if value is before first node
                 if (value < m_node[0]) {
                     m_inx_left = 0;
@@ -977,7 +977,7 @@ void GNodeArray::setup(void) const
 {
     // Reset distance vector
     m_step.clear();
-    
+
     // Get number of nodes
     int nodes = m_node.size();
 
@@ -992,7 +992,7 @@ void GNodeArray::setup(void) const
         // Evaluate linear slope and offset
         m_linear_slope  = double(nodes-1) / (m_node[nodes-1] - m_node[0]);
         m_linear_offset = -m_linear_slope * m_node[0];
-    
+
         // Check if nodes form a linear array
         m_is_linear = true;
         for (int i = 0; i < nodes-1; ++i) {
