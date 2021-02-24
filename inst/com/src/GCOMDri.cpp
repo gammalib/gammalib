@@ -292,8 +292,11 @@ void GCOMDri::compute_dre(const GCOMObservation& obs,
     // Initialise superpacket statistics
     init_statistics();
 
+    // Store selection set
+    m_selection = select;
+
     // Initialise selection statistics
-    select.init_statistics();
+    m_selection.init_statistics();
 
     // Signal that event selection was used (this will enable writing into
     // the FITS HDU) and store Earth horizon cut
@@ -390,7 +393,7 @@ void GCOMDri::compute_dre(const GCOMObservation& obs,
             }
 
             // Apply event selection
-            if (!select.use_event(*event)) {
+            if (!m_selection.use_event(*event)) {
                 continue;
             }
 
@@ -496,7 +499,7 @@ void GCOMDri::compute_dre(const GCOMObservation& obs,
     std::cout << "Phibar too high ..............: " << num_phibar_too_high << std::endl;
     std::cout << "Outside DRE cube .............: " << num_outside_dre << std::endl;
     std::cout << "Earth horizon angle too small : " << num_eha_too_small << std::endl;
-    std::cout << select << std::endl;
+    std::cout << m_selection << std::endl;
     #endif
 
     // Return
@@ -528,9 +531,6 @@ void GCOMDri::compute_drg(const GCOMObservation& obs,
 
     // Initialise superpacket statistics
     init_statistics();
-
-    // Initialise selection statistics
-    select.init_statistics();
 
     // Set all DRG bins to zero
     init_cube();
@@ -1244,6 +1244,12 @@ void GCOMDri::read_attributes(const GFitsHDU* hdu)
 
     // Read selection set
     m_selection.read(*hdu);
+
+    // Signal if selected set keywords were present. For simplicity we just
+    // search for the first keyword
+    if (hdu->has_card("D1EMIN")) {
+        m_has_selection = true;
+    }
 
     // Optionally read Earth horizon cut
     if (hdu->has_card("EHAMIN")) {

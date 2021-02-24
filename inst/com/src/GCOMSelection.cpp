@@ -340,6 +340,51 @@ void GCOMSelection::read(const GFitsHDU& hdu)
         m_vetoflag_max = hdu.integer("VFLMAX");
     }
 
+    // Read selection statistics
+    if (hdu.has_card("NEVCHK")) {
+        m_num_events_checked = hdu.integer("NEVCHK");
+    }
+    if (hdu.has_card("NEVUSE")) {
+        m_num_events_used = hdu.integer("NEVUSE");
+    }
+    if (hdu.has_card("NEVREJ")) {
+        m_num_events_rejected = hdu.integer("NEVREJ");
+    }
+    if (hdu.has_card("ND1ELO") && hdu.has_card("ND1EHI")) {
+        m_num_e1_min = hdu.integer("ND1ELO");
+        m_num_e1_max = hdu.integer("ND1EHI");
+    }
+    if (hdu.has_card("ND2ELO") && hdu.has_card("ND2EHI")) {
+        m_num_e2_min = hdu.integer("ND2ELO");
+        m_num_e2_max = hdu.integer("ND2EHI");
+    }
+    if (hdu.has_card("NTOFLO") && hdu.has_card("NTOFHI")) {
+        m_num_tof_min = hdu.integer("NTOFLO");
+        m_num_tof_max = hdu.integer("NTOFHI");
+    }
+    if (hdu.has_card("NPSDLO") && hdu.has_card("NPSDHI")) {
+        m_num_psd_min = hdu.integer("NPSDLO");
+        m_num_psd_max = hdu.integer("NPSDHI");
+    }
+    if (hdu.has_card("NZETLO") && hdu.has_card("NZETHI")) {
+        m_num_zeta_min = hdu.integer("NZETLO");
+        m_num_zeta_max = hdu.integer("NZETHI");
+    }
+    if (hdu.has_card("NRFLLO") && hdu.has_card("NRFLHI")) {
+        m_num_reflag_min = hdu.integer("NRFLLO");
+        m_num_reflag_max = hdu.integer("NRFLHI");
+    }
+    if (hdu.has_card("NVFLLO") && hdu.has_card("NVFLHI")) {
+        m_num_vetoflag_min = hdu.integer("NVFLLO");
+        m_num_vetoflag_max = hdu.integer("NVFLHI");
+    }
+    if (hdu.has_card("NNOSCT")) {
+        m_num_no_scatter = hdu.integer("NNOSCT");
+    }
+    if (hdu.has_card("NINVMT")) {
+        m_num_invalid_modcom = hdu.integer("NINVMT");
+    }
+
     // Return
     return;
 }
@@ -379,6 +424,27 @@ void GCOMSelection::write(GFitsHDU& hdu) const
     // Write veto flag selection
     hdu.card("VFLMIN",  m_vetoflag_min, "Veto flag minimum");
     hdu.card("VFLMAX",  m_vetoflag_max, "Veto flag maximum");
+
+    // Write selection statistics
+    hdu.card("NEVCHK",  m_num_events_checked,  "Number of checked events");
+    hdu.card("NEVUSE",  m_num_events_used,     "Number of used events");
+    hdu.card("NEVREJ",  m_num_events_rejected, "Number of rejected events");
+    hdu.card("ND1ELO",  m_num_e1_min,          "Number of events < D1EMIN");
+    hdu.card("ND1EHI",  m_num_e1_max,          "Number of events > D1EMAX");
+    hdu.card("ND2ELO",  m_num_e2_min,          "Number of events < D2EMIN");
+    hdu.card("ND2EHI",  m_num_e2_max,          "Number of events > D2EMAX");
+    hdu.card("NTOFLO",  m_num_tof_min,         "Number of events < TOFMIN");
+    hdu.card("NTOFHI",  m_num_tof_max,         "Number of events > TOFMIN");
+    hdu.card("NPSDLO",  m_num_psd_min,         "Number of events < PSDMIN");
+    hdu.card("NPSDHI",  m_num_psd_max,         "Number of events > PSDMAX");
+    hdu.card("NZETLO",  m_num_zeta_min,        "Number of events < ZETMIN");
+    hdu.card("NZETHI",  m_num_zeta_max,        "Number of events > ZETMAX");
+    hdu.card("NRFLLO",  m_num_reflag_min,      "Number of events < RFLMIN");
+    hdu.card("NRFLHI",  m_num_reflag_max,      "Number of events > RFLMAX");
+    hdu.card("NVFLLO",  m_num_vetoflag_min,    "Number of events < VFLMIN");
+    hdu.card("NVFLHI",  m_num_vetoflag_max,    "Number of events > VFLMAX");
+    hdu.card("NNOSCT",  m_num_no_scatter,      "Number of events w/o scatter angle");
+    hdu.card("NINVMT",  m_num_invalid_modcom,  "Number of events with invalid minitelescope");
 
     // Return
     return;
