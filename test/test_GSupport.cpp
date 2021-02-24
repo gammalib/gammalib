@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 test_GSupport.cpp - test support module                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -146,6 +146,15 @@ void TestGSupport::test_tools(void)
     test_assert(gammalib::contains(strings, "vector"), "\"vector\" in vector");
     test_assert(!gammalib::contains(strings, "b"), "\"b\" not in vector");
     test_assert(!gammalib::contains(strings, "isavector"), "\"isavector\" not in vector");
+
+    // Test compare method
+    test_assert(gammalib::compare(261.0, 260.999999, 1.0e-8),   "Compare positive floats for tol=1e-8");
+    test_assert(!gammalib::compare(261.0, 260.999999, 1.0e-9), "Compare positive floats for tol=1e-9");
+    test_assert(gammalib::compare(-261.0, -260.999999, 1.0e-8),   "Compare negative floats for tol=1e-8");
+    test_assert(!gammalib::compare(-261.0, -260.999999, 1.0e-9), "Compare negative floats for tol=1e-9");
+    test_assert(gammalib::compare(0.0, 0.0000001, 1.0),   "Compare near zero floats for tol=1.0");
+    test_assert(!gammalib::compare(0.0, 0.0000001, 0.1), "Compare near zero floats for tol=0.1");
+    test_assert(gammalib::compare(0.0, 0.0, 1.0e-10),   "Compare zero floats for tol=1e-10");
 
     // Return
     return;

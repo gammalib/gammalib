@@ -3,6 +3,7 @@
         * Version 2.0.0 released
         ========================
 
+        Add gammalib::compare() function (#3552)
         Add DRI constructor to GCOMObservation class.
         Add member access methods to GCOMDri class.
         Implement ToF correction for COMPTEL EVP version 2 datasets (#3549)

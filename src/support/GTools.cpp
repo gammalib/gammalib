@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GTools.cpp - GammaLib tools                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1978,4 +1978,50 @@ double gammalib::roi_arclength(const double& rad,     const double& dist,
 
     // Return arclength
     return arclength;
+}
+
+
+/***********************************************************************//**
+ * @brief Compare two floating point values with tolerance
+ *
+ * @param[in] a First floating point value.
+ * @param[in] b Second floating point value.
+ * @param[in] tol Relative tolerance.
+ * @return True if both floating point values are identical within
+ *         the tolerance.
+ *
+ * This method tests whether @p a is identical to @p b within a given
+ * relative tolerance @p tol. The test verifies whether
+ *
+ * \f[|a - b| \le |a \times tol|\f]
+ *
+ * for \f$a \ne 0\f$ or whether
+ *
+ * \f[|a - b| \le |b \times tol|\f]
+ *
+ * for \f$b \ne 0\f$. If both \f$a = 0\f$ and \f$b = 0\f$ the method
+ * returns true.
+ ***************************************************************************/
+bool gammalib::compare(const double& a, const double& b, const double& tol)
+{
+    // Initialise identity
+    bool identity = false;
+
+    // Case A: a is not zero
+    if (a != 0.0) {
+        identity = std::abs(a - b) <= std::abs(a * tol);
+    }
+
+    // Case B: b is not zero
+    else if (b != 0.0) {
+        identity = std::abs(a - b) <= std::abs(b * tol);
+    }
+
+    // Case C: a and b are zero
+    else {
+        identity = true;
+    }
+
+    // Return identity
+    return identity;
 }

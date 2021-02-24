@@ -80,6 +80,7 @@ The following methods have been added:
 - GCOMDri::num_used_superpackets()
 - GCOMDri::num_skipped_superpackets()
 - gammalib::tmpnam()
+- gammalib::compare()
 
 The following methods have been removed:
 - none
@@ -209,6 +210,9 @@ Added GSkyRegionRect class to implement a rectangular region on the sky (#3248).
 
 13. Support module
 ------------------
+Added gammalib::compare() function to compare two floating point numbers with a
+relative tolerance (#3552).
+
 Added gammalib::tmpnam() function to return a temporary file name, in replacement
 of the deprecated str::tmpnam() function (#3324).
 

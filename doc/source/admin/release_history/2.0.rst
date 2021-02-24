@@ -29,6 +29,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`3552 <https://cta-redmine.irap.omp.eu/issues/3552>`_] -
+  Add ``gammalib::compare()`` function
 * Add DRI constructor to ``GCOMObservation`` class
 * Add member access methods to ``GCOMDri`` class
 * [`3549 <https://cta-redmine.irap.omp.eu/issues/3549>`_] -

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GTools.hpp - GammaLib tools                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -151,6 +151,9 @@ namespace gammalib {
                                            const double& sindist,
                                            const double& roi,
                                            const double& cosroi);
+    bool                     compare(const double& a,
+                                     const double& b,
+                                     const double& tol);
 }
 
 
