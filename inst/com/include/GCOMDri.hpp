@@ -90,12 +90,19 @@ public:
     const std::string& name(void) const;
     void               name(const std::string& name);
     const GEbounds&    ebounds(void) const;
-    void               ebounds(const GEbounds&);
+    void               ebounds(const GEbounds& ebounds);
     const GGti&        gti(void) const;
     void               gti(const GGti& gti);
     const double&      phimin(void) const;
     const double&      phibin(void) const;
     const double&      tof_correction(void) const;
+    void               tof_correction(const double& tofcor);
+    const int&         num_superpackets(void) const;
+    void               num_superpackets(const int& number);
+    const int&         num_used_superpackets(void) const;
+    void               num_used_superpackets(const int& number);
+    const int&         num_skipped_superpackets(void) const;
+    void               num_skipped_superpackets(const int& number);
     void               compute_dre(const GCOMObservation& obs,
                                    const GCOMSelection&   select = GCOMSelection(),
                                    const double&          zetamin = 5.0);
@@ -370,6 +377,109 @@ inline
 const double& GCOMDri::tof_correction(void) const
 {
     return (m_tofcor);
+}
+
+
+/***********************************************************************//**
+ * @brief Set ToF correction factor
+ *
+ * @param[in] tofcor ToF correction factor.
+ *
+ * Set the ToF correction factor that corrects for the event selection
+ * in a ToF window.
+ ***************************************************************************/
+inline
+void GCOMDri::tof_correction(const double& tofcor)
+{
+    m_tofcor = tofcor;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of superpackets read for DRI
+ *
+ * @return Number of superpackets read for DRI.
+ *
+ * Returns the number of superpackets read for DRI.
+ ***************************************************************************/
+inline
+const int& GCOMDri::num_superpackets(void) const
+{
+    return (m_num_superpackets);
+}
+
+
+/***********************************************************************//**
+ * @brief Set number of superpackets read for DRI
+ *
+ * @param[in] number Number of superpackets read for DRI.
+ *
+ * Set the number of superpackets read for DRI.
+ ***************************************************************************/
+inline
+void GCOMDri::num_superpackets(const int& number)
+{
+    m_num_superpackets = number;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of superpackets used for DRI
+ *
+ * @return Number of superpackets used for DRI.
+ *
+ * Returns the number of superpackets used for DRI.
+ ***************************************************************************/
+inline
+const int& GCOMDri::num_used_superpackets(void) const
+{
+    return (m_num_used_superpackets);
+}
+
+
+/***********************************************************************//**
+ * @brief Set number of superpackets used for DRI
+ *
+ * @param[in] number Number of superpackets used for DRI.
+ *
+ * Set the number of superpackets used for DRI.
+ ***************************************************************************/
+inline
+void GCOMDri::num_used_superpackets(const int& number)
+{
+    m_num_used_superpackets = number;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of superpackets skipped for DRI
+ *
+ * @return Number of superpackets skipped for DRI.
+ *
+ * Returns the number of superpackets skipped for DRI.
+ ***************************************************************************/
+inline
+const int& GCOMDri::num_skipped_superpackets(void) const
+{
+    return (m_num_skipped_superpackets);
+}
+
+
+/***********************************************************************//**
+ * @brief Set number of superpackets skipped for DRI
+ *
+ * @param[in] number Number of superpackets skipped for DRI.
+ *
+ * Set the number of superpackets skipped for DRI.
+ ***************************************************************************/
+inline
+void GCOMDri::num_skipped_superpackets(const int& number)
+{
+    m_num_skipped_superpackets = number;
+    return;
 }
 
 #endif /* GCOMDRI_HPP */

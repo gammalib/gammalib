@@ -109,7 +109,48 @@ GCOMObservation::GCOMObservation(const GXmlElement& xml) : GObservation()
 
 
 /***********************************************************************//**
- * @brief Binned observation constructor
+ * @brief Binned observation DRI constructor
+ *
+ * @param[in] dre Event cube.
+ * @param[in] drb Background cube.
+ * @param[in] drg Geometry cube.
+ * @param[in] drx Exposure map.
+ *
+ * Creates COMPTEL observation from DRI instances.
+ ***************************************************************************/
+GCOMObservation::GCOMObservation(const GCOMDri& dre,
+                                 const GCOMDri& drb,
+                                 const GCOMDri& drg,
+                                 const GCOMDri& drx) : GObservation()
+{
+    // Initialise members
+    init_members();
+
+    // Set DRI
+    m_events = new GCOMEventCube(dre);
+    m_drb    = drb.map();
+    m_drg    = drg.map();
+    m_drx    = drx.map();
+
+    // Set attributes
+    m_obs_id   = 0;
+    m_ontime   = m_events->gti().ontime();
+    m_deadc    = 0.965;
+    m_livetime = m_deadc * m_ontime;
+    m_ewidth   = m_events->emax().MeV() - m_events->emin().MeV();
+    m_name     = "unknown";
+    m_drename  = "";
+    m_drbname  = "";
+    m_drgname  = "";
+    m_drxname  = "";
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Binned observation filename constructor
  *
  * @param[in] drename Event cube name.
  * @param[in] drbname Background cube name.

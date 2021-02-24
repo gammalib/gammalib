@@ -60,12 +60,19 @@ public:
     const std::string& name(void) const;
     void               name(const std::string& name);
     const GEbounds&    ebounds(void) const;
-    void               ebounds(const GEbounds&);
+    void               ebounds(const GEbounds& ebounds);
     const GGti&        gti(void) const;
     void               gti(const GGti& gti);
     const double&      phimin(void) const;
     const double&      phibin(void) const;
     const double&      tof_correction(void) const;
+    void               tof_correction(const double& tofcor);
+    const int&         num_superpackets(void) const;
+    void               num_superpackets(const int& number);
+    const int&         num_used_superpackets(void) const;
+    void               num_used_superpackets(const int& number);
+    const int&         num_skipped_superpackets(void) const;
+    void               num_skipped_superpackets(const int& number);
     void               compute_dre(const GCOMObservation& obs,
                                    const GCOMSelection&   select = GCOMSelection(),
                                    const double&          zetamin = 5.0);

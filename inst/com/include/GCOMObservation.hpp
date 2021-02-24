@@ -67,6 +67,10 @@ public:
     // Constructors and destructors
     GCOMObservation(void);
     explicit GCOMObservation(const GXmlElement& xml);
+    GCOMObservation(const GCOMDri& dre,
+                    const GCOMDri& drb,
+                    const GCOMDri& drg,
+                    const GCOMDri& drx);
     GCOMObservation(const GFilename& drename,
                     const GFilename& drbname,
                     const GFilename& drgname,
