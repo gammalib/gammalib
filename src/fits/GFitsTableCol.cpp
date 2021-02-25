@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GFitsTableCol.cpp - FITS table column abstract base class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -46,10 +46,10 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+//#define G_PRINT_CONTENT                           //!< Print column content
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_CALL_GRAPH                        //!< Dump call graph in console
-#define G_PRINT_CONTENT                           //!< Print column content
 
 
 /*==========================================================================
@@ -374,35 +374,6 @@ std::string GFitsTableCol::tform_binary(void) const
 
 
 /***********************************************************************//**
- * @brief Set table column scale value
- *
- * @param[in] tscale Table column scale value.
- * @param[in] tzero Table column scale value.
- *
- * Sets the table column scale values @p tscale and @p tzero. When reading
- * FITS table column values, the true value is computed using
- *
- * \f[
- *    {\rm true value} = {\rm FITS value} \times {\tm tscale} +  {\tm tzero}
- * \f]
- *
- * Setting of the @p tscale and @p tzero values will only be effective if
- * this is done before the first reading of a table column value. Also, the
- * setting will not affect the TSCALE and TZERO keywords that may exist in
- * the FITS header.
- ***************************************************************************/
-void GFitsTableCol::scale(const double& tscale, const double& tzero) const
-{
-    // Set tscale and tzero values
-    int status = 0;
-    status = __fftscl(FPTR(m_fitsfile), m_colnum, tscale, tzero, &status);
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Print column information
  *
  * @param[in] chatter Chattiness.
@@ -486,6 +457,11 @@ std::string GFitsTableCol::print(const GChatter& chatter) const
             result.append(" size="   + gammalib::str(m_size));
         }
 
+        // Append tscale information
+        if (tscale() != 1.0) {
+            result.append(" tscale=" + gammalib::str(tscale()));
+        }
+
     } // endif: chatter was not silent
 
     // Compile option: print content
@@ -546,9 +522,21 @@ void GFitsTableCol::save(void)
  * Loads table column from FITS file by calling the load_column_variable()
  * method for variable-length columns and load_column_fixed() for fixed-
  * length columns.
+ *
+ * The method also makes sure that any scaled column will be read unscaled.
  ***************************************************************************/
 void GFitsTableCol::load_column(void)
 {
+    // If the column is scaled then rest the scaling so that data are read
+    // unscaled. This is necessary to avoid that information is lost when
+    // rewriting the table. Note that a call to fftscl does not alter the
+    // keywords. Also note that this implies that scaling of integer columns
+    // has to be performed by hand.
+    if (m_tscale != 1.0) {
+        int status = 0;
+        status = __fftscl(FPTR(m_fitsfile), m_colnum, 1.0, 0.0, &status);
+    }
+
     // Load variable-length or fixed-length column from FITS file
     if (is_variable()) {
         load_column_variable();
@@ -977,6 +965,7 @@ void GFitsTableCol::init_members(void)
     m_varlen   = 0;
     m_size     = 0;
     m_anynul   = 0;
+    m_tscale   = 1.0;
 
     // Optionally print call graph
     #if defined(G_CALL_GRAPH)
@@ -1010,6 +999,7 @@ void GFitsTableCol::copy_members(const GFitsTableCol& column)
     m_rowstart = column.m_rowstart;
     m_size     = column.m_size;
     m_anynul   = column.m_anynul;
+    m_tscale   = column.m_tscale;
     FPTR_COPY(m_fitsfile, column.m_fitsfile);
 
     // Return

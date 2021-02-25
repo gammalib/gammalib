@@ -1,6 +1,6 @@
 .. _2.0:
 
-GammaLib 2.0 release (24 February 2021)
+GammaLib 2.0 release (25 February 2021)
 =======================================
 
 Overview
@@ -17,6 +17,8 @@ In particular, this release provides:
 Bug fixes
 ---------
 
+* [`3553 <https://cta-redmine.irap.omp.eu/issues/3553>`_] -
+  Fix reading of scaled FITS columns, remove ``GFitsTableCol::scale()`` method
 * [`3547 <https://cta-redmine.irap.omp.eu/issues/3547>`_] -
   Correct COMPTEL average deadtime to 0.965 (Rob van Dijk's thesis)
 * [`3499 <https://cta-redmine.irap.omp.eu/issues/3499>`_] -

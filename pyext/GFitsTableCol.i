@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GFitsTableCol.i - FITS abstract table column base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -96,7 +96,8 @@ public:
     const bool&             is_variable(void) const;
     void                    anynul(const int& anynul);
     const int&              anynul(void) const;
-    void                    scale(const double& tscale, const double& tzero) const;
+    void                    tscale(const double& tscale);
+    const double&           tscale(void) const;
     std::string             tform_binary(void) const;
 };
 

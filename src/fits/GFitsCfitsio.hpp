@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GFitsCfitsio.hpp  - CFITSIO interface header              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -73,6 +73,7 @@
 #define __ffgisz(A, B, C, D) ffgisz(A, B, C, D)
 #define __ffgky(A, B, C, D, E, F) ffgky(A, B, C, D, E, F)
 #define __ffgkey(A, B, C, D, E) ffgkey(A, B, C, D, E)
+#define __ffgkyd(A, B, C, D, E) ffgkyd(A, B, C, D, E)
 #define __ffgkyn(A, B, C, D, E, F) ffgkyn(A, B, C, D, E, F)
 #define __ffgnrw(A, B, C) ffgnrw(A, B, C)
 #define __ffgncl(A, B, C) ffgncl(A, B, C)
@@ -153,6 +154,7 @@ typedef fitsfile __fitsfile;
 #define __ffgisz(A, B, C, D) __dummy()
 #define __ffgky(A, B, C, D, E, F) __dummy()
 #define __ffgkey(A, B, C, D, E) __dummy()
+#define __ffgkyd(A, B, C, D, E) __dummy()
 #define __ffgkyn(A, B, C, D, E, F) __dummy()
 #define __ffgnrw(A, B, C) __dummy()
 #define __ffgncl(A, B, C) __dummy()

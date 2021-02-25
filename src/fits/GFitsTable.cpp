@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GFitsTable.cpp - FITS table base class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1171,6 +1171,16 @@ void GFitsTable::data_open(void* vptr)
             status = 0;
         }
 
+        // Check for scaled columns
+        double tscale = 1.0;
+        sprintf(keyname, "TSCAL%d", i+1);
+        status = __ffgky(FPTR(m_fitsfile), __TULONG, keyname, &offset, NULL, &status);
+        status = __ffgkyd(FPTR(m_fitsfile), keyname, &tscale, NULL, &status);
+        if (status != 0) {
+            tscale = 1.0;
+            status = 0;
+        }
+
         // Get column unit (optional, leave blank if not found)
         char unit[80];
         sprintf(keyname, "TUNIT%d", i+1);
@@ -1225,6 +1235,7 @@ void GFitsTable::data_open(void* vptr)
         m_columns[i]->width(width);
         m_columns[i]->nrows(m_rows);
         m_columns[i]->is_variable(typecode < 0);
+        m_columns[i]->tscale(tscale);
         m_columns[i]->connect(FPTR(m_fitsfile));
 
         // Extract column vector size

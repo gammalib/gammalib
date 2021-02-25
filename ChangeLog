@@ -1,8 +1,9 @@
-2021-02-24
+2021-02-25
 
         * Version 2.0.0 released
         ========================
 
+        Fix reading of scaled FITS columns, remove GFitsTableCol::scale() method (#3553)
         Add gammalib::compare() function (#3552)
         Add DRI constructor to GCOMObservation class.
         Add member access methods to GCOMDri class.

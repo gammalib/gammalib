@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-24 February 2021
+25 February 2021
 
 
 1. Introduction
@@ -29,6 +29,7 @@ The following classes have been renamed:
 - none
 
 The following methods have been added:
+- GFitsTableCol::tscale()
 - GResponse::convolve(GModelSky&, GObservation&, GMatrixSparse*)
 - GResponse::irf_spatial(GModelSky&, GObservation&, GMatrix*)
 - GObservation::model(GModels&, GMatrixSparse*)
@@ -83,7 +84,7 @@ The following methods have been added:
 - gammalib::compare()
 
 The following methods have been removed:
-- none
+- GFitsTableCol::scale()
 
 The following methods have been renamed:
 - none
@@ -115,13 +116,18 @@ None
 
 6. FITS I/O Interface
 ---------------------
-None
+Added GFitsTableCol::tscale() methods and a m_tscale member to the class that
+contains the optional TSCALn keyword value (m_tscale=1 in case that no scaling
+keyword is found). Upon loading of a column with m_tscale!=1 the FITS scaling
+will be set to 1 and TZERO to 0 so that the values are loaded unscaled. This
+assures that no information is lost. If needed, scaling of the FITS column
+values has to be performed manually. The GFitsTableCol::scale() method was
+removed since it won't have any effect anymore (#3553).
 
 
 7. Linear algebra module
 ------------------------
 Implemented GMatrixSparse::row() and GMatrixSparse::add_to_row() methods.
-
 
 
 8. Model module

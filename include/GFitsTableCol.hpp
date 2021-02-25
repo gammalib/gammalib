@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GFitsTableCol.hpp - FITS table column abstract base class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -95,7 +95,8 @@ public:
     const bool&             is_variable(void) const;
     void                    anynul(const int& anynul);
     const int&              anynul(void) const;
-    void                    scale(const double& tscale, const double& tzero) const;
+    void                    tscale(const double& tscale);
+    const double&           tscale(void) const;
     std::string             tform_binary(void) const;
     std::string             print(const GChatter& chatter = NORMAL) const;
 
@@ -146,6 +147,7 @@ protected:
     mutable int      m_size;      //!< Size of allocated data area (0 if not loaded)
     int              m_anynul;    //!< Number of NULLs encountered
     void*            m_fitsfile;  //!< FITS file pointer associated with column
+    double           m_tscale;    //!< Optional scaling factor (1 = no scaling)
 };
 
 
@@ -478,13 +480,44 @@ void GFitsTableCol::anynul(const int& anynul)
 
 
 /***********************************************************************//**
- * @brief Returns number of NULLs encountered
+ * @brief Return number of NULLs encountered
+ *
+ * @return Number of NULLs encountered
  ***************************************************************************/
 inline
 const int& GFitsTableCol::anynul(void) const
 {
     // Return number of NULLs encountered
     return m_anynul;
+}
+
+
+/***********************************************************************//**
+ * @brief Set TSCALE value
+ *
+ * @param[in] tscale TSCALE value
+ ***************************************************************************/
+inline
+void GFitsTableCol::tscale(const double& tscale)
+{
+    // Set number of NULLs encountered
+    m_tscale = tscale;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return TSCALE value
+ *
+ * @return TSCALE value (1 if unscaled).
+ ***************************************************************************/
+inline
+const double& GFitsTableCol::tscale(void) const
+{
+    // Return number of NULLs encountered
+    return m_tscale;
 }
 
 #endif /* GFITSTABLECOL_HPP */
