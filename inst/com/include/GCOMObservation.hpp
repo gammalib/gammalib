@@ -112,6 +112,7 @@ public:
                           const GFilename&              timname,
                           const std::vector<GFilename>& oadnames);
     void             response(const GCaldb& caldb, const std::string& rspname);
+    void             response(const GCOMResponse& response);
     void             obs_id(const double& id);
     void             ontime(const double& ontime);
     void             livetime(const double& livetime);
@@ -201,6 +202,19 @@ const GCOMResponse* GCOMObservation::response(void) const
 {
     // Return response pointer
     return &m_response;
+}
+
+
+/***********************************************************************//**
+ * @brief Set response function
+ *
+ * @param[in] response Response function.
+ ***************************************************************************/
+inline
+void GCOMObservation::response(const GCOMResponse& response)
+{
+    m_response = response;
+    return;
 }
 
 

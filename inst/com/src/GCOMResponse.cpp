@@ -247,6 +247,9 @@ GCOMResponse* GCOMResponse::clone(void) const
  * @exception GException::invalid_argument
  *            Observation is not a COMPTEL observation.
  *            Event is not a COMPTEL event bin.
+ * @exception GException::invalid_value
+ *            Response not initialised with a valid IAQ
+ *
  *
  * Returns the instrument response function for a given observed photon
  * direction as function of the assumed true photon direction. The result
@@ -295,6 +298,19 @@ double GCOMResponse::irf(const GEvent&       event,
         std::string msg = "Event of type \""+cls+"\" is  not a COMPTEL event. "
                           "Please specify a COMPTEL event as argument.";
         throw GException::invalid_argument(G_IRF, msg);
+    }
+
+    // Throw an exception if COMPTEL response is not set or if
+    if (m_iaq.empty()) {
+        std::string msg = "COMPTEL response is empty. Please initialise the "
+                          "response with an \"IAQ\".";
+        throw GException::invalid_value(G_IRF, msg);
+    }
+    else if (m_phigeo_bin_size == 0.0) {
+        std::string msg = "COMPTEL response has a zero Phigeo bin size. "
+                          "Please initialise the response with a valid "
+                          "\"IAQ\".";
+        throw GException::invalid_value(G_IRF, msg);
     }
 
     // Extract event parameters
@@ -864,6 +880,12 @@ void GCOMResponse::free_members(void)
  * @return Instrument response to point source for all events in
  *         observation.
  *
+ * @exception GException::invalid_argument
+ *            Observation is not a COMPTEL observation.
+ *            Event is not a COMPTEL event bin.
+ * @exception GException::invalid_value
+ *            Response not initialised with a valid IAQ
+ *
  * Returns the instrument response to a point source for all events in the
  * observations.
  *
@@ -894,6 +916,19 @@ GVector GCOMResponse::irf_ptsrc(const GModelSky&    model,
                           "not contain a COMPTEL event cube. Please specify "
                           "a COMPTEL observation containing and event cube.";
         throw GException::invalid_argument(G_IRF_PTSRC, msg);
+    }
+
+    // Throw an exception if COMPTEL response is not set or if
+    if (m_iaq.empty()) {
+        std::string msg = "COMPTEL response is empty. Please initialise the "
+                          "response with an \"IAQ\".";
+        throw GException::invalid_value(G_IRF_PTSRC, msg);
+    }
+    else if (m_phigeo_bin_size == 0.0) {
+        std::string msg = "COMPTEL response has a zero Phigeo bin size. "
+                          "Please initialise the response with a valid "
+                          "\"IAQ\".";
+        throw GException::invalid_value(G_IRF_PTSRC, msg);
     }
 
     // Get number of Chi/Psi pixels, Phibar layers and event bins
@@ -991,7 +1026,7 @@ GVector GCOMResponse::irf_ptsrc(const GModelSky&    model,
         } // endif: Phigeo was in valid range
 
     } // endfor: looped over Chi and Psi
- 
+
     // Return IRF vector
     return irfs;
 }

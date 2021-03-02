@@ -80,6 +80,7 @@ public:
                           const GFilename&              timname,
                           const std::vector<GFilename>& oadnames);
     void             response(const GCaldb& caldb, const std::string& rspname);
+    void             response(const GCOMResponse& response);
     void             obs_id(const double& id);
     void             ontime(const double& ontime);
     void             livetime(const double& livetime);

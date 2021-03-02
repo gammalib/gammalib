@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-25 February 2021
+2 March 2021
 
 
 1. Introduction
@@ -76,6 +76,7 @@ The following methods have been added:
 - GCOMObservation::drbname()
 - GCOMObservation::drgname()
 - GCOMObservation::drxname()
+- GCOMObservation::response(GCOMResponse&)
 - GCOMDri::tof_correction()
 - GCOMDri::num_superpackets()
 - GCOMDri::num_used_superpackets()
@@ -272,6 +273,8 @@ spatial model gradients (#3203).
 
 21. COMPTEL interface
 ---------------------
+Added method to set COMPTEL response using GCOMResponse instance.
+
 Added DRI constructor to GCOMObservation class.
 
 Added member access methods to GCOMDri class.
