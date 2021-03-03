@@ -126,11 +126,11 @@ GCOMObservation::GCOMObservation(const GCOMDri& dre,
     // Initialise members
     init_members();
 
-    // Set DRI
+    // Store DRIs
     m_events = new GCOMEventCube(dre);
-    m_drb    = drb.map();
-    m_drg    = drg.map();
-    m_drx    = drx.map();
+    m_drb    = drb;
+    m_drg    = drg;
+    m_drx    = drx;
 
     // Set attributes
     m_obs_id   = 0;
@@ -961,17 +961,17 @@ void GCOMObservation::load_drb(const GFilename& drbname)
     // Get image
     const GFitsImage& image = *fits.image("Primary");
 
-    // Load background model as sky map
+    // Read background model
     m_drb.read(image);
 
     // Correct WCS projection (HEASARC data format kluge)
-    gammalib::com_wcs_mer2car(m_drb);
+    gammalib::com_wcs_mer2car(const_cast<GSkyMap&>(m_drb.map()));
 
     // Close FITS file
     fits.close();
 
     // Check map dimensions
-    if (!check_map(m_drb)) {
+    if (!check_dri(m_drb)) {
         std::string msg = "DRB data cube \""+drbname+"\" incompatible with "
                           "DRE data cube \""+m_drename+"\".";
         throw GException::invalid_value(G_LOAD_DRB, msg);
@@ -1004,17 +1004,17 @@ void GCOMObservation::load_drg(const GFilename& drgname)
     // Get image
     const GFitsImage& image = *fits.image("Primary");
 
-    // Load geometry factors as sky map
+    // Read geometry factors
     m_drg.read(image);
 
     // Correct WCS projection (HEASARC data format kluge)
-    gammalib::com_wcs_mer2car(m_drg);
+    gammalib::com_wcs_mer2car(const_cast<GSkyMap&>(m_drg.map()));
 
     // Close FITS file
     fits.close();
 
     // Check map dimensions
-    if (!check_map(m_drg)) {
+    if (!check_dri(m_drg)) {
         std::string msg = "DRG data cube \""+drgname+"\" incompatible with "
                           "DRE data cube \""+m_drename+"\".";
         throw GException::invalid_value(G_LOAD_DRB, msg);
@@ -1043,11 +1043,11 @@ void GCOMObservation::load_drx(const GFilename& drxname)
     // Get HDU
     const GFitsImage& image = *fits.image("Primary");
 
-    // Load exposure map as sky map
+    // Read exposure map
     m_drx.read(image);
 
     // Correct WCS projection (HEASARC data format kluge)
-    gammalib::com_wcs_mer2car(m_drx);
+    gammalib::com_wcs_mer2car(const_cast<GSkyMap&>(m_drx.map()));
 
     // Close FITS file
     fits.close();
@@ -1061,18 +1061,19 @@ void GCOMObservation::load_drx(const GFilename& drxname)
 
 
 /***********************************************************************//**
- * @brief Check if sky map is compatible with event cube
+ * @brief Check if DRI is compatible with event cube
  *
- * @param[in] map Sky map.
- * @return True if map is compatible, false otherwise.
+ * @param[in] dri DRI.
+ * @return True if DRI is compatible, false otherwise.
  *
- * Compares the dimension and the WCS definition of a sky map to that of the
+ * Compares the dimension and the WCS definition of a DRI to that of the
  * event cube. If both are identical, true is returned, false otherwise.
  ***************************************************************************/
-bool GCOMObservation::check_map(const GSkyMap& map) const
+bool GCOMObservation::check_dri(const GCOMDri& dri) const
 {
-    // Get reference to event cube map
+    // Get references to event cube map and DRI map
     const GSkyMap& ref = dynamic_cast<GCOMEventCube*>(m_events)->dre().map();
+    const GSkyMap& map = dri.map();
 
     // Compare dimensions
     bool same_dimension = ((map.nx()    == ref.nx()) &&

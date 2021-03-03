@@ -92,5 +92,7 @@ New features
 Clean up
 --------
 
+* [`3560 <https://cta-redmine.irap.omp.eu/issues/3560>`_] -
+  Store DRB, DRG and DRX as instances of ``GCOMDri`` instead of ``GSkyMap`` in ``GCOMObservation``
 * [`2973 <https://cta-redmine.irap.omp.eu/issues/2973>`_] -
   Remove COMPTEL internal response caching

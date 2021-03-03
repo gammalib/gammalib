@@ -3,11 +3,12 @@
         * Version 2.0.0 released
         ========================
 
-        Implement COMPTEL response for diffuse models (#3558).
+        Store DRB, DRG and DRX as GCOMDri in GCOMObservation (#3560)
+        Implement COMPTEL response for diffuse models (#3558)
         Fix reading of scaled FITS columns, remove GFitsTableCol::scale() method (#3553)
         Add gammalib::compare() function (#3552)
-        Add DRI constructor to GCOMObservation class.
-        Add member access methods to GCOMDri class.
+        Add DRI constructor to GCOMObservation class
+        Add member access methods to GCOMDri class
         Implement ToF correction for COMPTEL EVP version 2 datasets (#3549)
         Implement ToF correction in IRF computation (#3548)
         Correct COMPTEL average deadtime to 0.965 (#3547)

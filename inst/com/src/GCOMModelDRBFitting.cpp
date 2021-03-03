@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GCOMModelDRBFitting.cpp - COMPTEL DRB model fitting class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -282,7 +282,7 @@ double GCOMModelDRBFitting::eval(const GEvent&       event,
         double scale = 1.0;
 
         // Get DRB model value
-        value = observation->drb().pixels()[index] / size;
+        value = observation->drb().map().pixels()[index] / size;
 
         // If the model has a single scaling factor then use the first
         // parameter as scaling factor of the model

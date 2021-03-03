@@ -32,7 +32,6 @@
 #include "GObservation.hpp"
 #include "GTime.hpp"
 #include "GFilename.hpp"
-#include "GSkyMap.hpp"
 #include "GCOMResponse.hpp"
 #include "GCOMTim.hpp"
 #include "GCOMOads.hpp"
@@ -47,6 +46,7 @@ class GModelSky;
 class GModels;
 class GXmlElement;
 class GFitsHDU;
+class GSkyMap;
 class GCOMStatus;
 
 
@@ -117,9 +117,9 @@ public:
     void             ewidth(const double& ewidth);
     const double&    obs_id(void) const;
     const double&    ewidth(void) const;
-    const GSkyMap&   drb(void) const;
-    const GSkyMap&   drg(void) const;
-    const GSkyMap&   drx(void) const;
+    const GCOMDri&   drb(void) const;
+    const GCOMDri&   drg(void) const;
+    const GCOMDri&   drx(void) const;
     GCOMDri          drm(const GModels& models) const;
     const GCOMTim&   tim(void) const;
     const GCOMOads&  oads(void) const;
@@ -141,7 +141,7 @@ protected:
     void load_drb(const GFilename& drbname);
     void load_drg(const GFilename& drgname);
     void load_drx(const GFilename& drxname);
-    bool check_map(const GSkyMap& map) const;
+    bool check_dri(const GCOMDri& map) const;
     void read_attributes(const GFitsHDU* hdu);
     void write_attributes(GFitsHDU* hdu) const;
 
@@ -158,9 +158,9 @@ protected:
     GFilename              m_drbname;    //!< DRB filename
     GFilename              m_drgname;    //!< DRG filename
     GFilename              m_drxname;    //!< DRX filename
-    GSkyMap                m_drb;        //!< Background model
-    GSkyMap                m_drg;        //!< Geometry factors
-    GSkyMap                m_drx;        //!< Exposure map
+    GCOMDri                m_drb;        //!< Background model
+    GCOMDri                m_drg;        //!< Geometry factors
+    GCOMDri                m_drx;        //!< Exposure map
     double                 m_ewidth;     //!< Energy width (MeV)
 
     // Protected members for unbinned observation
@@ -361,7 +361,7 @@ const double& GCOMObservation::ewidth(void) const
  * @return Background model.
  ***************************************************************************/
 inline
-const GSkyMap& GCOMObservation::drb(void) const
+const GCOMDri& GCOMObservation::drb(void) const
 {
     // Return background model
     return (m_drb);
@@ -374,7 +374,7 @@ const GSkyMap& GCOMObservation::drb(void) const
  * @return Geometry factors.
  ***************************************************************************/
 inline
-const GSkyMap& GCOMObservation::drg(void) const
+const GCOMDri& GCOMObservation::drg(void) const
 {
     // Return geometry factors
     return (m_drg);
@@ -387,7 +387,7 @@ const GSkyMap& GCOMObservation::drg(void) const
  * @return Exposure.
  ***************************************************************************/
 inline
-const GSkyMap& GCOMObservation::drx(void) const
+const GCOMDri& GCOMObservation::drx(void) const
 {
     // Return exposure
     return (m_drx);

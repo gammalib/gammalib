@@ -98,7 +98,9 @@ The arguments for the following methods have been changed:
 - GCOMObservation::drm(GSkyModel&) was GCOMObservation::drm(GSource&)
 
 The return value of the following methods has been changed:
-- none
+- GCOMObservation::drb() now returns reference to GCOMDri
+- GCOMObservation::drg() now returns reference to GCOMDri
+- GCOMObservation::drx() now returns reference to GCOMDri
 
 
 3. Configuration
@@ -275,6 +277,9 @@ spatial model gradients (#3203).
 
 21. COMPTEL interface
 ---------------------
+Store DRB, DRG and DRX as instances of GCOMDri instead of GSkyMap in GCOMObservation
+(#3560).
+
 Remove internal response caching since caching is handled by the base class response
 computation methods (#2973).
 

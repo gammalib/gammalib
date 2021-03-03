@@ -361,10 +361,10 @@ double GCOMResponse::irf(const GEvent&       event,
     if (iaq > 0.0) {
 
         // Get DRG value (units: probability)
-        double drg = observation->drg()(obsDir.dir(), iphibar);
+        double drg = observation->drg().map()(obsDir.dir(), iphibar);
 
         // Get DRX value (units: cm^2 sec)
-        double drx = observation->drx()(srcDir);
+        double drx = observation->drx().map()(srcDir);
 
         // Get ontime
         double ontime = observation->ontime(); // sec
@@ -840,11 +840,11 @@ GVector GCOMResponse::irf_ptsrc(const GModelSky&    model,
     static_cast<const GModelSpatialPointSource*>(model.spatial())->dir();
 
     // Get IAQ normalisation (cm2): DRX (cm2 s) * DEADC / ONTIME (s)
-    double iaq_norm = obs_ptr->drx()(srcDir) * obs_ptr->deadc() /
+    double iaq_norm = obs_ptr->drx().map()(srcDir) * obs_ptr->deadc() /
                       (obs_ptr->ontime() * cube->dre().tof_correction());
 
     // Get pointer to DRG pixels
-    const double* drg = obs_ptr->drg().pixels();
+    const double* drg = obs_ptr->drg().map().pixels();
 
     // Loop over Chi and Psi
     for (int ipix = 0; ipix < npix; ++ipix) {
@@ -1069,8 +1069,8 @@ GVector GCOMResponse::irf_diffuse(const GModelSky&    model,
     // Initialise some variables
     double         phigeo_min = m_phigeo_min * gammalib::deg2rad;
     double         phigeo_bin = m_phigeo_bin_size * gammalib::deg2rad;
-    const GSkyMap& drx        = obs_ptr->drx();
-    const double*  drg        = obs_ptr->drg().pixels();
+    const GSkyMap& drx        = obs_ptr->drx().map();
+    const double*  drg        = obs_ptr->drg().map().pixels();
 
     // Compute IAQ normalisation (1/s): DEADC / ONTIME (s)
     double iaq_norm = obs_ptr->deadc() /
