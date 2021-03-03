@@ -33,13 +33,9 @@
 #include "GFunction.hpp"
 #include "GTime.hpp"
 #include "GResponseCache.hpp"
-#include "GResponseVectorCache.hpp"
-#include "GFunctions.hpp"
 
 /* __ Forward declarations _______________________________________________ */
-class GVector;
 class GMatrix;
-class GMatrixSparse;
 class GEvent;
 class GPhoton;
 class GSource;
@@ -47,7 +43,6 @@ class GSkyDir;
 class GEnergy;
 class GEbounds;
 class GObservation;
-class GModelPar;
 class GModelSky;
 class GModelSpatialRadial;
 class GModelSpatialElliptical;
@@ -106,34 +101,24 @@ public:
                                  const GEvent&       event,
                                  const GObservation& obs,
                                  const bool&         grad = true) const;
-    virtual GVector     convolve(const GModelSky&    model,
-                                 const GObservation& obs,
-                                 GMatrixSparse*      gradients = NULL) const;
     virtual double      irf_spatial(const GEvent&       event,
                                     const GSource&      source,
                                     const GObservation& obs) const;
-    virtual GVector     irf_spatial(const GModelSky&    model,
-                                    const GObservation& obs,
-                                    GMatrix*            gradients = NULL) const;
     virtual void        remove_response_cache(const std::string& name);
+
+    virtual GEbounds    ebounds_model(const GModelSky& model) const;
 
 protected:
     // Protected methods
-    void    init_members(void);
-    void    copy_members(const GResponse& rsp);
-    void    free_members(void);
-    double  eval_prob(const GModelSky&    model,
-                      const GEvent&       event,
-                      const GEnergy&      srcEng,
-                      const GTime&        srcTime,
-                      const GObservation& obs,
-                      const bool&         grad) const;
-    GVector eval_probs(const GModelSky&    model,
-                       const GObservation& obs,
-                       GMatrixSparse*      gradients = NULL) const;
-    int     size_edisp_vector(const GModelSky&    model,
-                              const GObservation& obs,
-                              const bool&         grad) const;
+    void   init_members(void);
+    void   copy_members(const GResponse& rsp);
+    void   free_members(void);
+    double eval_prob(const GModelSky&    model,
+                     const GEvent&       event,
+                     const GEnergy&      srcEng,
+                     const GTime&        srcTime,
+                     const GObservation& obs,
+                     const bool&         grad) const;
 
     // Virtual protected methods
     virtual double irf_ptsrc(const GEvent&       event,
@@ -151,42 +136,30 @@ protected:
     virtual double irf_composite(const GEvent&       event,
                                  const GSource&      source,
                                  const GObservation& obs) const;
-    virtual GVector irf_ptsrc(const GModelSky&    model,
-                              const GObservation& obs,
-                              GMatrix*            gradients = NULL) const;
-    virtual GVector irf_radial(const GModelSky&    model,
-                               const GObservation& obs,
-                               GMatrix*            gradients = NULL) const;
-    virtual GVector irf_elliptical(const GModelSky&    model,
-                                   const GObservation& obs,
-                                   GMatrix*            gradients = NULL) const;
-    virtual GVector irf_diffuse(const GModelSky&    model,
-                                const GObservation& obs,
-                                GMatrix*            gradients = NULL) const;
-    virtual GVector irf_composite(const GModelSky&    model,
-                                  const GObservation& obs,
-                                  GMatrix*            gradients = NULL) const;
 
     // Protected classes
-    class edisp_kerns : public GFunctions {
+    class edisp_kern : public GFunction {
     public:
-        edisp_kerns(const GResponse*    parent,
-                    const GObservation* obs,
-                    const GModelSky*    model,
-                    const GEvent*       event,
-                    const GTime&        srcTime,
-                    const bool&         grad);
-        int     size(void) const { return m_size; }
-        GVector eval(const double& etrue);
+        edisp_kern(const GResponse*    parent,
+                   const GObservation* obs,
+                   const GModelSky*    model,
+                   const GEvent*       event,
+                   const GTime&        srcTime,
+                   const bool&         grad) :
+                   m_parent(parent),
+                   m_obs(obs),
+                   m_model(model),
+                   m_event(event),
+                   m_srcTime(srcTime),
+                   m_grad(grad) { }
+        double eval(const double& etrue);
     protected:
-        const GResponse*        m_parent;  //!< Response
-        const GObservation*     m_obs;     //!< Observation
-        const GModelSky*        m_model;   //!< Sky model
-        const GEvent*           m_event;   //!< Event
-        int                     m_size;    //!< Array of values and gradients
-        std::vector<GModelPar*> m_pars;    //!< Parameter pointers
-        GTime                   m_srcTime; //!< True arrival time
-        bool                    m_grad;    //!< Gradient flag
+        const GResponse*    m_parent;  //!< Response
+        const GObservation* m_obs;     //!< Observation
+        const GModelSky*    m_model;   //!< Sky model
+        const GEvent*       m_event;   //!< Event
+        GTime               m_srcTime; //!< True arrival time
+        bool                m_grad;    //!< Gradient flag
     };
     class irf_radial_kern_theta : public GFunction {
     public:
@@ -320,9 +293,8 @@ protected:
     // Cache for irf(GEvent&, GSource&, GObservation&) and
     // nroi(GModelSky&, GEnergy&, GTime&, GEnergy&, GTime&, GObservation&)
     // computations
-    mutable GResponseCache       m_irf_cache;
-    mutable GResponseCache       m_nroi_cache;
-    mutable GResponseVectorCache m_irf_vector_cache;
+    mutable GResponseCache m_irf_cache;
+    mutable GResponseCache m_nroi_cache;
 };
 
 #endif /* GRESPONSE_HPP */

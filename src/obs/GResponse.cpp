@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GResponse.cpp - Abstract response base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2020 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -35,9 +35,7 @@
 #include "GMath.hpp"
 #include "GVector.hpp"
 #include "GMatrix.hpp"
-#include "GMatrixSparse.hpp"
 #include "GIntegral.hpp"
-#include "GIntegrals.hpp"
 #include "GResponse.hpp"
 #include "GEvent.hpp"
 #include "GPhoton.hpp"
@@ -48,6 +46,7 @@
 #include "GObservation.hpp"
 #include "GSkyMap.hpp"
 #include "GModelSky.hpp"
+#include "GModelSpectralGauss.hpp"
 #include "GModelSpatialPointSource.hpp"
 #include "GModelSpatialRadial.hpp"
 #include "GModelSpatialElliptical.hpp"
@@ -57,8 +56,6 @@
 #include "GModelSpatialComposite.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_CONVOLVE          "GResponse::convolve(GModelSky&, GObservation&, "\
-                                                            "GMatrixSparse*)"
 #define G_IRF_RADIAL               "GResponse::irf_radial(GEvent&, GSource&,"\
                                                             " GObservation&)"
 #define G_IRF_ELLIPTICAL       "GResponse::irf_elliptical(GEvent&, GSource&,"\
@@ -71,6 +68,7 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+#define G_DEBUG_CONVOLVE_EDISP    //!< Debug convolve for energy dispersion
 
 
 /*==========================================================================
@@ -168,7 +166,7 @@ GResponse& GResponse::operator=(const GResponse& rsp)
  * @param[in] model Sky model.
  * @param[in] event Event.
  * @param[in] obs Observation.
- * @param[in] grad Should model gradients be computed?
+ * @param[in] grad Should model gradients be computed? (default: true)
  * @return Event probability.
  *
  * Computes the event probability
@@ -205,11 +203,11 @@ double GResponse::convolve(const GModelSky&    model,
             // Retrieve true energy boundaries
             GEbounds ebounds = this->ebounds(event.energy());
 
-            // Determine size of result array
-            int size = size_edisp_vector(model, obs, grad);
-
             // Initialise vector array
-            GVector array(size);
+            //GVector array(ebounds.size()); // need this?
+
+            // Get Valid Ebounds
+            GEbounds valid_ebounds = this->ebounds_model(model);
 
             // Loop over all boundaries
             for (int i = 0; i < ebounds.size(); ++i) {
@@ -218,67 +216,38 @@ double GResponse::convolve(const GModelSky&    model,
                 double etrue_min = ebounds.emin(i).MeV();
                 double etrue_max = ebounds.emax(i).MeV();
 
+
+                // Limit energy bounds for model
+                if (valid_ebounds.size() > 0 )
+                {
+                    if (valid_ebounds.emin(0).MeV() > etrue_min )
+                    {
+                        etrue_min = valid_ebounds.emin(0).MeV();
+                    }
+                    if (valid_ebounds.emax(0).MeV() < etrue_max )
+                    {
+                        etrue_max = valid_ebounds.emax(0).MeV();
+                    }
+                }
+
                 // Continue only if valid
                 if (etrue_max > etrue_min) {
 
                     // Setup integration function
-                    edisp_kerns integrand(this, &obs, &model, &event, srcTime, grad);
-                    GIntegrals  integral(&integrand);
+                    edisp_kern integrand(this, &obs, &model, &event, srcTime, grad);
+                    GIntegral  integral(&integrand);
 
                     // Set number of iterations
                     integral.fixed_iter(iter);
 
                     // Do Romberg integration
-                    array += integral.romberg(etrue_min, etrue_max);
+                    prob += integral.romberg(etrue_min, etrue_max);
 
                 } // endif: interval was valid
 
             } // endfor: looped over intervals
 
-            // Initialise array index
-            int index = 0;
-
-            // Get probability
-            prob = array[index++];
-
-            // Set gradients
-            if (grad) {
-
-                // Set spectral gradients
-                if (model.spectral() != NULL) {
-                    for (int i = 0; i < model.spectral()->size(); ++i) {
-                        GModelPar& par = (*(model.spectral()))[i];
-                        if (par.is_free() && par.has_grad()) {
-                            par.factor_gradient(array[index++]);
-                        }
-                    }
-                }
-
-                // Set temporal gradients
-                if (model.temporal() != NULL) {
-                    for (int i = 0; i < model.temporal()->size(); ++i) {
-                        GModelPar& par = (*(model.temporal()))[i];
-                        if (par.is_free() && par.has_grad()) {
-                            par.factor_gradient(array[index++]);
-                        }
-                    }
-                }
-
-                // Optionally set scale gradient for instrument
-                if (model.has_scales()) {
-                    for (int i = 0; i < model.scales(); ++i) {
-                        const GModelPar& par = model.scale(i);
-                        if (par.name() == obs.instrument()) {
-                            if (par.is_free() && par.has_grad()) {
-                                par.factor_gradient(array[index++]);
-                            }
-                        }
-                    }
-                }
-
-            } // endif: set gradients
-
-        } // endif: Case A
+        }
 
         // Case B: No integration (assume no energy dispersion)
         else {
@@ -289,7 +258,7 @@ double GResponse::convolve(const GModelSky&    model,
             // Evaluate probability
             prob = eval_prob(model, event, srcEng, srcTime, obs, grad);
 
-        } // endelse: Case B
+        }
 
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
@@ -310,212 +279,49 @@ double GResponse::convolve(const GModelSky&    model,
 }
 
 
+
 /***********************************************************************//**
- * @brief Convolve sky model with the instrument response
+ * @brief Validity of true energy interval
  *
- * @param[in] model Sky model.
- * @param[in] obs Observation.
- * @param[out] gradients Pointer to matrix of gradients.
- * @return Vector of event probabilities.
+ * @param[in] GModelSky& model
+ * @return GEbounds
  *
- * Computes the event probability
+ * Computes the valitdity of the true energy model.
+ * Special treatment of narrow Gaussians as approximation for 
+ * monochromatic lines.
+ * For a Gaussian Model return one sigle boundry 5 sigma around the line
+ * energy.
+ * Other models return empty boundry container.
  *
- * \f[
- *    P(p',E',t') = \int \int \int
- *                  S(p,E,t) \times R(p',E',t'|p,E,t) \, dp \, dE \, dt
- * \f]
- *
- * without taking into account any time dispersion. Energy dispersion is
- * correctly handled by this method. If time dispersion is indeed needed,
- * an instrument specific method needs to be provided.
  ***************************************************************************/
-GVector GResponse::convolve(const GModelSky&    model,
-                            const GObservation& obs,
-                            GMatrixSparse*      gradients) const
+GEbounds GResponse::ebounds_model(const GModelSky& model) const
 {
-    // Set number of iterations for Romberg integration.
-    static const int iter = 6;
 
-    // Get number of model parameters and number of events
-    int npars   = model.size();
-    int nevents = obs.events()->size();
+     if(model.spectral()->type()  == "Gaussian")
+     {
+        const double size = 5.0;
+        const GModelSpectralGauss* gauss = dynamic_cast<const GModelSpectralGauss*>(model.spectral());
+    
 
-    // Initialise gradients flag
-    bool grad = (gradients != NULL);
+         GEnergy mu = gauss->mean();
+         GEnergy sigma = gauss->sigma();
+         
+         GEnergy ebound_min = mu - size * sigma;
+         GEnergy ebound_max = mu + size * sigma;
+        
+         GEbounds emebounds(ebound_min, ebound_max);
+    
+         return emebounds;
 
-    // Check matrix consistency
-    if (grad) {
-        if (gradients->columns() != npars) {
-            std::string msg = "Number of "+gammalib::str(gradients->columns())+
-                              " columns in gradient matrix differs from number "
-                              "of "+gammalib::str(npars)+" parameters "
-                              "in model. Please provide a compatible gradient "
-                              "matrix.";
-            throw GException::invalid_argument(G_CONVOLVE, msg);
-        }
-        if (gradients->rows() != nevents) {
-            std::string msg = "Number of "+gammalib::str(gradients->rows())+
-                              " rows in gradient matrix differs from number "
-                              "of "+gammalib::str(nevents)+" events in "
-                              "observation. Please provide a compatible "
-                              "gradient matrix.";
-            throw GException::invalid_argument(G_CONVOLVE, msg);
-        }
-    }
-
-    // Initialise result
-    GVector probs(nevents);
-
-    // Continue only if the model has a spatial component
-    if (model.spatial() != NULL) {
-
-        // Case A: Integration
-        if (use_edisp()) {
-
-            // Initialise temporary vectors to hold gradients
-            GVector* tmp_gradients = NULL;
-            if (grad) {
-                tmp_gradients = new GVector[npars];
-                for (int i = 0; i < npars; ++i) {
-                    tmp_gradients[i] = GVector(nevents);
-                }
-            }
-
-            // Determine size of result array
-            int size = size_edisp_vector(model, obs, grad);
-
-            // Loop over events
-            for (int k = 0; k < nevents; ++k) {
-
-                // Get reference to event
-                const GEvent& event = *((*obs.events())[k]);
-
-                // Get source time (no dispersion)
-                GTime srcTime = event.time();
-
-                // Retrieve true energy boundaries
-                GEbounds ebounds = this->ebounds(event.energy());
-
-                // Initialise vector array
-                GVector array(size);
-
-                // Loop over all boundaries
-                for (int i = 0; i < ebounds.size(); ++i) {
-
-                    // Get true energy boundaries in MeV
-                    double etrue_min = ebounds.emin(i).MeV();
-                    double etrue_max = ebounds.emax(i).MeV();
-
-                    // Continue only if valid
-                    if (etrue_max > etrue_min) {
-
-                        // Setup integration function
-                        edisp_kerns integrand(this, &obs, &model, &event, srcTime, grad);
-                        GIntegrals  integral(&integrand);
-
-                        // Set number of iterations
-                        integral.fixed_iter(iter);
-
-                        // Do Romberg integration
-                        array += integral.romberg(etrue_min, etrue_max);
-
-                    } // endif: interval was valid
-
-                } // endfor: looped over intervals
-
-                // Initialise array index
-                int index = 0;
-
-                // Get probability
-                probs[k] = array[index++];
-
-                // Set gradients
-                if (grad) {
-
-                    // Get number of spatial, spectral and temporal parameters
-                    int n_spat = model.spatial()->size();
-                    int n_spec = model.spectral()->size();
-                    int n_temp = model.temporal()->size();
-
-                    // Set spectral gradients
-                    if (model.spectral() != NULL) {
-                        int offset = n_spat;
-                        for (int i = 0; i < n_spec; ++i) {
-                            const GModelPar& par = (*(model.spectral()))[i];
-                            if (par.is_free() && par.has_grad()) {
-                                tmp_gradients[offset+i][k] = array[index++];
-                            }
-                        }
-                    }
-
-                    // Set temporal gradients
-                    if (model.temporal() != NULL) {
-                        int offset = n_spat + n_spec;
-                        for (int i = 0; i < n_temp; ++i) {
-                            const GModelPar& par = (*(model.temporal()))[i];
-                            if (par.is_free() && par.has_grad()) {
-                                tmp_gradients[offset+i][k] = array[index++];
-                            }
-                        }
-                    }
-
-                    // Optionally set scale gradient for instrument
-                    if (model.has_scales()) {
-                        int offset = n_spat + n_spec + n_temp;
-                        for (int i = 0; i < model.scales(); ++i) {
-                            const GModelPar& par = model.scale(i);
-                            if (par.name() == obs.instrument()) {
-                                if (par.is_free() && par.has_grad()) {
-                                    tmp_gradients[offset+i][k] = array[index++];
-                                }
-                            }
-                        }
-                    }
-
-                } // endif: set gradients
-
-                // Compile option: Check for NaN/Inf
-                #if defined(G_NAN_CHECK)
-                if (gammalib::is_notanumber(probs[k]) || gammalib::is_infinite(probs[k])) {
-                    std::cout << "*** ERROR: GResponse::convolve:";
-                    std::cout << " NaN/Inf encountered";
-                    std::cout << " (probs[" << k << "]=" << probs[k];
-                    std::cout << ", event=" << event;
-                    std::cout << ", srcTime=" << srcTime;
-                    std::cout << ")" << std::endl;
-                }
-                #endif
-
-            } // endfor: looped over events
-
-            // Post-process gradients
-            if (grad) {
-
-                // Fill gradients into matrix
-                for (int i = 0; i < npars; ++i) {
-                    gradients->column(i, tmp_gradients[i]);
-                }
-
-                // Delete temporal gradients
-                delete [] tmp_gradients;
-
-            } // endif: post-processed gradients
-
-        } // endif: Case A
-
-        // Case B: No integration (assume no energy dispersion)
-        else {
-
-            // Evaluate probability
-            probs = eval_probs(model, obs, gradients);
-
-        } // endelse: Case B
-
-    } // endif: spatial component valid
-
-    // Return probabilities
-    return probs;
+     }
+     else
+     {
+        GEbounds empty_ebounds;
+        return empty_ebounds; 
+     }
+     
 }
+
 
 
 /***********************************************************************//**
@@ -569,7 +375,7 @@ double GResponse::irf_spatial(const GEvent&       event,
     double irf = 0.0;
 
     // Set IRF value attributes
-    std::string     name  = obs.id() + ":" + source.name();
+    std::string     name  = obs.id() + "::" + source.name();
     const GInstDir& dir   = event.dir();
     const GEnergy&  ereco = event.energy();
     const GEnergy&  etrue = source.energy();
@@ -619,112 +425,6 @@ double GResponse::irf_spatial(const GEvent&       event,
 
 
 /***********************************************************************//**
- * @brief Return instrument response vector integrated over the spatial model
- *
- * @param[in] model Sky model.
- * @param[in] obs Observation.
- * @param[in] gradients Gradients matrix.
- * @return Instrument response vector to a spatial model.
- *
- * Returns the instrument response to a sky model integrated over the spatial
- * model component for all events in a given observation. The method computes
- *
- * \f[
- *    {\tt irf}(p', E', t') = \int_p M_{\rm S}(p | E, t) \,
- *                                   R(p', E', t' | p, E, t) \, d\,p
- * \f]
- *
- * where
- * * \f$M_{\rm S}(p | E, t)\f$ is the spatial model component,
- * * \f$R(p', E', t' | p, E, t)\f$ is the Instrument Response Function (IRF),
- * * \f$p'\f$ is the measured instrument direction,
- * * \f$E'\f$ is the measured or reconstructed energy,
- * * \f$t'\f$ is the measured arrival time,
- * * \f$p\f$ is the true photon arrival direction,
- * * \f$E\f$ is the true photon energy, and
- * * \f$t\f$ is the true trigger time.
- *
- * The integration is done over all relevant true sky directions \f$p\f$.
- *
- * Depending on the type of the source model the method branches to the
- * following methods to perform the actual computations
- *
- * * irf_ptsrc() - for the handling of a point source
- * * irf_radial() - for radial models
- * * irf_elliptical() - for elliptical models
- * * irf_diffuse() - for diffuse models
- * * irf_composite() - for composite models
- *
- * The method implements a caching mechanism for spatial models that have all
- * parameters fixed. For those models the instrument response for a given
- * event and observation is only computed once and then stored in an internal
- * cache from which it is fetched back in case that the method is called
- * again for the same event and observation.
- ***************************************************************************/
-GVector GResponse::irf_spatial(const GModelSky&    model,
-                               const GObservation& obs,
-                               GMatrix*            gradients) const
-{
-    // Get number of model parameters and number of events
-    int npars   = model.size();
-    int nevents = obs.events()->size();
-
-    // Initialise result
-    GVector irfs(nevents);
-
-    // Continue only if model has a spatial component
-    if (model.spatial() != NULL) {
-
-        // Set IRF cache identifier
-        std::string cache_id = obs.id() + ":" + model.name();
-
-        // Signal if spatial model has free parameters
-        bool has_free_pars = model.spatial()->has_free_pars();
-
-        // If the spatial model component has free parameters, or the response
-        // cache should not be used, or the cache does not contain the requested
-        // IRF value then compute the IRF value for the spatial model.
-        if (has_free_pars    ||
-            !m_use_irf_cache ||
-            !m_irf_vector_cache.contains(cache_id, &irfs)) {
-
-            // Compute IRF for spatial model
-            switch (model.spatial()->code()) {
-                case GMODEL_SPATIAL_POINT_SOURCE:
-                    irfs = irf_ptsrc(model, obs, gradients);
-                    break;
-                case GMODEL_SPATIAL_RADIAL:
-                    irfs = irf_radial(model, obs, gradients);
-                    break;
-                case GMODEL_SPATIAL_ELLIPTICAL:
-                    irfs = irf_elliptical(model, obs, gradients);
-                    break;
-                case GMODEL_SPATIAL_DIFFUSE:
-                    irfs = irf_diffuse(model, obs, gradients);
-                    break;
-                case GMODEL_SPATIAL_COMPOSITE:
-                    irfs = irf_composite(model, obs, gradients);
-                    break;
-                default:
-                    break;
-            }
-
-            // If the spatial model has no free parameters and the response cache
-            // should be used then put the IRF value in the response cache.
-            if (!has_free_pars && m_use_irf_cache) {
-                m_irf_vector_cache.set(cache_id, irfs);
-            }
-
-        } // endif: computed spatial model
-
-    } // endif: model had spatial component
-
-    // Return IRF values
-    return irfs;
-}
-
-
-/***********************************************************************//**
  * @brief Remove response cache for model
  *
  * @param[in] name Model name.
@@ -736,7 +436,6 @@ void GResponse::remove_response_cache(const std::string& name)
     // Remove model from response caches
     m_irf_cache.remove(name);
     m_nroi_cache.remove(name);
-    m_irf_vector_cache.remove(name);
 
     // Return
     return;
@@ -766,7 +465,6 @@ void GResponse::init_members(void)
     // Clear cache
     m_irf_cache.clear();
     m_nroi_cache.clear();
-    m_irf_vector_cache.clear();
 
     // Return
     return;
@@ -790,7 +488,6 @@ void GResponse::copy_members(const GResponse& rsp)
     m_irf_diffuse_resolution    = rsp.m_irf_diffuse_resolution;
     m_irf_cache                 = rsp.m_irf_cache;
     m_nroi_cache                = rsp.m_nroi_cache;
-    m_irf_vector_cache          = rsp.m_irf_vector_cache;
 
     // Return
     return;
@@ -1094,6 +791,9 @@ double GResponse::irf_diffuse(const GEvent&       event,
     const GEnergy& srcEng  = source.energy();
     const GTime&   srcTime = source.time();
 
+    // Initialise map
+    //GSkyMap skymap;
+
     // If model is a diffuse map model then extract sky map
     const GModelSpatialDiffuseMap* map =
           dynamic_cast<const GModelSpatialDiffuseMap*>(source.model());
@@ -1257,232 +957,6 @@ double GResponse::irf_composite(const GEvent&       event,
 
 
 /***********************************************************************//**
- * @brief Return instrument response to point source sky model
- *
- * @param[in] model Sky model.
- * @param[in] obs Observation.
- * @param[in] gradients Gradients matrix.
- * @return Instrument response to point source sky model.
- *
- * Returns the instrument response to a point source sky model for all
- * events.
- ***************************************************************************/
-GVector GResponse::irf_ptsrc(const GModelSky&    model,
-                             const GObservation& obs,
-                             GMatrix*            gradients) const
-{
-    // Get number of events
-    int nevents = obs.events()->size();
-
-    // Initialise result
-    GVector irfs(nevents);
-
-    // Loop over events
-    for (int k = 0; k < nevents; ++k) {
-
-        // Get reference to event
-        const GEvent& event = *((*obs.events())[k]);
-
-        // Get source energy and time (no dispersion)
-        GEnergy srcEng  = event.energy();
-        GTime   srcTime = event.time();
-
-        // Setup source
-        GSource source(model.name(), model.spatial(), srcEng, srcTime);
-
-        // Get IRF value for event
-        irfs[k] = this->irf_ptsrc(event, source, obs);
-
-    } // endfor: looped over events
-
-    // Return IRF value
-    return irfs;
-}
-
-
-/***********************************************************************//**
- * @brief Return instrument response to radial source sky model
- *
- * @param[in] model Sky model.
- * @param[in] obs Observation.
- * @param[in] gradients Gradients matrix.
- * @return Instrument response to radial source sky model.
- *
- * Returns the instrument response to a radial source sky model for all
- * events.
- ***************************************************************************/
-GVector GResponse::irf_radial(const GModelSky&    model,
-                              const GObservation& obs,
-                              GMatrix*            gradients) const
-{
-    // Get number of events
-    int nevents = obs.events()->size();
-
-    // Initialise result
-    GVector irfs(nevents);
-
-    // Loop over events
-    for (int k = 0; k < nevents; ++k) {
-
-        // Get reference to event
-        const GEvent& event = *((*obs.events())[k]);
-
-        // Get source energy and time (no dispersion)
-        GEnergy srcEng  = event.energy();
-        GTime   srcTime = event.time();
-
-        // Setup source
-        GSource source(model.name(), model.spatial(), srcEng, srcTime);
-
-        // Get IRF value for event
-        irfs[k] = this->irf_radial(event, source, obs);
-
-    } // endfor: looped over events
-
-    // Return IRF value
-    return irfs;
-}
-
-
-/***********************************************************************//**
- * @brief Return instrument response to ellipitical source sky model
- *
- * @param[in] model Sky model.
- * @param[in] obs Observation.
- * @param[in] gradients Gradients matrix.
- * @return Instrument response to ellipitical source sky model.
- *
- * Returns the instrument response to a ellipitical source sky model for all
- * events.
- ***************************************************************************/
-GVector GResponse::irf_elliptical(const GModelSky&    model,
-                                  const GObservation& obs,
-                                  GMatrix*            gradients) const
-{
-    // Get number of events
-    int nevents = obs.events()->size();
-
-    // Initialise result
-    GVector irfs(nevents);
-
-    // Loop over events
-    for (int k = 0; k < nevents; ++k) {
-
-        // Get reference to event
-        const GEvent& event = *((*obs.events())[k]);
-
-        // Get source energy and time (no dispersion)
-        GEnergy srcEng  = event.energy();
-        GTime   srcTime = event.time();
-
-        // Setup source
-        GSource source(model.name(), model.spatial(), srcEng, srcTime);
-
-        // Get IRF value for event
-        irfs[k] = this->irf_elliptical(event, source, obs);
-
-    } // endfor: looped over events
-
-    // Return IRF value
-    return irfs;
-}
-
-
-/***********************************************************************//**
- * @brief Return instrument response to diffuse source sky model
- *
- * @param[in] model Sky model.
- * @param[in] obs Observation.
- * @param[in] gradients Gradients matrix.
- * @return Instrument response to diffuse source sky model.
- *
- * Returns the instrument response to a diffuse source sky model for all
- * events.
- ***************************************************************************/
-GVector GResponse::irf_diffuse(const GModelSky&    model,
-                               const GObservation& obs,
-                               GMatrix*            gradients) const
-{
-    // Get number of events
-    int nevents = obs.events()->size();
-
-    // Initialise result
-    GVector irfs(nevents);
-
-    // Loop over events
-    for (int k = 0; k < nevents; ++k) {
-
-        // Get reference to event
-        const GEvent& event = *((*obs.events())[k]);
-
-        // Get source energy and time (no dispersion)
-        GEnergy srcEng  = event.energy();
-        GTime   srcTime = event.time();
-
-        // Setup source
-        GSource source(model.name(), model.spatial(), srcEng, srcTime);
-
-        // Get IRF value for event
-        irfs[k] = this->irf_diffuse(event, source, obs);
-
-    } // endfor: looped over events
-
-    // Return IRF value
-    return irfs;
-}
-
-
-/***********************************************************************//**
- * @brief Return instrument response to composite source sky model
- *
- * @param[in] model Sky model.
- * @param[in] obs Observation.
- * @param[in] gradients Gradients matrix.
- * @return Instrument response to composite source sky model.
- *
- * Returns the instrument response to a composite source sky model for all
- * events.
- ***************************************************************************/
-GVector GResponse::irf_composite(const GModelSky&    model,
-                                 const GObservation& obs,
-                                 GMatrix*            gradients) const
-{
-    // Get number of events
-    int nevents = obs.events()->size();
-
-    // Initialise result
-    GVector irfs(nevents);
-
-    // Get pointer to composite spatial model
-    const GModelSpatialComposite* composite =
-          dynamic_cast<const GModelSpatialComposite*>(model.spatial());
-
-    // Create copy of sky model
-    GModelSky sky = model;
-
-    // Loop over model components
-    for (int i = 0; i < composite->components(); ++i) {
-
-        // Set spatial component of sky model
-        sky.spatial(const_cast<GModelSpatial*>(composite->component(i)));
-
-        // Compute and add IRF values
-        irfs += irf_spatial(sky, obs, gradients) * composite->scale(i);
-
-    } // endfor: looped over all model components
-
-    // Divide by number of model components
-    double sum = composite->sum_of_scales();
-    if (sum > 0.0) {
-        irfs /= sum;
-    }
-
-    // Return IRF values
-    return irfs;
-}
-
-
-/***********************************************************************//**
  * @brief Convolve sky model with the instrument response
  *
  * @param[in] model Sky model.
@@ -1623,346 +1097,41 @@ double GResponse::eval_prob(const GModelSky&    model,
 }
 
 
-/***********************************************************************//**
- * @brief Convolve sky model with the instrument response
- *
- * @param[in] model Sky model.
- * @param[in] obs Observation.
- * @param[out] gradients Pointer to matrix of gradients.
- * @return Event probabilities.
- *
- * Computes the event probability
- *
- * \f[
- *    P(p',E',t'|E,t) = \int S(p,E,t) \times R(p',E',t'|p,E,t) \, dp
- * \f]
- *
- * for a all events.
- ***************************************************************************/
-GVector GResponse::eval_probs(const GModelSky&    model,
-                              const GObservation& obs,
-                              GMatrixSparse*      gradients) const
-{
-    // Get number of model parameters and number of events
-    int npars   = model.size();
-    int nevents = obs.events()->size();
 
-    // Initialise gradients flag
-    bool grad = (gradients != NULL);
 
-    // Initialise result
-    GVector probs(nevents);
-
-    // Continue only if the model has a spatial component
-    if (model.spatial() != NULL) {
-
-        // Initialise matrix to hold spatial gradients
-        GMatrix spat_gradients(nevents, model.spatial()->size());
-
-        // Compute IRF value
-        probs = irf_spatial(model, obs, &spat_gradients);
-
-        // Get global model scaling
-        double scale = (model.has_scales())
-                       ? model.scale(obs.instrument()).value() : 1.0;
-
-        // Initialise temporary vectors to hold gradients
-        GVector* tmp_gradients = NULL;
-        if (grad) {
-            tmp_gradients = new GVector[npars];
-            for (int i = 0; i < npars; ++i) {
-                tmp_gradients[i] = GVector(nevents);
-            }
-        }
-
-        // Loop over events
-        for (int k = 0; k < nevents; ++k) {
-
-            // Get probability
-            double spat = probs[k];
-
-            // Continue only if spatial value is positive
-            if (spat > 0.0) {
-
-                // Get reference to event
-                const GEvent& event = *((*obs.events())[k]);
-
-                // Get source energy and time
-                GEnergy srcEng  = event.energy();
-                GTime   srcTime = event.time();
-
-                // Evaluate spectral and temporal components
-                double spec = (model.spectral() != NULL)
-                              ? model.spectral()->eval(srcEng, srcTime, grad)
-                              : 1.0;
-                double temp = (model.temporal() != NULL)
-                              ? model.temporal()->eval(srcTime, grad)
-                              : 1.0;
-
-                // Compute probability
-                probs[k] = spat * spec * temp * scale;
-
-                // Optionally compute partial derivatives
-                if (grad) {
-
-                    // Get number of spatial, spectral and temporal parameters
-                    int n_spat = model.spatial()->size();
-                    int n_spec = model.spectral()->size();
-                    int n_temp = model.temporal()->size();
-
-                    // Multiply factors to spatial gradients
-                    if (model.spatial() != NULL) {
-                        double fact = spec * temp * scale;
-                        for (int i = 0; i < n_spat; ++i) {
-                            tmp_gradients[i][k] = spat_gradients(k,i) * fact;
-                        }
-                    }
-
-                    // Multiply factors to spectral gradients
-                    if (model.spectral() != NULL) {
-                        int    offset = n_spat;
-                        double fact   = spat * temp * scale;
-                        for (int i = 0; i < n_spec; ++i) {
-                            tmp_gradients[offset+i][k] =
-                                (*(model.spectral()))[i].factor_gradient() * fact;
-                        }
-                    }
-
-                    // Multiply factors to temporal gradients
-                    if (model.temporal() != NULL) {
-                        int    offset = n_spat + n_spec;
-                        double fact   = spat * spec * scale;
-                        for (int i = 0; i < n_temp; ++i) {
-                            tmp_gradients[offset+i][k] =
-                                (*(model.temporal()))[i].factor_gradient() * fact;
-                        }
-                    }
-
-                    // Optionally set scale gradient for instrument
-                    if (model.has_scales()) {
-                        int    offset = n_spat + n_spec + n_temp;
-                        double fact   = spat * spec * temp;
-                        for (int i = 0; i < model.scales(); ++i) {
-                            const GModelPar& par     = model.scale(i);
-                            double           g_scale = 0.0;
-                            if (par.name() == obs.instrument()) {
-                                if (par.is_free()) {
-                                    tmp_gradients[offset+i][k] = par.scale() * fact;
-                                }
-                            }
-                        }
-                    }
-
-                } // endif: computed partial derivatives
-
-            } // endif: IRF spatial value was positive
-
-            // Compile option: Check for NaN/Inf
-            #if defined(G_NAN_CHECK)
-            if (gammalib::is_notanumber(probs[k]) || gammalib::is_infinite(probs[k])) {
-                std::cout << "*** ERROR: GResponse::eval_prob:";
-                std::cout << " NaN/Inf encountered";
-                std::cout << " (probs[" << k << "]=" << probs[k];
-                std::cout << ", spat=" << spat;
-                std::cout << ")" << std::endl;
-            }
-            #endif
-
-        } // endfor: looped over events
-
-        // Post-process gradients
-        if (grad) {
-
-            // Fill gradients into matrix
-            for (int i = 0; i < npars; ++i) {
-                gradients->column(i, tmp_gradients[i]);
-            }
-
-            // Delete temporal gradients
-            delete [] tmp_gradients;
-
-        } // endif: gradient post processing
-
-    } // endif: Gamma-ray source model had a spatial component
-
-    // Return event probabilities
-    return probs;
-}
 
 
 /***********************************************************************//**
- * @brief Return size of vector for energy dispersion computation
- *
- * @param[in] model Sky model.
- * @param[in] obs Observation.
- * @param[out] grad Signals whether gradients should be computed.
- * @return Size of vector for energy dispersion computation.
- *
- * Computes the size of the vector that will be computed for the computation
- * of the energy dispersion.
- ***************************************************************************/
-int GResponse::size_edisp_vector(const GModelSky&    model,
-                                 const GObservation& obs,
-                                 const bool&         grad) const
-{
-    // Initialise vector size
-    int size = 1;
-
-    // Determine size of gradient part
-    if (grad) {
-        if (model.spectral() != NULL) {
-            for (int i = 0; i < model.spectral()->size(); ++i) {
-                GModelPar& par = (*(model.spectral()))[i];
-                if (par.is_free() && par.has_grad()) {
-                    size++;
-                }
-            }
-        }
-        if (model.temporal() != NULL) {
-            for (int i = 0; i < model.temporal()->size(); ++i) {
-                GModelPar& par = (*(model.temporal()))[i];
-                if (par.is_free() && par.has_grad()) {
-                    size++;
-                }
-            }
-        }
-        if (model.has_scales()) {
-            for (int i = 0; i < model.scales(); ++i) {
-                GModelPar& par = const_cast<GModelPar&>(model.scale(i));
-                if (par.name() == obs.instrument()) {
-                    if (par.is_free() && par.has_grad()) {
-                        size++;
-                    }
-                }
-            }
-        }
-    }
-
-    // Return size
-    return size;
-}
-
-
-/***********************************************************************//**
- * @brief Constructor for energy dispersion integration kernels class
- *
- * @param[in] parent Pointer to response.
- * @param[in] obs Pointer to observation.
- * @param[in] model Pointer to sky model.
- * @param[in] event Pointer to event.
- * @param[in] srcTime True time.
- * @param[in] grad Evaluate gradients?
- *
- * This method constructs the integration kernel needed for the energy
- * dispersion computation.
- ***************************************************************************/
-GResponse::edisp_kerns::edisp_kerns(const GResponse*    parent,
-                                    const GObservation* obs,
-                                    const GModelSky*    model,
-                                    const GEvent*       event,
-                                    const GTime&        srcTime,
-                                    const bool&         grad)
-{
-    // Set members
-    m_parent  = parent;
-    m_obs     = obs;
-    m_model   = model;
-    m_event   = event;
-    m_size    = 1;
-    m_srcTime = srcTime;
-    m_grad    = grad;
-
-    // If gradients are requested then put pointers to all relevant parameter
-    // in the parameter pointer vector
-    m_pars.clear();
-    if (m_grad) {
-
-        // Add free spectral parameters with analytical gradients
-        if (m_model->spectral() != NULL) {
-            for (int i = 0; i < m_model->spectral()->size(); ++i) {
-                GModelPar& par = (*(m_model->spectral()))[i];
-                if (par.is_free() && par.has_grad()) {
-                    m_pars.push_back(&par);
-                }
-            }
-        }
-
-        // Add free temporal parameters with analytical gradients
-        if (m_model->temporal() != NULL) {
-            for (int i = 0; i < m_model->temporal()->size(); ++i) {
-                GModelPar& par = (*(m_model->temporal()))[i];
-                if (par.is_free() && par.has_grad()) {
-                    m_pars.push_back(&par);
-                }
-            }
-        }
-
-        // Add free scaling factors
-        if (m_model->has_scales()) {
-            for (int i = 0; i < m_model->scales(); ++i) {
-                GModelPar& par = const_cast<GModelPar&>(m_model->scale(i));
-                if (par.name() == m_obs->instrument()) {
-                    if (par.is_free() && par.has_grad()) {
-                        m_pars.push_back(&par);
-                    }
-                }
-            }
-        }
-
-        // Update size
-        m_size += m_pars.size();
-
-    } // endif: gradients were requested
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate energy dispersion integration kernel
+ * @brief Integration kernel for GResponse::edisp_kern() class
  *
  * @param[in] etrue True photon energy in MeV.
  *
  * This method implements the integration kernel needed for the
  * GResponse::edisp_kern() class.
  ***************************************************************************/
-GVector GResponse::edisp_kerns::eval(const double& etrue)
+double GResponse::edisp_kern::eval(const double& etrue)
 {
-    // Initialise result
-    GVector kernels(m_size);
-
-    // Initialise Ndarray array index
-    int index = 0;
-
     // Set true energy
     GEnergy srcEng;
     srcEng.MeV(etrue);
 
     // Get function value
-    kernels[index++] = m_parent->eval_prob(*m_model, *m_event,
-                                           srcEng, m_srcTime, *m_obs,
-                                           m_grad);
-
-    // If gradients are requested then extract them and put them into the
-    // array
-    if (m_grad) {
-        for (int i = 0; i < m_pars.size(); ++i, ++index) {
-            kernels[index] = m_pars[i]->factor_gradient();
-        }
-    }
+    double value = m_parent->eval_prob(*m_model, *m_event,
+                                       srcEng, m_srcTime, *m_obs, m_grad);
 
     // Compile option: Check for NaN
     #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(kernels[0]) || gammalib::is_infinite(kernels[0])) {
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
         std::cout << "*** ERROR: GResponse::edisp_kern::eval";
-        std::cout << "(etrue=" << etrue << "): NaN/Inf encountered";
-        std::cout << " (value=" << kernels[0] << ")" << std::endl;
+        std::cout << "(etrue=" << etrue << "): ";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (value=" << value;
+        std::cout << ")" << std::endl;
     }
     #endif
 
-    // Return kernels
-    return kernels;
+    // Return value
+    return value;
 }
 
 
@@ -2141,3 +1310,6 @@ double GResponse::irf_elliptical_kern_phi::eval(const double& phi)
     // Return
     return irf;
 }
+
+
+
