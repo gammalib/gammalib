@@ -77,6 +77,7 @@ The following methods have been added:
 - GCOMObservation::drgname()
 - GCOMObservation::drxname()
 - GCOMObservation::response(GCOMResponse&)
+- GCOMObservation::compute_drb()
 - GCOMDri::tof_correction()
 - GCOMDri::num_superpackets()
 - GCOMDri::num_used_superpackets()
@@ -280,8 +281,8 @@ spatial model gradients (#3203).
 Store DRB, DRG and DRX as instances of GCOMDri instead of GSkyMap in GCOMObservation
 (#3560).
 
-Remove internal response caching since caching is handled by the base class response
-computation methods (#2973).
+Added GCOMObservation::compute_drb() method to compute background models for COMPTEL.
+So far the PHINOR and BGDLIXA background methods were implemented (#3557).
 
 Added method to set COMPTEL response using GCOMResponse instance.
 
@@ -300,6 +301,9 @@ Set the COMPTEL average deadtime to 0.965 as quoted in Rob van Dijk's thesis on 
 Added methods to access DRI filenames in GCOMObservation.
 
 Implemented vectorised response computation in GCOMResponse::irf_ptsrc() method (#3501).
+
+Remove internal response caching since caching is handled by the base class response
+computation methods (#2973).
 
 
 22. INTEGRAL/SPI interface

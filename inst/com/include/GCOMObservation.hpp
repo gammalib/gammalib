@@ -131,6 +131,12 @@ public:
     void             drbname(const GFilename& drbname);
     void             drgname(const GFilename& drgname);
     void             drxname(const GFilename& drxname);
+    void             compute_drb(const std::string& method,
+                                 const GCOMDri&     drm,
+                                 const int&         nrunav = 3,
+                                 const int&         navgr  = 3,
+                                 const int&         nincl  = 13,
+                                 const int&         nexcl  = 0);
 
 protected:
     // Protected methods
@@ -144,6 +150,19 @@ protected:
     bool check_dri(const GCOMDri& map) const;
     void read_attributes(const GFitsHDU* hdu);
     void write_attributes(GFitsHDU* hdu) const;
+    void compute_drb_phinor(const GCOMDri& drm);
+    void compute_drb_bgdlixa(const GCOMDri& drm,
+                             const int&     nrunav = 3,
+                             const int&     navgr  = 3,
+                             const int&     nincl  = 13,
+                             const int&     nexcl  = 0);
+    void get_bgdlixa_phibar_indices(const int& iphibar,
+                                    const int& nincl,
+                                    const int& nexcl,
+                                    int*       isel1,
+                                    int*       iex1,
+                                    int*       iex2,
+                                    int*       isel2) const;
 
     // Protected members
     std::string            m_instrument; //!< Instrument name

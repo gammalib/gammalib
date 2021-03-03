@@ -5,6 +5,7 @@
 
         Store DRB, DRG and DRX as GCOMDri in GCOMObservation (#3560)
         Implement COMPTEL response for diffuse models (#3558)
+        Implement COMPTEL background model computation (#3557)
         Fix reading of scaled FITS columns, remove GFitsTableCol::scale() method (#3553)
         Add gammalib::compare() function (#3552)
         Add DRI constructor to GCOMObservation class

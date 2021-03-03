@@ -99,6 +99,12 @@ public:
     void             drbname(const GFilename& drbname);
     void             drgname(const GFilename& drgname);
     void             drxname(const GFilename& drxname);
+    void             compute_drb(const std::string& method,
+                                 const GCOMDri&     drm,
+                                 const int&         nrunav = 3,
+                                 const int&         navgr  = 3,
+                                 const int&         nincl  = 13,
+                                 const int&         nexcl  = 0);
 };
 
 

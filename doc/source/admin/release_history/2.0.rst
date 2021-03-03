@@ -33,6 +33,8 @@ Improvements
 
 * [`3558 <https://cta-redmine.irap.omp.eu/issues/3558>`_] -
   Implement COMPTEL response for diffuse models
+* [`3557 <https://cta-redmine.irap.omp.eu/issues/3557>`_] -
+  Implement COMPTEL background model computation
 * [`3552 <https://cta-redmine.irap.omp.eu/issues/3552>`_] -
   Add ``gammalib::compare()`` function
 * Add DRI constructor to ``GCOMObservation`` class

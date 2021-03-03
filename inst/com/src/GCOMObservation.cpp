@@ -57,7 +57,9 @@ const GObservationRegistry g_obs_com_registry(&g_obs_com_seed);
 #define G_LOAD_DRB                    "GCOMObservation::load_drb(GFilename&)"
 #define G_LOAD_DRG                    "GCOMObservation::load_drg(GFilename&)"
 #define G_DRM                                "GCOMObservation::drm(GModels&)"
-#define G_ADD_DRM                      "GCOMObservation::add_drm(GSkyModel&)"
+#define G_COMPUTE_DRB "GCOMObservation::compute_drb(std::string&, GCOMDri&, "\
+                                                     "int&, int&, int&, int&"
+#define G_COMPUTE_DRB_PHINOR  "GCOMObservation::compute_drb_phinor(GCOMDri&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -731,6 +733,45 @@ GCOMDri GCOMObservation::drm(const GModels& models) const
 
 
 /***********************************************************************//**
+ * @brief Compute DRB cube
+ *
+ * @param[in] method Background method (PHINOR or BGDLIXA).
+ * @param[in] drm DRM cube.
+ * @param[in] nrunav BGDLIXA: number of bins used for running average.
+ * @param[in] navgr BGDLIXA: number of bins used for averaging.
+ * @param[in] nincl BGDLIXA: number of Phibar layers to include.
+ * @param[in] nexcl BGDLIXA: number of Phibar layers to exclude.
+ *
+ * Computes a COMPTEL DRB cube using either the PHINOR or BGDLIXA method.
+ * See the protected methods compute_drb_phinor() and compute_drb_bgdlixa()
+ * for more information.
+ ***************************************************************************/
+void GCOMObservation::compute_drb(const std::string& method,
+                                  const GCOMDri&     drm,
+                                  const int&         nrunav,
+                                  const int&         navgr,
+                                  const int&         nincl,
+                                  const int&         nexcl)
+{
+    // Branch to relevant method based on specified background method
+    if (method == "PHINOR") {
+        compute_drb_phinor(drm);
+    }
+    else if (method == "BGDLIXA") {
+        compute_drb_bgdlixa(drm, nrunav, navgr, nincl, nexcl);
+    }
+    else {
+        std::string msg = "Unknown background method \""+method+"\". "
+                          "Specify either \"PHINOR\" or \"BGDLIXA\".";
+        throw GException::invalid_argument(G_COMPUTE_DRB, msg);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Print observation information
  *
  * @param[in] chatter Chattiness.
@@ -1131,6 +1172,477 @@ void GCOMObservation::write_attributes(GFitsHDU* hdu) const
     if (hdu != NULL) {
 
     } // endif: HDU was valid
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Compute DRB cube using PHINOR method
+ *
+ * @param[in] drm DRM cube.
+ *
+ * @exception GException::invalid_value
+ *            Observation does not contain an event cube
+ * @exception GException::invalid_argument
+ *            DRM cube is incompatible with DRE
+ ***************************************************************************/
+void GCOMObservation::compute_drb_phinor(const GCOMDri& drm)
+{
+    // Extract COMPTEL event cube
+    const GCOMEventCube* cube = dynamic_cast<const GCOMEventCube*>(this->events());
+    if (cube == NULL) {
+        std::string msg = "Observation \""+this->name()+"\" ("+this->id()+") "
+                          "does not contain a COMPTEL event cube. Please "
+                          "specify a COMPTEL observation containing and event "
+                          "cube.";
+        throw GException::invalid_value(G_COMPUTE_DRB_PHINOR, msg);
+    }
+
+    // Check DRM
+    if (!check_dri(drm)) {
+        std::string msg = "Specified DRM cube is incompatible with DRE. Please "
+                          "specify a DRM with a data-space definition that is "
+                          "identical to that of the DRE.";
+        throw GException::invalid_argument(G_COMPUTE_DRB_PHINOR, msg);
+    }
+
+    // Initialise DRB by cloning DRG
+    m_drb = m_drg;
+
+    // Get DRI sky maps
+    const GSkyMap& map_dre = cube->dre().map();
+    const GSkyMap& map_drm = drm.map();
+    const GSkyMap& map_drg = m_drg.map();
+    GSkyMap&       map_drb = const_cast<GSkyMap&>(m_drb.map());
+
+    // Get data space dimensions
+    int npix    = m_drg.map().npix();
+    int nphibar = m_drg.nphibar();
+
+    // Phibar normalise DRB
+    for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
+        double sum_dre = 0.0;
+        double sum_drm = 0.0;
+        double sum_drg = 0.0;
+        for (int ipix = 0; ipix < npix; ++ipix) {
+            sum_dre += map_dre(ipix, iphibar);
+            sum_drm += map_drm(ipix, iphibar);
+            sum_drg += map_drg(ipix, iphibar);
+        }
+        if (sum_drg > 0.0) {
+            double norm = (sum_dre - sum_drm) / sum_drg;
+            for (int ipix = 0; ipix < npix; ++ipix) {
+                map_drb(ipix, iphibar) *= norm;
+            }
+        }
+        else {
+            for (int ipix = 0; ipix < npix; ++ipix) {
+                map_drb(ipix, iphibar) = 0.0;
+            }
+        }
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Compute DRB cube using BGDLIXA method
+ *
+ * @param[in] drm DRM cube.
+ * @param[in] nrunav Number of bins used for running average.
+ * @param[in] navgr Number of bins used for averaging.
+ * @param[in] nincl Number of Phibar layers to include.
+ * @param[in] nexcl Number of Phibar layers to exclude.
+ *
+ * @exception GException::invalid_value
+ *            Observation does not contain an event cube
+ * @exception GException::invalid_argument
+ *            DRM cube is incompatible with DRE
+ *
+ * Computes a DRB cube using the BGDLIXA method that is documented in Rob
+ * van Dijk's PhD thesis. The revelant equations from the thesis that are
+ * implemented here are 3.12, 3.12 and 3.14.
+ ***************************************************************************/
+void GCOMObservation::compute_drb_bgdlixa(const GCOMDri& drm,
+                                          const int&     nrunav,
+                                          const int&     navgr,
+                                          const int&     nincl,
+                                          const int&     nexcl)
+{
+    // Extract COMPTEL event cube
+    const GCOMEventCube* cube = dynamic_cast<const GCOMEventCube*>(this->events());
+    if (cube == NULL) {
+        std::string msg = "Observation \""+this->name()+"\" ("+this->id()+") "
+                          "does not contain a COMPTEL event cube. Please "
+                          "specify a COMPTEL observation containing and event "
+                          "cube.";
+        throw GException::invalid_value(G_COMPUTE_DRB_PHINOR, msg);
+    }
+
+    // Check DRM
+    if (!check_dri(drm)) {
+        std::string msg = "Specified DRM cube is incompatible with DRE. Please "
+                          "specify a DRM with a data-space definition that is "
+                          "identical to that of the DRE.";
+        throw GException::invalid_argument(G_COMPUTE_DRB_PHINOR, msg);
+    }
+
+    // Initialise DRB and scratch DRI by cloning DRG
+    m_drb       = m_drg;
+    GCOMDri dri = m_drg;
+
+    // Get references to relevant sky maps
+    const GSkyMap& map_dre = cube->dre().map();
+    const GSkyMap& map_drm = drm.map();
+    const GSkyMap& map_drg = m_drg.map();
+    GSkyMap&       map_drb = const_cast<GSkyMap&>(m_drb.map());
+    GSkyMap&       map_dri = const_cast<GSkyMap&>(dri.map());
+
+    // Get data space dimensions
+    int nchi    = m_drg.nchi();
+    int npsi    = m_drg.npsi();
+    int nphibar = m_drg.nphibar();
+    int npix    = nchi * npsi;
+    int nsize   = npix * nphibar;
+
+    // Precompute half running average lengths
+    int navgr2 = int(navgr/2);
+    int nexcl2 = int(nexcl/2);
+    int nincl2 = int(nincl/2);
+
+    // Initialise DRB and scratch DRI
+    for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
+        for (int ipix = 0; ipix < npix; ++ipix) {
+            map_drb(ipix, iphibar) = 0.0;
+            map_dri(ipix, iphibar) = 0.0;
+        }
+    }
+
+    // Phibar normalise DRB (Equation 3.12 in Rob van Dijk's PhD thesis).
+    for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
+        double sum_dre = 0.0;
+        double sum_drm = 0.0;
+        double sum_drg = 0.0;
+        for (int ipix = 0; ipix < npix; ++ipix) {
+            sum_dre += map_dre(ipix, iphibar);
+            sum_drm += map_drm(ipix, iphibar);
+            sum_drg += map_drg(ipix, iphibar);
+        }
+        if (sum_drg > 0.0) {
+            double norm = (sum_dre - sum_drm) / sum_drg;
+            for (int ipix = 0; ipix < npix; ++ipix) {
+                map_dri(ipix, iphibar) = map_drg(ipix, iphibar) * norm;
+            }
+        }
+    }
+
+    // Do 3D running average of DRE and Phibar normalised DRG (Equation 3.13
+    // in Rob van Dijk's PhD thesis). The result is a Phibar normalised DRG
+    // that is normalised over the 3D region to the DRE. The 3D region is all
+    // Phibar layers and [-nrunav,+nrunav] Chi/Psi pixels around the pixel of
+    // consideration.
+    if (nrunav >= 1) {
+
+        // Loop over Chi pixels
+        for (int ichi = 0; ichi < nchi; ++ichi) {
+
+            // Compute running average window in Chi
+            int kchi_min = ichi - nrunav;
+            int kchi_max = ichi + nrunav;
+            if (kchi_min < 0) {
+                kchi_min = 0;
+            }
+            if (kchi_max >= nchi) {
+                kchi_max = nchi - 1;
+            }
+
+            // Loop over Psi pixels
+            for (int ipsi = 0; ipsi < npsi; ++ipsi) {
+
+                // Compute running average window in Psi
+                int kpsi_min = ipsi - nrunav;
+                int kpsi_max = ipsi + nrunav;
+                if (kpsi_min < 0) {
+                    kpsi_min = 0;
+                }
+                if (kpsi_max >= npsi) {
+                    kpsi_max = npsi - 1;
+                }
+
+                // Initialise sums
+                double sum_dre = 0.0;
+                double sum_drm = 0.0;
+                double sum_dri = 0.0;
+
+                // Compute running average
+                for (int kchi = kchi_min; kchi <= kchi_max; ++kchi) {
+                    for (int kpsi = kpsi_min; kpsi <= kpsi_max; ++kpsi) {
+                        int kpix = kchi + kpsi * nchi;
+                        for (int kphibar = 0; kphibar < nphibar; ++kphibar) {
+                            if (map_drg(kpix, kphibar) != 0.0) {
+                                sum_dre += map_dre(kpix, kphibar);
+                                sum_drm += map_drm(kpix, kphibar);
+                                sum_dri += map_dri(kpix, kphibar);
+                            }
+                        }
+                    }
+                }
+
+                // Renormalise scratch array
+                if (sum_dri != 0.0) {
+                    int    ipix = ichi + ipsi * nchi;
+                    double norm = (sum_dre - sum_drm) / sum_dri;
+                    for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
+                        map_dri(ipix, iphibar) *= norm;
+                    }
+                }
+
+            } // endfor: looped over Phi
+
+        } // endfor: looped over Chi
+
+    } // endif: running averaging was requested
+
+    // First part of Equation (3.14) in Rob van Dijk's PhD thesis.
+    // (DRB = B^0C_L / sum B^0C_L). The DRB is pre-computed by adjusting the
+    // scratch DRI over nincl Phibar layers.
+    int ksel1 = 0;
+    int kex1  = 0;
+    int kex2  = 0;
+    int ksel2 = 0;
+    for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
+
+        // Get Phibar index range for sums
+        get_bgdlixa_phibar_indices(iphibar, nincl, nexcl,
+                                   &ksel1, &kex1, &kex2, &ksel2);
+
+        // Loop over Chi/Psi pixels
+        for (int ipix = 0; ipix < npix; ++ipix) {
+
+            // Initialise DRB value
+            map_drb(ipix, iphibar) = 0.0;
+
+            // Continue only if scratch DRI is non-zero
+            if (map_dri(ipix, iphibar) != 0.0) {
+
+                // Initialise sum
+                double sum_dri = 0.0;
+
+                // Take sum over [ksel1, kex1]
+                if (kex1 >= 0) {
+                    for (int kphibar = ksel1; kphibar <= kex1; ++kphibar) {
+                        sum_dri += map_dri(ipix, kphibar);
+                    }
+                }
+
+                // Take sum over [kxe2, ksel2]
+                if (kex2 < nphibar) {
+                    for (int kphibar = kex2; kphibar <= ksel2; ++kphibar) {
+                        sum_dri += map_dri(ipix, kphibar);
+                    }
+                }
+
+                // If sum is not zero then set DRB
+                if (sum_dri != 0.0) {
+                    map_drb(ipix, iphibar) = map_dri(ipix, iphibar) / sum_dri;
+                }
+
+            } // endif: scratch DRI was non-zero
+
+        } // endfor: looped over Chi/Psi pixels
+
+    } // endfor: looped over Phibar
+
+    // Second part of Equation (3.14) in Rob van Dijk's PhD thesis that
+    // corresponds to G * [E / G]^s that will be stored in scratch DRI.
+    //
+    // NOTES:
+    // - we replaced DRE by DRE-DRM in the nominator of the running
+    //   average since and source component should of course be
+    //   subtracted
+    // - we implemented an alternative running average computation where
+    //   the ratio between the DRE and DRG sums is taken. This avoids
+    //   the divergence of the ratio at the edge of the DRG.
+    for (int ichi = 0; ichi < nchi; ++ichi) {
+
+        // Compute running average window in Chi
+        int kchi_min = ichi - navgr2;
+        int kchi_max = ichi + navgr2;
+        if (kchi_min < 0) {
+            kchi_min = 0;
+        }
+        if (kchi_max >= nchi) {
+            kchi_max = nchi - 1;
+        }
+
+        // Loop over Psi pixels
+        for (int ipsi = 0; ipsi < npsi; ++ipsi) {
+
+            // Compute running average window in Psi
+            int kpsi_min = ipsi - navgr2;
+            int kpsi_max = ipsi + navgr2;
+            if (kpsi_min < 0) {
+                kpsi_min = 0;
+            }
+            if (kpsi_max >= npsi) {
+                kpsi_max = npsi - 1;
+            }
+
+            // Loop over Phibar layers
+            for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
+
+                // Initialise sums
+                double sum_dre = 0.0;
+                double sum_drm = 0.0;
+                double sum_drg = 0.0;
+
+                // Compute running average
+                for (int kchi = kchi_min; kchi <= kchi_max; ++kchi) {
+                    for (int kpsi = kpsi_min; kpsi <= kpsi_max; ++kpsi) {
+                        int kpix = kchi + kpsi * nchi;
+                        sum_dre += map_dre(kpix, iphibar);
+                        sum_drm += map_drm(kpix, iphibar);
+                        sum_drg += map_drg(kpix, iphibar);
+                    }
+                }
+
+                // Multiply average by DRG and store it in scratch DRI
+                int ipix = ichi + ipsi * nchi;
+                if (sum_drg > 0.0) {
+                    double norm = (sum_dre - sum_drm) / sum_drg;
+                    map_dri(ipix, iphibar) = map_drg(ipix, iphibar) * norm;
+                }
+                else {
+                    map_dri(ipix, iphibar) = 0.0;
+                }
+
+            } // endfor: looped over Phibar layers
+
+        } // endfor: looped over Psi pixels
+
+    } // endfor: looped over Chi pixels
+
+    // Third part of Equation (3.14) in Rob van Dijk's PhD thesis that sums
+    // G * [E / G]^s over a subset of Phibar layers (the first parenthesis)
+    // and multplies with B^0C_L / sum B^0C_L
+    for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
+
+        // Get Phibar index range for sums
+        get_bgdlixa_phibar_indices(iphibar, nincl, nexcl,
+                                   &ksel1, &kex1, &kex2, &ksel2);
+
+        // Loop over Chi/Psi pixels
+        for (int ipix = 0; ipix < npix; ++ipix) {
+
+            // If DRB is not empty then correct it
+            if (map_drb(ipix, iphibar) != 0.0) {
+
+                // Initialise DRI sum
+                double sum_dri = 0.0;
+
+                // Take sum over [ksel1, kex1]
+                if (kex1 >= 0) {
+                    for (int kphibar = ksel1; kphibar <= kex1; ++kphibar) {
+                        sum_dri += map_dri(ipix, kphibar);
+                    }
+                }
+
+                // Take sum over [kxe2, ksel2]
+                if (kex2 < nphibar) {
+                    for (int kphibar = kex2; kphibar <= ksel2; ++kphibar) {
+                        sum_dri += map_dri(ipix, kphibar);
+                    }
+                }
+
+                // Correct DRB
+                map_drb(ipix, iphibar) *= sum_dri;
+
+            } // endif: DRB was not empty
+
+        } // endfor: looped over Chi/Psi pixels
+
+    } // endfor: looped over Phibar
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Compute Phibar index range for BGDLIXA background method
+ *
+ * @param[in] iphibar Phibar layer index.
+ * @param[in] nincl Number of Phibar layers to include.
+ * @param[in] nexcl Number of Phibar layers to exclude.
+ * @param[out] isel1 Start index for first sum.
+ * @param[out] iex1 Stop index for first sum.
+ * @param[out] iex2 Start index for second sum.
+ * @param[out] isel2 Stop index for second sum.
+ *
+ * This method is a helper method for the BGDLIXA background method. It
+ * computes the Phibar index range for the third step of the background
+ * model computation. The third step corresponds to Equation (3.14) in Rob
+ * van Dijk's PhD thesis.
+ *
+ * The Phibar sum will be taken over the index ranges [isel1, iex1] and
+ * [ixe2, isel2].
+ ***************************************************************************/
+void GCOMObservation::get_bgdlixa_phibar_indices(const int& iphibar,
+                                                 const int& nincl,
+                                                 const int& nexcl,
+                                                 int*       isel1,
+                                                 int*       iex1,
+                                                 int*       iex2,
+                                                 int*       isel2) const
+{
+    // Get number of Phibar layers
+    int nphibar = m_drg.nphibar();
+    int imax    = nphibar - 1;
+
+    // Precompute half running average lengths
+    int nexcl2 = int(nexcl/2);
+    int nincl2 = int(nincl/2);
+
+    // Compute Phibar index range without respecting boundaries
+    *iex1  = iphibar - nexcl2 - 1;
+    *iex2  = iphibar + nexcl2 + 1;
+    *isel1 = iphibar - nincl2;
+    *isel2 = iphibar + nincl2;
+
+    // If no Phibar layers are to be excluded then make sure that the
+    // Phibar layer range is continuous
+    if (nexcl == 0) {
+        (*iex2)--;
+    }
+
+    // Make sure that start index of first sum and stop index of second
+    // some are within the validity range
+    if (*isel1 < 0) {
+        *isel1 = 0;
+    }
+    if (*isel2 > imax) {
+        *isel2 = imax;
+    }
+ 
+    // Make sure that the sums use always ncincl Phibar layers, also near
+    // the edges
+    if (*isel1 == 0) {
+        *isel2 = nincl - 1;
+        if (nincl > imax) {
+            *isel2 = imax;
+        }
+
+    }
+    if (*isel2 == imax) {
+        *isel1 = nphibar - nincl;
+        if (*isel1 < 0) {
+            *isel1 = 0;
+        }
+    }
 
     // Return
     return;
