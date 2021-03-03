@@ -135,8 +135,6 @@ protected:
     double compute_geometry(const int& tjd, const double&     theta,
                                             const double&     phi,
                                             const GCOMStatus& status) const;
-    void   compute_drm_ptsrc(const GCOMObservation& obs,
-                             const GModelSky&       model);
     void   compute_tof_correction(void);
 
     // Protected members

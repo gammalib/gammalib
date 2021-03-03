@@ -1,8 +1,9 @@
-2021-02-25
+2021-03-03
 
         * Version 2.0.0 released
         ========================
 
+        Implement COMPTEL response for diffuse models (#3558).
         Fix reading of scaled FITS columns, remove GFitsTableCol::scale() method (#3553)
         Add gammalib::compare() function (#3552)
         Add DRI constructor to GCOMObservation class.
@@ -36,6 +37,7 @@
         Implement analytical gradients for the radial Gaussian model in a
           stacked analysis (#3203)
         Add GSkyModel flux_error() and eflux_error() methods (#3074)
+        Remove COMPTEL internal response caching (#2973).
         Implement pre-computation cache in GModelSpatialGauss (#1300)
 
 

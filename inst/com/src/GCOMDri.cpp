@@ -51,8 +51,6 @@
 #define G_COMPUTE_DRE               "GCOMDri::compute_dre(GCOMObservation&, "\
                                                    "GCOMSelection&, double&)"
 #define G_COMPUTE_DRM       "GCOMDri::compute_drm(GCOMObservation&, GModel&)"
-#define G_COMPUTE_DRE_PTSRC   "GCOMDri::compute_drm_ptsrc(GCOMObservation&, "\
-                                                                "GModelSky&)"
 #define G_COMPUTE_TOF_CORRECTION          "GCOMDri::compute_tof_correction()"
 
 /* __ Macros _____________________________________________________________ */
@@ -741,42 +739,22 @@ void GCOMDri::compute_drx(const GCOMObservation& obs)
  * @param[in] obs COMPTEL observation.
  * @param[in] model Model.
  *
- * @exception GException::feature_not_implemented
- *            Method is only implemented for a point source sky model.
- *
  * Compute DRM model cube for a COMPTEL observation.
  ***************************************************************************/
 void GCOMDri::compute_drm(const GCOMObservation& obs,
                           const GModel&          model)
 {
-    // Check if model is a sky model
-    const GModelSky* skymodel = dynamic_cast<const GModelSky*>(&model);
-    if (skymodel == NULL) {
-        std::string msg = "Method is only implement for sky models.";
-        throw GException::feature_not_implemented(G_COMPUTE_DRM, msg);
-    }
+    // Evaluate model
+    GVector values = model.eval(obs);
 
-    // Extract spatial model component
-    const GModelSpatial* spatial = skymodel->spatial();
+    // Get number of Chi/Psi pixels
+    int npix = nchi() * npsi();
 
-    // Select computation depending on the spatial model type
-    switch (spatial->code()) {
-        case GMODEL_SPATIAL_POINT_SOURCE:
-            {
-            compute_drm_ptsrc(obs, *skymodel);
-            }
-            break;
-        case GMODEL_SPATIAL_RADIAL:
-        case GMODEL_SPATIAL_ELLIPTICAL:
-        case GMODEL_SPATIAL_DIFFUSE:
-            {
-            std::string msg = "Method is not yet implemented for spatial model "
-                              "type \""+spatial->type()+"\".";
-            throw GException::feature_not_implemented(G_COMPUTE_DRM, msg);
-            }
-            break;
-        default:
-            break;
+    // Fill DRM with model values
+    for (int iphibar = 0, i = 0; iphibar < nphibar(); ++iphibar) {
+        for (int ipix = 0; ipix < npix; ++ipix, ++i) {
+            m_dri(ipix, iphibar) = values[i];
+        }
     }
 
     // Return
@@ -1474,124 +1452,6 @@ double GCOMDri::compute_geometry(const int&        tjd,
 
     // Return geometry factor
     return geometry;
-}
-
-
-/***********************************************************************//**
- * @brief Compute DRM model for a point source
- *
- * @param[in] obs COMPTEL observation.
- * @param[in] model Sky model.
- *
- * @exception GException::invalid_argument
- *            Model is not a point source model.
- *
- * Compute point source DRM model cube for a COMPTEL observation.
- ***************************************************************************/
-void GCOMDri::compute_drm_ptsrc(const GCOMObservation& obs,
-                                const GModelSky&       model)
-{
-    // Extract source direction from spatial model component
-    const GModelSpatialPointSource* source =
-        dynamic_cast<const GModelSpatialPointSource*>(model.spatial());
-    if (source == NULL) {
-        std::string msg = "Spatial component of model \""+model.name()+"\" "
-                          "is not a point source.";
-        throw GException::invalid_argument(G_COMPUTE_DRE_PTSRC, msg);
-    }
-    const GSkyDir& srcDir = source->dir();
-
-    // Extract response
-    const GCOMResponse* rsp = obs.response();
-
-    // Set all DRM cube bins to zero
-    init_cube();
-
-    // Get DRX value (units: cm^2 sec)
-    double drx = obs.drx()(srcDir);
-
-    // Get ontime
-    double ontime = obs.ontime(); // sec
-
-    // Get deadtime correction
-    double deadc = obs.deadc(GTime());
-
-    // Compute multiplicate IAQ normalisation
-    double norm = drx * deadc / ontime;
-
-    // Loop over all scatter angle pixels
-    for (int index = 0; index < m_dri.npix(); ++index) {
-
-        // Get sky direction of pixel
-        GSkyDir obsDir = m_dri.inx2dir(index);
-
-        // Compute angle between true photon arrival direction and scatter
-        // direction (Chi,Psi)
-        double phigeo = srcDir.dist_deg(obsDir);
-
-        // Get Phigeo interpolation factor
-        double phirat  = phigeo / rsp->m_phigeo_bin_size; // 0.5 at bin centre
-        int    iphigeo = int(phirat);                     // index into which Phigeo falls
-        double eps     = phirat - iphigeo - 0.5;          // 0.0 at bin centre
-
-        // Continue only if Phigeo is inside IAQ
-        if (iphigeo < rsp->m_phigeo_bins) {
-
-            // Initialise IAQ pixel index
-            int i = iphigeo;
-
-            // Interpolate towards left
-            if (eps < 0.0) {
-
-                // Not the first bin
-                if (iphigeo > 0) {
-                    for (int iphibar = 0; iphibar < nphibar(); ++iphibar,
-                         i += rsp->m_phigeo_bins) {
-                        double iaq = obs.drg()(index, iphibar);
-                        iaq       *= (1.0 + eps) * rsp->m_iaq[i] - eps * rsp->m_iaq[i-1];
-                        m_dri(index, iphibar) = iaq * norm;
-                    }
-                }
-                else {
-                    for (int iphibar = 0; iphibar < nphibar(); ++iphibar,
-                         i += rsp->m_phigeo_bins) {
-                        double iaq = obs.drg()(index, iphibar);
-                        iaq       *= (1.0 - eps) * rsp->m_iaq[i] + eps * rsp->m_iaq[i+1];
-                        m_dri(index, iphibar) = iaq * norm;
-                    }
-                }
-
-            }
-
-            // Interpolate towards right
-            else {
-
-                // Not the last IAQ bin
-                if (iphigeo < rsp->m_phigeo_bins-1) {
-                    for (int iphibar = 0; iphibar < nphibar(); ++iphibar,
-                         i += rsp->m_phigeo_bins) {
-                        double iaq = obs.drg()(index, iphibar);
-                        iaq       *= (1.0 - eps) * rsp->m_iaq[i] + eps * rsp->m_iaq[i+1];
-                        m_dri(index, iphibar) = iaq * norm;
-                    }
-                }
-                else {
-                    for (int iphibar = 0; iphibar < nphibar(); ++iphibar,
-                         i += rsp->m_phigeo_bins) {
-                        double iaq = obs.drg()(index, iphibar);
-                        iaq       *= (1.0 + eps) * rsp->m_iaq[i] - eps * rsp->m_iaq[i-1];
-                        m_dri(index, iphibar) = iaq * norm;
-                    }
-                }
-
-            } // endfor: looped over all Compton scatter angles
-
-        } // endif: Phigeo was inside IAQ
-
-    } // endfor: looped over all scatter angle pixels
-
-    // Return
-    return;
 }
 
 

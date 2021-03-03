@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCOMResponse.i - COMPTEL Response class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -56,11 +56,6 @@ public:
                                const GTime&        obsTime,
                                const GObservation& obs) const;
     virtual GEbounds      ebounds(const GEnergy& obsEnergy) const;
-
-    // Overloaded virtual base class methods
-    virtual double        irf_spatial(const GEvent&       event,
-                                      const GSource&      source,
-                                      const GObservation& obs) const;
 
     // Other Methods
     void               caldb(const GCaldb& caldb);

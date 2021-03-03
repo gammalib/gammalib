@@ -66,9 +66,6 @@ public:
     virtual void                read(const GXmlElement& xml);
     virtual void                write(GXmlElement& xml) const;
 
-    // Implement virtual methods
-    virtual void                remove_response_cache(const std::string& name);
-
     // Other methods
     bool             is_unbinned(void) const;
     bool             is_binned(void) const;
@@ -91,7 +88,6 @@ public:
     const GSkyMap&   drb(void) const;
     const GSkyMap&   drg(void) const;
     const GSkyMap&   drx(void) const;
-    const GCOMDri&   drm(const GModelSky& model) const;
     GCOMDri          drm(const GModels& models) const;
     const GCOMTim&   tim(void) const;
     const GCOMOads&  oads(void) const;

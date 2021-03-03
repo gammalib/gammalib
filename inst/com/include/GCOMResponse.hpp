@@ -83,11 +83,6 @@ public:
     virtual GEbounds      ebounds(const GEnergy& obsEnergy) const;
     virtual std::string   print(const GChatter& chatter = NORMAL) const;
 
-    // Overloaded virtual base class methods
-    virtual double        irf_spatial(const GEvent&       event,
-                                      const GSource&      source,
-                                      const GObservation& obs) const;
-
     // Other Methods
     void               caldb(const GCaldb& caldb);
     const GCaldb&      caldb(void) const;

@@ -1,7 +1,7 @@
 .. _2.0:
 
-GammaLib 2.0 release (25 February 2021)
-=======================================
+GammaLib 2.0 release (3 March 2021)
+===================================
 
 Overview
 --------
@@ -31,6 +31,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`3558 <https://cta-redmine.irap.omp.eu/issues/3558>`_] -
+  Implement COMPTEL response for diffuse models
 * [`3552 <https://cta-redmine.irap.omp.eu/issues/3552>`_] -
   Add ``gammalib::compare()`` function
 * Add DRI constructor to ``GCOMObservation`` class
@@ -90,3 +92,5 @@ New features
 Clean up
 --------
 
+* [`2973 <https://cta-redmine.irap.omp.eu/issues/2973>`_] -
+  Remove COMPTEL internal response caching

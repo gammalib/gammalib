@@ -679,43 +679,16 @@ void GCOMObservation::load(const GFilename&              evpname,
 
 
 /***********************************************************************//**
- * @brief Return model DRM cube
- *
- * @param[in] model Sky model.
- *
- * @return model DRM cube.
- ***************************************************************************/
-const GCOMDri& GCOMObservation::drm(const GModelSky& model) const
-{
-    // Search model in DRM cache
-    int index = 0;
-    for (; index < m_drms.size(); ++index) {
-        if (model.name() == m_drms[index].name()) {
-            break;
-        }
-    }
-
-    // If no model was found then add a cube to the DRM cache
-    if (index >= m_drms.size()) {
-        const_cast<GCOMObservation*>(this)->add_drm(model);
-        index = m_drms.size() - 1;
-    }
-
-    // Return reference to DRM cube
-    return (m_drms[index]);
-}
-
-
-/***********************************************************************//**
  * @brief Compute DRM cube
  *
  * @param[in] models Model container.
+ * @return DRM cube (units of counts)
  *
  * @exception GException::invalid_value
  *            Observation does not contain an event cube.
  *
  * Computes a COMPTEL DRM cube from the information provided in a model
- * container.
+ * container. The values of the DRM cube are in units of counts.
  ***************************************************************************/
 GCOMDri GCOMObservation::drm(const GModels& models) const
 {
@@ -732,6 +705,9 @@ GCOMDri GCOMObservation::drm(const GModels& models) const
     // Create DRM cube as copy of DRE cube
     GCOMEventCube drm_cube = *cube;
 
+    // Get vector of model values
+    GVector values = models.eval(*this);
+
     // Loop over all cube bins
     for (int i = 0; i < drm_cube.size(); ++i) {
 
@@ -739,7 +715,7 @@ GCOMDri GCOMObservation::drm(const GModels& models) const
         GCOMEventBin* bin = drm_cube[i];
 
         // Compute model value for cube bin
-        double model = models.eval(*bin, *this) * bin->size();
+        double model = values[i] * bin->size();
 
         // Store model value in cube bin
         bin->counts(model);
@@ -751,39 +727,6 @@ GCOMDri GCOMObservation::drm(const GModels& models) const
 
     // Return DRM
     return drm;
-}
-
-
-/***********************************************************************//**
- * @brief Remove response cache for model
- *
- * @param[in] name Model name.
- *
- * Remove response cache for model @p name from response cache.
- ***************************************************************************/
-void GCOMObservation::remove_response_cache(const std::string& name)
-{
-    // Search source in DRM cache
-    int index = 0;
-    for (; index < m_drms.size(); ++index) {
-        if (name == m_drms[index].name()) {
-            break;
-        }
-    }
-
-    // If source was found then remove cache entry for source
-    if (index < m_drms.size()) {
-        m_drms.erase(m_drms.begin()+index);
-    }
-
-    // Build model name
-    std::string model_name  = id() + ":" + name;
-
-    // Remove response cache
-    const_cast<GCOMResponse*>(this->response())->remove_response_cache(model_name);
-
-    // Return
-    return;
 }
 
 
@@ -893,9 +836,6 @@ void GCOMObservation::init_members(void)
     m_tim.clear();
     m_oads.clear();
 
-    // Initialise members for response cache
-    m_drms.clear();
-
     // Return
     return;
 }
@@ -932,9 +872,6 @@ void GCOMObservation::copy_members(const GCOMObservation& obs)
     m_oadnames = obs.m_oadnames;
     m_tim      = obs.m_tim;
     m_oads     = obs.m_oads;
-
-    // Copy members for response cache
-    m_drms = obs.m_drms;
 
     // Return
     return;
@@ -1117,46 +1054,6 @@ void GCOMObservation::load_drx(const GFilename& drxname)
 
     // Store DRX filename
     m_drxname = drxname;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Add DRM cube to observation response cache
- *
- * @param[in] model Sky model.
- *
- * @exception GException::invalid_value
- *            Observation does not contain an event cube.
- *
- * Adds a DRM cube based on the given source to the observation response
- * cache.
- ***************************************************************************/
-void GCOMObservation::add_drm(const GModelSky& model)
-{
-    // Get pointer on COMPTEL event cube
-    const GCOMEventCube* cube = dynamic_cast<const GCOMEventCube*>(m_events);
-    if (cube == NULL) {
-        std::string cls = std::string(typeid(m_events).name());
-        std::string msg = "Events of type \""+cls+"\" is not a COMPTEL event "
-                          "cube. Please specify a COMPTEL event cube when "
-                          "using this method.";
-        throw GException::invalid_value(G_ADD_DRM, msg);
-    }
-
-    // Initialise DRM cube based on DRE cube
-    GCOMDri drm = cube->dre();
-
-    // Compute DRM
-    drm.compute_drm((*this), model);
-
-    // Set model name
-    drm.name(model.name());
-
-    // Push model on stack
-    m_drms.push_back(drm);
 
     // Return
     return;

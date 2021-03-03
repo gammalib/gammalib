@@ -405,110 +405,6 @@ double GCOMResponse::irf(const GEvent&       event,
 
 
 /***********************************************************************//**
- * @brief Return instrument response
- *
- * @param[in] event Event.
- * @param[in] source Source.
- * @param[in] obs Observation.
- * @return Instrument response.
- *
- * @exception GException::invalid_argument
- *            Invalid observation or event type specified.
- * @exception GException::feature_not_implemented
- *            Computation for specified spatial model not implemented.
- *
- * Returns the instrument response for a given event, source and observation.
- * If all spatial model parameters are fixed a DRM cube stored in the COMPTEL
- * observation is used. The computation of this cube is handled by the
- * GCOMObservation::drm() method that also will update the cube in case that
- * any of the parameters changes.
- ***************************************************************************/
-double GCOMResponse::irf_spatial(const GEvent&       event,
-                                 const GSource&      source,
-                                 const GObservation& obs) const
-{
-    // Initialise IRF value
-    double irf = 0.0;
-
-    // Determine if all spatial parameters are fixed
-    #if defined(G_USE_DRM_CUBE)
-    bool fixed = true;
-    for (int i = 0; i < source.model()->size(); ++i) {
-        if ((*(source.model()))[i].is_free()) {
-            fixed = false;
-            break;
-        }
-    }
-
-    // If all parameters are fixed then use the DRM cache
-    if (fixed) {
-
-        // Get pointer to COMPTEL observation
-        const GCOMObservation* comobs = dynamic_cast<const GCOMObservation*>(&obs);
-        if (comobs == NULL) {
-            std::string cls = std::string(typeid(&obs).name());
-            std::string msg = "Observation of type \""+cls+"\" is not a "
-                              "COMPTEL observation. Please specify a COMPTEL "
-                              "observation as argument.";
-            throw GException::invalid_argument(G_IRF_SPATIAL, msg);
-        }
-
-        // Get pointer to COMPTEL event bin
-        if (!event.is_bin()) {
-            std::string msg = "The current event is not a COMPTEL event bin. "
-                              "This method only works on binned COMPTEL data. "
-                              "Please make sure that a COMPTEL observation "
-                              "containing binned data is provided.";
-            throw GException::invalid_argument(G_IRF_SPATIAL, msg);
-        }
-        const GCOMEventBin* bin = static_cast<const GCOMEventBin*>(&event);
-
-        // Setup sky model for DRM computation
-        GModelSky model(*(source.model()), GModelSpectralConst());
-
-        // Get IRF value
-        irf = comobs->drm(model)[bin->index()];
-
-    } // endif: all spatial parameters were fixed
-
-    // ... otherwise compute IRF directly
-    else {
-    #endif
-
-        // Select IRF depending on the spatial model type
-        switch (source.model()->code()) {
-            case GMODEL_SPATIAL_POINT_SOURCE:
-                {
-                const GModelSpatialPointSource* src =
-                    static_cast<const GModelSpatialPointSource*>(source.model());
-                GPhoton photon(src->dir(), source.energy(), source.time());
-                irf = this->irf(event, photon, obs);
-                }
-                break;
-            case GMODEL_SPATIAL_RADIAL:
-            case GMODEL_SPATIAL_ELLIPTICAL:
-            case GMODEL_SPATIAL_DIFFUSE:
-                {
-                std::string msg = "Response computation not yet implemented "
-                                  "for spatial model type \""+
-                                  source.model()->type()+"\".";
-                throw GException::feature_not_implemented(G_IRF_SPATIAL, msg);
-                }
-                break;
-            default:
-                break;
-        }
-
-    #if defined(G_USE_DRM_CUBE)
-    } // endelse: used IRF computation directly
-    #endif
-
-    // Return IRF value
-    return irf;
-}
-
-
-/***********************************************************************//**
  * @brief Return integral of event probability for a given sky model over ROI
  *
  * @param[in] model Sky model.
@@ -891,7 +787,7 @@ void GCOMResponse::free_members(void)
  *
  * @p gradients is an optional matrix where the number of rows corresponds
  * to the number of events in the observation and the number of columns
- * corresponds to the number of spatial model parameters. ince for point
+ * corresponds to the number of spatial model parameters. Since for point
  * sources no gradients are computed, the method does not alter the
  * content of @p gradients.
  ***************************************************************************/
@@ -1105,24 +1001,173 @@ GVector GCOMResponse::irf_elliptical(const GModelSky&    model,
  * @return Instrument response to diffuse source for all events in
  *         observation.
  *
- * @todo Implement method.
+ * @exception GException::invalid_argument
+ *            Observation is not a COMPTEL observation.
+ * @exception GException::invalid_value
+ *            Response not initialised with a valid IAQ
+ *
+ * Returns the instrument response to a diffuse source for all events in
+ * the observations. The diffuse source may be energy dependent.
+ *
+ * The computation is done by integrating the diffuse model for each pixel
+ * in Chi and Psi over a circular region centred on the Chi/Psi pixel with
+ * a radius equal to the maximum Phigeo value. The radial integration is
+ * done by looping over all Phigeo bins of the response. For each Phigeo
+ * value, the azimuthal integration is done by stepping with an angular step
+ * size that corresponds to the Phigeo step size (which typically is 1 deg).
+ *
+ * @p gradients is an optional matrix where the number of rows corresponds
+ * to the number of events in the observation and the number of columns
+ * corresponds to the number of spatial model parameters. Since for point
+ * sources no gradients are computed, the method does not alter the
+ * content of @p gradients.
  ***************************************************************************/
 GVector GCOMResponse::irf_diffuse(const GModelSky&    model,
                                   const GObservation& obs,
                                   GMatrix*            gradients) const
 {
-    // Throw exception
-    std::string msg = "Response computation not yet implemented "
-                      "for spatial model type \""+
-                      model.spatial()->type()+"\".";
-    throw GException::feature_not_implemented(G_IRF_DIFFUSE, msg);
+    // Extract COMPTEL observation
+    const GCOMObservation* obs_ptr = dynamic_cast<const GCOMObservation*>(&obs);
+    if (obs_ptr == NULL) {
+        std::string cls = std::string(typeid(&obs).name());
+        std::string msg = "Observation of type \""+cls+"\" is not a COMPTEL "
+                          "observations. Please specify a COMPTEL observation "
+                          "as argument.";
+        throw GException::invalid_argument(G_IRF_DIFFUSE, msg);
+    }
 
-    // Get number of events
-    int nevents = obs.events()->size();
+    // Extract COMPTEL event cube
+    const GCOMEventCube* cube = dynamic_cast<const GCOMEventCube*>(obs_ptr->events());
+    if (cube == NULL) {
+        std::string msg = "Observation \""+obs.name()+"\" ("+obs.id()+") does "
+                          "not contain a COMPTEL event cube. Please specify "
+                          "a COMPTEL observation containing and event cube.";
+        throw GException::invalid_argument(G_IRF_DIFFUSE, msg);
+    }
+
+    // Throw an exception if COMPTEL response is not set or if
+    if (m_iaq.empty()) {
+        std::string msg = "COMPTEL response is empty. Please initialise the "
+                          "response with an \"IAQ\".";
+        throw GException::invalid_value(G_IRF_DIFFUSE, msg);
+    }
+    else if (m_phigeo_bin_size == 0.0) {
+        std::string msg = "COMPTEL response has a zero Phigeo bin size. "
+                          "Please initialise the response with a valid "
+                          "\"IAQ\".";
+        throw GException::invalid_value(G_IRF_DIFFUSE, msg);
+    }
+
+    // Get number of Chi/Psi pixels, Phibar layers and event bins
+    int npix    = cube->naxis(0) * cube->naxis(1);
+    int nphibar = cube->naxis(2);
+    int nevents = cube->size();
 
     // Initialise result
     GVector irfs(nevents);
 
-    // Return IRF value
+    // Initialise some variables
+    double         phigeo_min = m_phigeo_min * gammalib::deg2rad;
+    double         phigeo_bin = m_phigeo_bin_size * gammalib::deg2rad;
+    const GSkyMap& drx        = obs_ptr->drx();
+    const double*  drg        = obs_ptr->drg().pixels();
+
+    // Compute IAQ normalisation (1/s): DEADC / ONTIME (s)
+    double iaq_norm = obs_ptr->deadc() /
+                      (obs_ptr->ontime() * cube->dre().tof_correction());
+
+    // Loop over Chi and Psi
+    for (int ipix = 0; ipix < npix; ++ipix) {
+
+        // Get pointer to event bin
+        const GCOMEventBin* bin = (*cube)[ipix];
+
+        // Get reference to instrument direction
+        const GCOMInstDir& obsDir = bin->dir();
+
+        // Get reference to Phigeo sky direction
+        const GSkyDir& phigeoDir = obsDir.dir();
+
+        // Loop over Phigeo
+        for (int iphigeo = 0; iphigeo < m_phigeo_bins; ++iphigeo) {
+
+            // Determine Phigeo value in radians
+            double phigeo = phigeo_min + iphigeo * phigeo_bin;
+
+            // Determine number of azimuthal integration steps and step size
+            // in radians
+            int naz = int(gammalib::twopi * phigeo / phigeo_bin + 0.5);
+            if (naz < 2) {
+                naz = 2;
+            }
+            double az_step = gammalib::twopi / double(naz);
+
+            // Computes solid angle of integration bin multiplied by Jaccobian
+            double omega = phigeo_bin * az_step * std::sin(phigeo);
+
+            // Loop over azimuth angle
+            double az = 0.0;
+            for (int iaz = 0; iaz < naz; ++iaz, az += az_step) {
+
+                // Get sky direction
+                GSkyDir skyDir = phigeoDir;
+                skyDir.rotate(az, phigeo);
+
+                // Fall through if sky direction is not contained in DRX
+                if (!drx.contains(skyDir)) {
+                    continue;
+                }
+
+                // Set photon
+                GPhoton photon(skyDir, bin->energy(), bin->time());
+
+                // Get model sky intensity for photon
+                double intensity = model.spatial()->eval(photon);
+
+                // Fall through if intensity is zero
+                if (intensity == 0.0) {
+                    continue;
+                }
+
+                // Multiply intensity by DRX value
+                intensity *= drx(skyDir);
+
+                // Multiply intensity by solid angle
+                intensity *= omega;
+
+                // Loop over Phibar
+                for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
+
+                    // Get IAQ index
+                    int i = iphibar * m_phigeo_bins + iphigeo;
+
+                    // Get IAQ value
+                    double iaq = m_iaq[i];
+
+                    // Fall through if IAQ is not positive
+                    if (iaq <= 0.0) {
+                        continue;
+                    }
+
+                    // Get DRI index
+                    int idri = ipix + iphibar * npix;
+
+                    // Compute IRF value
+                    double irf = iaq * drg[idri] * iaq_norm * intensity;
+
+                    // Add IRF value if it is positive
+                    if (irf > 0.0) {
+                        irfs[idri] += irf;
+                    }
+
+                } // endfor: looped over Phibar
+
+            } // endfor: looped over azimuth angle around locus of IAQ
+
+        } // endfor: looped over Phigeo angles
+
+    } // endfor: looped over Chi and Psi pixels
+
+    // Return IRF vector
     return irfs;
 }

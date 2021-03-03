@@ -98,9 +98,6 @@ public:
     virtual void                write(GXmlElement& xml) const;
     virtual std::string         print(const GChatter& chatter = NORMAL) const;
 
-    // Implement virtual methods
-    virtual void                remove_response_cache(const std::string& name);
-
     // Other methods
     bool             is_unbinned(void) const;
     bool             is_binned(void) const;
@@ -123,7 +120,6 @@ public:
     const GSkyMap&   drb(void) const;
     const GSkyMap&   drg(void) const;
     const GSkyMap&   drx(void) const;
-    const GCOMDri&   drm(const GModelSky& model) const;
     GCOMDri          drm(const GModels& models) const;
     const GCOMTim&   tim(void) const;
     const GCOMOads&  oads(void) const;
@@ -145,7 +141,6 @@ protected:
     void load_drb(const GFilename& drbname);
     void load_drg(const GFilename& drgname);
     void load_drx(const GFilename& drxname);
-    void add_drm(const GModelSky& model);
     bool check_map(const GSkyMap& map) const;
     void read_attributes(const GFitsHDU* hdu);
     void write_attributes(GFitsHDU* hdu) const;
@@ -174,9 +169,6 @@ protected:
     std::vector<GFilename> m_oadnames;   //!< OAD filenames
     GCOMTim                m_tim;        //!< COMPTEL Good Time Intervals
     GCOMOads               m_oads;       //!< Orbit Aspect Data
-
-    // Protected members for response cache
-    std::vector<GCOMDri>   m_drms;       //!< Convolved model cubes
 };
 
 
