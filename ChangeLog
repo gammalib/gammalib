@@ -1,8 +1,9 @@
-2021-03-03
+2021-03-04
 
         * Version 2.0.0 released
         ========================
 
+        Add missing members to GOptimizerLM::copy_members() method
         Store DRB, DRG and DRX as GCOMDri in GCOMObservation (#3560)
         Implement COMPTEL response for diffuse models (#3558)
         Implement COMPTEL background model computation (#3557)

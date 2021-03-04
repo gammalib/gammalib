@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-3 March 2021
+4 March 2021
 
 
 1. Introduction
@@ -200,6 +200,10 @@ only the function but also any available parameter gradients (#3333).
 
 11. Optimization module
 -----------------------
+The members m_npars, m_nfree and m_num_dec were not copied in the
+GOptimizerLM::copy_members(). Copying of these missing members was added to the
+method.
+
 Added GOptimizerLM::npars() and GOptimizerLM::nfree() methods.
 
 

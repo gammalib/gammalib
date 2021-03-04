@@ -676,6 +676,8 @@ void GOptimizerLM::init_members(void)
 void GOptimizerLM::copy_members(const GOptimizerLM& opt)
 {
     // Copy attributes
+    m_npars        = opt.m_npars;
+    m_nfree        = opt.m_nfree;
     m_lambda_start = opt.m_lambda_start;
     m_lambda_inc   = opt.m_lambda_inc;
     m_lambda_dec   = opt.m_lambda_dec;
@@ -695,6 +697,7 @@ void GOptimizerLM::copy_members(const GOptimizerLM& opt)
     m_delta        = opt.m_delta;
     m_status       = opt.m_status;
     m_iter         = opt.m_iter;
+    m_num_dec      = opt.m_num_dec;
     m_logger       = opt.m_logger;
 
     // Return
