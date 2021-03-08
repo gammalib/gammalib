@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GModelSpatialComposite.cpp - Spatial composite model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2020 by Domenico Tiziani                            *
+ *  copyright (C) 2016-2021 by Domenico Tiziani                            *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -709,6 +709,39 @@ double GModelSpatialComposite::sum_of_scales(void) const
 
     // Return sum
     return sum;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns flux integrated in sky region
+ *
+ * @param[in] region Sky region.
+ * @param[in] srcEng Energy.
+ * @param[in] srcTime Time.
+ * @return Flux (adimensional or ph/cm2/s).
+ *
+ * Returns flux within a sky region.
+ ***************************************************************************/
+double GModelSpatialComposite::flux(const GSkyRegion& region,
+                                    const GEnergy&    srcEng,
+                                    const GTime&      srcTime) const
+{
+    // Initialise flux
+    double flux = 0.0;
+
+    // Sum over all components
+    for (int i = 0; i < m_components.size(); ++i) {
+        flux += m_components[i]->flux(region, srcEng, srcTime) *
+                m_scales[i]->value();
+    }
+
+    // Normalise sum by sum of scales
+    if (sum_of_scales() > 0) {
+        flux /= sum_of_scales();
+    }
+
+    // Return flux
+    return flux;
 }
 
 

@@ -42,6 +42,7 @@
         Add GSkyModel flux_error() and eflux_error() methods (#3074)
         Remove COMPTEL internal response caching (#2973)
         Add GSkyMap::flux(GRegion(s)) and GSkyMap::solidangle(GRegion(s)) methods (#1785)
+        Reimplement GModelSpatial::flux() method for diffuse and combined models (#1785)
         Implement pre-computation cache in GModelSpatialGauss (#1300)
 
 

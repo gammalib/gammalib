@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpatialPointSource.cpp - Spatial point source model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -458,6 +458,35 @@ void GModelSpatialPointSource::write(GXmlElement& xml) const
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns model flux integrated in sky region
+ *
+ * @param[in] region Sky region.
+ * @param[in] srcEng Energy.
+ * @param[in] srcTime Time.
+ * @return Flux (adimensional or ph/cm2/s).
+ *
+ * Returns point source flux within a sky region. If the point source is
+ * contained within the sky region the flux will be 1, otherwise the flux
+ * will be 0.
+ ***************************************************************************/
+double GModelSpatialPointSource::flux(const GSkyRegion& region,
+                                      const GEnergy&    srcEng,
+                                      const GTime&      srcTime) const
+{
+    // Initialise flux
+    double flux = 0.0;
+
+    // If point source region overlaps with sky region then set flux to 1
+    if (this->region()->overlaps(region)) {
+        flux = 1.0;
+    }
+
+    // Return flux
+    return flux;
 }
 
 

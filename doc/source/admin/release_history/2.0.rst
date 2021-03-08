@@ -58,6 +58,8 @@ Improvements
   the radial Gaussian model in a stacked analysis
 * [`1785 <https://cta-redmine.irap.omp.eu/issues/1785>`_] -
   Add ``GSkyMap::flux(GRegion)``, ``GSkyMap::flux(GRegions)``, ``GSkyMap::solidangle(GRegion)`` and ``GSkyMap::solidangle(GRegions)`` methods
+* [`1785 <https://cta-redmine.irap.omp.eu/issues/1785>`_] -
+  Reimplement ``GModelSpatial::flux()`` method for diffuse and combined models
 * [`1300 <https://cta-redmine.irap.omp.eu/issues/1300>`_] -
   Implement pre-computation cache in GModelSpatialGauss
 

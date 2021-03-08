@@ -47,6 +47,11 @@ The following methods have been added:
 - GModelSky::flux_error(GSkyRegion&, GEnergy&, GEnergy&)
 - GModelSky::eflux_error(GEnergy&, GEnergy&)
 - GModelSky::eflux_error(GSkyRegion&, GEnergy&, GEnergy&)
+- GModelSpatialComposite::flux(GSkyRegion&, GEnergy&, GTime&)
+- GModelSpatialDiffuseConst::flux(GSkyRegion&, GEnergy&, GTime&)
+- GModelSpatialDiffuseCube::flux(GSkyRegion&, GEnergy&, GTime&)
+- GModelSpatialDiffuseMap::flux(GSkyRegion&, GEnergy&, GTime&)
+- GModelSpatialPointSource::flux(GSkyRegion&, GEnergy&, GTime&)
 - GModelSpatialRadial::is_energy_dependent()
 - GModelSpatialRadial::is_time_dependent()
 - GModelSpectralFunc::nodes()
@@ -163,6 +168,17 @@ Added analytical gradients to the GModelSpatialRadialGauss class (#3203).
 
 Added is_energy_dependent() and is_time_dependent() methods to GModelSpatialRadial
 to allow for checking of energy or time dependence of spatial model components.
+
+Reimplemented the GModelSpatial::flux(GSkyRegion&, GEnergy&, GTime&) method at
+the level of the following derived classes so that flux computation works for all
+kind of regions:
+- GModelSpatialComposite
+- GModelSpatialDiffuseConst 
+- GModelSpatialDiffuseCube
+- GModelSpatialDiffuseMap
+- GModelSpatialPointSource
+(#1785)
+
 
 A pre-computation cache was added to the GModelSpatialGauss class (#1300).
 

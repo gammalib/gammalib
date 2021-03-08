@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GModelSpatialDiffuseConst.cpp - Spatial isotropic model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -351,7 +351,7 @@ GSkyDir GModelSpatialDiffuseConst::mc(const GEnergy& energy,
 
     // Rotate sky direction by offset angles (phi, theta)
     dir.rotate_deg(phi, theta);
-    
+
     // Return sky direction
     return dir;
 }
@@ -473,9 +473,42 @@ void GModelSpatialDiffuseConst::write(GXmlElement& xml) const
 
 
 /***********************************************************************//**
+ * @brief Returns isotropic flux integrated in sky region
+ *
+ * @param[in] region Sky region.
+ * @param[in] srcEng Energy.
+ * @param[in] srcTime Time.
+ * @return Flux (adimensional or ph/cm2/s).
+ *
+ * Returns isotropic flux within a sky region. The flux \f$F\f$ is computed
+ * using
+ *
+ * \f[F = \frac{{\tt value}}{4 \pi} \times \Omega\f]
+ *
+ * where
+ * - \f${\tt value}\f$ is the normalisation factor returned by the value()
+ *   method, and
+ * - \f$\Omega\f$ is the solid angle of the sky region.
+ ***************************************************************************/
+double GModelSpatialDiffuseConst::flux(const GSkyRegion& region,
+                                       const GEnergy&    srcEng,
+                                       const GTime&      srcTime) const
+{
+    // Set normalization constant
+    const double norm = 1.0 / gammalib::fourpi;
+
+    // Compute flux in sky region
+    double flux = norm * m_value.value() * region.solidangle();
+
+    // Return flux
+    return flux;
+}
+
+
+/***********************************************************************//**
  * @brief Print isotropic source model information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing model information.
  ***************************************************************************/
 std::string GModelSpatialDiffuseConst::print(const GChatter& chatter) const

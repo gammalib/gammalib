@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpatialPointSource.hpp - Spatial point source model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -77,6 +77,11 @@ public:
     virtual void                      read(const GXmlElement& xml);
     virtual void                      write(GXmlElement& xml) const;
     virtual std::string               print(const GChatter& chatter = NORMAL) const;
+
+    // Overloaded base class methods
+    virtual double flux(const GSkyRegion& region,
+                        const GEnergy&    srcEng  = GEnergy(),
+                        const GTime&      srcTime = GTime()) const;
 
     // Other methods
     double  ra(void) const;

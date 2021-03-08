@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GModelSpatialDiffuseMap.cpp - Spatial map model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -701,7 +701,7 @@ void GModelSpatialDiffuseMap::mc_cone(const GSkyRegionCircle& cone) const
                     }
                     sum_map += flux; // total flux
                 }
-    
+
                 // Update maximum intensity
                 if (distance <= m_mc_cone.radius()) {
                     if (intensity > m_mc_max) {
@@ -742,6 +742,30 @@ void GModelSpatialDiffuseMap::mc_cone(const GSkyRegionCircle& cone) const
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns diffuse map flux integrated in sky region
+ *
+ * @param[in] region Sky region.
+ * @param[in] srcEng Energy.
+ * @param[in] srcTime Time.
+ * @return Flux (adimensional or ph/cm2/s).
+ *
+ * Returns diffuse map flux within a sky region. The flux is defined as the
+ * sum of the flux in all diffuse map pixels that are contained within the
+ * sky region multiplied by the diffuse map normalisation factor.
+ ***************************************************************************/
+double GModelSpatialDiffuseMap::flux(const GSkyRegion& region,
+                                     const GEnergy&    srcEng,
+                                     const GTime&      srcTime) const
+{
+    // Compute flux in sky region
+    double flux = m_map.flux(region) * m_value.value();
+
+    // Return flux
+    return flux;
 }
 
 

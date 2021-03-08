@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GModelSpatialDiffuseCube.cpp - Spatial map cube model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1036,6 +1036,83 @@ void GModelSpatialDiffuseCube::write(GFits& fits) const
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns diffuse cube flux integrated in sky region
+ *
+ * @param[in] region Sky region.
+ * @param[in] srcEng Energy.
+ * @param[in] srcTime Time.
+ * @return Flux (adimensional or ph/cm2/s).
+ *
+ * Returns diffuse cube flux within a sky region. The flux is computed by
+ * log-log interpolation of the flux of the sky maps that encompass the
+ * specified @p srcEng energy. Specifically
+ *
+ * \f[
+ *    F = {\tt value} \times \left \{
+ *    \begin{array}{l l}
+ *      0 & \mbox{if $F_l=0$ and $F_r=0$} \\
+ *      F_l & \mbox{if $F_l\ne0$ and $F_r=0$} \\
+ *      F_r & \mbox{if $F_l=0$ and $F_r\ne0$} \\
+ *      \exp \left( w_l \log F_l + w_r \log F_r \right) & \mbox{else}
+ *    \end{array}
+ *    \right .
+ * \f]
+ *
+ * where
+ * - \f$F\f$ is the diffuse cube flux
+ * - \f${\tt value}\f$ is the cube normalisation that is returned by the
+ *   value() method,
+ * - \f$w_l\f$ and \f$w_r\f$ are the weighting factors from the logarithmic
+ *   interpolation in @p srcEng, with \f$w_l+w_r=1\f$, and
+ * - \f$F_l\f$ and \f$F_r\f$ are the fluxes in the sky maps that encompass
+ *   the @p srcEng energy.
+ *
+ * This method fetches the diffuse cube if it was not yet fetched before.
+ ***************************************************************************/
+double GModelSpatialDiffuseCube::flux(const GSkyRegion& region,
+                                      const GEnergy&    srcEng,
+                                      const GTime&      srcTime) const
+{
+    // Fetch cube
+    fetch_cube();
+
+    // Initialise flux value
+    double flux = 0.0;
+
+    // Continue only if there is energy information for the map cube
+    if (m_logE.size() > 0) {
+
+        // Set energy for interpolation in log-energy
+        m_logE.set_value(srcEng.log10MeV());
+
+        // Compute map cube flux for the left and right map
+        double left_flux  = m_cube.flux(region, m_logE.inx_left());
+        double right_flux = m_cube.flux(region, m_logE.inx_right());
+
+        // Perform log-log interpolation
+        if (left_flux > 0.0 && right_flux > 0.0) {
+            double log_flux = m_logE.wgt_left()  * std::log(left_flux) +
+                              m_logE.wgt_right() * std::log(right_flux);
+            flux = std::exp(log_flux);
+        }
+        else if (left_flux > 0.0) {
+            flux = left_flux;
+        }
+        else if (right_flux > 0.0) {
+            flux = right_flux;
+        }
+
+        // Multiply by cube normalisation
+        flux *= m_value.value();
+
+    } // endif: energy information was available
+
+    // Return flux
+    return flux;
 }
 
 

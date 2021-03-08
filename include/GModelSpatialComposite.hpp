@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GModelSpatialComposite.hpp - Spatial composite model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2020 by Domenico Tiziani                            *
+ *  copyright (C) 2016-2021 by Domenico Tiziani                            *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -74,6 +74,11 @@ public:
     virtual void                    read(const GXmlElement& xml);
     virtual void                    write(GXmlElement& xml) const;
     virtual std::string             print(const GChatter& chatter = NORMAL) const;
+
+    // Overloaded base class methods
+    virtual double flux(const GSkyRegion& region,
+                        const GEnergy&    srcEng  = GEnergy(),
+                        const GTime&      srcTime = GTime()) const;
 
     // Other methods
     int                  components(void) const;

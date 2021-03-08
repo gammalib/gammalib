@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GModelSpatial.hpp - Spatial model abstract base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -104,6 +104,11 @@ public:
     virtual void           write(GXmlElement& xml) const = 0;
     virtual std::string    print(const GChatter& chatter = NORMAL) const = 0;
 
+    // Virtual methods
+    virtual double flux(const GSkyRegion& region,
+                        const GEnergy&    srcEng  = GEnergy(),
+                        const GTime&      srcTime = GTime()) const;
+
     // Methods
     std::string       type(void) const;
     void              type(const std::string& type);
@@ -113,9 +118,6 @@ public:
     bool              has_free_pars(void) const;
     int               size(void) const;
     void              autoscale(void);
-    double            flux(const GSkyRegion& region,
-                           const GEnergy&    srcEng = GEnergy(),
-                           const GTime&      srcTime = GTime()) const;
     const GSkyRegion* region(void) const;
 
 protected:
