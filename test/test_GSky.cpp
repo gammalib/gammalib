@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  test_GSky.cpp - Test sky module                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1283,6 +1283,24 @@ void TestGSky::test_GSkyMap(void)
     // Test total flux computation
     GNdarray flux_spectrum = map_src.flux();
 	test_value(flux_spectrum.size(), map_src.nmaps(), "Test flux() method");
+
+    // Test flux in region methods
+    GSkyRegionCircle    gc_circle(266.40499, -28.93617, 3.0);
+    GSkyRegionRectangle gc_box(266.40499, -28.93617, 4.0, 2.0, -58.59867);
+    GSkyRegionMap       gc_map(&gc_box);
+    GSkyRegions         gc_regions;
+    gc_regions.append(gc_circle);
+    gc_regions.append(gc_box);
+    test_value(map_src.flux(gc_circle),  0.49208055, "Test flux(GSkyRegionCircle) method");
+    test_value(map_src.flux(gc_box),     0.12306231, "Test flux(GSkyRegionRectangle) method");
+    test_value(map_src.flux(gc_map),     0.12306231, "Test flux(GSkyRegionMap) method");
+    test_value(map_src.flux(gc_regions), 0.49208055, "Test flux(GSkyRegions) method");
+
+    // Test solidangle in region methods
+    test_value(map_src.solidangle(gc_circle),  0.0097441693, "Test solidangle(GSkyRegionCircle) method");
+    test_value(map_src.solidangle(gc_box),     0.0024368775, "Test solidangle(GSkyRegionRectangle) method");
+    test_value(map_src.solidangle(gc_map),     0.0024368775, "Test solidangle(GSkyRegionMap) method");
+    test_value(map_src.solidangle(gc_regions), 0.0097441693, "Test solidangle(GSkyRegions) method");
 
     // Test map number changing
     GSkyMap map_more = map_src;

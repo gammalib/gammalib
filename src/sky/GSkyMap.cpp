@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GSkyMap.cpp - Sky map class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -417,7 +417,7 @@ GSkyMap& GSkyMap::operator+=(const GSkyMap& map)
             } // endfor: looped over all layers
 
         } // endfor: looped over all pixels
-    
+
     }
 
     // ... otherwise use interpolation method and add map
@@ -507,7 +507,7 @@ GSkyMap& GSkyMap::operator-=(const GSkyMap& map)
             } // endfor: looped over all layers
 
         } // endfor: looped over all pixels
-    
+
     }
 
     // ... otherwise use interpolation method and subtract map
@@ -597,7 +597,7 @@ GSkyMap& GSkyMap::operator*=(const GSkyMap& map)
             } // endfor: looped over all layers
 
         } // endfor: looped over all pixels
-    
+
     }
 
     // ... otherwise use interpolation method and multiply map
@@ -701,7 +701,7 @@ GSkyMap& GSkyMap::operator/=(const GSkyMap& map)
             } // endfor: looped over all layers
 
         } // endfor: looped over all pixels
-    
+
     }
 
     // ... otherwise use interpolation method and divide map
@@ -1724,6 +1724,66 @@ double GSkyMap::flux(const GSkyPixel& pixel, const int& map) const
 
 
 /***********************************************************************//**
+ * @brief Returns flux within sky region
+ *
+ * @param[in] region Sky region.
+ * @param[in] map Map index [0,...,nmaps()-1].
+ * @return Flux in sky region.
+ *
+ * The method returns the total flux in all sky map pixels that fall within
+ * the specified region. Containment is tested using the
+ * GSkyRegion::contains() method. Sky map values are multiplied by the solid
+ * angle of the pixel.
+ ***************************************************************************/
+double GSkyMap::flux(const GSkyRegion& region, const int& map) const
+{
+    // Initialise flux
+    double flux = 0.0;
+
+    // Loop over all sky pixels and sum flux of all pixels that fall within
+    // the sky region
+    for (int i = 0; i < m_num_pixels; ++i) {
+        if (region.contains(inx2dir(i))) {
+            flux += (*this)(i,map) * solidangle(i);
+        }
+    }
+
+    // Return flux
+    return flux;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns flux within sky regions
+ *
+ * @param[in] regions Sky regions.
+ * @param[in] map Map index [0,...,nmaps()-1].
+ * @return Flux in sky region.
+ *
+ * The method returns the total flux in all sky map pixels that fall within
+ * the specified regions. Containment is tested using the
+ * GSkyRegions::contains() method. Sky map values are multiplied by the solid
+ * angle of the pixel.
+ ***************************************************************************/
+double GSkyMap::flux(const GSkyRegions& regions, const int& map) const
+{
+    // Initialise flux
+    double flux = 0.0;
+
+    // Loop over all sky pixels and sum flux of all pixels that fall within
+    // the sky region
+    for (int i = 0; i < m_num_pixels; ++i) {
+        if (regions.contains(inx2dir(i))) {
+            flux += (*this)(i,map) * solidangle(i);
+        }
+    }
+
+    // Return flux
+    return flux;
+}
+
+
+/***********************************************************************//**
  * @brief Returns array with total flux for sky maps
  *
  * @return Array of pixel flux sums.
@@ -1734,7 +1794,7 @@ double GSkyMap::flux(const GSkyPixel& pixel, const int& map) const
 GNdarray GSkyMap::flux(void) const
 {
     // Initialise output array
-    GNdarray  flux_array = GNdarray(m_num_maps);
+    GNdarray flux_array = GNdarray(m_num_maps);
 
     // Loop over maps and store sums in output array
     for (int i = 0; i < m_num_maps; ++i) {
@@ -1831,6 +1891,62 @@ double GSkyMap::solidangle(const GSkyPixel& pixel) const
     }
 
     // Return solid angle
+    return solidangle;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns solid angle within sky region
+ *
+ * @param[in] region Sky region.
+ * @return Solid angle within sky region.
+ *
+ * The method returns the total solid angle of all sky map pixels that fall
+ * within the specified region. Containment is tested using the
+ * GSkyRegion::contains() method.
+ ***************************************************************************/
+double GSkyMap::solidangle(const GSkyRegion& region) const
+{
+    // Initialise flux
+    double solidangle = 0.0;
+
+    // Loop over all sky pixels and sum solid angle of all pixels that fall
+    // within the sky region
+    for (int i = 0; i < m_num_pixels; ++i) {
+        if (region.contains(inx2dir(i))) {
+            solidangle += this->solidangle(i);
+        }
+    }
+
+    // Return solidangle
+    return solidangle;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns flux within sky regions
+ *
+ * @param[in] region Sky region.
+ * @return Solid angle within sky region.
+ *
+ * The method returns the total solid angle of all sky map pixels that fall
+ * within the specified region. Containment is tested using the
+ * GSkyRegions::contains() method.
+ ***************************************************************************/
+double GSkyMap::solidangle(const GSkyRegions& regions) const
+{
+    // Initialise flux
+    double solidangle = 0.0;
+
+    // Loop over all sky pixels and sum solid angle of all pixels that fall
+    // within the sky regions
+    for (int i = 0; i < m_num_pixels; ++i) {
+        if (regions.contains(inx2dir(i))) {
+            solidangle += this->solidangle(i);
+        }
+    }
+
+    // Return solidangle
     return solidangle;
 }
 
@@ -2266,7 +2382,7 @@ GSkyRegionCircle GSkyMap::region_circle(void) const
 
         // Consider edges of pixel with maximum distance
         if (max_index != -1) {
-        
+
             // Set upper pixel edge just beyond the upper boundary since the
             // upper boundary is excluded
             const double up = 0.4999999;

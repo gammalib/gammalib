@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GSkyMap.hpp - Sky map class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -162,9 +162,13 @@ public:
     GNdarray                counts(void) const;
     double                  flux(const int& index, const int& map = 0) const;
     double                  flux(const GSkyPixel& pixel, const int& map = 0) const;
+    double                  flux(const GSkyRegion& region, const int& map = 0) const;
+    double                  flux(const GSkyRegions& regions, const int& map = 0) const;
     GNdarray                flux(void) const;
     double                  solidangle(const int& index) const;
     double                  solidangle(const GSkyPixel& pixel) const;
+    double                  solidangle(const GSkyRegion& region) const;
+    double                  solidangle(const GSkyRegions& regions) const;
     bool                    contains(const GSkyDir& dir) const;
     bool                    contains(const GSkyPixel& pixel) const;
     bool                    overlaps(const GSkyRegion& region) const;

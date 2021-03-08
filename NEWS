@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-4 March 2021
+8 March 2021
 
 
 1. Introduction
@@ -60,6 +60,10 @@ The following methods have been added:
 - GModelSpectralFunc::intensity()
 - GModelSpectralFunc::save()
 - GSkyMap::correlate()
+- GSkyMap::flux(GSkyRegion&, int&)
+- GSkyMap::flux(GSkyRegions&, int&)
+- GSkyMap::solidangle(GSkyRegion&)
+- GSkyMap::solidangle(GSkyRegions&)
 - GOptimizerLM::npars()
 - GOptimizerLM::nfree()
 - GXmlElement(std::string&, int&)
@@ -222,6 +226,13 @@ Added GSkyDirs container class to hold sky directions. The GHealpix::boundaries(
 method now returns an instance of GSkyDirs (#3324).
 
 Added GSkyRegionRect class to implement a rectangular region on the sky (#3248).
+
+Added GSkyMap::flux(GSkyRegion&, int&) and GSkyMap::flux(GSkyRegions&, int&) methods
+to compute the total flux within a given sky region or a list of sky regions. The flux
+returns the sum of the intensity times the solidangle for all pixels that are contained
+within the sky region(s). Containment is tested using the GSkyMap::contains() methods.
+Equivalent methods GSkyMap::solidangle(GSkyRegion&) and GSkyMap::solidangle(GSkyRegions&)
+were added to compute the total solid angle within specified sky region(s) (#1785).
 
 
 13. Support module
