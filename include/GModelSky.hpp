@@ -29,6 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include "GFunction.hpp"
 #include "GModel.hpp"
 #include "GModelPar.hpp"
 #include "GModelSpatial.hpp"
@@ -206,6 +207,30 @@ protected:
     GModelSpectral* xml_spectral(const GXmlElement& spectral) const;
     GModelTemporal* xml_temporal(const GXmlElement& temporal) const;
     bool            valid_model(void) const;
+
+    // Flux integration kernels
+    class flux_kern : public GFunction {
+    public:
+        flux_kern(const GModelSky*  parent,
+                  const GSkyRegion* region) :
+                  m_parent(parent),
+                  m_region(region) { }
+        double eval(const double& x);
+    protected:
+        const GModelSky*  m_parent;  //!< Sky model
+        const GSkyRegion* m_region;  //!< Sky region
+    };
+    class eflux_kern : public GFunction {
+    public:
+        eflux_kern(const GModelSky*  parent,
+                   const GSkyRegion* region) :
+                   m_parent(parent),
+                   m_region(region) { }
+        double eval(const double& x);
+    protected:
+        const GModelSky*  m_parent;  //!< Sky model
+        const GSkyRegion* m_region;  //!< Sky region
+    };
 
     // Protected data members
     std::string     m_type;       //!< Model type

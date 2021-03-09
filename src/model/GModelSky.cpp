@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GModelSky.cpp - Sky model class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1130,31 +1130,21 @@ double GModelSky::flux(const GSkyRegion& region,
     // If the spatial component depends on energy then use
     if (dependence) {
 
-        // Set 100 logarithmically-spaced energy nodes for node model
-        GEnergies energies(100, emin, emax, "LOG");
+        // Get boundaries in MeV
+        double mev_min = emin.MeV();
+        double mev_max = emax.MeV();
 
-        // Allocate spectral nodes
-        GModelSpectralNodes nodes(*spectral(), energies);
+        // Continue only if valid
+        if (mev_max > mev_min) {
 
-        // Multiply spectral nodes with spatial flux within region
-        for (int i = 0; i < nodes.nodes(); ++i) {
+            // Setup integration function
+            GModelSky::flux_kern integrand(this, &region);
+            GIntegral            integral(&integrand);
 
-            // Get energy and intensity
-            GEnergy energy    = nodes.energy(i);
-            double  intensity = nodes.intensity(i);
+            // Do Romberg integration
+            flux = integral.romberg(std::log(mev_min), std::log(mev_max));
 
-            // Multiply intensity with spatial flux within region. Note that
-            // this correctly takes the spatial normalisation into account
-            // since the flux() method does this.
-            intensity *= spatial()->flux(region, energy);
-
-            // Store intensity
-            nodes.intensity(i, intensity);
-
-        } // endfor: multiplied spectral nodes with spectral model
-
-        // Compute flux
-        flux = nodes.flux(emin, emax);
+        } // endif: energy interval was valid
 
     } // endif: spatial model was a diffuse cube
 
@@ -1236,7 +1226,10 @@ double GModelSky::eflux(const GEnergy& emin, const GEnergy& emax) const
  * @param[in] emax Maximum energy.
  * @return Sky model energy flux (erg cm\f$^{-2}\f$ s\f$^{-1}\f$)
  *
- * Returns the energy flux of the sky model within a given sky region.
+ * Returns the energy flux of the sky model within a given sky region. If
+ * the spatial model is energy dependent the method integrates the flux over
+ * the specified energy range. Otherwise the spatially integrated flux is
+ * multiplied by the spectral flux.
  ***************************************************************************/
 double GModelSky::eflux(const GSkyRegion& region,
                         const GEnergy&    emin,
@@ -1252,31 +1245,21 @@ double GModelSky::eflux(const GSkyRegion& region,
     // If the spatial component depends on energy then use
     if (dependence) {
 
-        // Set 100 logarithmically-spaced energy nodes for node model
-        GEnergies energies(100, emin, emax, "LOG");
+        // Get boundaries in MeV
+        double mev_min = emin.MeV();
+        double mev_max = emax.MeV();
 
-        // Allocate spectral nodes
-        GModelSpectralNodes nodes(*spectral(), energies);
+        // Continue only if valid
+        if (mev_max > mev_min) {
 
-        // Multiply spectral nodes with spatial flux within region
-        for (int i = 0; i < nodes.nodes(); ++i) {
+            // Setup integration function
+            GModelSky::eflux_kern integrand(this, &region);
+            GIntegral             integral(&integrand);
 
-            // Get energy and intensity
-            GEnergy energy    = nodes.energy(i);
-            double  intensity = nodes.intensity(i);
+            // Do Romberg integration
+            eflux = integral.romberg(std::log(mev_min), std::log(mev_max));
 
-            // Multiply intensity with spatial flux within region. Note that
-            // this correctly takes the spatial normalisation into account
-            // since the flux() method does this.
-            intensity *= spatial()->flux(region, energy);
-
-            // Store intensity
-            nodes.intensity(i, intensity);
-
-        } // endfor: multiplied spectral nodes with spectral model
-
-        // Compute flux
-        eflux = nodes.eflux(emin, emax);
+        } // endif: energy interval was valid
 
     } // endif: spatial model was a diffuse cube
 
@@ -2214,4 +2197,67 @@ bool GModelSky::valid_model(void) const
 
     // Return result
     return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Integration kernel for flux_kern() class
+ *
+ * @param[in] x Function value.
+ * @return Photon flux (erg/cm2/s/MeV)
+ *
+ * This method implements the integration kernel needed for the flux()
+ * method.
+ ***************************************************************************/
+double GModelSky::flux_kern::eval(const double& x)
+{
+    // Set energy
+    GEnergy eng;
+    double expx = std::exp(x);
+    eng.MeV(expx);
+
+    // Get photon flux within sky region -> (ph/cm2/s)
+    double value = m_parent->spatial()->flux(*m_region, eng);
+
+    // Multiply by spectral model -> (ph/cm2/s/MeV)
+    value *= m_parent->spectral()->eval(eng);
+
+    // Correct for variable substitution
+    value *= expx;
+
+    // Return value
+    return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Integration kernel for eflux_kern() class
+ *
+ * @param[in] x Function value.
+ * @return Energy flux (erg/cm2/s/MeV)
+ *
+ * This method implements the integration kernel needed for the eflux()
+ * method.
+ ***************************************************************************/
+double GModelSky::eflux_kern::eval(const double& x)
+{
+    // Set energy
+    GEnergy eng;
+    double expx = std::exp(x);
+    eng.MeV(expx);
+
+    // Get photon flux within sky region -> (ph/cm2/s)
+    double value = m_parent->spatial()->flux(*m_region, eng);
+
+    // Multiply by spectral model -> (ph/cm2/s/MeV)
+    value *= m_parent->spectral()->eval(eng);
+
+    // Correct for variable substitution
+    value *= expx;
+
+    // Multiply by energy in MeV -> (MeV/cm2/s/MeV)
+    value *= expx * gammalib::MeV2erg;
+
+    // Return value
+    return value;
 }
