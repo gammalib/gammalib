@@ -1214,7 +1214,7 @@ void GCOMObservation::compute_drb_phinor(const GCOMDri& drm)
     // Get DRI sky maps
     const GSkyMap& map_dre = cube->dre().map();
     const GSkyMap& map_drm = drm.map();
-    const GSkyMap& map_drg = m_drg.map();
+    GSkyMap        map_drg = get_weighted_drg_map();
     GSkyMap&       map_drb = const_cast<GSkyMap&>(m_drb.map());
 
     // Get data space dimensions
@@ -1298,7 +1298,7 @@ void GCOMObservation::compute_drb_bgdlixa(const GCOMDri& drm,
     // Get references to relevant sky maps
     const GSkyMap& map_dre = cube->dre().map();
     const GSkyMap& map_drm = drm.map();
-    const GSkyMap& map_drg = m_drg.map();
+    GSkyMap        map_drg = get_weighted_drg_map();
     GSkyMap&       map_drb = const_cast<GSkyMap&>(m_drb.map());
     GSkyMap&       map_dri = const_cast<GSkyMap&>(dri.map());
 
@@ -1569,6 +1569,36 @@ void GCOMObservation::compute_drb_bgdlixa(const GCOMDri& drm,
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return weighted DRG map
+ *
+ * @return Weighted DRG map.
+ *
+ * Returns a DRG as sky map where each pixel of the map is multiplied by the
+ * solidangle of the pixel.
+ ***************************************************************************/
+GSkyMap GCOMObservation::get_weighted_drg_map(void) const
+{
+    // Initialise
+    GSkyMap drg = m_drg.map();
+
+    // Get data space dimensions
+    int npix    = drg.npix();
+    int nphibar = drg.nmaps();
+
+    // Weight map
+    for (int ipix = 0; ipix < npix; ++ipix) {
+        double omega = drg.solidangle(ipix);
+        for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
+            drg(ipix,iphibar) *= omega;
+        }
+    }
+
+    // Return weighted DRG map
+    return drg;
 }
 
 

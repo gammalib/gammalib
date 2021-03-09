@@ -242,7 +242,7 @@ GCOMResponse* GCOMResponse::clone(void) const
  * @param[in] event Observed event.
  * @param[in] photon Incident photon.
  * @param[in] obs Observation.
- * @return Instrument response function (cm^2 sr^-1)
+ * @return Instrument response function (\f$cm^2 sr^{-1}\f$)
  *
  * @exception GException::invalid_argument
  *            Observation is not a COMPTEL observation.
@@ -250,22 +250,29 @@ GCOMResponse* GCOMResponse::clone(void) const
  * @exception GException::invalid_value
  *            Response not initialised with a valid IAQ
  *
- *
  * Returns the instrument response function for a given observed photon
  * direction as function of the assumed true photon direction. The result
  * is given by
- * \f[IRF = \frac{IAQ \times DRG \times DRX}{ontime \times ewidth}\f]
- * where
- * \f$IRF\f$ is the instrument response function,
- * \f$IAQ\f$ is the COMPTEL response matrix (sr-1),
- * \f$DRG\f$ is the geometry factor (cm2),
- * \f$DRX\f$ is the exposure (s),
- * \f$ontime\f$ is the ontime (s), and
- * \f$ewidth\f$ is the energy width (MeV).
  *
- * The observed photon direction is spanned by the 3 values (Chi,Psi,Phibar).
- * (Chi,Psi) is the scatter direction of the event, given in sky coordinates.
- * Phibar is the Compton scatter angle, computed from the energy deposits.
+ * \f[
+ *    {\tt IRF} = \frac{{\tt IAQ} \times {\tt DRG} \times {\tt DRX}}
+ *                     {T \times {\tt TOFCOR}}
+ * \f]
+ *
+ * where
+ * - \f${\tt IRF}\f$ is the instrument response function (\f$cm^2 sr^{-1}\f$),
+ * - \f${\tt IAQ}\f$ is the COMPTEL response matrix (\f$sr^{-1}\f$),
+ * - \f${\tt DRG}\f$ is the geometry factor (probability),
+ * - \f${\tt DRX}\f$ is the exposure (\f$cm^2 s\f$),
+ * - \f$T\f$ is the ontime (\f$s\f$), and
+ * - \f${\tt TOFCOR}\f$ is a correction that accounts for the Time of Flight
+ *   selection window.
+ *
+ * The observed photon direction is spanned by the three values \f$\Chi\f$,
+ * \f$\Psi\f$, and \f$\bar{\varphi})\f$. \f$\Chi\f$ and \f$\Psi\f$ is the
+ * scatter direction of the event, given in sky coordinates.
+ * \f$\bar{\varphi}\f$ is the Compton scatter angle, computed from the
+ * energy deposits in the two detector planes.
  ***************************************************************************/
 double GCOMResponse::irf(const GEvent&       event,
                          const GPhoton&      photon,
@@ -360,14 +367,14 @@ double GCOMResponse::irf(const GEvent&       event,
     // Continue only if IAQ is positive
     if (iaq > 0.0) {
 
-        // Get DRG value (units: probability)
+        // Get DRG value (unit: probability)
         double drg = observation->drg().map()(obsDir.dir(), iphibar);
 
-        // Get DRX value (units: cm^2 sec)
+        // Get DRX value (unit: cm^2 sec)
         double drx = observation->drx().map()(srcDir);
 
-        // Get ontime
-        double ontime = observation->ontime(); // sec
+        // Get ontime (unit: s)
+        double ontime = observation->ontime();
 
         // Get ToF correction
         double tofcor = cube->dre().tof_correction();
@@ -530,6 +537,29 @@ void GCOMResponse::load(const std::string& rspname)
  *
  * Read the COMPTEL response from IAQ FITS file and convert the IAQ values
  * into a probability per steradian.
+ *
+ * The IAQ values are divided by the solid angle of a Phigeo bin which is
+ * given by
+ *
+ * \f{eqnarray*}{
+ *    \Omega & = & 2 \pi \left[
+ *      \left(
+ *        1 - \cos \left( \varphi_{\rm geo} +
+ *                        \frac{1}{2} \Delta \varphi_{\rm geo} \right)
+ *      \right) -
+ *      \left(
+ *        1 - \cos \left( \varphi_{\rm geo} -
+ *                        \frac{1}{2} \Delta \varphi_{\rm geo} \right)
+ *      \right) \right] \\
+ *     &=& 2 \pi \left[
+ *        \cos \left( \varphi_{\rm geo} -
+ *                    \frac{1}{2} \Delta \varphi_{\rm geo} \right) -
+ *        \cos \left( \varphi_{\rm geo} +
+ *                    \frac{1}{2} \Delta \varphi_{\rm geo} \right)
+ *      \right] \\
+ *     &=& 4 \pi \sin \left( \varphi_{\rm geo} \right)
+ *             \sin \left( \frac{1}{2} \Delta \varphi_{\rm geo} \right)
+ * \f}
  ***************************************************************************/
 void GCOMResponse::read(const GFitsImage& image)
 {
@@ -549,8 +579,10 @@ void GCOMResponse::read(const GFitsImage& image)
         m_phibar_bin_size  = image.real("CDELT2");
 
         // Get axes minima (values of first bin)
-        m_phigeo_min = m_phigeo_ref_value + (1.0-m_phigeo_ref_pixel) * m_phigeo_bin_size;
-        m_phibar_min = m_phibar_ref_value + (1.0-m_phibar_ref_pixel) * m_phibar_bin_size;
+        m_phigeo_min = m_phigeo_ref_value + (1.0-m_phigeo_ref_pixel) *
+                       m_phigeo_bin_size;
+        m_phibar_min = m_phibar_ref_value + (1.0-m_phibar_ref_pixel) *
+                       m_phibar_bin_size;
 
         // Compute IAQ size. Continue only if size is positive
         int size = m_phigeo_bins * m_phibar_bins;
@@ -566,13 +598,16 @@ void GCOMResponse::read(const GFitsImage& image)
 
         } // endif: size was positive
 
+        // Precompute variable for conversion
+        double phigeo_min = m_phigeo_min      * gammalib::deg2rad;
+        double phigeo_bin = m_phigeo_bin_size * gammalib::deg2rad;
+        double omega0     = gammalib::fourpi  * std::sin(0.5 * phigeo_bin);
+
         // Convert IAQ matrix from probability per Phigeo bin into a
         // probability per steradian
-        double omega0 = gammalib::fourpi *
-                        std::sin(0.5 * m_phigeo_bin_size * gammalib::deg2rad);
         for (int iphigeo = 0; iphigeo < m_phigeo_bins; ++iphigeo) {
-            double phigeo = iphigeo * m_phigeo_bin_size + m_phigeo_min;
-            double omega  = omega0 * std::sin(phigeo * gammalib::deg2rad);
+            double phigeo = iphigeo * phigeo_bin + phigeo_min;
+            double omega  = omega0  * std::sin(phigeo);
             for (int iphibar = 0; iphibar < m_phibar_bins; ++iphibar) {
                 m_iaq[iphigeo+iphibar*m_phigeo_bins] /= omega;
             }
@@ -774,7 +809,7 @@ void GCOMResponse::free_members(void)
  * @param[in] obs Observation.
  * @param[out] gradients Gradients matrix.
  * @return Instrument response to point source for all events in
- *         observation.
+ *         observation (\f$cm^2\f$).
  *
  * @exception GException::invalid_argument
  *            Observation is not a COMPTEL observation.
@@ -935,7 +970,7 @@ GVector GCOMResponse::irf_ptsrc(const GModelSky&    model,
  * @param[in] obs Observation.
  * @param[out] gradients Gradients matrix.
  * @return Instrument response to radial source  for all events in
- *         observation.
+ *         observation (\f$cm^2\f$).
  *
  * @todo Implement method.
  ***************************************************************************/
@@ -967,7 +1002,7 @@ GVector GCOMResponse::irf_radial(const GModelSky&    model,
  * @param[in] obs Observation.
  * @param[out] gradients Gradients matrix.
  * @return Instrument response to elliptical source for all events in
- *         observation.
+ *         observation (\f$cm^2\f$).
  *
  * @todo Implement method.
  ***************************************************************************/
@@ -999,7 +1034,7 @@ GVector GCOMResponse::irf_elliptical(const GModelSky&    model,
  * @param[in] obs Observation.
  * @param[out] gradients Gradients matrix.
  * @return Instrument response to diffuse source for all events in
- *         observation.
+ *         observation (\f$cm^2\f$).
  *
  * @exception GException::invalid_argument
  *            Observation is not a COMPTEL observation.
@@ -1067,8 +1102,9 @@ GVector GCOMResponse::irf_diffuse(const GModelSky&    model,
     GVector irfs(nevents);
 
     // Initialise some variables
-    double         phigeo_min = m_phigeo_min * gammalib::deg2rad;
+    double         phigeo_min = m_phigeo_min      * gammalib::deg2rad;
     double         phigeo_bin = m_phigeo_bin_size * gammalib::deg2rad;
+    double         omega0     = 2.0 * std::sin(0.5 * phigeo_bin);
     const GSkyMap& drx        = obs_ptr->drx().map();
     const double*  drg        = obs_ptr->drg().map().pixels();
 
@@ -1092,18 +1128,20 @@ GVector GCOMResponse::irf_diffuse(const GModelSky&    model,
         for (int iphigeo = 0; iphigeo < m_phigeo_bins; ++iphigeo) {
 
             // Determine Phigeo value in radians
-            double phigeo = phigeo_min + iphigeo * phigeo_bin;
+            double phigeo     = phigeo_min + iphigeo * phigeo_bin;
+            double sin_phigeo = std::sin(phigeo);
 
             // Determine number of azimuthal integration steps and step size
             // in radians
-            int naz = int(gammalib::twopi * phigeo / phigeo_bin + 0.5);
+            double length = gammalib::twopi * sin_phigeo;
+            int    naz    = int(length / phigeo_bin + 0.5);
             if (naz < 2) {
                 naz = 2;
             }
             double az_step = gammalib::twopi / double(naz);
 
             // Computes solid angle of integration bin multiplied by Jaccobian
-            double omega = phigeo_bin * az_step * std::sin(phigeo);
+            double omega = omega0 * az_step * sin_phigeo;
 
             // Loop over azimuth angle
             double az = 0.0;
@@ -1121,7 +1159,7 @@ GVector GCOMResponse::irf_diffuse(const GModelSky&    model,
                 // Set photon
                 GPhoton photon(skyDir, bin->energy(), bin->time());
 
-                // Get model sky intensity for photon
+                // Get model sky intensity for photon (unit: sr^-1)
                 double intensity = model.spatial()->eval(photon);
 
                 // Fall through if intensity is zero
@@ -1129,10 +1167,10 @@ GVector GCOMResponse::irf_diffuse(const GModelSky&    model,
                     continue;
                 }
 
-                // Multiply intensity by DRX value
+                // Multiply intensity by DRX value (unit: cm^2 s sr^-1)
                 intensity *= drx(skyDir);
 
-                // Multiply intensity by solid angle
+                // Multiply intensity by solid angle (unit: cm^2 s)
                 intensity *= omega;
 
                 // Loop over Phibar
@@ -1152,7 +1190,7 @@ GVector GCOMResponse::irf_diffuse(const GModelSky&    model,
                     // Get DRI index
                     int idri = ipix + iphibar * npix;
 
-                    // Compute IRF value
+                    // Compute IRF value (unit: cm^2)
                     double irf = iaq * drg[idri] * iaq_norm * intensity;
 
                     // Add IRF value if it is positive

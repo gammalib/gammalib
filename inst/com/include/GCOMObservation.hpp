@@ -140,29 +140,30 @@ public:
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GCOMObservation& obs);
-    void free_members(void);
-    void load_dre(const GFilename& drename);
-    void load_drb(const GFilename& drbname);
-    void load_drg(const GFilename& drgname);
-    void load_drx(const GFilename& drxname);
-    bool check_dri(const GCOMDri& map) const;
-    void read_attributes(const GFitsHDU* hdu);
-    void write_attributes(GFitsHDU* hdu) const;
-    void compute_drb_phinor(const GCOMDri& drm);
-    void compute_drb_bgdlixa(const GCOMDri& drm,
-                             const int&     nrunav = 3,
-                             const int&     navgr  = 3,
-                             const int&     nincl  = 13,
-                             const int&     nexcl  = 0);
-    void get_bgdlixa_phibar_indices(const int& iphibar,
-                                    const int& nincl,
-                                    const int& nexcl,
-                                    int*       isel1,
-                                    int*       iex1,
-                                    int*       iex2,
-                                    int*       isel2) const;
+    void    init_members(void);
+    void    copy_members(const GCOMObservation& obs);
+    void    free_members(void);
+    void    load_dre(const GFilename& drename);
+    void    load_drb(const GFilename& drbname);
+    void    load_drg(const GFilename& drgname);
+    void    load_drx(const GFilename& drxname);
+    bool    check_dri(const GCOMDri& map) const;
+    void    read_attributes(const GFitsHDU* hdu);
+    void    write_attributes(GFitsHDU* hdu) const;
+    void    compute_drb_phinor(const GCOMDri& drm);
+    void    compute_drb_bgdlixa(const GCOMDri& drm,
+                                const int&     nrunav = 3,
+                                const int&     navgr  = 3,
+                                const int&     nincl  = 13,
+                                const int&     nexcl  = 0);
+    GSkyMap get_weighted_drg_map(void) const;
+    void    get_bgdlixa_phibar_indices(const int& iphibar,
+                                       const int& nincl,
+                                       const int& nexcl,
+                                       int*       isel1,
+                                       int*       iex1,
+                                       int*       iex2,
+                                       int*       isel2) const;
 
     // Protected members
     std::string            m_instrument; //!< Instrument name
