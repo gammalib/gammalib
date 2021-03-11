@@ -1,7 +1,7 @@
 .. _2.0:
 
-GammaLib 2.0 release (8 March 2021)
-===================================
+GammaLib 2.0 release (10 March 2021)
+========================-===========
 
 Overview
 --------
@@ -17,6 +17,8 @@ In particular, this release provides:
 Bug fixes
 ---------
 
+* [`3563 <https://cta-redmine.irap.omp.eu/issues/3563>`_] -
+  Fix incompatibility in GMatrixSparse::mix_column_prepare() method
 * [`3553 <https://cta-redmine.irap.omp.eu/issues/3553>`_] -
   Fix reading of scaled FITS columns, remove ``GFitsTableCol::scale()`` method
 * [`3547 <https://cta-redmine.irap.omp.eu/issues/3547>`_] -

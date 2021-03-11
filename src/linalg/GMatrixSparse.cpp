@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GMatrixSparse.cpp - Sparse matrix class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -2359,10 +2359,10 @@ int GMatrixSparse::stack_push_column(const double* values, const int* rows,
 /***********************************************************************//**
  * @brief Flush matrix stack
  *
- * Adds the stack to the actual matrix. First, the total number of matrix
- * elements is determined. Then new memory is allocated to hold all
- * elements. Finally, all elements are filled into a working array that is
- * then compressed into the matrix.
+ * Adds the content of the stack to the actual matrix. First, the total
+ * number of matrix elements is determined. Then new memory is allocated to
+ * hold all elements. Finally, all elements are filled into the new memory
+ * that is then replacing the old matrix memory.
  *
  * The method uses the internal working array m_stack_work.
  *
@@ -2382,9 +2382,10 @@ void GMatrixSparse::stack_flush(void)
     // Debug header
     #if defined(G_DEBUG_SPARSE_STACK_FLUSH)
     std::cout << "GMatrixSparse::stack_flush" << std::endl;
-    std::cout << " Number of stack entries .: " << m_stack_entries << std::endl;
-    std::cout << " Number of stack elements : " << m_stack_start[m_stack_entries] << std::endl;
-    std::cout << " Number of matrix elements: " << m_elements << std::endl;
+    std::cout << " Number of columns on stack : " << m_stack_entries << std::endl;
+    std::cout << " Number of elements on stack: " << m_stack_start[m_stack_entries] << std::endl;
+    std::cout << " Number of matrix elements .: " << m_elements << std::endl;
+    std::cout << " Col.start at end of matrix : " << m_colstart[m_cols] << std::endl;
     #endif
 
     // Use stack working array to flag all columns that exist already in the
@@ -2399,8 +2400,9 @@ void GMatrixSparse::stack_flush(void)
     }
 
     // Initialise some element counters
-    int new_elements = 0;
+    int new_elements = 0;    // Number of new elements to add to matrix
     #if defined(G_DEBUG_SPARSE_STACK_FLUSH)
+    int num_columns  = 0;    // Number of valid columns in stack
     int num_matrix   = 0;    // Number of elements only in matrix
     int num_stack    = 0;    // Number of elements only on stack
     int num_both     = 0;    // Number of elements in matrix and on stack
@@ -2421,6 +2423,11 @@ void GMatrixSparse::stack_flush(void)
         // Consider only valid entries
         if (col >= 0) {
 
+            // Debug option: update number of valid columns
+            #if defined(G_DEBUG_SPARSE_STACK_FLUSH)
+            num_columns++;
+            #endif
+
             // If column exists already in matrix then determine total number
             // of additional elements
             if (m_stack_work[col] == 1) {
@@ -2435,9 +2442,9 @@ void GMatrixSparse::stack_flush(void)
                 int k_stop  = m_stack_start[entry+1];
 
                 // Allocate output counters
-                int num_1;
-                int num_2;
-                int num_mix;
+                int num_1;    // Number of elements only found in matrix column
+                int num_2;    // Number of elements only found in stack column
+                int num_mix;  // Number of elements found in both columns
 
                 // Analyse column mixing
                 mix_column_prepare(&(m_rowinx[i_start]), i_stop-i_start,
@@ -2454,20 +2461,25 @@ void GMatrixSparse::stack_flush(void)
 
             } // endif: column existed in the matrix
 
-            // If column did not exists in the matrix then consider all
+            // If column did not exist in the matrix then consider all
             // elements as new
             else {
                 m_stack_work[col]  = (entry+2);
                 new_elements      += (m_stack_start[entry+1] - m_stack_start[entry]);
             }
-        } // endif: entry was valid
-    } // endfor: looped over all entries
-    int elements = m_elements + new_elements;
 
-    // Dump number of elements in new matrix 
+        } // endif: entry was valid
+
+    } // endfor: looped over all entries
+
+    // Debug option: Log number of valid columns and elements in new matrix
     #if defined(G_DEBUG_SPARSE_STACK_FLUSH)
-    std::cout << " New elements ............: " << new_elements << std::endl;
+    std::cout << " Valid columns on stack ....: " << num_columns << std::endl;
+    std::cout << " Valid elements on stack ...: " << new_elements << std::endl;
     #endif
+
+    // Compute total number of matrix elements
+    int elements = m_elements + new_elements;
 
     // Allocate memory for new matrix (always keep some elbow room)
     m_alloc = elements + m_mem_block;
@@ -2479,7 +2491,9 @@ void GMatrixSparse::stack_flush(void)
     int index = 0;
     for (int col = 0; col < m_cols; ++col) {
 
-        // If column does not exist then skip
+        // If column does not exist then skip. Note that the index is stored
+        // in [col] instead of [col+1] to not disturb the existing matrix.
+        // The column start indices are corrected later.
         if (m_stack_work[col] == 0) {
             m_colstart[col] = index;
             continue;
@@ -2512,7 +2526,8 @@ void GMatrixSparse::stack_flush(void)
             }
         }
 
-        // If column exists in the matrix and in the stack then we have to mix both
+        // If column exists in the matrix and in the stack then we have to
+        // mix both
         else {
 
             // Get stack entry for column mix
@@ -2537,17 +2552,20 @@ void GMatrixSparse::stack_flush(void)
 
         } // endelse: column mixing required
 
-        // Store actual index in column start array
+        // Store actual index in column start array. Note that the index is
+        // stored in [col] instead of [col+1] to not disturb the existing
+        // matrix. The column start indices are corrected later.
         m_colstart[col] = index;
 
     } // endfor: looped over all columns
 
-    // Dump number of elements in new matrix after addition
+    // Dump number of elements in new matrix after stack flushing
     #if defined(G_DEBUG_SPARSE_STACK_FLUSH)
-    std::cout << " Added elements ..........: " << index << " (should be " << elements << ")" << std::endl;
-    std::cout << " - Matrix only ...........: " << num_matrix << std::endl;
-    std::cout << " - Stack only ............: " << num_stack << std::endl;
-    std::cout << " - Matrix & Stack ........: " << num_both << std::endl;
+    std::cout << " Added elements ............: " << index;
+    std::cout << " (should be " << elements << ")" << std::endl;
+    std::cout << " - Matrix only .............: " << num_matrix << std::endl;
+    std::cout << " - Stack only ..............: " << num_stack << std::endl;
+    std::cout << " - Matrix & Stack ..........: " << num_both << std::endl;
     #endif
 
     // Correct columns start array
@@ -3339,7 +3357,11 @@ void GMatrixSparse::insert_zero_row_col(const int& rows, const int& cols)
  * @param[out] num_mix Number of elements found in both columns.
  *
  * This method prepares the mix of two sparse matrix columns into a single
- * column. 
+ * column. It counts the number of elements in two columns that have the
+ * same row and puts this number into @p num_mix. The number of elements
+ * that are only present in the first column will be put in @p num_1, the
+ * number of elements that are only present in the second column will be put
+ * in @p num_2.
  ***************************************************************************/
 void GMatrixSparse::mix_column_prepare(const int* src1_row, int src1_num,
                                        const int* src2_row, int src2_num,
@@ -3351,44 +3373,57 @@ void GMatrixSparse::mix_column_prepare(const int* src1_row, int src1_num,
     *num_mix = 0;
 
     // Initialise indices and row indices of both columns
-    int inx_1 = 0;                    // Column 1 element index
-    int inx_2 = 0;                    // Column 2 element index
-    int row_1 = src1_row[inx_1++];    // Column 1 first row index
-    int row_2 = src2_row[inx_2++];    // Column 2 first row index
+    int inx_1 = 0;                  // Column 1 element index
+    int inx_2 = 0;                  // Column 2 element index
+    int row_1 = src1_row[inx_1];    // Column 1 first row index
+    int row_2 = src2_row[inx_2];    // Column 2 first row index
 
-    // Mix elements of both columns while both contain still elements
+    // Count number of elements with same row or elements that exist only in
+    // either the first or the second column while both columns contain still
+    // elements
     while (inx_1 < src1_num && inx_2 < src2_num) {
 
         // Case A: the element exist in both columns
         if (row_1 == row_2) {
-            row_1 = src1_row[inx_1++];
-            row_2 = src2_row[inx_2++];
             (*num_mix)++;
+            inx_1++;
+            inx_2++;
+            if (inx_1 < src1_num) {
+                row_1 = src1_row[inx_1];
+            }
+            if (inx_2 < src2_num) {
+                row_2 = src2_row[inx_2];
+            }
         }
 
         // Case B: the element exists only in first column
         else if (row_1 < row_2) {
-            row_1 = src1_row[inx_1++];
             (*num_1)++;
+            inx_1++;
+            if (inx_1 < src1_num) {
+                row_1 = src1_row[inx_1];
+            }
         }
 
         // Case C: the element exists only in second column
         else {
-            row_2 = src2_row[inx_2++];
             (*num_2)++;
+            inx_2++;
+            if (inx_2 < src2_num) {
+                row_2 = src2_row[inx_2];
+            }
         }
 
-    } // endwhile: mixing
+    } // endwhile: counted elements
 
-    // At this point either the first or the second column expired of elements
-    // In the case that there are still elements remaining in the first column we
-    // count them now ...
+    // At this point at least one column expired of elements. If there are
+    // still elements remaining in the first column then count them now.
     if (inx_1 < src1_num) {
         *num_1 += (src1_num - inx_1);
     }
 
-    // ... or in the case that there are still elements remaining in the second
-    // column we count them now
+    // If there are still elements remaining in the second column then count
+    // them now.
     if (inx_2 < src2_num) {
         *num_2 += (src2_num - inx_2);
     }
@@ -3407,29 +3442,33 @@ void GMatrixSparse::mix_column_prepare(const int* src1_row, int src1_num,
  * @param[in] src2_data Data array [0...src2_num-1] of second column.
  * @param[in] src2_row Row index array [0...src2_num-1] of second column.
  * @param[in] src2_num Number of elements in second column.
- * @param[in] dst_data Data array [0...dst_num-1] of result column.
- * @param[in] dst_row Row index array [0...dst_num-1] of result column.
- * @param[in] dst_num Number of elements in result column.
+ * @param[in] dst_data Data array [0...dst_num-1] of mixed column.
+ * @param[in] dst_row Row index array [0...dst_num-1] of mixed column.
+ * @param[out] dst_num Number of elements in mixed column.
  *
  * This method mixes two sparse matrix columns into a single column.
  ***************************************************************************/
-void GMatrixSparse::mix_column(const double* src1_data, const int* src1_row,
-                               int src1_num,
-                               const double* src2_data, const int* src2_row,
-                               int src2_num,
-                               double* dst_data, int* dst_row, int* dst_num)
+void GMatrixSparse::mix_column(const double* src1_data,
+                               const int*    src1_row,
+                               int           src1_num,
+                               const double* src2_data,
+                               const int*    src2_row,
+                               int           src2_num,
+                               double*       dst_data,
+                               int*          dst_row,
+                               int*          dst_num)
 {
     // Initialise indices and row indices of both columns
+    int inx   = 0;                    // Mixed column element index
     int inx_1 = 0;                    // Column 1 element index
     int inx_2 = 0;                    // Column 2 element index
-    int inx   = 0;                    // Result column element index
-    int row_1 = src1_row[inx_1];
-    int row_2 = src2_row[inx_2];
+    int row_1 = src1_row[inx_1];      // Current row in column 1
+    int row_2 = src2_row[inx_2];      // Current row in column 2
 
     // Mix elements of both columns while both contain still elements
     while (inx_1 < src1_num && inx_2 < src2_num) {
 
-        // Case A: the element exists in both columns, so we add up the values
+        // Case A: the element exists in both columns, so we add the values
         if (row_1 == row_2) {
             dst_data[inx] = src1_data[inx_1++] + src2_data[inx_2++];
             dst_row[inx]  = row_1;
@@ -3441,8 +3480,8 @@ void GMatrixSparse::mix_column(const double* src1_data, const int* src1_row,
             }
         }
 
-        // Case B: the element exists only in first column, so we copy the element
-        // from the first column
+        // Case B: the element exists only in first column, so we copy the
+        // element from the first column
         else if (row_1 < row_2) {
             dst_data[inx] = src1_data[inx_1++];
             dst_row[inx]  = row_1;
@@ -3451,8 +3490,8 @@ void GMatrixSparse::mix_column(const double* src1_data, const int* src1_row,
             }
         }
 
-        // Case C: the element exists only in second column, so we copy the element
-        // from the second column
+        // Case C: the element exists only in second column, so we copy the
+        // element from the second column
         else {
             dst_data[inx] = src2_data[inx_2++];
             dst_row[inx]  = row_2;
@@ -3467,8 +3506,8 @@ void GMatrixSparse::mix_column(const double* src1_data, const int* src1_row,
     } // endwhile: mixing
 
     // At this point either the first or the second column expired of elements
-    // In the case that there are still elements remaining in the first column we
-    // add them now ...
+    // In the case that there are still elements remaining in the first column
+    // we add them now ...
     for (int i = inx_1; i < src1_num; ++i, ++inx) {
         dst_data[inx] = src1_data[i];
         dst_row[inx]  = src1_row[i];
@@ -3481,7 +3520,7 @@ void GMatrixSparse::mix_column(const double* src1_data, const int* src1_row,
         dst_row[inx]  = src2_row[i];
     }
 
-    // Now store the number of columns in the second column
+    // Now store the number of elements in the mixed column
     *dst_num = inx;
 
     // We're done

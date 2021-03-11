@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-8 March 2021
+11 March 2021
 
 
 1. Introduction
@@ -142,6 +142,10 @@ removed since it won't have any effect anymore (#3553).
 
 7. Linear algebra module
 ------------------------
+Fixed an incompatibility between GMatrixSparse::mix_column_prepare() and
+GMatrixSparse::mix_column() methods that led in rare cases to a segmentation
+fault (#3563).
+
 Implemented GMatrixSparse::row() and GMatrixSparse::add_to_row() methods.
 
 
