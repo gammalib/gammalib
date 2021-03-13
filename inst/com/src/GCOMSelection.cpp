@@ -531,6 +531,12 @@ std::string GCOMSelection::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Invalid minitelescope"));
         result.append(gammalib::str(m_num_invalid_modcom));
 
+        // Append phase selection if it exists
+        if (!m_phases.is_empty()) {
+            result.append("\n"+m_phases.print());
+            result.append("\n"+m_phase_curve.print());
+        }
+
     } // endif: chatter was not silent
 
     // Return result
@@ -564,6 +570,8 @@ void GCOMSelection::init_members(void)
     m_reflag_max   =  1000;  //!< Maximum rejection flag
     m_vetoflag_min =     0;  //!< Minimum veto flag
     m_vetoflag_max =     0;  //!< Maximum veto flag
+    m_phase_curve.clear();
+    m_phases.clear();
 
     // Initialise statistics
     init_statistics();
@@ -595,6 +603,8 @@ void GCOMSelection::copy_members(const GCOMSelection& select)
     m_reflag_max   = select.m_reflag_max;
     m_vetoflag_min = select.m_vetoflag_min;
     m_vetoflag_max = select.m_vetoflag_max;
+    m_phase_curve  = select.m_phase_curve;
+    m_phases       = select.m_phases;
 
     // Copy statistics
     m_num_events_checked  = select.m_num_events_checked;

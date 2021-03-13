@@ -109,7 +109,8 @@ public:
     void               compute_drg(const GCOMObservation& obs,
                                    const GCOMSelection&   select = GCOMSelection(),
                                    const double&          zetamin = 5.0);
-    void               compute_drx(const GCOMObservation& obs);
+    void               compute_drx(const GCOMObservation& obs,
+                                   const GCOMSelection&   select = GCOMSelection());
     void               compute_drm(const GCOMObservation& obs,
                                    const GModel&          model);
     double             cone_content(const GSkyDir& dir,
@@ -129,7 +130,9 @@ protected:
     void   free_members(void);
     void   init_cube(void);
     void   init_statistics(void);
-    bool   use_superpacket(const GCOMOad &oad, const GCOMTim& tim);
+    bool   use_superpacket(const GCOMOad&       oad,
+                           const GCOMTim&       tim,
+                           const GCOMSelection& select);
     void   read_attributes(const GFitsHDU* hdu);
     void   write_attributes(GFitsHDU* hdu) const;
     double compute_geometry(const int& tjd, const double&     theta,

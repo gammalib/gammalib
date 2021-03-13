@@ -305,19 +305,19 @@ void GCOMDri::compute_dre(const GCOMObservation& obs,
     compute_tof_correction();
 
     // Initialise statistics
-    int num_used_events           = 0;
-    int num_event_outside_sp      = 0;
-    int num_energy_too_low        = 0;
-    int num_energy_too_high       = 0;
-    int num_eha_too_small         = 0;
-    int num_phibar_too_low        = 0;
-    int num_phibar_too_high       = 0;
-    int num_outside_dre           = 0;
-    int num_event_before_dre      = 0;
-    int num_event_after_dre       = 0;
-    int num_d1module_off          = 0;
-    int num_d2module_off          = 0;
-    int num_processed             = 0;
+    int num_used_events      = 0;
+    int num_event_outside_sp = 0;
+    int num_energy_too_low   = 0;
+    int num_energy_too_high  = 0;
+    int num_eha_too_small    = 0;
+    int num_phibar_too_low   = 0;
+    int num_phibar_too_high  = 0;
+    int num_outside_dre      = 0;
+    int num_event_before_dre = 0;
+    int num_event_after_dre  = 0;
+    int num_d1module_off     = 0;
+    int num_d2module_off     = 0;
+    int num_processed        = 0;
 
     // Set all DRE bins to zero
     init_cube();
@@ -332,7 +332,7 @@ void GCOMDri::compute_dre(const GCOMObservation& obs,
         const GCOMOad &oad = obs.oads()[i_oad];
 
         // Check superpacket usage
-        if (!use_superpacket(oad, obs.tim())) {
+        if (!use_superpacket(oad, obs.tim(), select)) {
             continue;
         }
 
@@ -509,7 +509,7 @@ void GCOMDri::compute_dre(const GCOMObservation& obs,
  * @brief Compute geometry cube
  *
  * @param[in] obs COMPTEL observation.
- * @param[in] select Selection set (not used so far).
+ * @param[in] select Selection set.
  * @param[in] zetamin Minimum Earth horizon - Phibar cut (deg).
  *
  * Compute DRG cube for a COMPTEL observation.
@@ -540,7 +540,7 @@ void GCOMDri::compute_drg(const GCOMObservation& obs,
         const GCOMOad &oad = obs.oads()[i_oad];
 
         // Check superpacket usage
-        if (!use_superpacket(oad, obs.tim())) {
+        if (!use_superpacket(oad, obs.tim(), select)) {
             continue;
         }
 
@@ -626,6 +626,7 @@ void GCOMDri::compute_drg(const GCOMObservation& obs,
  * @brief Compute DRX exposure map
  *
  * @param[in] obs COMPTEL observation.
+ * @param[in] select Selection set.
  *
  * Compute DRX exposure map for a COMPTEL observation.
  *
@@ -643,7 +644,8 @@ void GCOMDri::compute_drg(const GCOMObservation& obs,
  * \f$r_1=13.8\f$ cm is the radius of a D1 module, and
  * \f$\theta_c\f$ is the zenith angle in COMPTEL coordinates.
  ***************************************************************************/
-void GCOMDri::compute_drx(const GCOMObservation& obs)
+void GCOMDri::compute_drx(const GCOMObservation& obs,
+                          const GCOMSelection&   select)
 {
     // Debug
     #if defined(G_DEBUG_COMPUTE_DRX)
@@ -667,7 +669,7 @@ void GCOMDri::compute_drx(const GCOMObservation& obs)
         const GCOMOad &oad = obs.oads()[i_oad];
 
         // Check superpacket usage
-        if (!use_superpacket(oad, obs.tim())) {
+        if (!use_superpacket(oad, obs.tim(), select)) {
             continue;
         }
 
@@ -1117,14 +1119,20 @@ void GCOMDri::init_statistics(void)
  *
  * @param[in] oad Orbit Aspect Data record (i.e. superpacket).
  * @param[in] tim Good Time Intervals.
+ * @param[in] select Selection set.
  * @return True if superpacket should be used, false otherwise.
  *
- * Checks if a superpacket should be used and updated the superpacket
- * statistics and selected time interval. A superpacket will be used if
+ * Checks if a superpacket should be used. A superpacket will be used if
  * it is fully enclosed within the COMPTEL Good Time Intervals and the
- * Good Time Intervals of the DRI dataset.
+ * Good Time Intervals of the DRI dataset. In case that phases are selected
+ * in the selection set, the superpacket will be used when the start time
+ * is comprised in one of the phases.
+ *
+ * The method updates the superpacket statistics and selected time interval.
  ***************************************************************************/
-bool GCOMDri::use_superpacket(const GCOMOad &oad, const GCOMTim& tim)
+bool GCOMDri::use_superpacket(const GCOMOad&       oad,
+                              const GCOMTim&       tim,
+                              const GCOMSelection& select)
 {
     // Initialise usage flag
     bool use = true;
@@ -1146,6 +1154,20 @@ bool GCOMDri::use_superpacket(const GCOMOad &oad, const GCOMTim& tim)
              !(m_gti.contains(oad.tstart()) && m_gti.contains(oad.tstop()))) {
         m_num_skipped_superpackets++;
         use = false;
+    }
+
+    // If there are phase intervals then skip if superpacket is the phase
+    // corresponding to the start time does not fall into any of the phase
+    // intervals
+    else if (!select.phases().is_empty()) {
+        double phase = select.phase_curve().phase(oad.tstart());
+        if (select.phases().contains(phase)) {
+            m_num_used_superpackets++;
+        }
+        else {
+            m_num_skipped_superpackets++;
+            use = false;
+        }
     }
 
     // ... otherwise use superpacket

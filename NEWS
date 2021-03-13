@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-11 March 2021
+13 March 2021
 
 
 1. Introduction
@@ -78,6 +78,7 @@ The following methods have been added:
 - GXmlElement::string()
 - GXmlElement::real()
 - GXmlElement::integer()
+- GPhases::contains()
 - GCTAEventBin::emin()
 - GCTAEventBin::emax()
 - GCOMObservation::GCOMObservation(GCOMDri&, GCOMDri&, GCOMDri&, GCOMDri&)
@@ -91,6 +92,8 @@ The following methods have been added:
 - GCOMDri::num_superpackets()
 - GCOMDri::num_used_superpackets()
 - GCOMDri::num_skipped_superpackets()
+- GCOMSelection::phase_curve()
+- GCOMSelection::phases()
 - gammalib::tmpnam()
 - gammalib::compare()
 
@@ -196,6 +199,9 @@ of functions (#3328).
 
 10. Observation module
 ----------------------
+Add GPhases::contains() method to check whether a phase is contained in the phase
+container (#3564).
+
 The sparse gradient matrix is now transposed in the likelihood method so that the
 elements can be access column-wise instead of row-wise, which speeds-up the element
 access (#3501).
@@ -313,6 +319,8 @@ spatial model gradients (#3203).
 
 21. COMPTEL interface
 ---------------------
+Add phase selection to GCOMSelection and GCOMDri (#3564).
+
 Store DRB, DRG and DRX as instances of GCOMDri instead of GSkyMap in GCOMObservation
 (#3560).
 

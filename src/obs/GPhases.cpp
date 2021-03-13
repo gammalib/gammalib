@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GPhases.cpp - Phase intervals class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Juergen Knoedlseder                              *
+ *  copyright (C) 2017-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -188,6 +188,34 @@ GPhases* GPhases::clone(void) const
 
 
 /***********************************************************************//**
+ * @brief Check whether phase is contained in phases
+ *
+ * @param[in] phase Phase.
+ * @returns Phase is contained in phases.
+ *
+ * Checks whether a phase is contained in one of the phase intervals. The
+ * lower phase bound is included while the upper phase bound is excluded
+ * by the check.
+ ***************************************************************************/
+bool GPhases::contains(const double& phase) const
+{
+    // Initialise containment flag
+    bool contained = false;
+
+    // Check if phase is contained in one of the phase intervals
+    for (int i = 0; i < size(); ++i) {
+        if (phase >= m_pmin[i] && phase < m_pmax[i]) {
+            contained = true;
+            break;
+        }
+    }
+
+    // Return containment flag
+    return contained;
+}
+
+
+/***********************************************************************//**
  * @brief Append phase interval
  *
  * @param[in] pmin Lower boundary of phase interval.
@@ -347,8 +375,17 @@ std::string GPhases::print(const GChatter& chatter) const
         result.append("=== GPhases ===");
 
         // Append phase interval information
-        result.append("\n"+gammalib::parformat("Number of intervals"));
+        result.append("\n"+gammalib::parformat("Number of phase intervals"));
         result.append(gammalib::str(size()));
+
+        // Append phases
+        for (int i = 0; i < size(); ++i) {
+            result.append("\n"+gammalib::parformat("Phase interval "+
+                          gammalib::str(i+1)));
+            result.append(gammalib::str(m_pmin[i]));
+            result.append(" - ");
+            result.append(gammalib::str(m_pmax[i]));
+        }
 
     } // endif: chatter was not silent
 

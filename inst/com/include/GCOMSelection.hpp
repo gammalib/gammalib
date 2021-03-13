@@ -30,6 +30,8 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GBase.hpp"
+#include "GPhases.hpp"
+#include "GModelTemporalPhaseCurve.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GFitsHDU;
@@ -63,38 +65,42 @@ public:
     virtual std::string    print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    void          init_statistics(void) const;
-    bool          use_event(const GCOMEventAtom& event) const;
-    const double& e1_min(void) const;
-    void          e1_min(const double& e1_min);
-    const double& e1_max(void) const;
-    void          e1_max(const double& e1_max);
-    const double& e2_min(void) const;
-    void          e2_min(const double& e2_min);
-    const double& e2_max(void) const;
-    void          e2_max(const double& e2_max);
-    const int&    tof_min(void) const;
-    void          tof_min(const int& tof_min);
-    const int&    tof_max(void) const;
-    void          tof_max(const int& tof_max);
-    const int&    psd_min(void) const;
-    void          psd_min(const int& psd_min);
-    const int&    psd_max(void) const;
-    void          psd_max(const int& psd_max);
-    const double& zeta_min(void) const;
-    void          zeta_min(const double& zeta_min);
-    const double& zeta_max(void) const;
-    void          zeta_max(const double& zeta_max);
-    const int&    reflag_min(void) const;
-    void          reflag_min(const int& reflag_min);
-    const int&    reflag_max(void) const;
-    void          reflag_max(const int& reflag_max);
-    const int&    vetoflag_min(void) const;
-    void          vetoflag_min(const int& vetoflag_min);
-    const int&    vetoflag_max(void) const;
-    void          vetoflag_max(const int& vetoflag_max);
-    void          read(const GFitsHDU& hdu);
-    void          write(GFitsHDU& hdu) const;
+    void                            init_statistics(void) const;
+    bool                            use_event(const GCOMEventAtom& event) const;
+    const double&                   e1_min(void) const;
+    void                            e1_min(const double& e1_min);
+    const double&                   e1_max(void) const;
+    void                            e1_max(const double& e1_max);
+    const double&                   e2_min(void) const;
+    void                            e2_min(const double& e2_min);
+    const double&                   e2_max(void) const;
+    void                            e2_max(const double& e2_max);
+    const int&                      tof_min(void) const;
+    void                            tof_min(const int& tof_min);
+    const int&                      tof_max(void) const;
+    void                            tof_max(const int& tof_max);
+    const int&                      psd_min(void) const;
+    void                            psd_min(const int& psd_min);
+    const int&                      psd_max(void) const;
+    void                            psd_max(const int& psd_max);
+    const double&                   zeta_min(void) const;
+    void                            zeta_min(const double& zeta_min);
+    const double&                   zeta_max(void) const;
+    void                            zeta_max(const double& zeta_max);
+    const int&                      reflag_min(void) const;
+    void                            reflag_min(const int& reflag_min);
+    const int&                      reflag_max(void) const;
+    void                            reflag_max(const int& reflag_max);
+    const int&                      vetoflag_min(void) const;
+    void                            vetoflag_min(const int& vetoflag_min);
+    const int&                      vetoflag_max(void) const;
+    void                            vetoflag_max(const int& vetoflag_max);
+    const GModelTemporalPhaseCurve& phase_curve(void) const;
+    void                            phase_curve(const GModelTemporalPhaseCurve& phase_curve);
+    const GPhases&                  phases(void) const;
+    void                            phases(const GPhases& phases);
+    void                            read(const GFitsHDU& hdu);
+    void                            write(GFitsHDU& hdu) const;
 
 protected:
     // Protected methods
@@ -103,20 +109,22 @@ protected:
     void free_members(void);
 
     // Protected members
-    double m_e1_min;       //!< Minimum D1 energy deposit (MeV)
-    double m_e1_max;       //!< Maximum D1 energy deposit (MeV)
-    double m_e2_min;       //!< Minimum D2 energy deposit (MeV)
-    double m_e2_max;       //!< Maximum D2 energy deposit (MeV)
-    int    m_tof_min;      //!< Minimum TOF window
-    int    m_tof_max;      //!< Maximum TOF window
-    int    m_psd_min;      //!< Minimum PSD window
-    int    m_psd_max;      //!< Maximum PSD window
-    double m_zeta_min;     //!< Minimum Earth horizon angle - Phibar window
-    double m_zeta_max;     //!< Maximum Earth horizon angle - Phibar window
-    int    m_reflag_min;   //!< Minimum rejection flag
-    int    m_reflag_max;   //!< Maximum rejection flag
-    int    m_vetoflag_min; //!< Minimum veto flag
-    int    m_vetoflag_max; //!< Maximum veto flag
+    double                   m_e1_min;       //!< Minimum D1 energy deposit (MeV)
+    double                   m_e1_max;       //!< Maximum D1 energy deposit (MeV)
+    double                   m_e2_min;       //!< Minimum D2 energy deposit (MeV)
+    double                   m_e2_max;       //!< Maximum D2 energy deposit (MeV)
+    int                      m_tof_min;      //!< Minimum TOF window
+    int                      m_tof_max;      //!< Maximum TOF window
+    int                      m_psd_min;      //!< Minimum PSD window
+    int                      m_psd_max;      //!< Maximum PSD window
+    double                   m_zeta_min;     //!< Minimum Earth horizon angle - Phibar window
+    double                   m_zeta_max;     //!< Maximum Earth horizon angle - Phibar window
+    int                      m_reflag_min;   //!< Minimum rejection flag
+    int                      m_reflag_max;   //!< Maximum rejection flag
+    int                      m_vetoflag_min; //!< Minimum veto flag
+    int                      m_vetoflag_max; //!< Maximum veto flag
+    GModelTemporalPhaseCurve m_phase_curve;  //!< Phase curve for phase selection
+    GPhases                  m_phases;       //!< Phases for phase selection
 
     // Selection statistics
     mutable int m_num_events_checked;  //!< Number of checked events
@@ -499,6 +507,56 @@ inline
 void GCOMSelection::vetoflag_max(const int& vetoflag_max)
 {
     m_vetoflag_max = vetoflag_max;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return phase curve
+ *
+ * @return Phase curve.
+ ***************************************************************************/
+inline
+const GModelTemporalPhaseCurve& GCOMSelection::phase_curve(void) const
+{
+    return (m_phase_curve);
+}
+
+
+/***********************************************************************//**
+ * @brief Set phase curve
+ *
+ * @param[in] phase_curve Phase curve.
+ ***************************************************************************/
+inline
+void GCOMSelection::phase_curve(const GModelTemporalPhaseCurve& phase_curve)
+{
+    m_phase_curve = phase_curve;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return phases
+ *
+ * @return Phases
+ ***************************************************************************/
+inline
+const GPhases& GCOMSelection::phases(void) const
+{
+    return (m_phases);
+}
+
+
+/***********************************************************************//**
+ * @brief Set phases
+ *
+ * @param[in] phases Phases.
+ ***************************************************************************/
+inline
+void GCOMSelection::phases(const GPhases& phases)
+{
+    m_phases = phases;
     return;
 }
 

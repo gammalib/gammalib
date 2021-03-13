@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GPhases.hpp - Phase intervals class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Juergen Knoedlseder                              *
+ *  copyright (C) 2017-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -57,6 +57,7 @@ public:
     std::string classname(void) const;
     int         size(void) const;
     bool        is_empty(void) const;
+    bool        contains(const double& phase) const;
     void        append(const double& pmin, const double& pmax);
     void        remove(const int& index);
     void        reserve(const int& num);

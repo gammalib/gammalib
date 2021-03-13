@@ -79,7 +79,8 @@ public:
     void               compute_drg(const GCOMObservation& obs,
                                    const GCOMSelection&   select = GCOMSelection(),
                                    const double&          zetamin = 5.0);
-    void               compute_drx(const GCOMObservation& obs);
+    void               compute_drx(const GCOMObservation& obs,
+                                   const GCOMSelection&   select = GCOMSelection());
     void               compute_drm(const GCOMObservation& obs,
                                    const GModel&          model);
     double             cone_content(const GSkyDir& dir,
