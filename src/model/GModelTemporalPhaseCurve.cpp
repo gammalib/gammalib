@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelTemporalPhaseCurve.cpp - Temporal phase curve model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -506,7 +506,7 @@ double GModelTemporalPhaseCurve::phase(const GTime& time) const
     // Set constants
     const double c1 = 0.5;
     const double c2 = 1.0 / 6.0;
-    
+
     // Compute time since reference time in seconds
     double t = time - mjd();
 
@@ -645,7 +645,7 @@ void GModelTemporalPhaseCurve::init_members(void)
     m_f0.name("F0");
     m_f0.unit("Hz");
     m_f0.scale(1.0);
-    m_f0.value(1.0);
+    m_f0.value(0.0);
     m_f0.range(0.0,1000.0);
     m_f0.free();
     m_f0.gradient(0.0);
@@ -656,7 +656,7 @@ void GModelTemporalPhaseCurve::init_members(void)
     m_f1.name("F1");
     m_f1.unit("s^-2");
     m_f1.scale(1.0);
-    m_f1.value(0.1);
+    m_f1.value(0.0);
     m_f1.range(-1000.0,1000.0);
     m_f1.free();
     m_f1.gradient(0.0);
@@ -667,7 +667,7 @@ void GModelTemporalPhaseCurve::init_members(void)
     m_f2.name("F2");
     m_f2.unit("s^-3");
     m_f2.scale(1.0);
-    m_f2.value(0.01);
+    m_f2.value(0.0);
     m_f2.range(-1000.0,1000.0);
     m_f2.free();
     m_f2.gradient(0.0);
@@ -831,7 +831,7 @@ void GModelTemporalPhaseCurve::load_nodes(const GFilename& filename)
                                   "with normalizations not exceeding 1.";
                 throw GException::invalid_value(G_LOAD_NODES, msg);
             }
-        
+
         } // endfor: looped over nodes
 
         // If first phase is larger than zero then add last node with phase-1 as
