@@ -1204,7 +1204,7 @@ void GCOMDri::read_attributes(const GFitsHDU* hdu)
     GTime tstop  = gammalib::com_time(hdu->integer("VIEDAY"), hdu->integer("VIETIM"));
 
     // Set Good Time Intervals
-    if (tstop > tstart) {
+    if (tstop >= tstart) {
         m_gti = GGti(tstart, tstop);
     }
 
