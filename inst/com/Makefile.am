@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for com module                                                #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016-2018 Juergen Knoedlseder                               #
+# Copyright (C) 2016-2021 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -34,7 +34,8 @@ INCLUDES = -I$(top_srcdir)/include \
            -I$(top_srcdir)/inst/com/src
 
 # Define sources for this directory
-sources = src/GCOMSupport.cpp \
+sources = src/GCOMTools.cpp \
+          src/GCOMSupport.cpp \
           src/GCOMSelection.cpp \
           src/GCOMStatus.cpp \
           src/GCOMDri.cpp \
@@ -56,7 +57,7 @@ sources = src/GCOMSupport.cpp \
           src/GCOMModelDRBFitting.cpp
 
 # Define headers to be installed
-pkginclude_HEADERS = include/GCOMEventCube.hpp \
+pkginclude_HEADERS = include/GCOMTools.hpp \
                      include/GCOMSelection.hpp \
                      include/GCOMStatus.hpp \
                      include/GCOMDri.hpp \
@@ -66,6 +67,7 @@ pkginclude_HEADERS = include/GCOMEventCube.hpp \
                      include/GCOMRoi.hpp \
                      include/GCOMEventAtom.hpp \
                      include/GCOMEventList.hpp \
+                     include/GCOMEventCube.hpp \
                      include/GCOMEventBin.hpp \
                      include/GCOMInstDir.hpp \
                      include/GCOMResponse.hpp \

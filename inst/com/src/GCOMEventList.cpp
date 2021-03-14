@@ -32,6 +32,7 @@
 #include "GMath.hpp"
 #include "GFits.hpp"
 #include "GException.hpp"
+#include "GCOMTools.hpp"
 #include "GCOMSupport.hpp"
 #include "GCOMEventList.hpp"
 

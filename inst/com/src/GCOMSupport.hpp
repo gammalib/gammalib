@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCOMSupport.hpp - COMPTEL support functions              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,7 +31,6 @@
 
 /* __ Forward declarations _______________________________________________ */
 class GSkyMap;
-class GTime;
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -42,9 +41,6 @@ namespace gammalib {
     void   com_wcs_mer2car(GSkyMap& map);
     double com_energy1(const double& energy, const double& phigeo);
     double com_energy2(const double& energy, const double& phigeo);
-    GTime  com_time(const int& tjd, const int& tics);
-    int    com_tjd(const GTime& time);
-    int    com_tics(const GTime& time);
 }
 
 #endif /* GCOMSUPPORT_HPP */

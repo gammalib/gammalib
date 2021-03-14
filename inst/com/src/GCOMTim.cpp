@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCOMTim.cpp - COMPTEL Good Time Intervals class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2019 by Juergen Knodlseder                          *
+ *  copyright (C) 2017-2021 by Juergen Knodlseder                          *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,8 +33,9 @@
 #include "GFitsBinTable.hpp"
 #include "GFitsTableULongCol.hpp"
 #include "GFitsTableStringCol.hpp"
-#include "GCOMTim.hpp"
+#include "GCOMTools.hpp"
 #include "GCOMSupport.hpp"
+#include "GCOMTim.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 

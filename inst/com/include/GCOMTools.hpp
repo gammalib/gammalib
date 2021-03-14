@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GCOMLib.hpp - COMPTEL Support Header files              *
+ *                     GCOMTools.hpp - COMPTEL tools                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2021 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,36 +19,28 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCOMLib.hpp
- * @brief Collection of COMPTEL support header files
- * @author Juergen Knoedlseder    
+ * @file GCOMTools.hpp
+ * @brief Definition of COMPTEL tools
+ * @author Juergen Knoedlseder
  */
 
-#ifndef GCOMLIB_HPP
-#define GCOMLIB_HPP
+#ifndef GCOMTOOLS_HPP
+#define GCOMTOOLS_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GammaLib.hpp"
 
-/* __ COMPTEL specific headers ___________________________________________ */
-#include "GCOMTools.hpp"
-#include "GCOMEventCube.hpp"
-#include "GCOMEventBin.hpp"
-#include "GCOMInstDir.hpp"
-#include "GCOMResponse.hpp"
-#include "GCOMD1Response.hpp"
-#include "GCOMD2Response.hpp"
-#include "GCOMInstChars.hpp"
-#include "GCOMObservation.hpp"
-#include "GCOMSelection.hpp"
-#include "GCOMStatus.hpp"
-#include "GCOMDri.hpp"
-#include "GCOMOads.hpp"
-#include "GCOMOad.hpp"
-#include "GCOMTim.hpp"
-#include "GCOMRoi.hpp"
-#include "GCOMEventAtom.hpp"
-#include "GCOMEventList.hpp"
-#include "GCOMModelDRBFitting.hpp"
+/* __ Forward declarations _______________________________________________ */
+class GTime;
 
-#endif /* GCOMLIB_HPP */
+/* __ Namespaces _________________________________________________________ */
+
+/* __ Constants __________________________________________________________ */
+
+/* __ Prototypes _________________________________________________________ */
+namespace gammalib {
+    GTime com_time(const int& tjd, const int& tics);
+    int   com_tjd(const GTime& time);
+    int   com_tics(const GTime& time);
+}
+
+#endif /* GCOMTOOLS_HPP */

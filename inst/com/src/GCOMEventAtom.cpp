@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GCOMEventAtom.cpp - COMPTEL event atom class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,8 +29,9 @@
 #include <config.h>
 #endif
 #include <string>
-#include "GCOMEventAtom.hpp"
+#include "GCOMTools.hpp"
 #include "GCOMSupport.hpp"
+#include "GCOMEventAtom.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 

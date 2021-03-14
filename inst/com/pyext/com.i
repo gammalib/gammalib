@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        com.i - COMPTEL module                           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -100,6 +100,7 @@
 }
 
 /* __ COMPTEL _____________________________________________________________ */
+%include "GCOMTools.i"
 %include "GCOMObservation.i"
 %include "GCOMResponse.i"
 %include "GCOMEventBin.i"

@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCOMOads.cpp - COMPTEL Orbit Aspect Data container class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2019 by Juergen Knodlseder                          *
+ *  copyright (C) 2017-2021 by Juergen Knodlseder                          *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,8 +32,9 @@
 #include "GMath.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
-#include "GCOMOads.hpp"
+#include "GCOMTools.hpp"
 #include "GCOMSupport.hpp"
+#include "GCOMOads.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_AT                                             "GCOMOads::at(int&)"

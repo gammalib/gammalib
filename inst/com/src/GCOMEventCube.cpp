@@ -32,6 +32,7 @@
 #include "GTools.hpp"
 #include "GFits.hpp"
 #include "GFilename.hpp"
+#include "GCOMTools.hpp"
 #include "GCOMSupport.hpp"
 #include "GCOMEventCube.hpp"
 

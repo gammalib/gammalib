@@ -37,6 +37,8 @@
 #include "GModelSky.hpp"
 #include "GModelSpatial.hpp"
 #include "GModelSpatialPointSource.hpp"
+#include "GCOMTools.hpp"
+#include "GCOMSupport.hpp"
 #include "GCOMDri.hpp"
 #include "GCOMOad.hpp"
 #include "GCOMOads.hpp"
@@ -45,7 +47,6 @@
 #include "GCOMObservation.hpp"
 #include "GCOMEventList.hpp"
 #include "GCOMSelection.hpp"
-#include "GCOMSupport.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_COMPUTE_DRE               "GCOMDri::compute_dre(GCOMObservation&, "\
