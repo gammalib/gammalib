@@ -385,6 +385,44 @@ double GApplication::celapse(void) const
 
 
 /***********************************************************************//**
+ * @brief Return application equivalent CO2 imprint (units: g)
+ *
+ * @return Application equivalent CO2 imprint (g).
+ *
+ * The method returns the equivalent CO2 imprint in grams after the currently
+ * elpased CPU time as returned by celapse(). The method assumes an imprint
+ * of 4.68 g eCO2 / CPU hour as estimated by Berthoud et al. (2020)
+ * (see page 10 of https://hal.archives-ouvertes.fr/hal-02549565v4/document).
+ * The imprint factor includes
+ * * server fabrication
+ * * server environment
+ * * server usage (electricity)
+ * * travelling of personnel in the context of their work
+ * * travelling of personnel from home to office
+ * * personnel equipment
+ * * personnel energy
+ *
+ * The imprint factor is based on an estimate done for the DAHU cluster
+ * of the UMS GRICAD in 2019. Note that the impact of electricity was
+ * computed assuming 108 g eCO2 / kWh consumed, and about 50% of the total
+ * imprint was due to electricity consumption. For countries with a more
+ * carbon intensive electricity production, the CO2 imprint will be
+ * accordingly larger.
+ ***************************************************************************/
+double GApplication::eCO2(void) const
+{
+    // Get elapsed time in CPU jours
+    double cpu_hours = celapse() / 3600.0;
+
+    // Convert into g eCO2
+    double eCO2 = 4.68 * cpu_hours;
+
+    // Return equivalent CO2 imprint
+    return eCO2;
+}
+
+
+/***********************************************************************//**
  * @brief Open log file
  *
  * @param[in] clobber Overwrite (true) or append (false) to existing file
@@ -578,22 +616,31 @@ void GApplication::log_header(void)
  * @brief Write application trailer in log file
  *
  * The application trailer gives the total number of elapsed calendar and
- * CPU seconds.
+ * CPU seconds, as well as the carbon footprint of the application execution.
  ***************************************************************************/
 void GApplication::log_trailer(void)
 {
     // Reset any indentation
     log.indent(0);
 
+    // Get application statistics
+    double telapse = this->telapse();
+    double celapse = this->celapse();
+    double eCO2    = this->eCO2();
+
     // Dump trailer
     log << "Application \"" << m_name << "\" terminated after ";
-    log << telapse() << " wall clock seconds, consuming ";
-    log << celapse() << " seconds of CPU time.";
-    if (telapse() < 0.1) {
-         log << " This was rather quick!";
+    log << telapse << " wall clock seconds, consuming ";
+    log << celapse << " seconds of CPU time and generating a carbon";
+    log << " footprint of " << eCO2 << " g eCO2.";
+    if (eCO2 >= 1000.0) {
+        log << " Please watch your carbon footprint.";
     }
-    if (telapse() > 86400.0) {
-         log << " Hope it was worth waiting ...";
+    if (telapse < 0.1) {
+        log << " This was rather quick and economic!";
+    }
+    if (telapse > 86400.0) {
+        log << " Hope it was worth waiting ...";
     }
     log << std::endl;
 

@@ -1,8 +1,9 @@
-2021-03-13
+2021-04-02
 
         * Version 2.0.0 released
         ========================
 
+        Add carbon footprint estimation to GApplication (#3592)
         Add phase selection to GCOMSelection and GCOMDri (#3564)
         Fix incompatibility in GMatrixSparse::mix_column_prepare() method (#3563)
         Add missing members to GOptimizerLM::copy_members() method

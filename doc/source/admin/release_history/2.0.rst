@@ -33,6 +33,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`3592 <https://cta-redmine.irap.omp.eu/issues/3592>`_] -
+  Add carbon footprint estimation to ``GApplication``
 * [`3564 <https://cta-redmine.irap.omp.eu/issues/3564>`_] -
   Add phase selection to ``GCOMSelection`` and ``GCOMDri``
 * [`3558 <https://cta-redmine.irap.omp.eu/issues/3558>`_] -

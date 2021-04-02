@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GApplication.hpp - GammaLib application base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -78,6 +78,7 @@ public:
     const std::string&              version(void) const;
     double                          telapse(void) const;
     double                          celapse(void) const;
+    double                          eCO2(void) const;
     void                            logFileOpen(const bool& clobber = true);
     void                            logFileClose(void);
     bool                            logTerse(void) const;
