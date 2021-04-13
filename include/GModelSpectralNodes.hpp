@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GModelSpectralNodes.hpp - Spectral nodes model class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -126,6 +126,7 @@ public:
     void    energy(const int& index, const GEnergy& energy);
     double  intensity(const int& index) const;
     void    intensity(const int& index, const double& intensity);
+    double  error(const int& index) const;
 
 protected:
     // Protected methods

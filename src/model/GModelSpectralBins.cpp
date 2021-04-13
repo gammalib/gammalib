@@ -58,6 +58,7 @@ const GModelSpectralRegistry g_spectral_bins_registry(&g_spectral_bins_seed);
 #define G_EMAX_SET                 "GModelSpectralBins::emax(int&, GEnergy&)"
 #define G_INTENSITY_GET                 "GModelSpectralBins::intensity(int&)"
 #define G_INTENSITY_SET        "GModelSpectralBins::intensity(int&, double&)"
+#define G_ERROR_GET                         "GModelSpectralBins::error(int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -1162,6 +1163,31 @@ double GModelSpectralBins::intensity(const int& index) const
 
     // Return intensity
     return (m_values[index].value());
+}
+
+
+/***********************************************************************//**
+ * @brief Return intensity error of bin
+ *
+ * @param[in] index Bin index [0,...,bins()-1].
+ * @return Intensity error of bin @p index.
+ *
+ * @exception GException::out_of_range
+ *            Index is out of range.
+ *
+ * Returns the intensity error of bin @p index.
+ ***************************************************************************/
+double GModelSpectralBins::error(const int& index) const
+{
+    // Raise an exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= bins()) {
+        throw GException::out_of_range(G_ERROR_GET, "Bin index", index, bins());
+    }
+    #endif
+
+    // Return intensity error
+    return (m_values[index].error());
 }
 
 

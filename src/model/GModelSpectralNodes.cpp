@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GModelSpectralNodes.cpp - Spectral nodes model class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -55,6 +55,7 @@ const GModelSpectralRegistry g_spectral_nodes_registry(&g_spectral_nodes_seed);
 #define G_ENERGY_SET            "GModelSpectralNodes::energy(int&, GEnergy&)"
 #define G_INTENSITY_GET                "GModelSpectralNodes::intensity(int&)"
 #define G_INTENSITY_SET       "GModelSpectralNodes::intensity(int&, double&)"
+#define G_ERROR_GET                        "GModelSpectralNodes::error(int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -1112,6 +1113,31 @@ double GModelSpectralNodes::intensity(const int& index) const
 
     // Return intensity
     return (m_values[index].value());
+}
+
+
+/***********************************************************************//**
+ * @brief Return intensity error of node
+ *
+ * @param[in] index Node index [0,...,nodes()-1].
+ * @return Intensity error of node @p index.
+ *
+ * @exception GException::out_of_range
+ *            Index is out of range.
+ *
+ * Returns the intensity error of node @p index.
+ ***************************************************************************/
+double GModelSpectralNodes::error(const int& index) const
+{
+    // Raise an exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= nodes()) {
+        throw GException::out_of_range(G_ERROR_GET, index, nodes()-1);
+    }
+    #endif
+
+    // Return intensity error
+    return (m_values[index].error());
 }
 
 

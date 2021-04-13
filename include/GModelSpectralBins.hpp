@@ -106,6 +106,7 @@ public:
     void    emax(const int& index, const GEnergy& emax);
     double  intensity(const int& index) const;
     void    intensity(const int& index, const double& intensity);
+    double  error(const int& index) const;
 
 protected:
     // Protected methods

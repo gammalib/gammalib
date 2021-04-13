@@ -66,6 +66,7 @@ The following methods have been added:
 - GModelSpectralFunc::energy()
 - GModelSpectralFunc::intensity()
 - GModelSpectralFunc::save()
+- GModelSpectralNodes::error()
 - GSkyMap::correlate()
 - GSkyMap::flux(GSkyRegion&, int&)
 - GSkyMap::flux(GSkyRegions&, int&)
@@ -161,7 +162,8 @@ Implemented GMatrixSparse::row() and GMatrixSparse::add_to_row() methods.
 8. Model module
 ---------------
 Added GModelSpectralBins class that implements statistically independent spectral
-bins as the spectral model component (#3606).
+bins as the spectral model component. In addition, added GModelSpectralNodes::error()
+method so that intensity errors can be accessed directly (#3606).
 
 Added methods to GModelSpectralFunc to allow building of a file function
 in memory (#3535).
