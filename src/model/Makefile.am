@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for model module                                              #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016-2020 Juergen Knoedlseder                               #
+# Copyright (C) 2016-2021 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -67,6 +67,7 @@ sources = GModelPar.cpp \
           GModelSpectralGauss.cpp \
           GModelSpectralLogParabola.cpp \
           GModelSpectralMultiplicative.cpp \
+          GModelSpectralBins.cpp \
           GModelSpectralNodes.cpp \
           GModelSpectralPlaw.cpp \
           GModelSpectralPlawPhotonFlux.cpp \

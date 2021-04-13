@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for include module                                            #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016-2020 Juergen Knoedlseder                               #
+# Copyright (C) 2016-2021 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -200,6 +200,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GModelSpectralGauss.hpp \
                      GModelSpectralLogParabola.hpp \
                      GModelSpectralMultiplicative.hpp \
+                     GModelSpectralBins.hpp \
                      GModelSpectralNodes.hpp \
                      GModelSpectralPlaw.hpp \
                      GModelSpectralPlawPhotonFlux.hpp \

@@ -1,6 +1,6 @@
 GammaLib information
 ====================
-* Version: 2.0.0.dev (2 April 2021)
+* Version: 2.0.0.dev (13 April 2021)
 
 [![Build Status](https://cta-jenkins.irap.omp.eu/buildStatus/icon?job=gammalib-integrate-os)](https://cta-jenkins.irap.omp.eu/job/gammalib-integrate-os/)
 
@@ -194,7 +194,7 @@ extensive unit test by typing:
 If everything works successfully you should see
 
     ===================
-    All 21 tests passed
+    All 22 tests passed
     ===================
 
 or

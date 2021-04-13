@@ -95,6 +95,7 @@ void TestGModel::set(void)
     m_xml_model_point_smoothbplaw  = datadir + "/model_point_smoothbplaw.xml";
     m_xml_model_point_supeplaw     = datadir + "/model_point_supeplaw.xml";
     m_xml_model_point_logparabola  = datadir + "/model_point_logparabola.xml";
+    m_xml_model_point_bins         = datadir + "/model_point_bins.xml";
     m_xml_model_point_nodes        = datadir + "/model_point_nodes.xml";
     m_xml_model_point_filefct      = datadir + "/model_point_filefct.xml";
     m_xml_model_point_table        = datadir + "/model_point_table.xml";
@@ -201,6 +202,8 @@ void TestGModel::set(void)
            "Test GModelSpectralExponential");
     append(static_cast<pfunction>(&TestGModel::test_nodes),
            "Test GModelSpectralNodes");
+    append(static_cast<pfunction>(&TestGModel::test_bins),
+           "Test GModelSpectralBins");
     append(static_cast<pfunction>(&TestGModel::test_filefct),
            "Test GModelSpectralFunc");
     append(static_cast<pfunction>(&TestGModel::test_table),
@@ -2437,6 +2440,164 @@ void TestGModel::test_exponential(void)
 
 
 /***********************************************************************//**
+ * @brief Test GModelSpectralBins class
+ ***************************************************************************/
+void TestGModel::test_bins(void)
+{
+    // Test void constructor
+    GModelSpectralBins model1;
+    test_value(model1.type(), "BinFunction", "Check void model type");
+    test_value(model1.bins(), 0, "Check number of bins in void model");
+    test_value(model1.size(), 1, "Check number of parameters in void model");
+
+    // Test model constructor
+    GModelSpectralPlaw plaw(2.0, -2.1, GEnergy(100.0, "MeV"));
+    GEbounds           ebounds(3, GEnergy(1.0, "MeV"), GEnergy(1000.0, "MeV"));
+    GModelSpectralBins model2(plaw, ebounds, -3.0);
+    test_value(model2.bins(), 3, "Check number of bins in power-law constructed model");
+    test_value(model2.size(), 10, "Check number of parameters in power-law constructed model");
+    test_value(model2.index(), -3.0, "Check index in power-law constructed model");
+    test_value(model2.emin(0).MeV(), 1.0, "Check emin[0] in power-law constructed model");
+    test_value(model2.emax(0).MeV(), 10.0, "Check emax[0] in power-law constructed model");
+    test_value(model2.intensity(0), 2825.075089, "Check intensity[0] in power-law constructed model");
+    test_value(model2.emin(1).MeV(), 10.0, "Check emin[1] in power-law constructed model");
+    test_value(model2.emax(1).MeV(), 100.0, "Check emax[1] in power-law constructed model");
+    test_value(model2.intensity(1), 22.440369, "Check intensity[1] in power-law constructed model");
+    test_value(model2.emin(2).MeV(), 100.0, "Check emin[2] in power-law constructed model");
+    test_value(model2.emax(2).MeV(), 1000.0, "Check emax[2] in power-law constructed model");
+    test_value(model2.intensity(2), 0.1782502, "Check intensity[2] in power-law constructed model");
+    test_value(model2.eval(GEnergy(1.0, "MeV")), 89336.718430, "Check eval(1 MeV) in power-law constructed model");
+    test_value(model2.eval(GEnergy(9.0, "MeV")), 122.546939, "Check eval(9 MeV) in power-law constructed model");
+    test_value(model2.eval(GEnergy(76.0, "MeV")), 1.61655029, "Check eval(76 MeV) in power-law constructed model");
+
+    // Test XML constructor
+    GXml               xml(m_xml_model_point_bins);
+    GXmlElement*       element = xml.element(0)->element(0)->element("spectrum", 0);
+    GModelSpectralBins model3(*element);
+    test_value(model3.bins(), 4, "Check number of bins in XML constructed model");
+    test_value(model3.size(), 13, "Check number of parameters in XML constructed model");
+    test_value(model3.index(), -2.48, "Check index in XML constructed model");
+    test_value(model3.emin(0).MeV(), 0.75, "Check emin[0] in XML constructed model");
+    test_value(model3.emax(0).MeV(), 1.0, "Check emax[0] in XML constructed model");
+    test_value(model3.intensity(0), 1.0e-7, "Check intensity[0] in XML constructed model");
+    test_value(model3.emin(1).MeV(), 1.0, "Check emin[1] in XML constructed model");
+    test_value(model3.emax(1).MeV(), 3.0, "Check emax[1] in XML constructed model");
+    test_value(model3.intensity(1), 0.5e-7, "Check intensity[1] in XML constructed model");
+    test_value(model3.emin(2).MeV(), 3.0, "Check emin[2] in XML constructed model");
+    test_value(model3.emax(2).MeV(), 10.0, "Check emax[2] in XML constructed model");
+    test_value(model3.intensity(2), 0.1e-7, "Check intensity[2] in XML constructed model");
+    test_value(model3.emin(3).MeV(), 10.0, "Check emin[3] in XML constructed model");
+    test_value(model3.emax(3).MeV(), 30.0, "Check emax[3] in XML constructed model");
+    test_value(model3.intensity(3), 0.05e-7, "Check intensity[3] in XML constructed model");
+
+    // Test copy constructor
+    GModelSpectralBins model4(model2);
+    test_value(model4.bins(), 3, "Check number of bins in power-law constructed model");
+    test_value(model4.size(), 10, "Check number of parameters in power-law constructed model");
+    test_value(model4.index(), -3.0, "Check index in power-law constructed model");
+    test_value(model4.emin(0).MeV(), 1.0, "Check emin[0] in power-law constructed model");
+    test_value(model4.emax(0).MeV(), 10.0, "Check emax[0] in power-law constructed model");
+    test_value(model4.intensity(0), 2825.075089, "Check intensity[0] in power-law constructed model");
+    test_value(model4.emin(1).MeV(), 10.0, "Check emin[1] in power-law constructed model");
+    test_value(model4.emax(1).MeV(), 100.0, "Check emax[1] in power-law constructed model");
+    test_value(model4.intensity(1), 22.440369, "Check intensity[1] in power-law constructed model");
+    test_value(model4.emin(2).MeV(), 100.0, "Check emin[2] in power-law constructed model");
+    test_value(model4.emax(2).MeV(), 1000.0, "Check emax[2] in power-law constructed model");
+    test_value(model4.intensity(2), 0.1782502, "Check intensity[2] in power-law constructed model");
+
+    // Test XML write and read methods
+    GXmlElement xml_element;
+    model4.write(xml_element);
+    GModelSpectralBins model5;
+    model5.read(xml_element);
+    test_value(model5.bins(), 3, "Check number of bins in power-law constructed model");
+
+    // Test bin function manipulation
+    GModelSpectralBins model6;
+    model6.reserve(3);
+    test_value(model6.bins(), 0, "Check number of bins after first manipulation");
+    test_value(model6.size(), 1, "Check number of parameters after first manipulation");
+    model6.append(GEnergy(1.0, "MeV"), GEnergy(10.0, "MeV"), 1.0);
+    test_value(model6.bins(), 1, "Check number of bins after second manipulation");
+    test_value(model6.size(), 4, "Check number of parameters after second manipulation");
+    test_value(model6.emin(0).MeV(), 1.0, "Check emin[0] after second manipulation");
+    test_value(model6.emax(0).MeV(), 10.0, "Check emax[0] after second manipulation");
+    test_value(model6.intensity(0), 1.0, "Check intensity[0] after second manipulation");
+    model6.append(GEnergy(10.0, "MeV"), GEnergy(100.0, "MeV"), 0.1);
+    test_value(model6.bins(), 2, "Check number of bins after third manipulation");
+    test_value(model6.size(), 7, "Check number of parameters after third manipulation");
+    test_value(model6.emin(0).MeV(), 1.0, "Check emin[0] after third manipulation");
+    test_value(model6.emax(0).MeV(), 10.0, "Check emax[0] after third manipulation");
+    test_value(model6.intensity(0), 1.0, "Check intensity[0] after third manipulation");
+    test_value(model6.emin(1).MeV(), 10.0, "Check emin[1] after third manipulation");
+    test_value(model6.emax(1).MeV(), 100.0, "Check emax[1] after third manipulation");
+    test_value(model6.intensity(1), 0.1, "Check intensity[1] after third manipulation");
+    model6.remove(0);
+    test_value(model6.bins(), 1, "Check number of bins after forth manipulation");
+    test_value(model6.size(), 4, "Check number of parameters after forth manipulation");
+    test_value(model6.emin(0).MeV(), 10.0, "Check emin[0] after forth manipulation");
+    test_value(model6.emax(0).MeV(), 100.0, "Check emax[0] after forth manipulation");
+    test_value(model6.intensity(0), 0.1, "Check intensity[0] after forth manipulation");
+    model6.insert(0, GEnergy(0.9, "MeV"), GEnergy(9.9, "MeV"), 0.9);
+    test_value(model6.bins(), 2, "Check number of bins after fifth manipulation");
+    test_value(model6.size(), 7, "Check number of parameters after fifth manipulation");
+    test_value(model6.emin(0).MeV(), 0.9, "Check emin[0] after fifth manipulation");
+    test_value(model6.emax(0).MeV(), 9.9, "Check emax[0] after fifth manipulation");
+    test_value(model6.intensity(0), 0.9, "Check intensity[0] after fifth manipulation");
+    test_value(model6.emin(1).MeV(), 10.0, "Check emin[1] after fifth manipulation");
+    test_value(model6.emax(1).MeV(), 100.0, "Check emax[1] after fifth manipulation");
+    test_value(model6.intensity(1), 0.1, "Check intensity[1] after fifth manipulation");
+    model6.extend(model6);
+    test_value(model6.bins(), 4, "Check number of bins after sixth manipulation");
+    test_value(model6.size(), 13, "Check number of parameters after sixth manipulation");
+    test_value(model6.emin(0).MeV(), 0.9, "Check emin[0] after sixth manipulation");
+    test_value(model6.emax(0).MeV(), 9.9, "Check emax[0] after sixth manipulation");
+    test_value(model6.intensity(0), 0.9, "Check intensity[0] after sixth manipulation");
+    test_value(model6.emin(1).MeV(), 10.0, "Check emin[1] after sixth manipulation");
+    test_value(model6.emax(1).MeV(), 100.0, "Check emax[1] after sixth manipulation");
+    test_value(model6.intensity(1), 0.1, "Check intensity[1] after sixth manipulation");
+    test_value(model6.emin(2).MeV(), 0.9, "Check emin[2] after sixth manipulation");
+    test_value(model6.emax(2).MeV(), 9.9, "Check emax[2] after sixth manipulation");
+    test_value(model6.intensity(2), 0.9, "Check intensity[2] after sixth manipulation");
+    test_value(model6.emin(3).MeV(), 10.0, "Check emin[3] after sixth manipulation");
+    test_value(model6.emax(3).MeV(), 100.0, "Check emax[3] after sixth manipulation");
+    test_value(model6.intensity(3), 0.1, "Check intensity[3] after sixth manipulation");
+    model6.clear();
+    test_value(model6.bins(), 0, "Check number of bins after seventh manipulation");
+    test_value(model6.size(), 1, "Check number of parameters after seventh manipulation");
+
+    // Test emin method
+    model5.emin(0, GEnergy(0.1, "GeV"));
+    test_value(model5.emin(0).GeV(), 0.1, "Check emin() method");
+
+    // Test emax method
+    model5.emax(0, GEnergy(0.2, "GeV"));
+    test_value(model5.emax(0).GeV(), 0.2, "Check emax() method");
+
+    // Test intensity method
+    model5.intensity(0, 2.0e-7);
+    test_value(model5.intensity(0), 2.0e-7, "Check intensity() method");
+
+    // Test operator access
+    const char* strarray[] = {"Index", "LowerLimit0", "UpperLimit0", "Intensity0",
+                                       "LowerLimit0", "UpperLimit0", "Intensity1"};
+    for (int i = 0; i < 7; ++i) {
+        std::string keyname(strarray[i]);
+        model5[keyname].remove_range(); // To allow setting of any value
+        model5[keyname].value(2.1);
+        model5[keyname].error(1.9);
+        model5[keyname].gradient(0.8);
+        test_value(model5[keyname].value(), 2.1);
+        test_value(model5[keyname].error(), 1.9);
+        test_value(model5[keyname].gradient(), 0.8);
+    }
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Test GModelSpectralNodes class
  ***************************************************************************/
 void TestGModel::test_nodes(void)
@@ -2445,7 +2606,7 @@ void TestGModel::test_nodes(void)
     GModelSpectralNodes model1;
     test_value(model1.type(), "NodeFunction", "Check void model type");
 
-    // Test node function manimulation
+    // Test node function manipulation
     GModelSpectralNodes model2;
     model2.reserve(3);
     test_value(model2.size(), 0);

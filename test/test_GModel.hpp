@@ -1,7 +1,7 @@
 /***************************************************************************
  *                test_GModel.hpp - Test model module                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2020 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2021 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -76,6 +76,7 @@ public:
     void                test_supeplaw(void);
     void                test_logparabola(void);
     void                test_multiplicative(void);
+    void                test_bins(void);
     void                test_nodes(void);
     void                test_filefct(void);
     void                test_spectral_composite(void);
@@ -130,6 +131,7 @@ private:
     std::string m_xml_model_point_smoothbplaw;
     std::string m_xml_model_point_supeplaw;
     std::string m_xml_model_point_logparabola;
+    std::string m_xml_model_point_bins;
     std::string m_xml_model_point_nodes;
     std::string m_xml_model_point_filefct;
     std::string m_xml_model_point_table;

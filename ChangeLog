@@ -1,8 +1,9 @@
-2021-04-02
+2021-04-13
 
         * Version 2.0.0 released
         ========================
 
+        Add GModelSpectralBins class (#3606)
         Add carbon footprint estimation to GApplication (#3592)
         Add phase selection to GCOMSelection and GCOMDri (#3564)
         Fix incompatibility in GMatrixSparse::mix_column_prepare() method (#3563)

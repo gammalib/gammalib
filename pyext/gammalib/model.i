@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          model.i - Model module                         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -206,6 +206,7 @@
 %include "GModelSpectralFunc.i"
 %include "GModelSpectralGauss.i"
 %include "GModelSpectralLogParabola.i"
+%include "GModelSpectralBins.i"
 %include "GModelSpectralNodes.i"
 %include "GModelSpectralPlaw.i"
 %include "GModelSpectralPlawPhotonFlux.i"

@@ -133,7 +133,6 @@ protected:
     void copy_members(const GModelSpectralNodes& model);
     void free_members(void);
     void update_pars(void);
-    void load_nodes(const std::string& filename);
     void set_cache(void) const;
     void set_eval_cache(void) const;
     void set_flux_cache(void) const;

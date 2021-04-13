@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-2 April 2021
+13 April 2021
 
 
 1. Introduction
@@ -19,6 +19,7 @@ The following classes have been added:
 - GSkyRegionRect
 - GModelAssociation
 - GModelAssociations
+- GModelSpectralBins
 - GCTAModelSkyCube
 - GCTABackground2D
 
@@ -159,8 +160,11 @@ Implemented GMatrixSparse::row() and GMatrixSparse::add_to_row() methods.
 
 8. Model module
 ---------------
+Added GModelSpectralBins class that implements statistically independent spectral
+bins as the spectral model component (#3606).
+
 Added methods to GModelSpectralFunc to allow building of a file function
-in memort (#3535).
+in memory (#3535).
 
 Added GModelAssociation class to implement a model association and the
 GModelAssociations container class to hold a list of model associations.

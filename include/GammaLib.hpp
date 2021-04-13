@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GammaLib.hpp - Gamma-Ray Astronomy Library Header file         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -241,6 +241,7 @@
 #include "GModelSpectralGauss.hpp"
 #include "GModelSpectralLogParabola.hpp"
 #include "GModelSpectralMultiplicative.hpp"
+#include "GModelSpectralBins.hpp"
 #include "GModelSpectralNodes.hpp"
 #include "GModelSpectralPlaw.hpp"
 #include "GModelSpectralPlawPhotonFlux.hpp"

@@ -1,6 +1,6 @@
 .. _2.0:
 
-GammaLib 2.0 release (13 March 2021)
+GammaLib 2.0 release (13 April 2021)
 ====================================
 
 Overview
@@ -73,6 +73,8 @@ Improvements
 New features
 ------------
 
+* [`3606 <https://cta-redmine.irap.omp.eu/issues/3606>`_] -
+  Add ``GModelSpectralBins`` class
 * [`3527 <https://cta-redmine.irap.omp.eu/issues/3527>`_] -
   Add ``GCTABackground2D`` class
 * [`3469 <https://cta-redmine.irap.omp.eu/issues/3469>`_] -
