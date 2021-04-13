@@ -156,6 +156,11 @@ protected:
                                 const int&     navgr  = 3,
                                 const int&     nincl  = 13,
                                 const int&     nexcl  = 0);
+    void    compute_drb_bgdlixe(const GCOMDri& drm,
+                                const int&     nrunav = 3,
+                                const int&     navgr  = 3,
+                                const int&     nincl  = 13,
+                                const int&     nexcl  = 0);
     GSkyMap get_weighted_drg_map(void) const;
     void    get_bgdlixa_phibar_indices(const int& iphibar,
                                        const int& nincl,
