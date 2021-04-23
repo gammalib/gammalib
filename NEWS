@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-13 April 2021
+23 April 2021
 
 
 1. Introduction
@@ -210,6 +210,9 @@ of functions (#3328).
 
 10. Observation module
 ----------------------
+The GResponse class now support the fitting of spectral lines which requires that
+energy dispersion is enabled in the computations (#3386).
+
 Add GPhases::contains() method to check whether a phase is contained in the phase
 container (#3564).
 
