@@ -17,13 +17,15 @@ requirements:
   build:
     - python  
     - setuptools
-    - cfitsio
-    - readline
+    - cfitsio ==3.430
+    - readline >=7.0
     - ncurses
     - swig
   run:
     - python
-    - cfitsio
+    - cfitsio ==3.430
+    - readline >=7.0
+    - ncurses
 
 about:
   home: http://cta.irap.omp.eu/gammalib
