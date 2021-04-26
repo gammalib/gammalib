@@ -36,8 +36,8 @@ Installing
 
   .. code-block:: bash
 
-     $ conda create -n myenv python=2.7  # or e.g. python=3.5
-     $ source activate myenv
+     $ conda create -n myenv python=3.5  # or one of the following Python versions: 2.7, 3.5, 3.6, 3.7, 3.8
+     $ conda activate myenv
      (myenv) $
 
 - Install pre-compiled GammaLib conda package from Anaconda cloud with:
@@ -52,7 +52,7 @@ Installing
 
   .. code-block:: bash
 
-     (myenv) $ source activate myenv
+     (myenv) $ conda activate myenv
 
 
 Testing
