@@ -18,13 +18,13 @@ requirements:
     - python  
     - setuptools
     - cfitsio ==3.430
-    - readline >=7.0
+    - readline ==7.0
     - ncurses
     - swig
   run:
     - python
     - cfitsio ==3.430
-    - readline >=7.0
+    - readline ==7.0
     - ncurses
 
 about:
