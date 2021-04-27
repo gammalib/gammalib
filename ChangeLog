@@ -1,3 +1,12 @@
+2021-04-24
+
+        * Bug fix version 1.7.4 released
+        ================================
+
+        Speed-up Monte-Carlo sampling of exponentially cut-off power
+          law models (#3625)
+
+
 2020-12-02
 
         * Bug fix version 1.7.3 released

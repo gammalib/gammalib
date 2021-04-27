@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpectralExpPlaw.cpp - Exponential cut off power law model     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -64,6 +64,7 @@ const GModelSpectralRegistry g_spectral_eplaw_registry2(&g_spectral_eplaw_seed2)
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+//#define G_DEBUG_MC                          //!< Debug Monte-Carlo sampling
 
 
 /*==========================================================================
@@ -410,7 +411,7 @@ double GModelSpectralExpPlaw::flux(const GEnergy& emin,
 {
     // Initialise flux
     double flux = 0.0;
-    
+
     // Compute only if integration range is valid
     if (emin < emax) {
 
@@ -456,7 +457,7 @@ double GModelSpectralExpPlaw::eflux(const GEnergy& emin,
 {
     // Initialise flux
     double eflux = 0.0;
-    
+
     // Compute only if integration range is valid
     if (emin < emax) {
 
@@ -519,10 +520,24 @@ GEnergy GModelSpectralExpPlaw::mc(const GEnergy& emin,
 
     // Initialise energy
     double eng;
-    
-    // Initialse acceptance fraction
+
+    // Initialise acceptance fraction
     double acceptance_fraction;
     double inv_ecut = 1.0 / m_ecut.value();
+
+    // Compute random number generator normalisation for speed-up of the
+    // computations. Normally it should be sufficient to always use the
+    // minimum energy for the normalisation, yet for the case that the model
+    // grows with energy we better also test the maximum energy, and we
+    // just use the larger of both normalisations
+    double norm_emin = std::exp(-emin.MeV() * inv_ecut);
+    double norm_emax = std::exp(-emax.MeV() * inv_ecut);
+    double norm      = (norm_emin > norm_emax) ? norm_emin : norm_emax;
+
+    // Debug option: initialise number of samples
+    #if defined(G_DEBUG_MC)
+    int samples = 0;
+    #endif
 
     // Use rejection method to draw a random energy. We first draw
     // analytically from a power law, and then compare the power law
@@ -530,6 +545,11 @@ GEnergy GModelSpectralExpPlaw::mc(const GEnergy& emin,
     // gives an acceptance fraction, and we accept the energy only if
     // a uniform random number is <= the acceptance fraction.
     do {
+
+        // Debug option: increment number of samples
+        #if defined(G_DEBUG_MC)
+        samples++;
+        #endif
 
         // Get uniform random number
         double u = ran.uniform();
@@ -549,14 +569,22 @@ GEnergy GModelSpectralExpPlaw::mc(const GEnergy& emin,
         else {
             eng = std::exp(u * m_mc_pow_ewidth + m_mc_pow_emin);
         }
-        
+
         // Compute acceptance fraction
         acceptance_fraction = std::exp(-eng * inv_ecut);
 
-    } while (ran.uniform() > acceptance_fraction);
-    
+    } while (ran.uniform() * norm > acceptance_fraction);
+
     // Set energy
     energy.MeV(eng);
+
+    // Debug option: write result
+    #if defined(G_DEBUG_MC)
+    std::cout << "GModelSpectralExpPlaw::mc(";
+    std::cout << emin.print() << "," << emax.print() << "," << time.print() << "):";
+    std::cout << " energy=" << energy.print();
+    std::cout << " samples=" << samples << std::endl;
+    #endif
 
     // Return energy
     return energy;
@@ -632,7 +660,7 @@ void GModelSpectralExpPlaw::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print model information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing model information.
  ***************************************************************************/
 std::string GModelSpectralExpPlaw::print(const GChatter& chatter) const
@@ -810,7 +838,7 @@ void GModelSpectralExpPlaw::update_eval_cache(const GEnergy& energy) const
     double index = m_index.value();
     double ecut  = m_ecut.value();
     double pivot = m_pivot.value();
-    
+
     // If the energy or one of the parameters index, cut-off or pivot
     // energy has changed then recompute the cache
     if ((m_last_energy != energy) ||
