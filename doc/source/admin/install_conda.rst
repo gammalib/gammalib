@@ -36,7 +36,7 @@ Installing
 
   .. code-block:: bash
 
-     $ conda create -n myenv python=3.5  # or one of the following Python versions: 2.7, 3.5, 3.6, 3.7, 3.8
+     $ conda create -n myenv python=3.5  # or one of the following Python versions: 2.7, 3.5, 3.6, 3.7, 3.8, 3.9
      $ conda activate myenv
      (myenv) $
 
