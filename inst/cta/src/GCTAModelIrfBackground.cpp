@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelIrfBackground.cpp - CTA IRF background model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -62,7 +62,7 @@ const GModelRegistry         g_cta_inst_background_registry(&g_cta_inst_backgrou
 #define G_USE_RATE_EBIN
 
 /* __ Debug definitions __________________________________________________ */
-#define G_DUMP_MC
+//#define G_DUMP_MC
 //#define G_DEBUG_NPRED
 
 /* __ Constants __________________________________________________________ */
