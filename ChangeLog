@@ -1,8 +1,9 @@
-2021-04-24
+2021-04-28
 
         * Bug fix version 1.7.4 released
         ================================
 
+        Add conda activation and deactivation scripts for csh (#3628)
         Speed-up Monte-Carlo sampling of exponentially cut-off power
           law models (#3625)
 
