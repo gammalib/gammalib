@@ -62,6 +62,7 @@ EXTRA_DIST = README.md \
              doc/Doxyfile doc/source \
              dev/testreport.py \
              dev/00-gammalib-activate.sh dev/01-gammalib-deactivate.sh \
+             dev/00-gammalib-activate.csh dev/01-gammalib-deactivate.csh \
              dev/conda.recipe/build.sh \
              dev/conda.recipe/conda_build_config.yaml \
              dev/conda.recipe/meta.yaml.in
