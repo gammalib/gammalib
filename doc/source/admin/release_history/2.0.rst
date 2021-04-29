@@ -33,6 +33,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`3630 <https://cta-redmine.irap.omp.eu/issues/3630>`_] -
+  Add ASCL shield to **About** page
 * [`3386 <https://cta-redmine.irap.omp.eu/issues/3386>`_] -
   Support spectral line fitting
 * [`3592 <https://cta-redmine.irap.omp.eu/issues/3592>`_] -

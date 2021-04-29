@@ -1,8 +1,9 @@
-2021-04-23
+2021-04-29
 
         * Version 2.0.0 released
         ========================
 
+        Add ASCL shield to "About" page (#3630)
         Support spectral line fitting (#3386)
         Add GModelSpectralBins class (#3606)
         Add carbon footprint estimation to GApplication (#3592)

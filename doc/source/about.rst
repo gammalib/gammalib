@@ -38,10 +38,13 @@ to include the formal reference
    L. Gerard, A. Schulz, P. Martin, D. Sanchez, S. Ohm, T. Hassan, and
    S. Brau-Nogue, 2016, A&A, 593, A1 <https://www.aanda.org/articles/aa/pdf/2016/09/aa28822-16.pdf>`_
 
-in your paper as well as the identifier
-`ascl:1110.007 <http://ascl.net/1110.007>`_
-of the code in the Astrophysics Source Code Library (ASCL).
-You can also reference GammaLib via
+in your paper as well as the Astrophysics Source Code Library (ASCL) identifier
+
+.. image:: https://img.shields.io/badge/ascl-1110.007-blue.svg?colorB=262255
+   :target: http://ascl.net/1110.007
+
+You may also reference the software by its Digital Object Identifier (DOI) on
+Zenodo, which is
 
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3265404.svg
    :target: https://doi.org/10.5281/zenodo.3265404

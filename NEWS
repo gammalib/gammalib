@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-23 April 2021
+29 April 2021
 
 
 1. Introduction
@@ -124,7 +124,12 @@ The return value of the following methods has been changed:
 None
 
 
-4. Application module
+4. Documentation
+----------------
+Add Astrophysics Source Code Library (ASCL) shield to "About" page (#3630)
+
+
+5. Application module
 ---------------------
 Add GApplication::eCO2() method to estimate the carbon footprint if the elapsed
 CPU time. The carbon footprint estimation is also added to the trailer text of
@@ -134,12 +139,12 @@ Corrected the computation of the elapsed CPU time in an application in case
 that OpenMP is enabled (#3417).
 
 
-5. Base module
+6. Base module
 --------------
 None
 
 
-6. FITS I/O Interface
+7. FITS I/O Interface
 ---------------------
 Added GFitsTableCol::tscale() methods and a m_tscale member to the class that
 contains the optional TSCALn keyword value (m_tscale=1 in case that no scaling
@@ -150,7 +155,7 @@ values has to be performed manually. The GFitsTableCol::scale() method was
 removed since it won't have any effect anymore (#3553).
 
 
-7. Linear algebra module
+8. Linear algebra module
 ------------------------
 Fixed an incompatibility between GMatrixSparse::mix_column_prepare() and
 GMatrixSparse::mix_column() methods that led in rare cases to a segmentation
@@ -159,7 +164,7 @@ fault (#3563).
 Implemented GMatrixSparse::row() and GMatrixSparse::add_to_row() methods.
 
 
-8. Model module
+9. Model module
 ---------------
 Added GModelSpectralBins class that implements statistically independent spectral
 bins as the spectral model component. In addition, added GModelSpectralNodes::error()
@@ -201,14 +206,14 @@ kind of regions:
 A pre-computation cache was added to the GModelSpatialGauss class (#1300).
 
 
-9. Numerics module
-------------------
+10. Numerics module
+-------------------
 The GFunctions class was added to implement the virtual base class for a set of
 functions. The GIntegrals class was added that performs integration over a set
 of functions (#3328).
 
 
-10. Observation module
+11. Observation module
 ----------------------
 The GResponse class now support the fitting of spectral lines which requires that
 energy dispersion is enabled in the computations (#3386).
@@ -242,7 +247,7 @@ GResponse::convolve() method to perform the true energy integration, integrating
 only the function but also any available parameter gradients (#3333).
 
 
-11. Optimization module
+12. Optimization module
 -----------------------
 The members m_npars, m_nfree and m_num_dec were not copied in the
 GOptimizerLM::copy_members(). Copying of these missing members was added to the
@@ -251,7 +256,7 @@ method.
 Added GOptimizerLM::npars() and GOptimizerLM::nfree() methods.
 
 
-12. Sky module
+13. Sky module
 --------------
 Added GSkyMap::correlate() method as opposed to GSkyMap::smooth(). While the later
 smoothes a map, and hence conserves the intensity in a sky map, the correlate()
@@ -275,7 +280,7 @@ Equivalent methods GSkyMap::solidangle(GSkyRegion&) and GSkyMap::solidangle(GSky
 were added to compute the total solid angle within specified sky region(s) (#1785).
 
 
-13. Support module
+14. Support module
 ------------------
 Added gammalib::compare() function to compare two floating point numbers with a
 relative tolerance (#3552).
@@ -284,39 +289,39 @@ Added gammalib::tmpnam() function to return a temporary file name, in replacemen
 of the deprecated str::tmpnam() function (#3324).
 
 
-14. XML module
+15. XML module
 --------------
 Added value constructors the GXmlElement interface and the methods value(), string(),
 real() and integer() to access the value as string, floating point or integer value
 (#3431). 
 
 
-15. VO module
+16. VO module
 -------------
 Use gammalib::tmpnam() instead of str::tmpnam() in GVOClient (#3324).
 
 
-16. Xspec module
+17. Xspec module
 ----------------
 None
 
 
-17. Test module
+18. Test module
 ---------------
 None
 
 
-18. Multi-wavelength interface
+19. Multi-wavelength interface
 ------------------------------
 None
 
 
-19. Fermi-LAT interface
+20. Fermi-LAT interface
 -----------------------
 Adapted the GLATResponse interface to the vectorised response computation (#3203).
 
 
-20. CTA interface
+21. CTA interface
 -----------------
 Added the GCTABackground2D class that implements a two-dimensional background model
 spanned by energy and offset angle (#3527).
@@ -331,7 +336,7 @@ models that applies for a stacked analysis. The code supports in particular anal
 spatial model gradients (#3203).
 
 
-21. COMPTEL interface
+22. COMPTEL interface
 ---------------------
 Add phase selection to GCOMSelection and GCOMDri (#3564).
 
@@ -363,6 +368,6 @@ Remove internal response caching since caching is handled by the base class resp
 computation methods (#2973).
 
 
-22. INTEGRAL/SPI interface
+23. INTEGRAL/SPI interface
 --------------------------
 None
