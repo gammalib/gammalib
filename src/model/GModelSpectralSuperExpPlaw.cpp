@@ -67,6 +67,7 @@ const GModelSpectralRegistry     g_spectral_seplaw_registry2(&g_spectral_seplaw_
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+//#define G_DEBUG_MC                          //!< Debug Monte-Carlo sampling
 
 
 /*==========================================================================
@@ -435,7 +436,7 @@ double GModelSpectralSuperExpPlaw::flux(const GEnergy& emin,
 {
     // Initialise flux
     double flux = 0.0;
-    
+
     // Compute only if integration range is valid
     if (emin < emax) {
 
@@ -481,7 +482,7 @@ double GModelSpectralSuperExpPlaw::eflux(const GEnergy& emin,
 {
     // Initialise flux
     double eflux = 0.0;
-    
+
     // Compute only if integration range is valid
     if (emin < emax) {
 
@@ -544,10 +545,24 @@ GEnergy GModelSpectralSuperExpPlaw::mc(const GEnergy& emin,
 
     // Initialise energy
     double eng;
-    
-    // Initialse acceptance fraction
+
+    // Initialise acceptance fraction
     double acceptance_fraction;
     double inv_ecut = 1.0 / m_ecut.value();
+
+    // Compute random number generator normalisation for speed-up of the
+    // computations. Normally it should be sufficient to always use the
+    // minimum energy for the normalisation, yet for the case that the model
+    // grows with energy we better also test the maximum energy, and we
+    // just use the larger of both normalisations
+    double norm_emin = std::exp(- std::pow(emin.MeV() * inv_ecut, m_index2.value()));
+    double norm_emax = std::exp(- std::pow(emax.MeV() * inv_ecut, m_index2.value()));
+    double norm      = (norm_emin > norm_emax) ? norm_emin : norm_emax;
+
+    // Debug option: initialise number of samples
+    #if defined(G_DEBUG_MC)
+    int samples = 0;
+    #endif
 
     // Use rejection method to draw a random energy. We first draw
     // analytically from a power law, and then compare the power law
@@ -555,6 +570,11 @@ GEnergy GModelSpectralSuperExpPlaw::mc(const GEnergy& emin,
     // gives an acceptance fraction, and we accept the energy only if
     // a uniform random number is <= the acceptance fraction.
     do {
+
+        // Debug option: increment number of samples
+        #if defined(G_DEBUG_MC)
+        samples++;
+        #endif
 
         // Get uniform random number
         double u = ran.uniform();
@@ -574,14 +594,22 @@ GEnergy GModelSpectralSuperExpPlaw::mc(const GEnergy& emin,
         else {
             eng = std::exp(u * m_mc_pow_ewidth + m_mc_pow_emin);
         }
-        
+
         // Compute acceptance fraction
         acceptance_fraction = std::exp(- std::pow(eng * inv_ecut, m_index2.value()));
 
-    } while (ran.uniform() > acceptance_fraction);
-    
+    } while (ran.uniform() * norm > acceptance_fraction);
+
     // Set energy
     energy.MeV(eng);
+
+    // Debug option: write result
+    #if defined(G_DEBUG_MC)
+    std::cout << "GModelSpectralSuperExpPlaw::mc(";
+    std::cout << emin.print() << "," << emax.print() << "," << time.print() << "):";
+    std::cout << " energy=" << energy.print();
+    std::cout << " samples=" << samples << std::endl;
+    #endif
 
     // Return energy
     return energy;
@@ -750,7 +778,7 @@ void GModelSpectralSuperExpPlaw::init_members(void)
 	m_index2.name("Index2");
 	m_index2.scale(1.0);
 	m_index2.value(1.0);        // default: -2.0
-	m_index2.range(0.0,5.0);    // range:   [-10,+10]
+	m_index2.range(0.0,5.0);    // range:   [0,5]
 	m_index2.free();
 	m_index2.gradient(0.0);
 	m_index2.has_grad(true);
@@ -857,7 +885,7 @@ void GModelSpectralSuperExpPlaw::update_eval_cache(const GEnergy& energy) const
     double ecut   = m_ecut.value();
     double pivot  = m_pivot.value();
     double index2 = m_index2.value();
-    
+
     // If the energy or one of the parameters index1, index2, cut-off or pivot
     // energy has changed then recompute the cache
     if ((m_last_energy != energy) ||

@@ -1,0 +1,16 @@
+.. _1.7.4:
+
+GammaLib 1.7.4 release (28 April 2021)
+======================================
+
+Overview
+--------
+
+GammaLib 1.7.4 is a bug fix release for GammaLib release 1.7.
+
+The following bugs were fixed:
+
+* [`3628 <https://cta-redmine.irap.omp.eu/issues/3628>`_] -
+  Add conda activation and deactivation scripts for csh
+* [`3625 <https://cta-redmine.irap.omp.eu/issues/3625>`_] -
+  Speed-up Monte-Carlo sampling of exponentially cut-off power law models

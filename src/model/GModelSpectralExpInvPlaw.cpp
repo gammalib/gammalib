@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpectralExpInvPlaw.cpp - Exponential cut off power law model   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016 by Alexander Ziegler                                *
+ *  copyright (C) 2016-2021 by Alexander Ziegler                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -57,6 +57,7 @@ const GModelSpectralRegistry   g_spectral_einvplaw_registry1(&g_spectral_einvpla
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+//#define G_DEBUG_MC                          //!< Debug Monte-Carlo sampling
 
 
 /*==========================================================================
@@ -402,7 +403,7 @@ double GModelSpectralExpInvPlaw::eval(const GEnergy& srcEng,
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::cout << "*** ERROR: GModelSpectralExpPlaw::eval";
+        std::cout << "*** ERROR: GModelSpectralExpInvPlaw::eval";
         std::cout << "(srcEng=" << srcEng;
         std::cout << ", srcTime=" << srcTime << "):";
         std::cout << " NaN/Inf encountered";
@@ -436,11 +437,11 @@ double GModelSpectralExpInvPlaw::eval(const GEnergy& srcEng,
  * The integration is done numerically.
  ***************************************************************************/
 double GModelSpectralExpInvPlaw::flux(const GEnergy& emin,
-                                   const GEnergy& emax) const
+                                      const GEnergy& emax) const
 {
     // Initialise flux
     double flux = 0.0;
-    
+
     // Compute only if integration range is valid
     if (emin < emax) {
 
@@ -482,11 +483,11 @@ double GModelSpectralExpInvPlaw::flux(const GEnergy& emin,
  * The integration is done numerically.
  ***************************************************************************/
 double GModelSpectralExpInvPlaw::eflux(const GEnergy& emin,
-                                    const GEnergy& emax) const
+                                       const GEnergy& emax) const
 {
     // Initialise flux
     double eflux = 0.0;
-    
+
     // Compute only if integration range is valid
     if (emin < emax) {
 
@@ -531,9 +532,9 @@ double GModelSpectralExpInvPlaw::eflux(const GEnergy& emin,
  * on an acceptance fraction that is computed from the exponential cut off.
  ***************************************************************************/
 GEnergy GModelSpectralExpInvPlaw::mc(const GEnergy& emin,
-                                  const GEnergy& emax,
-                                  const GTime&   time,
-                                  GRan&          ran) const
+                                     const GEnergy& emax,
+                                     const GTime&   time,
+                                     GRan&          ran) const
 {
     // Throw an exception if energy range is invalid
     if (emin >= emax) {
@@ -549,10 +550,24 @@ GEnergy GModelSpectralExpInvPlaw::mc(const GEnergy& emin,
 
     // Initialise energy
     double eng;
-    
+
     // Initialse acceptance fraction
     double acceptance_fraction;
     double inv_ecut = m_lambda.value();
+
+    // Compute random number generator normalisation for speed-up of the
+    // computations. Normally it should be sufficient to always use the
+    // minimum energy for the normalisation, yet for the case that the model
+    // grows with energy we better also test the maximum energy, and we
+    // just use the larger of both normalisations
+    double norm_emin = std::exp(-emin.MeV() * inv_ecut);
+    double norm_emax = std::exp(-emax.MeV() * inv_ecut);
+    double norm      = (norm_emin > norm_emax) ? norm_emin : norm_emax;
+
+    // Debug option: initialise number of samples
+    #if defined(G_DEBUG_MC)
+    int samples = 0;
+    #endif
 
     // Use rejection method to draw a random energy. We first draw
     // analytically from a power law, and then compare the power law
@@ -560,6 +575,11 @@ GEnergy GModelSpectralExpInvPlaw::mc(const GEnergy& emin,
     // gives an acceptance fraction, and we accept the energy only if
     // a uniform random number is <= the acceptance fraction.
     do {
+
+        // Debug option: increment number of samples
+        #if defined(G_DEBUG_MC)
+        samples++;
+        #endif
 
         // Get uniform random number
         double u = ran.uniform();
@@ -579,14 +599,22 @@ GEnergy GModelSpectralExpInvPlaw::mc(const GEnergy& emin,
         else {
             eng = std::exp(u * m_mc_pow_ewidth + m_mc_pow_emin);
         }
-        
+
         // Compute acceptance fraction
         acceptance_fraction = std::exp(-eng * inv_ecut);
 
-    } while (ran.uniform() > acceptance_fraction);
-    
+    } while (ran.uniform() * norm > acceptance_fraction);
+
     // Set energy
     energy.MeV(eng);
+
+    // Debug option: write result
+    #if defined(G_DEBUG_MC)
+    std::cout << "GModelSpectralExpInvPlaw::mc(";
+    std::cout << emin.print() << "," << emax.print() << "," << time.print() << "):";
+    std::cout << " energy=" << energy.print();
+    std::cout << " samples=" << samples << std::endl;
+    #endif
 
     // Return energy
     return energy;
@@ -841,7 +869,7 @@ void GModelSpectralExpInvPlaw::update_eval_cache(const GEnergy& energy) const
     double index  = m_index.value();
     double lambda = m_lambda.value();
     double pivot  = m_pivot.value();
-    
+
     // If the energy or one of the parameters index, lambda or pivot
     // energy has changed then recompute the cache
     if ((m_last_energy != energy) ||

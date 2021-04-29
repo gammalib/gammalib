@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelIrfBackground.cpp - CTA IRF background model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *

@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectralComposite.cpp - Spectral composite model class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2017 by Michael Mayer                               *
+ *  copyright (C) 2016-2021 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -54,6 +54,7 @@ const GModelSpectralRegistry  g_spectral_comp_registry(&g_spectral_comp_seed);
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+//#define G_DEBUG_UPDATE_MC_CACHE                  //!< Debug MC cache update
 
 
 /*==========================================================================
@@ -698,7 +699,7 @@ void GModelSpectralComposite::copy_members(const GModelSpectralComposite& model)
     // Clear parameters and copy the pointers from the clone
     m_pars.clear();
     for (int i = 0; i < model.components(); ++i) {
-    	
+
         // Clone spectral component
         m_spectral.push_back(model.m_spectral[i]->clone());
 
@@ -807,6 +808,17 @@ void GModelSpectralComposite::update_mc_cache(const GEnergy& emin,
 	    	sum += prob;
 
 	    } //endfor: looped over spectral components
+
+        // Debug option: signal update
+        #if defined(G_DEBUG_UPDATE_MC_CACHE)
+        std::cout << "GModelSpectralComposite::update_mc_cache(";
+        std::cout << emin.print() << "," << emax.print() << "):";
+        std::cout << " flux=" << m_mc_flux;
+        for (int i = 0; i < m_spectral.size(); ++i) {
+            std::cout << " prob[" << i << "]=" << m_mc_probs[i];
+        }
+        std::cout << std::endl;
+        #endif
 
 	} // endif: emin and emax have changed
 
