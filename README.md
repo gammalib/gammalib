@@ -114,16 +114,16 @@ The `make check` command will run an extensive unit test to verify that
 GammaLib was correctly built.  Make sure that all tests were successful. 
 
 
-Macintosh OS X Installation
-============================
-GammaLib is known to work on various flavors of OS X.  To cope with
+Macintosh OS Installation
+==========================
+GammaLib is known to work on various flavors of Mac OS.  To cope with
 different system versions and architectures, there are two Mac
 specific configure options:
 
      $ ./configure --enable-universalsdk[=PATH]
 
 creates a universal build of GammaLib.  The optional argument specifies
-which OSX SDK should be used to perform the build.  This defaults to
+which MacOS SDK should be used to perform the build.  This defaults to
 `/Developer/SDKs/MacOSX.10.4u.sdk`.  Specify `/` when building on a 10.5
 system or higher, especially when building 64-bit code.
 
