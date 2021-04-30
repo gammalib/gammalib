@@ -100,6 +100,9 @@ GModelSpectralNodes::GModelSpectralNodes(const GModelSpectral& model,
     // Initialise members
     init_members();
 
+    // Reserve space for nodes
+    reserve(energies.size());
+
     // Append nodes for all energies
     for (int i = 0; i < energies.size(); ++i) {
         append(energies[i], model.eval(energies[i]));

@@ -39,6 +39,7 @@ public:
     // Constructors and destructors
     GModelSpectralFunc(void);
     GModelSpectralFunc(const GFilename& filename, const double& norm);
+    GModelSpectralFunc(const GModelSpectral& model, const GEnergies& energies);
     explicit GModelSpectralFunc(const GXmlElement& xml);
     GModelSpectralFunc(const GModelSpectralFunc& model);
     virtual ~GModelSpectralFunc(void);

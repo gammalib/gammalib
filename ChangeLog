@@ -1,10 +1,10 @@
-2021-04-29
+2021-04-30
 
         * Version 2.0.0 released
         ========================
 
         Add ASCL shield to "About" page (#3630)
-        Support spectral line fitting (#3386)
+        Add GModelSpectralFunc spectral constructor (#3626)
         Add GModelSpectralBins class (#3606)
         Add carbon footprint estimation to GApplication (#3592)
         Add phase selection to GCOMSelection and GCOMDri (#3564)
@@ -34,6 +34,7 @@
         Add XML value constructors and access methods to GXmlElement class (#3431)
         Correct application elapsed CPU time for OpenMP (#3417) 
         Implement sparse vector response cache (#3403)
+        Support spectral line fitting (#3386)
         Implement GMatrixSparse::row() and GMatrixSparse::add_to_row() methods
         Integrate analytical gradients for energy dispersion computation (#3333)
         Add GFunctions abstract base class (#3328)

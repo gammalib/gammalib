@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-29 April 2021
+30 April 2021
 
 
 1. Introduction
@@ -56,6 +56,7 @@ The following methods have been added:
 - GModelSpatialPointSource::flux(GSkyRegion&, GEnergy&, GTime&)
 - GModelSpatialRadial::is_energy_dependent()
 - GModelSpatialRadial::is_time_dependent()
+- GModelSpectralFunc(GModelSpectral&, GEnergies&)
 - GModelSpectralFunc::nodes()
 - GModelSpectralFunc::is_empty()
 - GModelSpectralFunc::append()
@@ -166,6 +167,9 @@ Implemented GMatrixSparse::row() and GMatrixSparse::add_to_row() methods.
 
 9. Model module
 ---------------
+Added GModelSpectralFunc spectral model constructor that enables creating a file
+function from an arbitrary spectral model (#3626).
+
 Added GModelSpectralBins class that implements statistically independent spectral
 bins as the spectral model component. In addition, added GModelSpectralNodes::error()
 method so that intensity errors can be accessed directly (#3606).

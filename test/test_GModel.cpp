@@ -2721,6 +2721,19 @@ void TestGModel::test_filefct(void)
     test_value(model2.norm(), 2.0, "Check normalisation of loaded model");
     test_value(model2.filename().url(), m_filefct, "Check filename of loaded model");
 
+    // Test spectral model constructor
+    GModelSpectralPlaw plaw(5.7e-16, -2.48, GEnergy(0.3, "TeV"));
+    GEnergies          energies(3, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
+    GModelSpectralFunc model8(plaw, energies);
+    test_value(model8.size(), 1);
+    test_value(model8.nodes(), 3);
+    test_value(model8.energy(0).TeV(), 0.1);
+    test_value(model8.intensity(0), 8.69231722336369e-15);
+    test_value(model8.energy(1).TeV(), 3.16227766016838);
+    test_value(model8.intensity(1), 1.65628690171949e-18);
+    test_value(model8.energy(2).TeV(), 100.0);
+    test_value(model8.intensity(2), 3.15598962890354e-22);
+
     // Test XML constructor
     GXml               xml(m_xml_model_point_filefct);
     GXmlElement*       element = xml.element(0)->element(0)->element("spectrum", 0);
@@ -2981,7 +2994,7 @@ void TestGModel::test_temp_const(void)
     // Test value constructor
     GModelTemporalConst model2(3.0);
     test_value(model2.norm(), 3.0);
-    
+
     // Test XML constructor
     GModelTemporalConst model3;
 
@@ -3021,7 +3034,7 @@ void TestGModel::test_temp_lightcurve(void)
     test_value(model2.filename().url(), m_temp_lightcurve,
                "Check light curve data file name");
     test_value(model2.norm(), 2.0);
-   
+
     // Test XML constructor
     GXml         xml(m_xml_model_point_temp_lightcurve);
     GXmlElement* element = xml.element(0)->element(0)->element("temporal", 0);
@@ -3385,7 +3398,7 @@ void TestGModel::test_models(void)
                     "Model \"2FGL J0005.7+3815\" found but not expected.");
         test_assert(!models.is_empty(), "Model container is empty.");
         test_value(models.size(), 1);
-        
+
         // Append model with same name
         test_try("Append model with same name");
         try {
@@ -3398,7 +3411,7 @@ void TestGModel::test_models(void)
         catch (std::exception &e) {
             test_try_failure(e);
         }
-        
+
         // Append model with different name
         model->name("Appended model");
         models.append(*model);
@@ -3460,7 +3473,7 @@ void TestGModel::test_models(void)
         models.load(m_xml_file);
         test_assert(!models.is_empty(), "Model container is empty.");
         test_value(models.size(), 1);
-        
+
         // Append identical container
         test_try("Append identical container");
         try {
@@ -3490,7 +3503,7 @@ void TestGModel::test_models(void)
     catch (std::exception &e) {
         test_try_failure(e);
     }
-    
+
 
     // Setup Crab model
     GModelSky crab;
@@ -3549,7 +3562,7 @@ void TestGModel::test_model_registry(void)
             test_assert(ptr != NULL, "Model pointer for \"" +
                                      registry.name(i)+"\" is NULL");
             if (ptr != NULL) {
-            
+
                 // Test model type
                 test_assert(ptr->type() == registry.name(i),
                             "Expected \""+registry.name(i)+"\" instead"
@@ -4214,7 +4227,7 @@ void TestGModel::test_flux(void)
 
     // Test point source outside ROI
     test_value(ps.flux(circle1), 0.0, 1.e-7, "Check point source not contained in region");
-    
+
     // Exit test
     return;
 }

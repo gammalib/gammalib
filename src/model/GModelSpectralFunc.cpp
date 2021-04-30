@@ -33,6 +33,7 @@
 #include "GTools.hpp"
 #include "GCsv.hpp"
 #include "GRan.hpp"
+#include "GEnergies.hpp"
 #include "GModelSpectralFunc.hpp"
 #include "GModelSpectralRegistry.hpp"
 
@@ -135,6 +136,35 @@ GModelSpectralFunc::GModelSpectralFunc(const GXmlElement& xml) :
 
 
 /***********************************************************************//**
+ * @brief Spectral model constructor
+ *
+ * @param[in] model Spectral model.
+ * @param[in] energies File function node energies.
+ *
+ * Constructs a spectral file function model from any spectral model.
+ * The file function normalisation will be set to unity.
+ ***************************************************************************/
+GModelSpectralFunc::GModelSpectralFunc(const GModelSpectral& model,
+                                       const GEnergies&      energies) :
+                    GModelSpectral()
+{
+    // Initialise members
+    init_members();
+
+    // Reserve space for file function nodes
+    reserve(energies.size());
+
+    // Append nodes for all energies
+    for (int i = 0; i < energies.size(); ++i) {
+        append(energies[i], model.eval(energies[i]));
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Copy constructor
  *
  * @param[in] model File function model.
@@ -178,7 +208,7 @@ GModelSpectralFunc::~GModelSpectralFunc(void)
  * @param[in] model File function model.
  * @return File function model.
  ***************************************************************************/
-GModelSpectralFunc& GModelSpectralFunc::operator= (const GModelSpectralFunc& model)
+GModelSpectralFunc& GModelSpectralFunc::operator=(const GModelSpectralFunc& model)
 {
     // Execute only if object is not identical
     if (this != &model) {
@@ -1016,7 +1046,7 @@ void GModelSpectralFunc::save(const GFilename& filename, const bool& clobber) co
         csv(i,0) = gammalib::str(m_lin_nodes[i]);
         csv(i,1) = gammalib::str(m_lin_values[i]);
     }
-    
+
     // Save CSV file
     csv.save(filename, " ", clobber);
 

@@ -1,6 +1,6 @@
 GammaLib information
 ====================
-* Version: 2.0.0.dev (29 April 2021)
+* Version: 2.0.0.dev (30 April 2021)
 
 [![Build Status](https://cta-jenkins.irap.omp.eu/buildStatus/icon?job=gammalib-integrate-os)](https://cta-jenkins.irap.omp.eu/job/gammalib-integrate-os/)
 
@@ -181,7 +181,8 @@ refer to the section "Known problems" for more information.
 
 Windows Installation
 ====================
-There have been no efforts so far to compile GammaLib under Windows.
+On Windows GammaLib needs to be installed into a virtual machine running
+a Linux distribution.
 
 
 Testing
@@ -202,8 +203,8 @@ or
     ============================================================================
     Testsuite summary for gammalib 2.0.0.dev
     ============================================================================
-    # TOTAL: 21
-    # PASS:  21
+    # TOTAL: 22
+    # PASS:  22
     # SKIP:  0
     # XFAIL: 0
     # FAIL:  0
