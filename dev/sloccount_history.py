@@ -54,7 +54,7 @@ def generate_history():
         # Checkout commit
         git = subprocess.Popen(['git', 'checkout', '-f', hash], stdout=subprocess.PIPE)
         commit, err = git.communicate()
-        print(commit, err)
+        #print(commit, err)
 
         # Get SLOC count statistics
         git       = subprocess.Popen(['sloccount', '.'], stdout=subprocess.PIPE)
