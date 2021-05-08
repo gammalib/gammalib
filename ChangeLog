@@ -1,8 +1,9 @@
-2021-04-30
+2021-05-08
 
         * Version 2.0.0 released
         ========================
 
+        Add stamp() methods to GApplication (#3662)
         Add ASCL shield to "About" page (#3630)
         Add GModelSpectralFunc spectral constructor (#3626)
         Add GModelSpectralBins class (#3606)

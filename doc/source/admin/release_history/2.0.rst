@@ -1,7 +1,7 @@
 .. _2.0:
 
-GammaLib 2.0 release (30 April 2021)
-====================================
+GammaLib 2.0 release (8 May 2021)
+=================================
 
 Overview
 --------
@@ -33,6 +33,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`3662 <https://cta-redmine.irap.omp.eu/issues/3662>`_] -
+  Add ``stamp()`` methods to ``GApplication``
 * [`3630 <https://cta-redmine.irap.omp.eu/issues/3630>`_] -
   Add ASCL shield to **About** page
 * [`3626 <https://cta-redmine.irap.omp.eu/issues/3626>`_] -

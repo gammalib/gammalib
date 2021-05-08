@@ -1,7 +1,7 @@
 /***************************************************************************
  *            test_GApplication.cpp - test GApplication classes            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -672,6 +672,30 @@ void TestGApplication::test_GApplication(void)
         fclose(fp);
 
     } // endif: log file existed
+
+    // Check stamping of FITS HDU
+    GFitsBinTable table1;
+    app1.stamp(table1);
+    test_value(table1.string("CREATOR"), "test_GApplication v1.0.0",
+               "Check stamping of FITS HDU");
+
+    // Check stamping of FITS object
+    GFits fits1;
+    GFitsBinTable table2;
+    fits1.append(table2);
+    app1.stamp(fits1);
+    test_value(fits1[0]->string("CREATOR"), "test_GApplication v1.0.0",
+               "Check stamping of FITS object");
+
+    // Check stamping of FITS file
+    GFits fits2;
+    GFitsBinTable table3;
+    fits2.append(table3);
+    fits2.saveto("test_application.fits", true);
+    app1.stamp("test_application.fits");
+    GFits fits3("test_application.fits");
+    test_value(fits3[0]->string("CREATOR"), "test_GApplication v1.0.0",
+               "Check stamping of FITS file");
 
     // Return
     return; 

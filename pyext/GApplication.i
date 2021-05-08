@@ -83,6 +83,7 @@ public:
     %rename(_log_trailer)   log_trailer;
     %rename(_need_help)     need_help;
     %rename(_args)          args;
+    %rename(_stamp)         stamp;
     %rename(_log)           log;
 
     // Methods
@@ -105,6 +106,9 @@ public:
     const bool&                     need_help(void) const;
     const GApplicationPars&         pars(void) const;
     void                            pars(const GApplicationPars& pars);
+    void                            stamp(GFitsHDU& hdu) const;
+    void                            stamp(GFits& fits) const;
+    void                            stamp(const GFilename& filename) const;
     const std::vector<std::string>& args(void) const;
 
     // Public members

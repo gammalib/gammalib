@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-30 April 2021
+8 May 2021
 
 
 1. Introduction
@@ -31,6 +31,9 @@ The following classes have been renamed:
 
 The following methods have been added:
 - GApplication::eCO2()
+- GApplication::stamp(GFitsHdu&)
+- GApplication::stamp(GFits&)
+- GApplication::stamp(GFilename&)
 - GFitsTableCol::tscale()
 - GResponse::convolve(GModelSky&, GObservation&, GMatrixSparse*)
 - GResponse::irf_spatial(GModelSky&, GObservation&, GMatrix*)
@@ -132,6 +135,10 @@ Add Astrophysics Source Code Library (ASCL) shield to "About" page (#3630)
 
 5. Application module
 ---------------------
+Add GApplication::stamp() methods to write provenance information into a FITS
+HDU, a FITS object or a FITS file. So far the only provenance information that
+is written is the CREATOR keyword (#3662).
+
 Add GApplication::eCO2() method to estimate the carbon footprint if the elapsed
 CPU time. The carbon footprint estimation is also added to the trailer text of
 an application to raise awareness (#3592).

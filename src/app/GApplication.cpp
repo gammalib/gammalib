@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GApplication.cpp - GammaLib application base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,6 +30,9 @@
 #endif
 #include "GApplication.hpp"
 #include "GTools.hpp"
+#include "GFits.hpp"
+#include "GFitsHDU.hpp"
+#include "GFilename.hpp"
 
 /* __ OpenMP section _____________________________________________________ */
 #ifdef _OPENMP
@@ -886,6 +889,68 @@ void GApplication::log_parameters(const GChatter& chatter)
         } // endfor: looped over all parameters
 
     } // endif: chattiness satisfied minimum required level
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Stamp FITS header with provenance information
+ *
+ * @param[in] hdu FITS header.
+ *
+ * Write provenance information into a FITS header.
+ ***************************************************************************/
+void GApplication::stamp(GFitsHDU& hdu) const
+{
+    // Set provenance information
+    std::string creator = name() + " v" + version();
+
+    // Write provenance information
+    hdu.card("CREATOR", creator, "Program which created the file");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Stamp all headers in FITS object with provenance information
+ *
+ * @param[in] fits FITS object.
+ *
+ * Write provenance information into all headers of FITS object.
+ ***************************************************************************/
+void GApplication::stamp(GFits& fits) const
+{
+    // Loop over FITS headers
+    for (int i = 0; i < fits.size(); ++i) {
+        stamp(*fits[i]);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Stamp all headers in FITS file with provenance information
+ *
+ * @param[in] filename FITS file name.
+ *
+ * Write provenance information into all headers of FITS file.
+ ***************************************************************************/
+void GApplication::stamp(const GFilename& filename) const
+{
+    // Open FITS file
+    GFits fits(filename);
+
+    // Stamp headers
+    stamp(fits);
+
+    // Save FITS file
+    fits.save(true);
 
     // Return
     return;

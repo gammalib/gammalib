@@ -35,6 +35,11 @@
 #include "GLog.hpp"
 #include "GApplicationPars.hpp"
 
+/* __ Forward declarations _______________________________________________ */
+class GFitsHDU;
+class GFits;
+class GFilename;
+
 
 /***********************************************************************//**
  * @class GApplication
@@ -115,6 +120,9 @@ public:
     const GApplicationPars&         pars(void) const;
     void                            pars(const GApplicationPars& pars);
     const std::vector<std::string>& args(void) const;
+    void                            stamp(GFitsHDU& hdu) const;
+    void                            stamp(GFits& fits) const;
+    void                            stamp(const GFilename& filename) const;
     std::string                     print(const GChatter& chatter = NORMAL) const;
 
     // Public members
