@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GMatrixSymmetric.cpp - Symmetric matrix class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -85,28 +85,38 @@ GMatrixSymmetric::GMatrixSymmetric(void) : GMatrixBase()
 /***********************************************************************//**
  * @brief Matrix constructor
  *
- * @param[in] rows Number of rows [>0].
- * @param[in] columns Number of columns [>0].
+ * @param[in] rows Number of rows [>=0].
+ * @param[in] columns Number of columns [>=0].
  *
- * @exception GException::empty
- *            Specified number of rows or columns is not valid.
+ * @exception GException::invalid_argument
+ *            Number of rows or columns is negative.
+ *
+ * Constructs a matrix with the specified number of @p rows and @p columns.
  ***************************************************************************/
 GMatrixSymmetric::GMatrixSymmetric(const int& rows, const int& columns) :
                   GMatrixBase()
 {
-    // Continue only if matrix is valid
-    if (rows > 0 && columns > 0) {
-
-        // Initialise class members for clean destruction
-        init_members();
-
-        // Allocate matrix memory
-        alloc_members(rows, columns);
-
+    // Compile option: raise an exception if number of rows or columns is
+    // negative
+    #if defined(G_RANGE_CHECK)
+    if (rows < 0) {
+        std::string msg = "Number of rows "+gammalib::str(rows)+" is negative. "
+                          "Please specify a non-negative number of rows.";
+        throw GException::invalid_argument(G_CONSTRUCTOR, msg);
     }
-    else {
-        throw GException::empty(G_CONSTRUCTOR);
+    if (columns < 0) {
+        std::string msg = "Number of columns "+gammalib::str(columns)+" is "
+                          "negative. Please specify a non-negative number of "
+                          "columns.";
+        throw GException::invalid_argument(G_CONSTRUCTOR, msg);
     }
+    #endif
+
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Allocate matrix memory
+    alloc_members(rows, columns);
 
     // Return
     return;

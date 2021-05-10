@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GMatrixBase.hpp - Abstract matrix base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -172,9 +172,10 @@ public:
     virtual std::string   print(const GChatter& chatter = NORMAL) const = 0;
 
     // Base class methods
-    const int& size(void) const;
-    const int& columns(void) const;
-    const int& rows(void) const;
+    bool                  is_empty(void) const;
+    const int&            size(void) const;
+    const int&            columns(void) const;
+    const int&            rows(void) const;
 
 protected:
     // Protected methods
@@ -204,6 +205,20 @@ protected:
     int*    m_colsel;     //!< Column selection (for compressed decomposition)
     double* m_data;       //!< Matrix data
 };
+
+
+/***********************************************************************//**
+ * @brief Check if matrix is empty
+ *
+ * @return True if matrix has no rows or columns.
+ *
+ * Checks if the matrix has no rows or columns.
+ ***************************************************************************/
+inline
+bool GMatrixBase::is_empty(void) const
+{
+    return (m_rows == 0 || m_cols == 0);
+}
 
 
 /***********************************************************************//**

@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-8 May 2021
+10 May 2021
 
 
 1. Introduction
@@ -39,6 +39,7 @@ The following methods have been added:
 - GResponse::irf_spatial(GModelSky&, GObservation&, GMatrix*)
 - GObservation::model(GModels&, GMatrixSparse*)
 - GObservation::model_grad(GModel&, GModelPar&)
+- GMatrixBase::is_empty()
 - GModels::eval(GObservation&, GMatrixSparse*)
 - GModel::eval(GObservation&, GMatrixSparse*)
 - GModel::associations()
@@ -165,6 +166,10 @@ removed since it won't have any effect anymore (#3553).
 
 8. Linear algebra module
 ------------------------
+Fixed some issues with matrix methods that did not work on empty matrices. The
+GMatrixBase::is_empty() method was added to check whether a matrix is empty
+or not (#3541).
+
 Fixed an incompatibility between GMatrixSparse::mix_column_prepare() and
 GMatrixSparse::mix_column() methods that led in rare cases to a segmentation
 fault (#3563).

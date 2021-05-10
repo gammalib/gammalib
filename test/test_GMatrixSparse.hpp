@@ -1,7 +1,7 @@
 /***************************************************************************
  *             test_GMatrixSparse.hpp - Test sparse matrix class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -51,6 +51,7 @@ public:
     virtual void               set(void);
     virtual TestGMatrixSparse* clone(void) const;
     virtual std::string        classname(void) const { return "TestGMatrixSparse"; }
+    void                       empty(void);
     void                       alloc_matrix(void);
     void                       assign_values(void);
     void                       copy_matrix(void);
@@ -76,7 +77,7 @@ private:
                                   const GMatrixSparse& ref) const;
     bool          check_matrix_ut(const GMatrixSparse& matrix,
                                   const GMatrixSparse& ref) const;
-    
+
     // Private members;
     GMatrixSparse m_test;    //!< Test matrix
     GMatrixSparse m_bigger;  //!< Bigger test matrix (for collisions)

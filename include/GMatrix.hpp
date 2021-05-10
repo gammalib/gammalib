@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GMatrix.hpp - General matrix class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -131,7 +131,6 @@ public:
     GMatrix transpose(void) const;
     GMatrix invert(void) const;
     GVector solve(const GVector& vector) const;
-    GMatrix negate(void) const;
     GMatrix abs(void) const;
     GMatrix extract_lower_triangle(void) const;
     GMatrix extract_upper_triangle(void) const;

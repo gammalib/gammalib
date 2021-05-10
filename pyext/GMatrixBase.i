@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GMatrixBase.i - Abstract matrix base class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -61,7 +61,8 @@ public:
     virtual double        sum(void) const = 0;
 
     // Base class methods
-    const int& size(void) const;
-    const int& columns(void) const;
-    const int& rows(void) const;
+    bool                  is_empty(void) const;
+    const int&            size(void) const;
+    const int&            columns(void) const;
+    const int&            rows(void) const;
 };

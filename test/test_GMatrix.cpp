@@ -1,7 +1,7 @@
 /***************************************************************************
  *             test_GMatrix.cpp - Test generic matrix class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,6 +38,20 @@ double g_matrix[] = {1.0, 2.0, 3.0, 4.0,
 double g_vector[] = {1.0, 2.0, 3.0, 4.0};
 int    g_rows     = 3;
 int    g_cols     = 4;
+
+/* __ Test macros ________________________________________________________ */
+#define TEST_FAILURE(WHAT,TEST, MSG, EXCEPTION) \
+    test_try(WHAT); \
+    try { \
+        TEST; \
+        test_try_failure(MSG); \
+    } \
+    catch (EXCEPTION &e) { \
+        test_try_success(); \
+    } \
+    catch (std::exception &e) { \
+        test_try_failure(e); \
+    }
 
 
 /***************************************************************************
@@ -235,6 +249,7 @@ void TestGMatrix::set(void)
     name("GMatrix");
 
     // Append tests
+    append(static_cast<pfunction>(&TestGMatrix::empty), "Test empty matrix");
     append(static_cast<pfunction>(&TestGMatrix::alloc_matrix), "Test matrix allocation");
     append(static_cast<pfunction>(&TestGMatrix::assign_values), "Test value assignment");
     append(static_cast<pfunction>(&TestGMatrix::copy_matrix), "Test matrix copying");
@@ -268,23 +283,217 @@ TestGMatrix* TestGMatrix::clone(void) const
 
 
 /***********************************************************************//**
+ * @brief Test empty matrix
+ ***************************************************************************/
+void TestGMatrix::empty(void)
+{
+    // Test void constructor
+    GMatrix matrix1;
+    test_assert(matrix1.is_empty(), "Test that void matrix is empty");
+    test_value(matrix1.size(), 0, "Test that void matrix has zero size");
+    test_value(matrix1.columns(), 0, "Test that void matrix has zero columns");
+    test_value(matrix1.rows(), 0, "Test that void matrix has zero rows");
+    test_value(matrix1.classname(), "GMatrix", "Test classname of void matrix");
+
+    // Test allocation constructor with zero rows and columns
+    GMatrix matrix2(0,0);
+    test_assert(matrix2.is_empty(), "Test that zero-size matrix is empty");
+    test_value(matrix2.size(), 0, "Test that zero-size matrix has zero size");
+    test_value(matrix2.columns(), 0, "Test that zero-size matrix has zero columns");
+    test_value(matrix2.rows(), 0, "Test that zero-size matrix has zero rows");
+    test_value(matrix2.classname(), "GMatrix", "Test classname of zero-size matrix");
+
+    // Test allocation constructor with zero rows
+    GMatrix matrix3(0,10);
+    test_assert(matrix3.is_empty(), "Test that zero-rows matrix is empty");
+    test_value(matrix3.size(), 0, "Test that zero-rows matrix has zero size");
+    test_value(matrix3.columns(), 0, "Test that zero-rows matrix has zero columns");
+    test_value(matrix3.rows(), 0, "Test that zero-rows matrix has zero rows");
+    test_value(matrix3.classname(), "GMatrix", "Test classname of zero-rows matrix");
+
+    // Test allocation constructor with zero columns
+    GMatrix matrix4(5,0);
+    test_assert(matrix4.is_empty(), "Test that zero-columns matrix is empty");
+    test_value(matrix4.size(), 0, "Test that zero-columns matrix has zero size");
+    test_value(matrix4.columns(), 0, "Test that zero-columns matrix has zero columns");
+    test_value(matrix4.rows(), 0, "Test that zero-columns matrix has zero rows");
+    test_value(matrix4.classname(), "GMatrix", "Test classname of zero-columns matrix");
+
+    // Test comparison operators
+    test_assert(matrix1 == matrix2, "Test that void and zero-size matrix are equal");
+    test_assert(!(matrix1 != matrix2), "Test that void and zero-size matrix are not unequal");
+    test_assert(matrix1 == matrix3, "Test that void and zero-rows matrix are equal");
+    test_assert(!(matrix1 != matrix3), "Test that void and zero-rows matrix are not unequal");
+    test_assert(matrix1 == matrix4, "Test that void and zero-columns matrix are equal");
+    test_assert(!(matrix1 != matrix4), "Test that void and columns-rows matrix are not unequal");
+
+    // Test matrix attributes and printing
+    test_value(matrix1.fill(), 0.0, "Test fill of empty matrix");
+    test_value(matrix1.min(), 0.0, "Test minimum of empty matrix");
+    test_value(matrix1.max(), 0.0, "Test maximum of empty matrix");
+    test_value(matrix1.sum(), 0.0, "Test sum of empty matrix");
+    test_value(matrix1.print(), "=== GMatrix ==="
+                                "\n Number of rows ............: 0"
+                                "\n Number of columns .........: 0"
+                                "\n Number of elements ........: 0"
+                                "\n Number of allocated cells .: 0",
+               "Test printing of empty matrix");
+
+    // Test vector multiplication operator
+    GVector vector1;
+    GVector vector2 = matrix1 * vector1;
+    test_value(vector2.size(), 0, "Test that vector multiplication with empty matrix produces zero size vector");
+
+    // Test matrix assignment operator
+    GMatrix matrix5 = matrix1;
+    test_assert(matrix5.is_empty(), "Test that assignment of empty matrix produces empty matrix");
+
+    // Test matrix addition operators
+    matrix5 = matrix1 + matrix1;
+    test_assert(matrix5.is_empty(), "Test that matrix addition of empty matrix produces empty matrix");
+    matrix5  = matrix1;
+    matrix5 += matrix1;
+    test_assert(matrix5.is_empty(), "Test that unary matrix addition of empty matrix produces empty matrix");
+    matrix5 = matrix1 + 1.0;
+    test_assert(matrix5.is_empty(), "Test that addition of scalar produces empty matrix");
+    matrix5  = matrix1;
+    matrix5 += 1.0;
+    test_assert(matrix5.is_empty(), "Test that unary addition of scalar produces empty matrix");
+
+    // Test matrix subtraction operators
+    matrix5 = matrix1 - matrix1;
+    test_assert(matrix5.is_empty(), "Test that matrix subtraction of empty matrix produces empty matrix");
+    matrix5  = matrix1;
+    matrix5 -= matrix1;
+    test_assert(matrix5.is_empty(), "Test that unary matrix subtraction of empty matrix produces empty matrix");
+    matrix5 = matrix1 - 1.0;
+    test_assert(matrix5.is_empty(), "Test that subtraction of scalar produces empty matrix");
+    matrix5  = matrix1;
+    matrix5 -= 1.0;
+    test_assert(matrix5.is_empty(), "Test that unary subtraction of scalar produces empty matrix");
+
+    // Test matrix multiplication operators
+    matrix5 = matrix1 * matrix1;
+    test_assert(matrix5.is_empty(), "Test that matrix multiplication with empty matrix produces empty matrix");
+    matrix5  = matrix1;
+    matrix1 *= matrix1;
+    test_assert(matrix5.is_empty(), "Test that unary matrix multiplication of empty matrix produces empty matrix");
+    matrix5 = matrix1 * 3.0;
+    test_assert(matrix5.is_empty(), "Test that multiplication by scalar of empty matrix produces empty matrix");
+    matrix5  = matrix1;
+    matrix5 *= 3.0;
+    test_assert(matrix5.is_empty(), "Test that unary multiplication by scalar of empty matrix produces empty matrix");
+
+    // Test matrix division operator
+    matrix5  = matrix1;
+    matrix1 /= 3.0;
+    test_assert(matrix5.is_empty(), "Test that unary division by scalar of empty matrix produces empty matrix");
+
+    // Test matrix negation operator
+    matrix5 = -matrix1;
+    test_assert(matrix5.is_empty(), "Test that matrix negation produces empty matrix");
+
+    // Test matrix clearing
+    matrix5.clear();
+    test_assert(matrix5.is_empty(), "Test that cleared matrix produces empty matrix");
+
+    // Test transpose method
+    matrix5 = matrix1.transpose();
+    test_assert(matrix5.is_empty(), "Test that transpose() method produces empty matrix");
+
+    // Test invert method (feature not implemented)
+    //matrix5 = matrix1.invert();
+    //test_assert(matrix5.is_empty(), "Test that invert() method produces empty matrix");
+
+    // Test solve method (feature not implemented)
+    //GVector vector3 = matrix1.solve(GVector(0));
+    //test_value(vector3.size(), 0, "Test that solve() method produces a zero-size vector");
+
+    // Test abs method
+    matrix5 = matrix1.abs();
+    test_assert(matrix5.is_empty(), "Test that abs() method produces empty matrix");
+
+    // Test extract_lower_triangle method
+    matrix5 = matrix1.extract_lower_triangle();
+    test_assert(matrix5.is_empty(), "Test that extract_lower_triangle() method produces empty matrix");
+
+    // Test extract_upper_triangle method
+    matrix5 = matrix1.extract_upper_triangle();
+    test_assert(matrix5.is_empty(), "Test that extract_upper_triangle() method produces empty matrix");
+
+    // Test matrix access
+    TEST_FAILURE("Element access with at() of empty matrix",
+                 double& element = matrix1.at(0,0),
+                 "Exception expected for element access with at() of empty matrix.",
+                 GException::out_of_range)
+    TEST_FAILURE("Element access with at() of empty matrix (const version)",
+                 const double& element = matrix1.at(0,0),
+                 "Exception expected for element access with at() of empty matrix.",
+                 GException::out_of_range)
+    TEST_FAILURE("Row access of empty matrix",
+                 GVector vector = matrix1.row(0),
+                 "Exception expected for row access of empty matrix.",
+                 GException::out_of_range)
+    TEST_FAILURE("Column access of empty matrix",
+                 GVector vector = matrix1.column(0),
+                 "Exception expected for column access of empty matrix.",
+                 GException::out_of_range)
+
+    // Test row and column insertion and addition
+    TEST_FAILURE("Row insertion into empty matrix",
+                 matrix1.row(0, GVector()),
+                 "Exception expected for row insertion into empty matrix.",
+                 GException::out_of_range)
+    TEST_FAILURE("Row addition to empty matrix",
+                 matrix1.add_to_row(0, GVector()),
+                 "Exception expected for row addition to empty matrix.",
+                 GException::out_of_range)
+    TEST_FAILURE("Column insertion into empty matrix",
+                 matrix1.column(0, GVector()),
+                 "Exception expected for column insertion into empty matrix.",
+                 GException::out_of_range)
+    TEST_FAILURE("Column addition to empty matrix",
+                 matrix1.add_to_column(0, GVector()),
+                 "Exception expected for column addition to empty matrix.",
+                 GException::out_of_range)
+
+    // Test failure models
+    TEST_FAILURE("Matrix inversion",
+                 GMatrix matrix = matrix1.invert(),
+                 "Exception expected for matrix inversion.",
+                 GException::feature_not_implemented)
+    TEST_FAILURE("Matrix solution with non-zero vector",
+                 GVector vector = matrix1.solve(GVector(3)),
+                 "Exception expected for matrix solution with non-zero vector.",
+                 GException::feature_not_implemented)
+
+    // Test Euler angle method
+    matrix5.eulerx(10.0);
+    test_assert(!matrix5.is_empty(), "Test that eulerx() method produces non-empty matrix");
+    test_value(matrix5.size(), 9, "Test that matrix returned by eulerx() has 9 elements");
+    test_value(matrix5.columns(), 3, "Test that matrix returned by eulerx() has 3 columns");
+    test_value(matrix5.rows(), 3, "Test that matrix returned by eulerx() has 3 rows");
+    matrix5.eulery(10.0);
+    test_assert(!matrix5.is_empty(), "Test that eulery() method produces non-empty matrix");
+    test_value(matrix5.size(), 9, "Test that matrix returned by eulerx() has 9 elements");
+    test_value(matrix5.columns(), 3, "Test that matrix returned by eulerx() has 3 columns");
+    test_value(matrix5.rows(), 3, "Test that matrix returned by eulerx() has 3 rows");
+    matrix5.eulerz(10.0);
+    test_assert(!matrix5.is_empty(), "Test that eulerz() method produces non-empty matrix");
+    test_value(matrix5.size(), 9, "Test that matrix returned by eulerx() has 9 elements");
+    test_value(matrix5.columns(), 3, "Test that matrix returned by eulerx() has 3 columns");
+    test_value(matrix5.rows(), 3, "Test that matrix returned by eulerx() has 3 rows");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Test matrix allocation
  ***************************************************************************/
 void TestGMatrix::alloc_matrix(void)
 {
-    // Allocate zero matrix. The allocation should fail.
-    test_try("Allocate zero matrix");
-    try {
-        GMatrix test(0,0);
-        test_try_failure("Expected GException::empty exception.");
-    }
-    catch (GException::empty &e) {
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
     // Return
     return;
 }

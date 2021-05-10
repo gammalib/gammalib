@@ -18,11 +18,13 @@ Bug fixes
 ---------
 
 * [`3563 <https://cta-redmine.irap.omp.eu/issues/3563>`_] -
-  Fix incompatibility in GMatrixSparse::mix_column_prepare() method
+  Fix incompatibility in ``GMatrixSparse::mix_column_prepare()`` method
 * [`3553 <https://cta-redmine.irap.omp.eu/issues/3553>`_] -
   Fix reading of scaled FITS columns, remove ``GFitsTableCol::scale()`` method
 * [`3547 <https://cta-redmine.irap.omp.eu/issues/3547>`_] -
   Correct COMPTEL average deadtime to 0.965 (Rob van Dijk's thesis)
+* [`3541 <https://cta-redmine.irap.omp.eu/issues/3541>`_] -
+  Fix handling of empty matrix objects
 * [`3499 <https://cta-redmine.irap.omp.eu/issues/3499>`_] -
   Fix response cache removal for vector cache
 * Fix ``GSkyMap::stack_maps()`` method for WCS maps

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        GVector.cpp - Vector class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,6 +33,7 @@
 
 
 /* __ Method name definitions ____________________________________________ */
+#define G_CONSTRUCTOR                                "GVector::GVector(int&)"
 #define G_OP_ADD                              "GVector::operator+=(GVector&)"
 #define G_OP_SUB                              "GVector::operator-=(GVector&)"
 #define G_AT                                              "GVector::at(int&)"
@@ -62,13 +63,27 @@ GVector::GVector(void)
 /***********************************************************************//**
  * @brief Vector constructor
  *
- * @param[in] num Number of elements in vector.
+ * @param[in] num Number of elements in vector [>=0].
+ *
+ * @exception GException::invalid_argument
+ *            Number of elements is negative.
  *
  * Initialises a vector with @p num elements. All vector elements will be
  * set to 0.
  ***************************************************************************/
 GVector::GVector(const int& num)
 {
+    // Compile option: raise an exception if number of rows or columns is
+    // negative
+    #if defined(G_RANGE_CHECK)
+    if (num < 0) {
+        std::string msg = "Number of elements "+gammalib::str(num)+" is "
+                          "negative. Please specify a non-negative number of "
+                          "elements.";
+        throw GException::invalid_argument(G_CONSTRUCTOR, msg);
+    }
+    #endif
+
     // Initialise class members
     init_members();
 

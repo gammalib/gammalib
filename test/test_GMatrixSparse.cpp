@@ -1,7 +1,7 @@
 /***************************************************************************
  *            test_GMatrixSparse.cpp - Test sparse matrix class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -40,6 +40,20 @@ int    g_elements = 9;
 int    g_rows     = 4;
 int    g_cols     = 5;
 
+/* __ Test macros ________________________________________________________ */
+#define TEST_FAILURE(WHAT,TEST, MSG, EXCEPTION) \
+    test_try(WHAT); \
+    try { \
+        TEST; \
+        test_try_failure(MSG); \
+    } \
+    catch (EXCEPTION &e) { \
+        test_try_success(); \
+    } \
+    catch (std::exception &e) { \
+        test_try_failure(e); \
+    }
+
 
 /***************************************************************************
  * @brief Set test matrix
@@ -58,33 +72,6 @@ GMatrixSparse TestGMatrixSparse::set_matrix(void) const
     return matrix;
 }
 
-
-/***************************************************************************
- * @brief Set test matrix with zero lines
- ***************************************************************************/
-/*
-GMatrixSparse TestGMatrixSparse::set_matrix_zero(void) const
-{
-    // Allocate matrix
-    GMatrixSparse matrix(g_rows+1,g_cols+1);
-
-    // Set matrix values
-	int i = 0;
-    for (int row = 0; row < g_rows+1; ++row) {
-        if (row == 2) continue;
-        int j = 0;
-        for (int col = 0; col < g_cols+1; ++col) {
-            if (col == 2) continue;
-            matrix(row,col) = g_matrix[j+i*g_cols];
-            j++;
-        }
-        i++;
-    }
-
-    // Return matrix
-    return matrix;
-}
-*/
 
 /***************************************************************************
  * @brief Set test vector
@@ -120,7 +107,7 @@ bool TestGMatrixSparse::check_matrix(const GMatrixSparse& matrix,
 {
     // Initialise check with true
     bool result = true;
-    
+
     // Compare all matrix elements
     for (int row = 0; row < g_rows; ++row) {
         for (int col = 0; col < g_cols; ++col) {
@@ -139,7 +126,7 @@ bool TestGMatrixSparse::check_matrix(const GMatrixSparse& matrix,
                 result = false;
                 break;
             }
-            
+
         } // endfor: looped over columns
 	} // endfor: looped over rows
 
@@ -183,7 +170,7 @@ bool TestGMatrixSparse::check_matrix_trans(const GMatrixSparse& matrix,
                 result = false;
                 break;
             }
-            
+
         } // endfor: looped over columns
 	} // endfor: looped over rows
 
@@ -224,7 +211,7 @@ bool TestGMatrixSparse::check_matrix_lt(const GMatrixSparse& matrix,
                 result = false;
                 break;
             }
-            
+
         } // endfor: looped over columns
 	} // endfor: looped over rows
 
@@ -265,7 +252,7 @@ bool TestGMatrixSparse::check_matrix_ut(const GMatrixSparse& matrix,
                 result = false;
                 break;
             }
-            
+
         } // endfor: looped over columns
 	} // endfor: looped over rows
 
@@ -283,6 +270,7 @@ void TestGMatrixSparse::set(void)
     name("GMatrixSparse");
 
     // Append tests
+    append(static_cast<pfunction>(&TestGMatrixSparse::empty), "Test empty matrix");
     append(static_cast<pfunction>(&TestGMatrixSparse::alloc_matrix), "Test matrix allocation");
     append(static_cast<pfunction>(&TestGMatrixSparse::assign_values), "Test value assignment");
     append(static_cast<pfunction>(&TestGMatrixSparse::copy_matrix), "Test matrix copying");
@@ -316,23 +304,246 @@ TestGMatrixSparse* TestGMatrixSparse::clone(void) const
 
 
 /***********************************************************************//**
+ * @brief Test empty matrix
+ ***************************************************************************/
+void TestGMatrixSparse::empty(void)
+{
+    // Test void constructor
+    GMatrixSparse matrix1;
+    test_assert(matrix1.is_empty(), "Test that void matrix is empty");
+    test_value(matrix1.size(), 0, "Test that void matrix has zero size");
+    test_value(matrix1.columns(), 0, "Test that void matrix has zero columns");
+    test_value(matrix1.rows(), 0, "Test that void matrix has zero rows");
+    test_value(matrix1.classname(), "GMatrixSparse", "Test classname of void matrix");
+
+    // Test allocation constructor with zero rows and columns
+    GMatrixSparse matrix2(0,0);
+    test_assert(matrix2.is_empty(), "Test that zero-size matrix is empty");
+    test_value(matrix2.size(), 0, "Test that zero-size matrix has zero size");
+    test_value(matrix2.columns(), 0, "Test that zero-size matrix has zero columns");
+    test_value(matrix2.rows(), 0, "Test that zero-size matrix has zero rows");
+    test_value(matrix2.classname(), "GMatrixSparse", "Test classname of zero-size matrix");
+
+    // Test allocation constructor with zero rows
+    GMatrixSparse matrix3(0,10);
+    test_assert(matrix3.is_empty(), "Test that zero-rows matrix is empty");
+    test_value(matrix3.size(), 0, "Test that zero-rows matrix has zero size");
+    test_value(matrix3.columns(), 0, "Test that zero-rows matrix has zero columns");
+    test_value(matrix3.rows(), 0, "Test that zero-rows matrix has zero rows");
+    test_value(matrix3.classname(), "GMatrixSparse", "Test classname of zero-rows matrix");
+
+    // Test allocation constructor with zero columns
+    GMatrixSparse matrix4(5,0);
+    test_assert(matrix4.is_empty(), "Test that zero-columns matrix is empty");
+    test_value(matrix4.size(), 0, "Test that zero-columns matrix has zero size");
+    test_value(matrix4.columns(), 0, "Test that zero-columns matrix has zero columns");
+    test_value(matrix4.rows(), 0, "Test that zero-columns matrix has zero rows");
+    test_value(matrix4.classname(), "GMatrixSparse", "Test classname of zero-columns matrix");
+
+    // Test comparison operators
+    test_assert(matrix1 == matrix2, "Test that void and zero-size matrix are equal");
+    test_assert(!(matrix1 != matrix2), "Test that void and zero-size matrix are not unequal");
+    test_assert(matrix1 == matrix3, "Test that void and zero-rows matrix are equal");
+    test_assert(!(matrix1 != matrix3), "Test that void and zero-rows matrix are not unequal");
+    test_assert(matrix1 == matrix4, "Test that void and zero-columns matrix are equal");
+    test_assert(!(matrix1 != matrix4), "Test that void and columns-rows matrix are not unequal");
+
+    // Test matrix attributes and printing
+    test_value(matrix1.fill(), 0.0, "Test fill of empty matrix");
+    test_value(matrix1.min(), 0.0, "Test minimum of empty matrix");
+    test_value(matrix1.max(), 0.0, "Test maximum of empty matrix");
+    test_value(matrix1.sum(), 0.0, "Test sum of empty matrix");
+    test_value(matrix1.print(), "=== GMatrixSparse ==="
+                                "\n Number of rows ............: 0"
+                                "\n Number of columns .........: 0"
+                                "\n Number of nonzero elements : 0"
+                                "\n Number of allocated cells .: 0"
+                                "\n Memory block size .........: 512"
+                                "\n Sparse matrix fill ........: 0"
+                                "\n Pending element ...........: 0"
+                                "\n Fill stack size ...........: 0 (none)",
+               "Test printing of empty matrix");
+
+    // Test vector multiplication operator
+    GVector vector1;
+    GVector vector2 = matrix1 * vector1;
+    test_value(vector2.size(), 0, "Test that vector multiplication with empty matrix produces zero size vector");
+
+    // Test matrix assignment operator
+    GMatrixSparse matrix5 = matrix1;
+    test_assert(matrix5.is_empty(), "Test that assignment of empty matrix produces empty matrix");
+
+    // Test matrix addition operators
+    matrix5 = matrix1 + matrix1;
+    test_assert(matrix5.is_empty(), "Test that matrix addition of empty matrix produces empty matrix");
+    matrix5  = matrix1;
+    matrix5 += matrix1;
+    test_assert(matrix5.is_empty(), "Test that unary matrix addition of empty matrix produces empty matrix");
+    matrix5 = matrix1 + 1.0;
+    test_assert(matrix5.is_empty(), "Test that addition of scalar produces empty matrix");
+    matrix5  = matrix1;
+    matrix5 += 1.0;
+    test_assert(matrix5.is_empty(), "Test that unary addition of scalar produces empty matrix");
+
+    // Test matrix subtraction operators
+    matrix5 = matrix1 - matrix1;
+    test_assert(matrix5.is_empty(), "Test that matrix subtraction of empty matrix produces empty matrix");
+    matrix5  = matrix1;
+    matrix5 -= matrix1;
+    test_assert(matrix5.is_empty(), "Test that unary matrix subtraction of empty matrix produces empty matrix");
+    matrix5 = matrix1 - 1.0;
+    test_assert(matrix5.is_empty(), "Test that subtraction of scalar produces empty matrix");
+    matrix5  = matrix1;
+    matrix5 -= 1.0;
+    test_assert(matrix5.is_empty(), "Test that unary subtraction of scalar produces empty matrix");
+
+    // Test matrix multiplication operators
+    matrix5 = matrix1 * matrix1;
+    test_assert(matrix5.is_empty(), "Test that matrix multiplication with empty matrix produces empty matrix");
+    matrix5  = matrix1;
+    matrix1 *= matrix1;
+    test_assert(matrix5.is_empty(), "Test that unary matrix multiplication of empty matrix produces empty matrix");
+    matrix5 = matrix1 * 3.0;
+    test_assert(matrix5.is_empty(), "Test that multiplication by scalar of empty matrix produces empty matrix");
+    matrix5  = matrix1;
+    matrix5 *= 3.0;
+    test_assert(matrix5.is_empty(), "Test that unary multiplication by scalar of empty matrix produces empty matrix");
+
+    // Test matrix division operator
+    matrix5  = matrix1;
+    matrix1 /= 3.0;
+    test_assert(matrix5.is_empty(), "Test that unary division by scalar of empty matrix produces empty matrix");
+
+    // Test matrix negation operator
+    matrix5 = -matrix1;
+    test_assert(matrix5.is_empty(), "Test that matrix negation produces empty matrix");
+
+    // Test matrix clearing
+    matrix5.clear();
+    test_assert(matrix5.is_empty(), "Test that cleared matrix produces empty matrix");
+
+    // Test transpose method
+    matrix5 = matrix1.transpose();
+    test_assert(matrix5.is_empty(), "Test that transpose() method produces empty matrix");
+
+    // Test invert method
+    matrix5 = matrix1.invert();
+    test_assert(matrix5.is_empty(), "Test that invert() method produces empty matrix");
+
+    // Test solve method
+    GVector vector3 = matrix1.solve(GVector(0));
+    test_value(vector3.size(), 0, "Test that solve() method produces a zero-size vector");
+
+    // Test abs method
+    matrix5 = matrix1.abs();
+    test_assert(matrix5.is_empty(), "Test that abs() method produces empty matrix");
+
+    // Test cholesky_decompose method
+    matrix5 = matrix1.cholesky_decompose();
+    test_assert(matrix5.is_empty(), "Test that cholesky_decompose() method produces empty matrix");
+
+    // Test cholesky_invert method
+    matrix5 = matrix1.cholesky_invert();
+    test_assert(matrix5.is_empty(), "Test that cholesky_invert() method produces empty matrix");
+
+    // Test stack methods
+    matrix5.stack_init(10, 20);
+    test_assert(matrix5.is_empty(), "Test that empty matrix is still empty after stack initialisation");
+
+    // Test matrix access
+    TEST_FAILURE("Element access of empty matrix",
+                 double& element = matrix1(0,0),
+                 "Exception expected for element access of empty matrix.",
+                 GException::out_of_range)
+    TEST_FAILURE("Element access of empty matrix (const version)",
+                 const double& element = matrix1(0,0),
+                 "Exception expected for element access of empty matrix.",
+                 GException::out_of_range)
+    TEST_FAILURE("Element access with at() of empty matrix",
+                 double& element = matrix1.at(0,0),
+                 "Exception expected for element access with at() of empty matrix.",
+                 GException::out_of_range)
+    TEST_FAILURE("Element access with at() of empty matrix (const version)",
+                 const double& element = matrix1.at(0,0),
+                 "Exception expected for element access with at() of empty matrix.",
+                 GException::out_of_range)
+    TEST_FAILURE("Row access of empty matrix",
+                 GVector vector = matrix1.row(0),
+                 "Exception expected for row access of empty matrix.",
+                 GException::out_of_range)
+    TEST_FAILURE("Column access of empty matrix",
+                 GVector vector = matrix1.column(0),
+                 "Exception expected for column access of empty matrix.",
+                 GException::out_of_range)
+
+    // Test row and column insertion and addition
+    TEST_FAILURE("Row insertion into empty matrix",
+                 matrix1.row(0, GVector()),
+                 "Exception expected for row insertion into empty matrix.",
+                 GException::out_of_range)
+    TEST_FAILURE("Row addition to empty matrix",
+                 matrix1.add_to_row(0, GVector()),
+                 "Exception expected for row addition to empty matrix.",
+                 GException::out_of_range)
+    TEST_FAILURE("Column insertion into empty matrix",
+                 matrix1.column(0, GVector()),
+                 "Exception expected for column insertion into empty matrix.",
+                 GException::out_of_range)
+    TEST_FAILURE("Column addition to empty matrix",
+                 matrix1.add_to_column(0, GVector()),
+                 "Exception expected for column addition to empty matrix.",
+                 GException::out_of_range)
+    double values[] = {1.0, 2.0, 3.0};
+    int    rows[]   = {0, 1, 2};
+    TEST_FAILURE("Values insertion into empty matrix",
+                 matrix1.column(0, values, rows, 3),
+                 "Exception expected for values insertion into empty matrix.",
+                 GException::out_of_range)
+    TEST_FAILURE("Values addition to empty matrix",
+                 matrix1.add_to_column(0, values, rows, 3),
+                 "Exception expected for values addition to empty matrix.",
+                 GException::out_of_range)
+
+    // Test failure models
+    TEST_FAILURE("Matrix solution with non-zero vector",
+                 GVector vector = matrix1.solve(GVector(3)),
+                 "Exception expected for matrix solution with non-zero vector.",
+                 GException::matrix_vector_mismatch)
+    TEST_FAILURE("Matrix Cholesky solver with zero vector",
+                 GVector vector = matrix1.cholesky_solver(GVector(0)),
+                 "Exception expected for matrix Cholesky solver with zero vector.",
+                 GException::matrix_not_factorised)
+    TEST_FAILURE("Matrix Cholesky solver with non-zero vector",
+                 GVector vector = matrix1.cholesky_solver(GVector(3)),
+                 "Exception expected for matrix Cholesky solver with non-zero vector.",
+                 GException::matrix_vector_mismatch)
+
+    // Test stack
+    TEST_FAILURE("Push vector column on stack of empty matrix",
+                 matrix5.stack_push_column(GVector(3),0),
+                 "Exception expected for vector column push on stack of empty matrix.",
+                 GException::out_of_range)
+    TEST_FAILURE("Push column values on stack of empty matrix",
+                 matrix5.stack_push_column(values, rows, 3 ,0),
+                 "Exception expected for column values push on stack of empty matrix.",
+                 GException::out_of_range)
+
+    // Test stack flush and destroy
+    matrix5.stack_flush();
+    test_assert(matrix5.is_empty(), "Test that empty matrix is still empty after stack flush");
+    matrix5.stack_destroy();
+    test_assert(matrix5.is_empty(), "Test that empty matrix is still empty after stack destruction");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Test matrix allocation
  ***************************************************************************/
 void TestGMatrixSparse::alloc_matrix(void)
 {
-    // Allocate zero matrix. The allocation should fail.
-    test_try("Allocate zero matrix");
-    try {
-        GMatrixSparse test(0,0);
-        test_try_failure("Expected GException::empty exception.");
-    }
-    catch (GException::empty &e) {
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
     // Setup a symmetric sparse matrix
     int size = 30;
     GMatrixSparse symmetric(size,size);
@@ -412,7 +623,7 @@ void TestGMatrixSparse::assign_values(void)
 {
     // Setup 3x3 matrix
     GMatrixSparse test(3,3);
-    
+
     // Assignment individual values
     for (int i = 0; i < 3; ++i) {
         for (int k = 0; k < 3; ++k) {
@@ -718,7 +929,7 @@ void TestGMatrixSparse::matrix_operations(void)
     catch (std::exception &e) {
         test_try_failure(e);
     }
-    
+
     // Test matrix multiplication
 	GMatrixSparse test3 = m_test * m_test.transpose();
 
@@ -873,7 +1084,7 @@ void TestGMatrixSparse::matrix_arithmetics(void)
     test_assert(check_matrix(m_test), "Test source matrix");
     test_assert(check_matrix(test, 1.0, 3.0), "Test GMatrixSparse + 3.0",
                 "Unexpected result matrix:\n"+test.print());
-    
+
 	// GMatrixSparse - 5.0
 	test = m_test - 5.0;
     test_assert(check_matrix(m_test), "Test source matrix");
@@ -955,7 +1166,7 @@ void TestGMatrixSparse::matrix_functions(void)
     test_assert(check_matrix(test2, 1.0, 0.0), 
                 "Test GMatrixSparse(GMatrixSparse) constructor",
                 "Unexpected GMatrixSparse:\n"+test2.print());
-    
+
     // Return
     return;
 }
@@ -1251,7 +1462,7 @@ void TestGMatrixSparse::matrix_cholesky(void)
     GMatrixSparse ci_residuals  = ci_product - unit;
 	res = (ci_residuals.abs()).max();
     test_value(res, 0.0, 1.0e-15, "Test Cholesky inverter");
-            
+
 	// Test Cholesky inverter
     /*
 	chol_test_inv = chol_test.cholesky_invert();
@@ -1300,7 +1511,7 @@ void TestGMatrixSparse::matrix_print(void)
     reference.append(" 0, 3, 0, 0, 0\n");
     reference.append(" 2, 0, 4, 0, 8\n");
     reference.append(" 0, 0, 5, 6, 9");
- 
+
     // Test the print method
     std::string output = m_test.print();
     test_value(output, reference);
@@ -1340,7 +1551,7 @@ void TestGMatrixSparse::matrix_print(void)
     ref_big.append(" 27, 28, 29, 30, 31, 32, 33, ... 60, 61, 62, 63, 64, 65, 66\n");
     ref_big.append(" 28, 29, 30, 31, 32, 33, 34, ... 61, 62, 63, 64, 65, 66, 67\n");
     ref_big.append(" 29, 30, 31, 32, 33, 34, 35, ... 62, 63, 64, 65, 66, 67, 68");
- 
+
     // Test the print method
     output = big.print();
     test_value(output, ref_big);

@@ -1,7 +1,7 @@
 /***************************************************************************
  *          test_GMatrixSymmetric.hpp - Test symmetric matrix class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -51,6 +51,7 @@ public:
     virtual void                  set(void);
     virtual TestGMatrixSymmetric* clone(void) const;
     virtual std::string           classname(void) const { return "TestGMatrixSymmetric"; }
+    void                          empty(void);
     void                          alloc_matrix(void);
     void                          assign_values(void);
     void                          copy_matrix(void);
