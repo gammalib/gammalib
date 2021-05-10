@@ -502,7 +502,16 @@ GVector GObservation::model(const GModels& models,
         m_pars_with_gradients.reserve(models.size());
 
         // Check number of columns
-        if (gradient->columns() != models.npars()) {
+        int npars = (nevents > 0) ? models.npars() : 0;
+        if (gradient->columns() != npars) {
+            std::string msg = "Number of "+gammalib::str(gradient->columns())+
+                              " columns in gradient matrix differs from number "
+                              "of "+gammalib::str(npars)+" parameters in model "
+                              "container. Please specify compatible arguments.";
+            throw GException::invalid_argument(G_MODEL2, msg);
+        }
+        
+        if ((nevents > 0) && (gradient->columns() != models.npars())) {
             std::string msg = "Number of "+gammalib::str(gradient->columns())+
                               " columns in gradient matrix differs from number "
                               "of "+gammalib::str(models.npars())+" parameters "
@@ -540,9 +549,9 @@ GVector GObservation::model(const GModels& models,
                     values += mptr->eval(*this, NULL);
                 }
 
-                // ... otherwise evaluate model and gradients and add to
-                // model vector and gradient matrix
-                else {
+                // ... otherwise if there are events then evaluate model and
+                // gradients and add to model vector and gradient matrix
+                else if (nevents > 0) {
 
                     // Allocate gradient matrix
                     GMatrixSparse gradients(nevents, mptr->size());
