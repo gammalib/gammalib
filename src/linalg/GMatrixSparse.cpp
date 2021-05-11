@@ -2236,13 +2236,6 @@ int GMatrixSparse::stack_push_column(const double* values, const int* rows,
     }
     #endif
 
-    // Raise an exception if the matrix and vector dimensions are
-    // incompatible
-    if (rows[number-1] >= m_rows) {
-        throw GException::matrix_vector_mismatch(G_STACK_PUSH2, rows[number-1],
-                                                 m_rows, m_cols);
-    }
-
     // Initialise return value
     int remaining = number; 
 
@@ -2252,6 +2245,14 @@ int GMatrixSparse::stack_push_column(const double* values, const int* rows,
         // If the array is empty there is nothing to do
         if (!values || !rows || (number < 1)) {
             continue;
+        }
+
+        // Raise an exception if the matrix and vector dimensions are
+        // incompatible. This test needs to be done after the test on a
+        // positive number!
+        if (rows[number-1] >= m_rows) {
+            throw GException::matrix_vector_mismatch(G_STACK_PUSH2, rows[number-1],
+                                                     m_rows, m_cols);
         }
 
         // If there is no stack or the stack can not hold the requested 
