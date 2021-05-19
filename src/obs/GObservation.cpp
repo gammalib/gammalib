@@ -231,7 +231,7 @@ void GObservation::events(const GEvents& events)
  * @brief Compute likelihood function
  *
  * @param[in] models Models.
- * @param[in,out] gradient Pointer to gradients.
+ * @param[in,out] gradients Pointer to gradients.
  * @param[in,out] curvature Pointer to curvature matrix.
  * @param[in,out] npred Pointer to Npred value.
  * @return Likelihood.
@@ -241,7 +241,7 @@ void GObservation::events(const GEvents& events)
  * that are predicted by all models.
  ***************************************************************************/
 double GObservation::likelihood(const GModels& models,
-                                GVector*       gradient,
+                                GVector*       gradients,
                                 GMatrixSparse* curvature,
                                 double*        npred) const
 {
@@ -259,7 +259,7 @@ double GObservation::likelihood(const GModels& models,
 
             // Update the log-likelihood
             value = likelihood_poisson_unbinned(models,
-                                                gradient,
+                                                gradients,
                                                 curvature,
                                                 npred);
 
@@ -281,7 +281,7 @@ double GObservation::likelihood(const GModels& models,
         // Poisson statistic
         if ((statistic == "POISSON") || (statistic == "CSTAT")) {
             value = likelihood_poisson_binned(models,
-                                              gradient,
+                                              gradients,
                                               curvature,
                                               npred);
         }
@@ -289,7 +289,7 @@ double GObservation::likelihood(const GModels& models,
         // ... or Gaussian statistic
         else if ((statistic == "GAUSSIAN")  || (statistic == "CHI2")) {
             value = likelihood_gaussian_binned(models,
-                                               gradient,
+                                               gradients,
                                                curvature,
                                                npred);
         }
@@ -310,11 +310,11 @@ double GObservation::likelihood(const GModels& models,
 
 
 /***********************************************************************//**
- * @brief Return model value and (optionally) gradient
+ * @brief Return model value and (optionally) gradients
  *
  * @param[in] models Model container.
  * @param[in] event Observed event.
- * @param[out] gradient Pointer to gradient vector (optional).
+ * @param[out] gradients Pointer to gradient vector (optional).
  * @return Model value.
  *
  * @exception GException::invalid_value
@@ -332,7 +332,7 @@ double GObservation::likelihood(const GModels& models,
  ***************************************************************************/
 double GObservation::model(const GModels& models,
                            const GEvent&  event,
-                           GVector*       gradient) const
+                           GVector*       gradients) const
 {
     // Initialise method variables
     double model     = 0.0;    // Reset model value
@@ -340,15 +340,15 @@ double GObservation::model(const GModels& models,
     int    grad_size = 0;      // Reset gradient size
 
     // Set gradient usage flag
-    bool use_grad = (gradient != NULL);
+    bool use_grad = (gradients != NULL);
 
     // If gradient is available then reset gradient vector elements to 0
     // and determine vector size
     if (use_grad) {
 
         // Reset gradient vector
-        (*gradient) = 0.0;
-        grad_size   = gradient->size();
+        (*gradients) = 0.0;
+        grad_size    = gradients->size();
 
         // Initialise stack of parameters with gradients
         m_pars_with_gradients.clear();
@@ -380,7 +380,7 @@ double GObservation::model(const GModels& models,
                             "store the model parameter gradients. "+
                             gammalib::str(models.npars())+" elements "
                             "requested while vector only contains "+
-                            gammalib::str(gradient->size())+" elements.";
+                            gammalib::str(gradients->size())+" elements.";
                         throw GException::invalid_value(G_MODEL1, msg);
                     }
                     #endif
@@ -405,16 +405,16 @@ double GObservation::model(const GModels& models,
                             // Set gradient
                             if (par.is_free()) {
                                 if (has_gradient(*mptr, par)) {
-                                    (*gradient)[igrad+ipar] =
+                                    (*gradients)[igrad+ipar] =
                                         par.factor_gradient();
                                 }
                                 else {
-                                    (*gradient)[igrad+ipar] =
+                                    (*gradients)[igrad+ipar] =
                                         model_grad(*mptr, par, event);
                                 }
                             }
                             else {
-                                (*gradient)[igrad+ipar] = 0.0;
+                                (*gradients)[igrad+ipar] = 0.0;
                             }
 
                         } // endfor: looped over all parameter indices
@@ -433,16 +433,16 @@ double GObservation::model(const GModels& models,
                             // Set gradient
                             if (par.is_free()) {
                                 if (has_gradient(*mptr, par)) {
-                                    (*gradient)[igrad+ipar] =
+                                    (*gradients)[igrad+ipar] =
                                         par.factor_gradient();
                                 }
                                 else {
-                                    (*gradient)[igrad+ipar] =
+                                    (*gradients)[igrad+ipar] =
                                         model_grad(*mptr, par, event);
                                 }
                             }
                             else {
-                                (*gradient)[igrad+ipar] = 0.0;
+                                (*gradients)[igrad+ipar] = 0.0;
                             }
 
                         } // endfor: looped over all parameter indices
@@ -469,7 +469,7 @@ double GObservation::model(const GModels& models,
  * @brief Return vector of model values and (optionally) gradients
  *
  * @param[in] models Model container.
- * @param[out] gradient Pointer to sparse gradient matrix.
+ * @param[out] gradients Pointer to sparse gradient matrix.
  * @return Vector of model values.
  *
  * @exception GException::invalid_argument
@@ -477,17 +477,17 @@ double GObservation::model(const GModels& models,
  *
  * Returns the model values for each event in the observation.
  *
- * If @p gradient is not NULL, the matrix contains on output the model
- * factor gradients for all events. Each row of the @p gradient matrix
+ * If @p gradients is not NULL, the matrix contains on output the model
+ * factor gradients for all events. Each row of the @p gradients matrix
  * corresponds to one event, the columns correspond to the parameters
  * of the @p models container.
  ***************************************************************************/
 GVector GObservation::model(const GModels& models,
-                            GMatrixSparse* gradient) const
+                            GMatrixSparse* gradients) const
 {
     // Initialise variables
     int  nevents  = events()->size();
-    bool use_grad = (gradient != NULL);
+    bool use_grad = (gradients != NULL);
     int  igrad    = 0;
 
     // Initialise model values
@@ -502,35 +502,26 @@ GVector GObservation::model(const GModels& models,
         m_pars_with_gradients.reserve(models.size());
 
         // Check number of columns
-        int npars = (nevents > 0) ? models.npars() : 0;
-        if (gradient->columns() != npars) {
-            std::string msg = "Number of "+gammalib::str(gradient->columns())+
-                              " columns in gradient matrix differs from number "
-                              "of "+gammalib::str(npars)+" parameters in model "
-                              "container. Please specify compatible arguments.";
-            throw GException::invalid_argument(G_MODEL2, msg);
-        }
-        
-        if ((nevents > 0) && (gradient->columns() != models.npars())) {
-            std::string msg = "Number of "+gammalib::str(gradient->columns())+
-                              " columns in gradient matrix differs from number "
-                              "of "+gammalib::str(models.npars())+" parameters "
-                              "in model container. Please specify compatible "
-                              "arguments.";
+        int ncolumns = (nevents > 0) ? models.npars() : 0;
+        if (gradients->columns() != ncolumns) {
+            std::string msg = "Number of "+gammalib::str(gradients->columns())+" "
+                              "columns in gradient matrix differs from expected "
+                              "number of "+gammalib::str(ncolumns)+". Please "
+                              "specify compatible arguments.";
             throw GException::invalid_argument(G_MODEL2, msg);
         }
 
         // Check number of rows
-        if (gradient->rows() != nevents) {
-            std::string msg = "Number of "+gammalib::str(gradient->rows())+
-                              " rows in gradient matrix differs from number "
-                              "of "+gammalib::str(nevents)+" events "
-                              "in observation. Please specify compatible "
-                              "arguments.";
+        int nrows = (ncolumns > 0) ? nevents : 0;
+        if (gradients->rows() != nrows) {
+            std::string msg = "Number of "+gammalib::str(gradients->rows())+" "
+                              "rows in gradient matrix differs from expected "
+                              "number of "+gammalib::str(nrows)+". Please "
+                              "specify compatible arguments.";
             throw GException::invalid_argument(G_MODEL2, msg);
         }
 
-    } // endif: Gradient requested
+    } // endif: gradient was requested
 
     // Loop over models
     for (int i = 0; i < models.size(); ++i) {
@@ -554,16 +545,16 @@ GVector GObservation::model(const GModels& models,
                 else if (nevents > 0) {
 
                     // Allocate gradient matrix
-                    GMatrixSparse gradients(nevents, mptr->size());
+                    GMatrixSparse grads(nevents, mptr->size());
 
                     // Initialise sparse matrix stack
-                    gradients.stack_init(nevents*mptr->size(), mptr->size());
+                    grads.stack_init(nevents*mptr->size(), mptr->size());
 
                     // Evaluate model and add to values
-                    values += mptr->eval(*this, &gradients);
+                    values += mptr->eval(*this, &grads);
 
                     // Destroy sparse matrix stack (fills stack in matrix)
-                    gradients.stack_destroy();
+                    grads.stack_destroy();
 
                     // If model provides the parameter indices that were
                     // updated by the eval() method then use them as this
@@ -588,14 +579,14 @@ GVector GObservation::model(const GModels& models,
                                 // Determine gradient
                                 GVector grad(nevents);
                                 if (has_gradient(*mptr, par)) {
-                                    grad = gradients.column(ipar);
+                                    grad = grads.column(ipar);
                                 }
                                 else {
                                     grad = model_grad(*mptr, par);
                                 }
 
                                 // Set gradient
-                                gradient->column(igrad+ipar, grad);
+                                gradients->column(igrad+ipar, grad);
 
                             } // endif: parameter was free
 
@@ -618,7 +609,7 @@ GVector GObservation::model(const GModels& models,
                                 // Determine gradient
                                 GVector grad(nevents);
                                 if (has_gradient(*mptr, par)) {
-                                    grad = gradients.column(ipar);
+                                    grad = grads.column(ipar);
                                     #if defined(G_DEBUG_VECTOR_MODEL)
                                     if (ipar < 3) {
                                         GVector num_grad = model_grad(*mptr, par);
@@ -640,7 +631,7 @@ GVector GObservation::model(const GModels& models,
                                 }
 
                                 // Set gradient
-                                gradient->column(igrad+ipar, grad);
+                                gradients->column(igrad+ipar, grad);
 
                             } // endif: parameter was free
 
@@ -688,11 +679,11 @@ int GObservation::nobserved(void) const
 
 
 /***********************************************************************//**
- * @brief Return total number (and optionally gradient) of predicted counts
+ * @brief Return total number (and optionally gradients) of predicted counts
  *        for all models
  *
  * @param[in] models Models.
- * @param[out] gradient Model parameter gradients (optional).
+ * @param[out] gradients Model parameter gradients (optional).
  *
  * @exception GException::gradient_par_mismatch
  *            Dimension of gradient vector mismatches number of parameters.
@@ -705,14 +696,14 @@ int GObservation::nobserved(void) const
  * and observation identifiers matches those of the observation. Models that
  * do not match will be skipped.
  ***************************************************************************/
-double GObservation::npred(const GModels& models, GVector* gradient) const
+double GObservation::npred(const GModels& models, GVector* gradients) const
 {
     // Verify that gradient vector and models have the same dimension
     #if defined(G_RANGE_CHECK)
-    if (gradient != NULL) {
-        if (models.npars() != gradient->size()) {
+    if (gradients != NULL) {
+        if (models.npars() != gradients->size()) {
             throw GException::gradient_par_mismatch(G_NPRED,
-                                                    gradient->size(),
+                                                    gradients->size(),
                                                     models.npars());
         }
     }
@@ -723,8 +714,8 @@ double GObservation::npred(const GModels& models, GVector* gradient) const
     int    igrad = 0;      // Reset gradient counter
 
     // If gradient is available then reset gradient vector elements to 0
-    if (gradient != NULL) {
-        (*gradient) = 0.0;
+    if (gradients != NULL) {
+        (*gradients) = 0.0;
     }
 
     // Loop over models
@@ -742,10 +733,10 @@ double GObservation::npred(const GModels& models, GVector* gradient) const
                 npred += this->npred(*mptr);
 
                 // Optionally determine Npred gradients
-                if (gradient != NULL) {
+                if (gradients != NULL) {
                     for (int k = 0; k < mptr->size(); ++k) {
                         const GModelPar& par = (*mptr)[k];
-                        (*gradient)[igrad+k] = npred_grad(*mptr, par);
+                        (*gradients)[igrad+k] = npred_grad(*mptr, par);
                     }
                 }
 
@@ -1353,7 +1344,7 @@ void GObservation::free_members(void)
  *        unbinned analysis (version with working arrays)
  *
  * @param[in] models Models.
- * @param[in,out] gradient Gradient.
+ * @param[in,out] gradients Gradient.
  * @param[in,out] curvature Curvature matrix.
  * @param[in,out] npred Number of predicted events.
  * @return Likelihood value.
@@ -1375,7 +1366,7 @@ void GObservation::free_members(void)
  * \f$\delta^2 L/dp_1 dp_2\f$.
  ***************************************************************************/
 double GObservation::likelihood_poisson_unbinned(const GModels& models,
-                                                 GVector*       gradient,
+                                                 GVector*       gradients,
                                                  GMatrixSparse* curvature,
                                                  double*        npred) const
 {
@@ -1384,7 +1375,7 @@ double GObservation::likelihood_poisson_unbinned(const GModels& models,
 
     // Get number of events and parameters
     int nevents = events()->size();
-    int npars   = gradient->size();
+    int npars   = gradients->size();
 
     // Allocate some working arrays
     int*          inx    = new int[npars];
@@ -1395,10 +1386,10 @@ double GObservation::likelihood_poisson_unbinned(const GModels& models,
     // Determine Npred value and gradient for this observation
     double npred_value = this->npred(models, &wrk_grad);
 
-    // Update likelihood, Npred and gradient
-    value     += npred_value;
-    *npred    += npred_value;
-    *gradient += wrk_grad;
+    // Update likelihood, Npred and gradients
+    value      += npred_value;
+    *npred     += npred_value;
+    *gradients += wrk_grad;
 
     // Compute model and derivative
     GVector model_vector = this->model(models, &wrk_matrix);
@@ -1454,7 +1445,7 @@ double GObservation::likelihood_poisson_unbinned(const GModels& models,
             double       fa_i    = fa * g;
 
             // Update gradient.
-            (*gradient)[jpar] -= fb * g;
+            (*gradients)[jpar] -= fb * g;
 
             // Loop over rows
             register int* ipar = inx;
@@ -1484,7 +1475,7 @@ double GObservation::likelihood_poisson_unbinned(const GModels& models,
  *        binned analysis (version with working arrays)
  *
  * @param[in] models Models.
- * @param[in,out] gradient Gradient.
+ * @param[in,out] gradients Gradient.
  * @param[in,out] curvature Curvature matrix.
  * @param[in,out] npred Number of predicted events.
  * @return Likelihood value.
@@ -1506,7 +1497,7 @@ double GObservation::likelihood_poisson_unbinned(const GModels& models,
  * and also updates the total number of predicted events m_npred.
  ***************************************************************************/
 double GObservation::likelihood_poisson_binned(const GModels& models,
-                                               GVector*       gradient,
+                                               GVector*       gradients,
                                                GMatrixSparse* curvature,
                                                double*        npred) const
 {
@@ -1527,7 +1518,7 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
 
     // Get number of events and parameters
     int nevents = events()->size();
-    int npars   = gradient->size();
+    int npars   = gradients->size();
 
     // Allocate some working arrays
     int*          inx    = new int[npars];
@@ -1628,7 +1619,7 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
                 double       fa_i    = fa * g;
 
                 // Update gradient
-                (*gradient)[jpar] += fc * g;
+                (*gradients)[jpar] += fc * g;
 
                 // Loop over rows
                 register int* ipar = inx;
@@ -1663,7 +1654,7 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
             // Update gradient
             register int* ipar = inx;
             for (register int idev = 0; idev < ndev; ++idev, ++ipar) {
-                (*gradient)[*ipar] += wrk_grad[*ipar];
+                (*gradients)[*ipar] += wrk_grad[*ipar];
             }
 
         } // endif: data was 0
@@ -1697,7 +1688,7 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
  *        binned analysis (version with working arrays)
  *
  * @param[in] models Models.
- * @param[in,out] gradient Gradient.
+ * @param[in,out] gradients Gradient.
  * @param[in,out] curvature Curvature matrix.
  * @param[in,out] npred Number of predicted events.
  * @return Likelihood value.
@@ -1720,7 +1711,7 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
  * and also updates the total number of predicted events m_npred.
  ***************************************************************************/
 double GObservation::likelihood_gaussian_binned(const GModels& models,
-                                                GVector*       gradient,
+                                                GVector*       gradients,
                                                 GMatrixSparse* curvature,
                                                 double*        npred) const
 {
@@ -1729,7 +1720,7 @@ double GObservation::likelihood_gaussian_binned(const GModels& models,
 
     // Get number of events and parameters
     int nevents = events()->size();
-    int npars   = gradient->size();
+    int npars   = gradients->size();
 
     // Allocate some working arrays
     int*          inx    = new int[npars];
@@ -1810,7 +1801,7 @@ double GObservation::likelihood_gaussian_binned(const GModels& models,
             double       fa_i = wrk_grad[jpar] * weight;
 
             // Update gradient
-            (*gradient)[jpar] -= fa * fa_i;
+            (*gradients)[jpar] -= fa * fa_i;
 
             // Loop over rows
             register int* ipar = inx;

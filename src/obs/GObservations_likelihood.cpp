@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GObservations_likelihood.cpp - Likelihood function class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -206,12 +206,8 @@ void GObservations::likelihood::eval(const GOptimizerPars& pars)
     // Single loop for common exit point
     do {
 
-        // Get number of parameters for allocation of vectors and matrices.
-        // Make sure that this number is at least 1
+        // Get number of parameters for allocation of vectors and matrices
         int npars = pars.size();
-        if (npars < 1) {
-            npars = 1;
-        }
 
         // Free old memory
         if (m_gradient  != NULL) delete m_gradient;
@@ -419,7 +415,7 @@ GMatrixSparse GObservations::likelihood::hessian(const GOptimizerPars& pars)
 
     // Loop over parameters
     for (int i = 0; i < npars; ++i) {
-    
+
         // Get parameter
         GOptimizerPar* par = wrk_pars[i];
 
@@ -454,15 +450,15 @@ GMatrixSparse GObservations::likelihood::hessian(const GOptimizerPars& pars)
                 par->factor_value(xtf + d);
                 eval(wrk_pars);
                 fs1  = value();
-                
+
                 // Compute left-hand side
                 par->factor_value(xtf - d);
                 eval(wrk_pars);
                 fs2  = value();
-                
+
                 // Recover current value
                 par->factor_value(xtf);
-                
+
                 // Compute sag
                 sag = 0.5 * (fs1 + fs2 - 2.0*f);
 
@@ -473,7 +469,7 @@ GMatrixSparse GObservations::likelihood::hessian(const GOptimizerPars& pars)
 
                 // ... otherwise increase step size
                 d *= 10.0;
-                
+
             } // endfor
 
             // Save old step size and second derivative
@@ -502,7 +498,7 @@ GMatrixSparse GObservations::likelihood::hessian(const GOptimizerPars& pars)
                 d = dmin;
             }
             */
-            
+
             // Check if converged
             if (std::abs((d-dlast)/d) < step_tolerance) {
                 break;
@@ -532,11 +528,11 @@ GMatrixSparse GObservations::likelihood::hessian(const GOptimizerPars& pars)
 
     // Compute off-diagonal elements
     for (int i = 0; i < npars; ++i) {
-    
+
         // Get parameter 1
         GOptimizerPar* par1 = wrk_pars[i];
         double         x1   = par1->factor_value();
-        
+
         // Increment parameter 1
         par1->factor_value(x1 + dir[i]);
 
@@ -561,16 +557,16 @@ GMatrixSparse GObservations::likelihood::hessian(const GOptimizerPars& pars)
             eval(wrk_pars);
             double fs1     = value();
             double element = (fs1 + f - yy[i] - yy[j])/(dir[i]*dir[j]);
-            
+
             // Store Hessian element
             hessian(i,j) = element;
             hessian(j,i) = element;
 
             // Restore parameter 2
             par2->factor_value(x2);
-            
+
         } // endfor: looped over columns
-        
+
         // Restore parameter 1
         par1->factor_value(x1);
 

@@ -359,24 +359,28 @@ GVector GResponse::convolve(const GModelSky&    model,
 
     // Check matrix consistency
     if (grad) {
-        int ncols = (nevents > 0) ? npars : 0;
-        if (gradients->columns() != ncols) {
-            std::string msg = "Number of "+gammalib::str(gradients->columns())+
-                              " columns in gradient matrix differs from number "
-                              "of "+gammalib::str(ncols)+" parameters "
-                              "in model. Please provide a compatible gradient "
-                              "matrix.";
+
+        // Check number of columns
+        int ncolumns = (nevents > 0) ? npars : 0;
+        if (gradients->columns() != ncolumns) {
+            std::string msg = "Number of "+gammalib::str(gradients->columns())+" "
+                              "columns in gradient matrix differs from expected "
+                              "number of "+gammalib::str(ncolumns)+". Please "
+                              "specify compatible arguments.";
             throw GException::invalid_argument(G_CONVOLVE, msg);
         }
-        if (gradients->rows() != nevents) {
-            std::string msg = "Number of "+gammalib::str(gradients->rows())+
-                              " rows in gradient matrix differs from number "
-                              "of "+gammalib::str(nevents)+" events in "
-                              "observation. Please provide a compatible "
-                              "gradient matrix.";
+
+        // Check number of rows
+        int nrows = (ncolumns > 0) ? nevents : 0;
+        if (gradients->rows() != nrows) {
+            std::string msg = "Number of "+gammalib::str(gradients->rows())+" "
+                              "rows in gradient matrix differs from expected "
+                              "number of "+gammalib::str(nrows)+". Please "
+                              "specify compatible arguments.";
             throw GException::invalid_argument(G_CONVOLVE, msg);
         }
-    }
+
+    } // endif: gadient was requested
 
     // Initialise result
     GVector probs(nevents);

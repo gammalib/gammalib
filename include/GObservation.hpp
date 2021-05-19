@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GObservation.hpp - Abstract observation base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -97,17 +97,17 @@ public:
     virtual const GEvents*   events(void) const;
     virtual void             events(const GEvents& events);
     virtual double           likelihood(const GModels& models,
-                                        GVector*       gradient,
+                                        GVector*       gradients,
                                         GMatrixSparse* curvature,
                                         double*        npred) const;
     virtual double           model(const GModels& models,
                                    const GEvent&  event,
-                                   GVector*       gradient = NULL) const;
+                                   GVector*       gradients = NULL) const;
     virtual GVector          model(const GModels& models,
-                                   GMatrixSparse* gradient = NULL) const;
+                                   GMatrixSparse* gradients = NULL) const;
     virtual int              nobserved(void) const;
     virtual double           npred(const GModels& models,
-                                   GVector*       gradient = NULL) const;
+                                   GVector*       gradients = NULL) const;
     virtual double           npred(const GModel& model) const;
     virtual double           model_grad(const GModel&    model,
                                         const GModelPar& par,
@@ -139,15 +139,15 @@ protected:
 
     // Likelihood methods
     virtual double likelihood_poisson_unbinned(const GModels& models,
-                                               GVector*       gradient,
+                                               GVector*       gradients,
                                                GMatrixSparse* curvature,
                                                double*        npred) const;
     virtual double likelihood_poisson_binned(const GModels& models,
-                                             GVector*       gradient,
+                                             GVector*       gradients,
                                              GMatrixSparse* curvature,
                                              double*        npred) const;
     virtual double likelihood_gaussian_binned(const GModels& models,
-                                              GVector*       gradient,
+                                              GVector*       gradients,
                                               GMatrixSparse* curvature,
                                               double*        npred) const;
 
