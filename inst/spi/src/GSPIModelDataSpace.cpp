@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GSPIModelDataSpace.cpp - INTEGRAL/SPI data space model         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2020 by Juergen Knoedlseder                              *
+ *  copyright (C) 2020-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -755,7 +755,7 @@ void GSPIModelDataSpace::setup_model(const GObservation& obs) const
         if (cube != NULL) {
 
             // Continue only if the model index is valid
-            if (m_index >= 0 and m_index < cube->models()) {
+            if (m_index >= 0 && m_index < cube->models()) {
 
                 // Continue only if there is a method
                 if (!m_method.empty()) {
