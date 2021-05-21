@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GLATResponse.cpp - Fermi LAT response class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -43,7 +43,6 @@
 #include "GLATEventAtom.hpp"
 #include "GLATEventBin.hpp"
 #include "GLATEventCube.hpp"
-#include "GLATException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CALDB                           "GLATResponse::caldb(std::string&)"
@@ -53,6 +52,7 @@
 #define G_NROI            "GLATResponse::nroi(GModelSky&, GEnergy&, GTime&, "\
                                                              "GObservation&)"
 #define G_EBOUNDS                           "GLATResponse::ebounds(GEnergy&)"
+#define G_SAVE                             "GLATResponse::save(std::string&)"
 #define G_AEFF                                     "GLATResponse::aeff(int&)"
 #define G_PSF                                       "GLATResponse::psf(int&)"
 #define G_EDISP                                   "GLATResponse::edisp(int&)"
@@ -200,7 +200,7 @@ GLATResponse* GLATResponse::clone(void) const
  * @param[in] photon Incident photon.
  * @param[in] obs Observation.
  *
- * @exception GLATException::bad_instdir_type
+ * @exception GException::invalid_argument
  *            Instrument direction is not a valid LAT instrument direction.
  *
  * @todo The IRF value is not divided by ontime of the event, but it is
@@ -212,8 +212,14 @@ double GLATResponse::irf(const GEvent&       event,
 {
     // Get pointer to LAT instrument direction
     const GLATInstDir* dir = dynamic_cast<const GLATInstDir*>(&(event.dir()));
+
+    // If pointer is not valid then throw an exception
     if (dir == NULL) {
-        throw GLATException::bad_instdir_type(G_IRF);
+        std::string cls = std::string(typeid(&(event.dir())).name());
+        std::string msg = "Invalid instrument direction type \""+cls+
+                          "\" specified. Please specify a \"GLATInstDir\" "
+                          "instance as argument.";
+        throw GException::invalid_argument(G_IRF, msg);
     }
 
     // Get photon attributes
@@ -326,15 +332,14 @@ double GLATResponse::irf_spatial_atom(const GLATEventAtom& event,
  * @param[in] source Source.
  * @param[in] obs Observation.
  *
- * @exception GLATException::diffuse_not_found
+ * @exception GException::invalid_value
  *            Diffuse model not found.
  *
  * This method first searches for a corresponding source map, and if found,
  * computes the response from the source map. If no source map is present
  * it checks if the source is a point source. If this is the case a mean
  * PSF is allocated for the source and the response is computed from the
- * mean PSF. Otherwise an GLATException::diffuse_not_found exception is
- * thrown.
+ * mean PSF. Otherwise an GException::invalid_value exception is thrown.
  *
  * @todo Extract event cube from observation. We do not need the cube
  *       pointer in the event anymore.
@@ -484,7 +489,11 @@ double GLATResponse::irf_spatial_bin(const GLATEventBin& event,
 
     // ... otherwise throw an exception
     if ((idiff == -1) && ptsrc == NULL) {
-        throw GLATException::diffuse_not_found(G_IRF_BIN, source.name());
+        std::string msg = "No diffuse source with name \""+source.name()+
+                          "\" found and source is not a point source. So far "
+                          "the LAT module can only handle diffuse sources and "
+                          "point sources. Please adapt your model accordingly.";
+        throw GException::invalid_value(G_IRF_BIN, msg);
     }
 
     // Return IRF value
@@ -686,6 +695,10 @@ void GLATResponse::load(const std::string& rspname)
  ***************************************************************************/
 void GLATResponse::save(const std::string& rspname) const
 {
+    // Throw an exception
+    std::string msg = "Saving of LAT response not implemented.";
+    throw GException::feature_not_implemented(G_SAVE, msg);
+
     // Return
     return;
 }
@@ -713,14 +726,15 @@ GLATAeff* GLATResponse::aeff(const int& index) const
 /***********************************************************************//**
  * @brief Return pointer on point spread function
  *
- * @param[in] index Response index (starting from 0).
+ * @param[in] index Response index [0,...,m_psf.size()-1].
  ***************************************************************************/
 GLATPsf* GLATResponse::psf(const int& index) const
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= m_psf.size()) {
-        throw GException::out_of_range(G_PSF, index, 0, m_psf.size()-1);
+        throw GException::out_of_range(G_PSF, "Response index", index,
+                                       m_psf.size());
     }
     #endif
 
@@ -732,14 +746,15 @@ GLATPsf* GLATResponse::psf(const int& index) const
 /***********************************************************************//**
  * @brief Return pointer on energy dispersion
  *
- * @param[in] index Response index (starting from 0).
+ * @param[in] index Response index [0,...,m_edisp.size()-1].
  ***************************************************************************/
 GLATEdisp* GLATResponse::edisp(const int& index) const
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= m_edisp.size()) {
-        throw GException::out_of_range(G_EDISP, index, 0, m_edisp.size()-1);
+        throw GException::out_of_range(G_EDISP, "Response index", index,
+                                       m_edisp.size());
     }
     #endif
 

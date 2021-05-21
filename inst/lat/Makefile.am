@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for lat module                                                #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016-2018 Juergen Knoedlseder                               #
+# Copyright (C) 2016-2021 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -51,8 +51,7 @@ sources = src/GLATObservation.cpp \
           src/GLATInstDir.cpp \
           src/GLATRoi.cpp \
           src/GLATLtCube.cpp \
-          src/GLATLtCubeMap.cpp \
-          src/GLATException.cpp
+          src/GLATLtCubeMap.cpp
 
 # Define headers to be installed
 pkginclude_HEADERS = include/GLATLib.hpp \
@@ -74,8 +73,7 @@ pkginclude_HEADERS = include/GLATLib.hpp \
                      include/GLATInstDir.hpp \
                      include/GLATRoi.hpp \
                      include/GLATLtCube.hpp \
-                     include/GLATLtCubeMap.hpp \
-                     include/GLATException.hpp
+                     include/GLATLtCubeMap.hpp
 
 # CALDB to distribute
 caldb_indx  = caldb/data/glast/lat/caldb.indx.gz

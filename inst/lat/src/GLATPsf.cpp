@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATPsf.cpp - Fermi LAT point spread function              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,6 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GException.hpp"
 #include "GTools.hpp"
 #include "GFilename.hpp"
 #include "GFits.hpp"
@@ -36,7 +37,6 @@
 #include "GLATPsf.hpp"
 #include "GLATPsfV1.hpp"
 #include "GLATPsfV3.hpp"
-#include "GLATException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                                        "GLATPsf::read(GFits&)"
@@ -271,8 +271,8 @@ void GLATPsf::save(const GFilename& filename, const bool& clobber)
  * @param[in] fits FITS file.
  * @param[in] evtype Event type.
  *
- * @exception GException::invalid_response
- *            Invalid response type or unsupported response version found.
+ * @exception GException::invalid_value
+ *            Unsupported response version found.
  *
  * Reads the Fermi LAT point spread function from FITS file. The method
  * determines the PSF version from the information found in the FITS file
@@ -332,8 +332,10 @@ void GLATPsf::read(const GFits& fits, const std::string& evtype)
         m_psf = new GLATPsfV3;
         break;
     default:
-        throw GLATException::invalid_response(G_READ, 
-              "Unsupported response function version "+gammalib::str(version)+".");
+        std::string msg = "Unsupported response function version "+
+                          gammalib::str(version)+". Please specify either a "
+                          "version 1 or 3 point spread function.";
+        throw GException::invalid_value(G_READ, msg);
         break;
     }
 

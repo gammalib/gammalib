@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GLATEventList.cpp - Fermi/LAT event list class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,7 +38,6 @@
 #include "GFitsTableLongCol.hpp"
 #include "GFitsTableShortCol.hpp"
 #include "GLATEventList.hpp"
-#include "GLATException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_OPERATOR                          "GLATEventList::operator[](int&)"
@@ -358,25 +357,28 @@ void GLATEventList::write(GFits& file) const
 
 
 /***********************************************************************//**
- * @brief Set region of interest
+ * @brief Set Region of Interest
  *
- * @param[in] roi Region of interest.
+ * @param[in] roi Region of Interest.
  *
- * @exception GLATException::bad_roi_type
- *            ROI is not of type GLATRoi.
+ * @exception GException::invalid_argument
+ *            Region of Interest @p roi in not a LAT Region of Interest.
  ***************************************************************************/
 void GLATEventList::roi(const GRoi& roi)
 {
-    // Cast ROI dynamically
-    const GLATRoi* ptr = dynamic_cast<const GLATRoi*>(&roi);
+    // Cast RoI dynamically
+    const GLATRoi* latroi = dynamic_cast<const GLATRoi*>(&roi);
 
-    // Throw exception if ROI is not of correct type
-    if (ptr == NULL) {
-        throw GLATException::bad_roi_type(G_ROI);
+    // Throw exception if RoI is not of correct type
+    if (latroi == NULL) {
+        std::string cls = std::string(typeid(&roi).name());
+        std::string msg = "Invalid RoI type \""+cls+"\" specified. Please "
+                          "specify a \"GLATRoi\" instance as argument.";
+        throw GException::invalid_argument(G_ROI, msg);
     }
 
-    // Set ROI
-    m_roi = *ptr;
+    // Copy RoI
+    m_roi = *latroi;
 
     // Return
     return;

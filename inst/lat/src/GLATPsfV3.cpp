@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GLATPsfV3.cpp - Fermi/LAT point spread function version 3 class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,12 +28,12 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GLATPsfV3.hpp"
-#include "GLATException.hpp"
+#include "GException.hpp"
 #include "GMath.hpp"
 #include "GFitsBinTable.hpp"
 #include "GFitsTableFloatCol.hpp"
 #include "GIntegral.hpp"
+#include "GLATPsfV3.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                                 "GLATPsfV3::read(GFitsTable&)"
@@ -175,7 +175,7 @@ GLATPsfV3* GLATPsfV3::clone(void) const
  *
  * @param[in] table FITS table.
  *
- * @exception GLATException::inconsistent_response
+ * @exception GException::invalid_argument
  *            Inconsistent response table encountered
  *
  * Reads point spread function information from FITS HDU. In addition to the
@@ -224,28 +224,52 @@ void GLATPsfV3::read(const GFitsTable& table)
 
         // Check consistency of columns
         if (ncore->number() != size) {
-            throw GLATException::inconsistent_response(G_READ,
-                                                       ncore->number(), size);
+            std::string msg = "Number of elements in \"NCORE\" column ("+
+                              gammalib::str(ncore->number())+") is incompatible "
+                              "with the expected size ("+
+                              gammalib::str(size)+"). Please specify a valid "
+                              "point spread function table.";
+            throw GException::invalid_argument(G_READ, msg);
         }
         if (ntail->number() != size) {
-            throw GLATException::inconsistent_response(G_READ,
-                                                       ntail->number(), size);
+            std::string msg = "Number of elements in \"NTAIL\" column ("+
+                              gammalib::str(ntail->number())+") is incompatible "
+                              "with the expected size ("+
+                              gammalib::str(size)+"). Please specify a valid "
+                              "point spread function table.";
+            throw GException::invalid_argument(G_READ, msg);
         }
         if (score->number() != size) {
-            throw GLATException::inconsistent_response(G_READ,
-                                                       score->number(), size);
+            std::string msg = "Number of elements in \"SCORE\" column ("+
+                              gammalib::str(score->number())+") is incompatible "
+                              "with the expected size ("+
+                              gammalib::str(size)+"). Please specify a valid "
+                              "point spread function table.";
+            throw GException::invalid_argument(G_READ, msg);
         }
         if (stail->number() != size) {
-            throw GLATException::inconsistent_response(G_READ,
-                                                       stail->number(), size);
+            std::string msg = "Number of elements in \"STAIL\" column ("+
+                              gammalib::str(stail->number())+") is incompatible "
+                              "with the expected size ("+
+                              gammalib::str(size)+"). Please specify a valid "
+                              "point spread function table.";
+            throw GException::invalid_argument(G_READ, msg);
         }
         if (gcore->number() != size) {
-            throw GLATException::inconsistent_response(G_READ,
-                                                       gcore->number(), size);
+            std::string msg = "Number of elements in \"GCORE\" column ("+
+                              gammalib::str(gcore->number())+") is incompatible "
+                              "with the expected size ("+
+                              gammalib::str(size)+"). Please specify a valid "
+                              "point spread function table.";
+            throw GException::invalid_argument(G_READ, msg);
         }
         if (gtail->number() != size) {
-            throw GLATException::inconsistent_response(G_READ,
-                                                       gtail->number(), size);
+            std::string msg = "Number of elements in \"GTAIL\" column ("+
+                              gammalib::str(gtail->number())+") is incompatible "
+                              "with the expected size ("+
+                              gammalib::str(size)+"). Please specify a valid "
+                              "point spread function table.";
+            throw GException::invalid_argument(G_READ, msg);
         }
 
         // Copy data

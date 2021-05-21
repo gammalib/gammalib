@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GLATAeff.cpp - Fermi LAT effective area                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,7 +38,6 @@
 #include "GFitsTableCol.hpp"
 #include "GFitsTableFloatCol.hpp"
 #include "GLATAeff.hpp"
-#include "GLATException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ_AEFF                        "GLATAeff::read_aeff(GFitsTable&)"
@@ -554,7 +553,7 @@ void GLATAeff::free_members(void)
  *
  * @param[in] hdu FITS table.
  *
- * @exception GLATException::inconsistent_response
+ * @exception GException::invalid_argument
  *            Inconsistent response table encountered
  *
  * The effective area is converted into units of cm2.
@@ -583,7 +582,13 @@ void GLATAeff::read_aeff(const GFitsTable& hdu)
         // Check consistency of effective area table
         int num = ptr->number();
         if (num != size) {
-            throw GLATException::inconsistent_response(G_READ_AEFF, num, size);
+            std::string msg = "Number of elements in response table ("+
+                              gammalib::str(num)+") does not correspond to "
+                              "the expectation according to the number of "
+                              "energy and cos theta bins ("+gammalib::str(size)+
+                              "). Please specify a consistent effective area "
+                              "response.";
+            throw GException::invalid_argument(G_READ_AEFF, msg);
         }
 
         // Copy data and convert from m2 into cm2

@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GLATPsfBase.cpp - Abstract Fermi LAT point spread function base class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,11 +28,10 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GLATPsfBase.hpp"
-#include "GLATException.hpp"
 #include "GTools.hpp"
 #include "GFitsBinTable.hpp"
 #include "GFitsTableFloatCol.hpp"
+#include "GLATPsfBase.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ_SCALE                   "GLATPsfBase::read_scale(GFitsTable&)"

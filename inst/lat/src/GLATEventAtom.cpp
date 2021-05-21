@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GLATEventAtom.cpp - LAT event atom class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,9 +29,8 @@
 #include <config.h>
 #endif
 #include <string>
-#include "GLATEventAtom.hpp"
-#include "GLATException.hpp"
 #include "GTools.hpp"
+#include "GLATEventAtom.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 

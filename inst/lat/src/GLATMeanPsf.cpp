@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GLATMeanPsf.cpp - Fermi/LAT mean PSF class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,14 +29,14 @@
 #include <config.h>
 #endif
 #include <cmath>
-#include "GLATMeanPsf.hpp"
+#include "GException.hpp"
 #include "GTools.hpp"
 #include "GMath.hpp"
 #include "GLATAeff.hpp"
 #include "GLATPsf.hpp"
 #include "GLATObservation.hpp"
 #include "GLATEventCube.hpp"
-#include "GLATException.hpp"
+#include "GLATMeanPsf.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_SET                  "GLATMeanPsf::set(GSkyDir&, GLATObservation&)"
@@ -287,8 +287,8 @@ GLATMeanPsf* GLATMeanPsf::clone(void) const
  * @param[in] dir Source location.
  * @param[in] obs LAT observation.
  *
- * @exception GLATException::no_ltcube
- *            Livetime cube has not been defined.
+ * @exception GException::invalid_argument
+ *            No livetime cube found in observation.
  *
  * Computes the mean PSF and the energy dependent exposure for a source at
  * a given sky location. The PSF is computed for all bin boundaries of the
@@ -308,7 +308,10 @@ void GLATMeanPsf::set(const GSkyDir& dir, const GLATObservation& obs)
     // Get pointer on livetime cube
     const GLATLtCube* ltcube = obs.ltcube();
     if (ltcube == NULL) {
-        throw GLATException::no_ltcube(G_SET);
+        std::string msg = "Observation does not contain a livetime cube. "
+                          "Please specify an observation containing a livetime "
+                          "cube.";
+        throw GException::invalid_argument(G_SET, msg);
     }
     
     // Get energy boundaries

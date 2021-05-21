@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  test_LAT.cpp - test Fermi/LAT classes                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -359,12 +359,15 @@ void TestGLATResponse::test_one_response(const std::string& irf)
         test_try_failure(e);
     }
 
-    // Try saving the response
+    // Try saving the response (not implemented)
     test_try("Test saving the response");
     try {
         GLATResponse rsp;
         rsp.load(irf);
         rsp.save(fitsfile);
+        test_try_failure();
+    }
+    catch (GException::feature_not_implemented &e) {
         test_try_success();
     }
     catch (std::exception &e) {

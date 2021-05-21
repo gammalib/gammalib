@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATEdisp.hpp  -  Fermi LAT energy dispersion              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -91,7 +91,7 @@ private:
     void init_members(void);
     void copy_members(const GLATEdisp& edisp);
     void free_members(void);
-    void read_edisp(const GFitsTable& hdu);
+    void read_edisp(const GFitsTable& table);
     void write_edisp(GFits& file) const;
     
     // Protected members

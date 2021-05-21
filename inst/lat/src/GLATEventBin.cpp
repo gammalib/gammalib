@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATEventBin.cpp - Fermi/LAT event bin class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,9 +30,9 @@
 #endif
 #include <string>
 #include <cmath>
-#include "GLATEventBin.hpp"
-#include "GLATException.hpp"
+#include "GException.hpp"
 #include "GTools.hpp"
+#include "GLATEventBin.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_DIR                                           "GLATEventBin::dir()"
@@ -201,8 +201,8 @@ double GLATEventBin::size(void) const
  *
  * @return Instrument direction of event bin.
  *
- * @exception GLATException::no_member
- *            Invalid instrument direction pointer.
+ * @exception GException::invalid_value
+ *            Invalid instrument direction pointer encountered.
  *
  * Returns reference to the instrument direction of the event bin.
  ***************************************************************************/
@@ -210,8 +210,9 @@ const GLATInstDir& GLATEventBin::dir(void) const
 {
     // Throw an exception if instrument direction pointer is not valid
     if (m_dir == NULL) {
-        throw GLATException::no_member(G_DIR,
-                                       "Invalid instrument direction pointer.");
+        std::string msg = "Invalid instrument direction pointer encountered. "
+                          "Please set up the event bin correctly.";
+        throw GException::invalid_value(G_DIR, msg);
     }
 
     // Return instrument direction
@@ -224,8 +225,8 @@ const GLATInstDir& GLATEventBin::dir(void) const
  *
  * @return Energy of event bin.
  *
- * @exception GLATException::no_member
- *            Invalid energy pointer.
+ * @exception GException::invalid_value
+ *            Invalid energy pointer encountered.
  *
  * Returns reference to the energy of the event bin.
  ***************************************************************************/
@@ -233,8 +234,9 @@ const GEnergy& GLATEventBin::energy(void) const
 {
     // Throw an exception if energy pointer is not valid
     if (m_energy == NULL) {
-        throw GLATException::no_member(G_ENERGY,
-                                       "Invalid energy pointer.");
+        std::string msg = "Invalid energy pointer encountered. Please set up "
+                          "the event bin correctly.";
+        throw GException::invalid_value(G_ENERGY, msg);
     }
 
     // Return energy
@@ -247,8 +249,8 @@ const GEnergy& GLATEventBin::energy(void) const
  *
  * @return Time of event bin.
  *
- * @exception GLATException::no_member
- *            Invalid time pointer.
+ * @exception GException::invalid_value
+ *            Invalid time pointer encountered.
  *
  * Returns reference to the time of the event bin.
  ***************************************************************************/
@@ -256,8 +258,9 @@ const GTime& GLATEventBin::time(void) const
 {
     // Throw an exception if time pointer is not valid
     if (m_time == NULL) {
-        throw GLATException::no_member(G_TIME,
-                                       "Invalid time pointer.");
+        std::string msg = "Invalid time pointer encountered. Please set up "
+                          "the event bin correctly.";
+        throw GException::invalid_value(G_TIME, msg);
     }
 
     // Return time
@@ -279,8 +282,9 @@ double GLATEventBin::counts(void) const
 {
     // Throw an exception if counts pointer is not valid
     if (m_counts == NULL) {
-        throw GLATException::no_member(G_COUNTS_GET,
-                                       "Invalid counts pointer.");
+        std::string msg = "Invalid counts pointer encountered. Please set up "
+                          "the event bin correctly.";
+        throw GException::invalid_value(G_COUNTS_GET, msg);
     }
 
     // Return counts
@@ -293,8 +297,8 @@ double GLATEventBin::counts(void) const
  *
  * @param[in] counts Number of counts.
  *
- * @exception GLATException::no_member
- *            Invalid counts pointer.
+ * @exception GException::invalid_value
+ *            Invalid counts pointer encountered.
  *
  * Set the number of counts in the event bin.
  ***************************************************************************/
@@ -302,8 +306,9 @@ void GLATEventBin::counts(const double& counts)
 {
     // Throw an exception if counts pointer is not valid
     if (m_counts == NULL) {
-        throw GLATException::no_member(G_COUNTS_SET,
-                                       "Invalid counts pointer.");
+        std::string msg = "Invalid counts pointer encountered. Please set up "
+                          "the event bin correctly.";
+        throw GException::invalid_value(G_COUNTS_SET, msg);
     }
 
     // Set number of counts in event bin
@@ -342,8 +347,8 @@ double GLATEventBin::error(void) const
  *
  * @return Solid angle of event bin.
  *
- * @exception GLATException::no_member
- *            Invalid solid angle pointer.
+ * @exception GException::invalid_value
+ *            Invalid solid angle pointer encountered.
  *
  * Returns reference to the solid angle of the event bin.
  ***************************************************************************/
@@ -351,8 +356,9 @@ const double& GLATEventBin::solidangle(void) const
 {
     // Throw an exception if solid angle pointer is not valid
     if (m_solidangle == NULL) {
-        throw GLATException::no_member(G_SOLIDANGLE,
-                                       "Invalid solid angle pointer.");
+        std::string msg = "Invalid solid angle pointer encountered. Please "
+                          "set up the event bin correctly.";
+        throw GException::invalid_value(G_SOLIDANGLE, msg);
     }
 
     // Return solid angle
@@ -365,8 +371,8 @@ const double& GLATEventBin::solidangle(void) const
  *
  * @return Energy width of event bin.
  *
- * @exception GLATException::no_member
- *            Invalid energy width pointer.
+ * @exception GException::invalid_value
+ *            Invalid energy width pointer encountered.
  *
  * Returns reference to the energy width of the event bin.
  ***************************************************************************/
@@ -374,8 +380,9 @@ const GEnergy& GLATEventBin::ewidth(void) const
 {
     // Throw an exception if energy width pointer is not valid
     if (m_ewidth == NULL) {
-        throw GLATException::no_member(G_EWIDTH,
-                                       "Invalid energy width pointer.");
+        std::string msg = "Invalid energy width pointer encountered. Please "
+                          "set up the event bin correctly.";
+        throw GException::invalid_value(G_EWIDTH, msg);
     }
 
     // Return energy width
@@ -388,8 +395,8 @@ const GEnergy& GLATEventBin::ewidth(void) const
  *
  * @return Ontime of event bin.
  *
- * @exception GLATException::no_member
- *            Invalid ontime pointer.
+ * @exception GException::invalid_value
+ *            Invalid ontime pointer encountered.
  *
  * Returns reference to the ontime of the event bin.
  ***************************************************************************/
@@ -397,8 +404,9 @@ const double& GLATEventBin::ontime(void) const
 {
     // Throw an exception if ontime pointer is not valid
     if (m_ontime == NULL) {
-        throw GLATException::no_member(G_ONTIME,
-                                       "Invalid ontime pointer.");
+        std::string msg = "Invalid ontime pointer encountered. Please set up "
+                          "the event bin correctly.";
+        throw GException::invalid_value(G_ONTIME, msg);
     }
 
     // Return ontime
@@ -409,7 +417,7 @@ const double& GLATEventBin::ontime(void) const
 /***********************************************************************//**
  * @brief Print event information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing number of counts in event bin.
  ***************************************************************************/
 std::string GLATEventBin::print(const GChatter& chatter) const

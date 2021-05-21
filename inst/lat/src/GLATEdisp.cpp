@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GLATEdisp.cpp - Fermi LAT energy dispersion               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,6 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GException.hpp"
 #include "GTools.hpp"
 #include "GFilename.hpp"
 #include "GFits.hpp"
@@ -35,7 +36,6 @@
 #include "GFitsBinTable.hpp"
 #include "GFitsTableFloatCol.hpp"
 #include "GLATEdisp.hpp"
-#include "GLATException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                                      "GLATEdisp::read(GFits&)"
@@ -371,19 +371,21 @@ void GLATEdisp::free_members(void)
 /***********************************************************************//**
  * @brief Read energy dispersion from FITS table
  *
- * @param[in] hdu FITS table pointer.
+ * @param[in] table FITS table.
  *
- * @exception GLATException::inconsistent_response
+ * @exception GException::invalid_argument
  *            Inconsistent response table encountered
+ *
+ * @todo Implement reading of energy dispersion table
  ***************************************************************************/
-void GLATEdisp::read_edisp(const GFitsTable& hdu)
+void GLATEdisp::read_edisp(const GFitsTable& table)
 {
     // Clear arrays
     m_norm.clear();
     m_ls1.clear();
 
     // Get energy and cos theta binning
-    m_edisp_bins.read(hdu);
+    m_edisp_bins.read(table);
 
     // Continue only if there are bins
     int size = m_edisp_bins.size();
@@ -394,17 +396,25 @@ void GLATEdisp::read_edisp(const GFitsTable& hdu)
         m_ls1.reserve(size);
 
         // Get pointer to columns
-        const GFitsTableCol* norm = hdu["NORM"];
-        const GFitsTableCol* ls1  = hdu["LS1"];
+        const GFitsTableCol* norm = table["NORM"];
+        const GFitsTableCol* ls1  = table["LS1"];
 
         // Check consistency of columns
         if (norm->number() != size) {
-            throw GLATException::inconsistent_response(G_READ_EDISP,
-                                                       norm->number(), size);
+            std::string msg = "Number of elements in \"NORM\" column ("+
+                              gammalib::str(norm->number())+") is incompatible "
+                              "with the expected size ("+
+                              gammalib::str(size)+"). Please specify a valid "
+                              "point spread function table.";
+            throw GException::invalid_argument(G_READ, msg);
         }
         if (ls1->number() != size) {
-            throw GLATException::inconsistent_response(G_READ_EDISP,
-                                                       ls1->number(), size);
+            std::string msg = "Number of elements in \"LS1\" column ("+
+                              gammalib::str(ls1->number())+") is incompatible "
+                              "with the expected size ("+
+                              gammalib::str(size)+"). Please specify a valid "
+                              "point spread function table.";
+            throw GException::invalid_argument(G_READ, msg);
         }
 
         // Copy data

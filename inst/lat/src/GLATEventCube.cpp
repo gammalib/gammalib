@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GLATEventCube.cpp - Fermi/LAT event cube class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,12 +28,12 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GException.hpp"
 #include "GTools.hpp"
 #include "GFilename.hpp"
 #include "GFitsImage.hpp"
 #include "GFitsTable.hpp"
 #include "GLATEventCube.hpp"
-#include "GLATException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_NAXIS                                   "GLATEventCube::naxis(int)"
@@ -280,7 +280,8 @@ int GLATEventCube::naxis(const int& axis) const
     // Optionally check if the axis is valid
     #if defined(G_RANGE_CHECK)
     if (axis < 0 || axis >= dim()) {
-        throw GException::out_of_range(G_NAXIS, "LAT event cube axis", axis, dim());
+        throw GException::out_of_range(G_NAXIS, "LAT event cube axis",
+                                       axis, dim());
     }
     #endif
 
@@ -486,7 +487,7 @@ void GLATEventCube::map(const GSkyMap& map)
 /***********************************************************************//**
  * @brief Print event cube information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing event cube information.
  ***************************************************************************/
 std::string GLATEventCube::print(const GChatter& chatter) const
@@ -578,7 +579,8 @@ std::string GLATEventCube::diffname(const int& index) const
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= ndiffrsp()) {
-        throw GException::out_of_range(G_DIFFNAME, index, 0, ndiffrsp()-1);
+        throw GException::out_of_range(G_DIFFNAME, "Diffuse model index",
+                                       index, ndiffrsp());
     }
     #endif
 
@@ -603,7 +605,8 @@ GSkyMap* GLATEventCube::diffrsp(const int& index) const
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= ndiffrsp()) {
-        throw GException::out_of_range(G_DIFFRSP, index, 0, ndiffrsp()-1);
+        throw GException::out_of_range(G_DIFFRSP, "Diffuse model index",
+                                       index, ndiffrsp());
     }
     #endif
 
@@ -786,8 +789,8 @@ void GLATEventCube::read_cntmap(const GFitsImage& hdu)
  *
  * @param[in] hdu Image HDU.
  *
- * @exception GLATException::wcs_incompatible
- *            Source map not compatible with sky map
+ * @exception GException::invalid_argument
+ *            Source map in @p hdu is not compatible with event cube.
  *
  * This method reads a LAT source map from a FITS image. The source map is
  * stored in a GSkyMap object and is given in units of counts/pixel/MeV.
@@ -803,19 +806,34 @@ void GLATEventCube::read_srcmap(const GFitsImage& hdu)
     // Check that source map sky projection is consistent with counts
     // map sky projection
     if (*(m_map.projection()) != *(map->projection())) {
-        throw GLATException::wcs_incompatible(G_READ_SRCMAP, hdu.extname());
+        std::string msg = "Specified source map projection in HDU \""+
+                          hdu.extname()+"\" is incompatible with map projection "
+                          "of the event cube. Please specify a compatible "
+                          "map projection.";
+        throw GException::invalid_argument(G_READ_SRCMAP, msg);
     }
 
     // Check that source map dimension is consistent with counts map
     // dimension
     if (m_map.nx() != map->nx() ||
         m_map.ny() != map->ny()) {
-        throw GLATException::wcs_incompatible(G_READ_SRCMAP, hdu.extname());
+        std::string msg = "Number of pixels ("+gammalib::str(map->nx())+","+
+                          gammalib::str(map->ny())+") in source map in HDU \""+
+                          hdu.extname()+"\" is not compatible with number of "
+                          "pixels ("+gammalib::str(m_map.nx())+","+
+                          gammalib::str(m_map.ny())+") in the event cube. "
+                          "Please specify a source map of compatible size.";
+        throw GException::invalid_argument(G_READ_SRCMAP, msg);
     }
 
     // Check that source map has required number of energy bins
     if (m_map.nmaps()+1 != map->nmaps()) {
-        throw GLATException::wcs_incompatible(G_READ_SRCMAP, hdu.extname());
+        std::string msg = "Number of maps ("+gammalib::str(map->nmaps())+")"+
+                          " in source map in HDU \""+hdu.extname()+"\" is not "
+                          "compatible with number of energy bin boundaries ("+
+                          gammalib::str(m_map.nmaps()+1)+") of the event cube. "
+                          "Please specify a source map of compatible size.";
+        throw GException::invalid_argument(G_READ_SRCMAP, msg);
     }
 
     // Append source map to list of maps
@@ -897,7 +915,7 @@ void GLATEventCube::read_gti(const GFitsTable& hdu)
 /***********************************************************************//**
  * @brief Set sky directions and solid angles of events cube.
  *
- * @exception GLATException::no_sky
+ * @exception GException::invalid_value
  *            No sky pixels found in event cube.
  *
  * This method computes the sky directions and solid angles for all event
@@ -906,10 +924,11 @@ void GLATEventCube::read_gti(const GFitsTable& hdu)
  ***************************************************************************/
 void GLATEventCube::set_directions(void)
 {
-    // Throw an error if we have no sky pixels
+    // Throw an exception if we have no sky pixels
     if (npix() < 1) {
-        throw GLATException::no_sky(G_SET_DIRECTIONS, "Every LAT event cube"
-                                   " needs a definition of the sky pixels.");
+        std::string msg = "LAT event cube contains no sky pixels. Please "
+                          "provide a valid LAT event cube.";
+        throw GException::invalid_value(G_SET_DIRECTIONS, msg);
     }
 
     // Clear old pixel directions and solid angle
@@ -937,7 +956,7 @@ void GLATEventCube::set_directions(void)
 /***********************************************************************//**
  * @brief Set log mean energies and energy widths of event cube.
  *
- * @exception GLATException::no_ebds
+ * @exception GException::invalid_value
  *            No energy boundaries found in event cube.
  *
  * This method computes the log mean energies and the energy widths of the
@@ -948,8 +967,9 @@ void GLATEventCube::set_energies(void)
 {
     // Throw an error if we have no energy bins
     if (ebins() < 1) {
-        throw GLATException::no_ebds(G_SET_ENERGIES, "Every LAT event cube"
-                             " needs a definition of the energy boundaries.");
+        std::string msg = "LAT event cube contains no energy bins. Please "
+                          "provide a valid LAT event cube.";
+        throw GException::invalid_value(G_SET_ENERGIES, msg);
     }
 
     // Clear old bin energies and energy widths
@@ -1016,9 +1036,8 @@ void GLATEventCube::set_times(void)
  *
  * @exception GException::out_of_range
  *            Event index is outside valid range.
- * @exception GLATException::no_energies
+ * @exception GException::invalid_value
  *            Energy vectors have not been set up.
- * @exception GLATException::no_dirs
  *            Sky directions and solid angles vectors have not been set up.
  *
  * This method provides the event attributes to the event bin. The event bin
@@ -1038,12 +1057,24 @@ void GLATEventCube::set_bin(const int& index)
 
     // Check for the existence of energies and energy widths
     if (m_energies.size() != ebins() || m_ewidth.size() != ebins()) {
-        throw GLATException::no_energies(G_SET_BIN);
+        std::string msg = "Number of energy bins ("+gammalib::str(ebins())+
+                          ") is incompatible with size of energies ("+
+                          gammalib::str(m_energies.size())+") an/or size of "
+                          "energy widths ("+gammalib::str(m_ewidth.size())+
+                          "). Please provide an correctly initialised event "
+                          "cube.";
+        throw GException::invalid_value(G_SET_BIN, msg);
     }
 
     // Check for the existence of sky directions and solid angles
     if (m_dirs.size() != npix() || m_solidangle.size() != npix()) {
-        throw GLATException::no_dirs(G_SET_BIN);
+        std::string msg = "Number of sky pixels ("+gammalib::str(npix())+
+                          ") is incompatible with size of sky directions ("+
+                          gammalib::str(m_dirs.size())+") and/or size of "
+                          "solid angles ("+gammalib::str(m_solidangle.size())+
+                          "). Please provide an correctly initialised event "
+                          "cube.";
+        throw GException::invalid_value(G_SET_BIN, msg);
     }
 
     // Get pixel and energy bin indices.

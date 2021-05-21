@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GLATObservation.cpp - Fermi LAT observation class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -34,7 +34,6 @@
 #include "GLATEventList.hpp"
 #include "GLATEventCube.hpp"
 #include "GLATRoi.hpp"
-#include "GLATException.hpp"
 #include "GFits.hpp"
 #include "GTools.hpp"
 #include "GEnergy.hpp"
@@ -202,8 +201,8 @@ GLATObservation* GLATObservation::clone(void) const
  *
  * @param[in] rsp Response function.
  *
- * @exception GLATException::bad_response_type
- *            Specified response in not of type GLATResponse.
+ * @exception GException::invalid_argument
+ *            Response @p rsp in not a LAT response.
  *
  * Sets the response function for the observation. The argument has to be of
  * type GLATResponse, otherwise an exception is thrown.
@@ -212,8 +211,14 @@ void GLATObservation::response(const GResponse& rsp)
 {
     // Get pointer on LAT response
     const GLATResponse* latrsp = dynamic_cast<const GLATResponse*>(&rsp);
+    
+    // If pointer is not valid then throw an exception
     if (latrsp == NULL) {
-        throw GLATException::bad_response_type(G_RESPONSE);
+        std::string cls = std::string(typeid(&rsp).name());
+        std::string msg = "Invalid response type \""+cls+"\" specified. "
+                          "Please specify a \"GLATResponse\" instance as "
+                          "argument.";
+        throw GException::invalid_argument(G_RESPONSE, msg);
     }
 
     // Copy response function

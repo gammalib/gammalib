@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GLATLib.hpp - Fermi/LAT Support Header files             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,11 +33,11 @@
 /* __ Fermi/LAT specific headers _________________________________________ */
 #include "GLATAeff.hpp"
 #include "GLATEdisp.hpp"
+#include "GLATEfficiency.hpp"
 #include "GLATEventAtom.hpp"
 #include "GLATEventBin.hpp"
 #include "GLATEventCube.hpp"
 #include "GLATEventList.hpp"
-#include "GLATException.hpp"
 #include "GLATInstDir.hpp"
 #include "GLATLtCube.hpp"
 #include "GLATLtCubeMap.hpp"
