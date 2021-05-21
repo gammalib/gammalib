@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for mwl module                                                #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016-2018 Juergen Knoedlseder                               #
+# Copyright (C) 2016-2021 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -33,16 +33,14 @@ INCLUDES = -I$(top_srcdir)/include \
            -I$(top_srcdir)/inst/mwl/include
 
 # Define sources for this directory
-sources = src/GMWLException.cpp \
-          src/GMWLObservation.cpp \
+sources = src/GMWLObservation.cpp \
           src/GMWLSpectrum.cpp \
           src/GMWLDatum.cpp \
           src/GMWLInstDir.cpp \
           src/GMWLResponse.cpp
 
 # Define headers to be installed
-pkginclude_HEADERS = include/GMWLException.hpp \
-                     include/GMWLObservation.hpp \
+pkginclude_HEADERS = include/GMWLObservation.hpp \
                      include/GMWLSpectrum.hpp \
                      include/GMWLDatum.hpp \
                      include/GMWLInstDir.hpp \

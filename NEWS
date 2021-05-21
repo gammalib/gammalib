@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-10 May 2021
+21 May 2021
 
 
 1. Introduction
@@ -24,7 +24,8 @@ The following classes have been added:
 - GCTABackground2D
 
 The following classes have been removed:
-- none
+- GMWLExceptionHandler
+- GMWLException
 
 The following classes have been renamed:
 - none

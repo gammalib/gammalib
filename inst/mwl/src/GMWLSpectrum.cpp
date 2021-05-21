@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GMWLSpectrum.cpp - Multi-wavelength spectrum class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -34,7 +34,6 @@
 #include "GFitsTable.hpp"
 #include "GEnergy.hpp"
 #include "GException.hpp"
-#include "GMWLException.hpp"
 #include "GMWLSpectrum.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -349,8 +348,8 @@ void GMWLSpectrum::read(const GFits& fits, const std::string& extname)
  * @param[in] fits FITS file.
  * @param[in] extno Extension number of spectrum.
  *
- * @exception GMWLException::file_open_error
- *            No table found in file.
+ * @exception GException::invalid_argument
+ *            No table found in FITS file.
  *
  * Read the spectrum from a FITS table found in the specified extension.
  * In no extension number if specified (or if extno=0) then the spectrum
@@ -377,8 +376,10 @@ void GMWLSpectrum::read(const GFits& fits, const int& extno)
 
     // If we found no table then throw an exception
     if (extension == 0) {
-        throw GMWLException::file_open_error(G_READ, fits.filename().url(),
-                                             "No table found in file.");
+        std::string msg = "No table found in file \""+fits.filename().url()+
+                          "\". Please specify a FITS object containing a "
+                          "table.";
+        throw GException::invalid_argument(G_READ, msg);
     }
 
     // Get table pointer
@@ -568,8 +569,8 @@ void GMWLSpectrum::set_ebounds(void)
  *
  * @param[in] table FITS table.
  *
- * @exception GMWLException::bad_file_format
- *            Table has invalid format
+ * @exception GException::invalid_argument
+ *            Table does not contain at least two columns.
  *
  * Read spectrum from FITS table. The table is expected to be in one of the
  * three following formats:
@@ -608,9 +609,11 @@ void GMWLSpectrum::read_fits(const GFitsTable& table)
         c_flux_err   = table[3];
     }
     else {
-        throw GMWLException::bad_file_format(G_READ_FITS,
-                             "At least 2 columns are expected is table \""+
-                              table.extname()+"\".");
+        std::string msg = "At least 2 columns are expected in FITS table \""+
+                          table.extname()+"\"but found "+
+                          gammalib::str(table.ncols())+" columns. Please "
+                          "specify a FITS table with at least two columns.";
+        throw GException::invalid_argument(G_READ_FITS, msg);
     }
 
     // Read spectral points and add to spectrum
@@ -682,8 +685,8 @@ GEnergy GMWLSpectrum::conv_energy(const double& energy, const std::string& unit)
  * @param[in] flux Flux value.
  * @param[in] unit Unit of value.
  *
- * @exception GMWLException::invalid_unit
- *            Invalid unit string encountered
+ * @exception GException::invalid_argument
+ *            Invalid @p unit encountered.
  *
  * Converts a flux value into units of ph/cm2/s/MeV based on the specified
  * units. The following units are supported (case insensitive):
@@ -709,7 +712,10 @@ double GMWLSpectrum::conv_flux(const GEnergy& energy, const double& flux,
 
     // ... otherwise throw exception
     else {
-        throw GMWLException::invalid_unit(G_CONV_FLUX, unit);
+        std::string msg = "Unit \""+unit+"\" not recognised. Please specify "
+                          "one of \"PH/CM2/S/MEV\", \"PH/S/CM2/MEV\", "
+                          "\"ERG/CM2/S\" or \"ERG/S/CM2\".";
+        throw GException::invalid_argument(G_CONV_FLUX, msg);
     }
 
     // Return energy

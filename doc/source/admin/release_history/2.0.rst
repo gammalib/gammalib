@@ -1,7 +1,7 @@
 .. _2.0:
 
-GammaLib 2.0 release (8 May 2021)
-=================================
+GammaLib 2.0 release (21 May 2021)
+==================================
 
 Overview
 --------
@@ -120,3 +120,5 @@ Clean up
   Store DRB, DRG and DRX as instances of ``GCOMDri`` instead of ``GSkyMap`` in ``GCOMObservation``
 * [`2973 <https://cta-redmine.irap.omp.eu/issues/2973>`_] -
   Remove COMPTEL internal response caching
+* [`35 <https://cta-redmine.irap.omp.eu/issues/35>`_] -
+  Replace specific by generic exceptions

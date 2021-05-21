@@ -1,4 +1,4 @@
-2021-05-10
+2021-05-21
 
         * Version 2.0.0 released
         ========================
@@ -53,6 +53,7 @@
         Add GSkyMap::flux(GRegion(s)) and GSkyMap::solidangle(GRegion(s)) methods (#1785)
         Reimplement GModelSpatial::flux() method for diffuse and combined models (#1785)
         Implement pre-computation cache in GModelSpatialGauss (#1300)
+        Replace specific by generic exceptions (#35)
 
 
 2021-04-28

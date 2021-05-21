@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GMWLObservation.cpp - Multi-wavelength observation class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -34,7 +34,6 @@
 #include "GException.hpp"
 #include "GMWLObservation.hpp"
 #include "GMWLSpectrum.hpp"
-#include "GMWLException.hpp"
 
 /* __ Globals ____________________________________________________________ */
 const GMWLObservation      g_obs_mwl_seed;
@@ -205,8 +204,8 @@ GMWLObservation* GMWLObservation::clone(void) const
  *
  * @param[in] rsp Response function.
  *
- * @exception GMWLException::bad_response_type
- *            Specified response in not of type GMWLResponse.
+ * @exception GException::invalid_argument
+ *            Response @p rsp in not a MWL response.
  *
  * Sets the response function for the observation. The argument has to be of
  * type GMWLResponse, otherwise an exception is thrown.
@@ -215,8 +214,14 @@ void GMWLObservation::response(const GResponse& rsp)
 {
     // Get pointer on MWL response
     const GMWLResponse* mwlrsp = dynamic_cast<const GMWLResponse*>(&rsp);
+
+    // If pointer is not valid then throw an exception
     if (mwlrsp == NULL) {
-        throw GMWLException::bad_response_type(G_RESPONSE);
+        std::string cls = std::string(typeid(&rsp).name());
+        std::string msg = "Invalid response type \""+cls+"\" specified. "
+                          "Please specify a \"GMWLResponse\" instance as "
+                          "argument.";
+        throw GException::invalid_argument(G_RESPONSE, msg);
     }
 
     // Copy response function
@@ -269,11 +274,6 @@ void GMWLObservation::read(const GXmlElement& xml)
  * @brief Write observation into XML element
  *
  * @param[in] xml XML element.
- *
- * @exception GException::xml_invalid_parnum
- *            Invalid number of parameters found in XML element.
- * @exception GException::xml_invalid_parnames
- *            Invalid parameter names found in XML element.
  *
  * Writes information for a multi-wavelength observation into an XML element.
  * The format of the XML element is

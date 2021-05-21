@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GMWLLib.hpp  -  Multi-wavelength Support Header files          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2021 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,9 +26,10 @@
 #include "GammaLib.hpp"
 
 /* __ MWL specific headers _______________________________________________ */
-#include "GMWLException.hpp"
-#include "GMWLObservation.hpp"
-#include "GMWLSpectrum.hpp"
 #include "GMWLDatum.hpp"
+#include "GMWLInstDir.hpp"
+#include "GMWLObservation.hpp"
+#include "GMWLResponse.hpp"
+#include "GMWLSpectrum.hpp"
 
 #endif /* GMWLLIB_HPP */
