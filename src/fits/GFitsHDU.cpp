@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GFitsHDU.cpp  - FITS HDU handling class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -213,7 +213,7 @@ void GFitsHDU::connect(void* vptr)
 /***********************************************************************//**
  * @brief Move FITS file pointer to HDU
  *
- * @exception GException::fits_file_not_open
+ * @exception GException::runtime_error
  *            No FITS file has been opened.
  *
  * Moves FITS file pointer to the actual HDU. This operation should preceed
@@ -223,8 +223,9 @@ void GFitsHDU::move_to_hdu(void)
 {
     // Throw an exception if FITS file is not open
     if (FPTR(m_fitsfile)->Fptr == NULL) {
-        throw GException::fits_file_not_open(G_MOVE_TO_HDU, 
-              "Open file before moving file pointer to HDU.");
+        std::string msg = "FITS file not opened. Please open the FITS file "
+                          "before moving the file pointer to an HDU.";
+        throw GException::runtime_error(G_MOVE_TO_HDU, msg);
     }
 
     // Move to HDU
@@ -238,10 +239,8 @@ void GFitsHDU::move_to_hdu(void)
 /***********************************************************************//**
  * @brief Get HDU type from FITS file
  *
- * @exception GException::fits_file_not_open
+ * @exception GException::runtime_error
  *            No FITS file has been opened.
- * @exception GException::fits_hdu_not_found
- *            Requested HDU not found.
  ***************************************************************************/
 GFitsHDU::HDUType GFitsHDU::get_hdu_type(void) const
 {
@@ -250,8 +249,9 @@ GFitsHDU::HDUType GFitsHDU::get_hdu_type(void) const
 
     // Throw an exception if FITS file is not open
     if (FPTR(m_fitsfile)->Fptr == NULL) {
-        throw GException::fits_file_not_open(G_GET_HDU_TYPE, 
-              "Open file before requesting HDU type.");
+        std::string msg = "FITS file not opened. Please open the FITS file "
+                          "before requesting an HDU type.";
+        throw GException::runtime_error(G_GET_HDU_TYPE, msg);
     }
 
     // Get HDU type
@@ -272,7 +272,7 @@ GFitsHDU::HDUType GFitsHDU::get_hdu_type(void) const
  * @param[in] vptr FITS file pointer.
  * @param[in] hdunum Number of HDU (starting from 0).
  *
- * @exception GException::fits_file_not_open
+ * @exception GException::invalid_argument
  *            FITS file pointer does not point to an open FITS file
  * @exception GException::fits_error
  *            Unable to open FITS HDU.
@@ -286,8 +286,10 @@ void GFitsHDU::open(void* vptr, int hdunum)
 {
     // Verify that FITS file pointer is valid
     if (vptr == NULL) {
-        throw GException::fits_file_not_open(G_OPEN,
-              "FITS file pointer does not point to an open FITS file.");
+        std::string msg = "FITS file pointer does not point to an open FITS "
+                          "file. Please open the FITS file before opening an "
+                          "HDU.";
+        throw GException::invalid_argument(G_OPEN, msg);
     }
 
     // Move to HDU

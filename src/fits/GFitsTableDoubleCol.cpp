@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GFitsTableDoubleCol.cpp - FITS table double column class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -289,7 +289,7 @@ int GFitsTableDoubleCol::integer(const int& row, const int& inx) const
  * @param[in] row Row after which rows should be inserted (0=first row).
  * @param[in] nrows Number of rows to be inserted.
  *
- * @exception GException::fits_invalid_row
+ * @exception GException::out_of_range
  *            Specified row is invalid.
  *
  * Inserts rows into a FITS table. This implies that the column will be
@@ -299,7 +299,8 @@ void GFitsTableDoubleCol::insert(const int& row, const int& nrows)
 {
     // Make sure that row is valid
     if (row < 0 || row > m_length) {
-        throw GException::fits_invalid_row(G_INSERT, row, m_length);
+        throw GException::out_of_range(G_INSERT, "FITS table row number",
+                                       row, m_length+1);
     }
     
     // Continue only if there are rows to be inserted
@@ -372,9 +373,8 @@ void GFitsTableDoubleCol::insert(const int& row, const int& nrows)
  * @param[in] row Row after which rows should be removed (0=first row).
  * @param[in] nrows Number of rows to be removed.
  *
- * @exception GException::fits_invalid_row
+ * @exception GException::out_of_range
  *            Specified row is invalid.
- * @exception GException::fits_invalid_nrows
  *            Invalid number of rows specified.
  *
  * This method removes rows from a FITS table. This implies that the column
@@ -384,12 +384,14 @@ void GFitsTableDoubleCol::remove(const int& row, const int& nrows)
 {
     // Make sure that row is valid
     if (row < 0 || row >= m_length) {
-        throw GException::fits_invalid_row(G_REMOVE, row, m_length-1);
+        throw GException::out_of_range(G_REMOVE, "FITS table row number",
+                                       row, m_length);
     }
 
     // Make sure that we don't remove beyond the limit
     if (nrows < 0 || nrows > m_length-row) {
-        throw GException::fits_invalid_nrows(G_REMOVE, nrows, m_length-row);
+        throw GException::out_of_range(G_REMOVE, "Number of FITS table rows",
+                                       nrows, m_length-row+1);
     }
     
     // Continue only if there are rows to be removed

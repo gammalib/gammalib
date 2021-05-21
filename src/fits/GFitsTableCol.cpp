@@ -30,9 +30,9 @@
 #endif
 #include <cstdlib>
 #include "GException.hpp"
+#include "GTools.hpp"
 #include "GFitsCfitsio.hpp"
 #include "GFitsTableCol.hpp"
-#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_ELEMENTS1                     "GFitsTableCol::elements(int&, int&)"
@@ -191,7 +191,7 @@ GFitsTableCol& GFitsTableCol::operator=(const GFitsTableCol& column)
 /***********************************************************************//**
  * @brief Set number of column elements for specific row
  *
- * @param[in] row Row index.
+ * @param[in] row Row number.
  * @param[in] elements Number of elements in @p row.
  *
  * @exception GException::out_of_range
@@ -205,13 +205,14 @@ void GFitsTableCol::elements(const int& row, const int& elements)
 {
     // Check row value
     if (row < 0 || row >= nrows()) {
-        throw GException::out_of_range(G_ELEMENTS1, "Row index", row, nrows());
+        throw GException::out_of_range(G_ELEMENTS1, "FITS table row number",
+                                       row, nrows());
     }
 
     // Check that elements is non-negative
     if (elements < 0) {
         std::string msg = "Number of elements " + gammalib::str(elements) +
-                          " can not be negative.\nPlease specify a"
+                          " can not be negative. Please specify a"
                           " non-negative number of elements.";
         throw GException::invalid_argument(G_ELEMENTS1, msg);
     }
@@ -276,7 +277,8 @@ int GFitsTableCol::elements(const int& row) const
 {
     // Check row value
     if (row < 0 || row >= nrows()) {
-        throw GException::out_of_range(G_ELEMENTS2, "Row index", row, nrows());
+        throw GException::out_of_range(G_ELEMENTS2, "FITS table row number",
+                                       row, nrows());
     }
 
     // Get number of elements
@@ -603,9 +605,10 @@ void GFitsTableCol::load_column_fixed(void)
 
                 // Break on any other cfitsio error
                 if (status != 0) {
-                    throw GException::fits_hdu_not_found(G_LOAD_COLUMN_FIXED,
-                                  (FPTR(m_fitsfile)->HDUposition)+1,
-                                  status);
+                    std::string msg = "FITS HDU number "+
+                                      gammalib::str((FPTR(m_fitsfile)->HDUposition)+1)+
+                                      " not found in FITS file.";
+                    throw GException::fits_error(G_LOAD_COLUMN_FIXED, status, msg);
                 }
 
                 // Load data
@@ -614,7 +617,7 @@ void GFitsTableCol::load_column_fixed(void)
                                  &m_anynul, &status);
                 if (status != 0) {
                     throw GException::fits_error(G_LOAD_COLUMN_FIXED, status,
-                                    "for column '"+m_name+"'.");
+                                    "for column \""+m_name+"\".");
                 }
 
             } // endif: no primary HDU found
@@ -631,8 +634,6 @@ void GFitsTableCol::load_column_fixed(void)
 /***********************************************************************//**
  * @brief Load variable-length column from FITS file
  *
- * @exception GException::fits_hdu_not_found
- *            Specified HDU not found in FITS file.
  * @exception GException::fits_error
  *            An error occured while loading column data from FITS file.
  *
@@ -672,9 +673,10 @@ void GFitsTableCol::load_column_variable(void)
 
             // Break on any other cfitsio error
             if (status != 0) {
-                throw GException::fits_hdu_not_found(G_LOAD_COLUMN_VARIABLE,
-                                  (FPTR(m_fitsfile)->HDUposition)+1,
-                                  status);
+                std::string msg = "FITS HDU number "+
+                                  gammalib::str((FPTR(m_fitsfile)->HDUposition)+1)+
+                                  " not found in FITS file.";
+                throw GException::fits_error(G_LOAD_COLUMN_VARIABLE, status, msg);
             }
 
             // Allocate rowstart array
@@ -782,8 +784,6 @@ void GFitsTableCol::save_column(void)
 /***********************************************************************//**
  * @brief Save table column into FITS file
  *
- * @exception GException::fits_hdu_not_found
- *            Specified HDU not found in FITS file.
  * @exception GException::fits_error
  *            Error occured during writing of the column data.
  *
@@ -808,9 +808,10 @@ void GFitsTableCol::save_column_fixed(void)
                               (FPTR(m_fitsfile)->HDUposition)+1, NULL,
                               &status);
         if (status != 0) {
-            throw GException::fits_hdu_not_found(G_SAVE_COLUMN_FIXED,
-                              (FPTR(m_fitsfile)->HDUposition)+1,
-                              status);
+            std::string msg = "FITS HDU number "+
+                              gammalib::str((FPTR(m_fitsfile)->HDUposition)+1)+
+                              " not found in FITS file.";
+            throw GException::fits_error(G_SAVE_COLUMN_FIXED, status, msg);
         }
 
         // Save the column data
@@ -858,9 +859,10 @@ void GFitsTableCol::save_column_variable(void)
                               (FPTR(m_fitsfile)->HDUposition)+1, NULL,
                               &status);
         if (status != 0) {
-            throw GException::fits_hdu_not_found(G_SAVE_COLUMN_VARIABLE,
-                              (FPTR(m_fitsfile)->HDUposition)+1,
-                              status);
+            std::string msg = "FITS HDU number "+
+                              gammalib::str((FPTR(m_fitsfile)->HDUposition)+1)+
+                              " not found in FITS file.";
+            throw GException::fits_error(G_SAVE_COLUMN_VARIABLE, status, msg);
         }
 
         // Save the column data row-by-row

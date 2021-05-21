@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GFitsTableBitCol.cpp  - FITS table Bit column class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -317,7 +317,7 @@ int GFitsTableBitCol::integer(const int& row, const int& inx) const
  * @param[in] row Row after which rows should be inserted (0=first row).
  * @param[in] nrows Number of rows to be inserted.
  *
- * @exception GException::fits_invalid_row
+ * @exception GException::out_of_range
  *            Specified row is invalid.
  *
  * Inserts rows into a FITS table. This implies that the column will be
@@ -327,7 +327,8 @@ void GFitsTableBitCol::insert(const int& row, const int& nrows)
 {
     // Make sure that row is valid
     if (row < 0 || row > m_length) {
-        throw GException::fits_invalid_row(G_INSERT, row, m_length);
+        throw GException::out_of_range(G_INSERT, "FITS table row number",
+                                       row, m_length+1);
     }
     
     // Continue only if there are rows to be inserted
@@ -410,9 +411,8 @@ void GFitsTableBitCol::insert(const int& row, const int& nrows)
  * @param[in] row Row after which rows should be removed (0=first row).
  * @param[in] nrows Number of rows to be removed.
  *
- * @exception GException::fits_invalid_row
+ * @exception GException::out_of_range
  *            Specified row is invalid.
- * @exception GException::fits_invalid_nrows
  *            Invalid number of rows specified.
  *
  * This method removes rows from a FITS table. This implies that the column
@@ -422,12 +422,14 @@ void GFitsTableBitCol::remove(const int& row, const int& nrows)
 {
     // Make sure that row is valid
     if (row < 0 || row >= m_length) {
-        throw GException::fits_invalid_row(G_REMOVE, row, m_length-1);
+        throw GException::out_of_range(G_REMOVE, "FITS table row number",
+                                       row, m_length);
     }
     
     // Make sure that we don't remove beyond the limit
     if (nrows < 0 || nrows > m_length-row) {
-        throw GException::fits_invalid_nrows(G_REMOVE, nrows, m_length-row);
+        throw GException::out_of_range(G_REMOVE, "Number of FITS table rows",
+                                       nrows, m_length-row+1);
     }
     
     // Continue only if there are rows to be removed
@@ -842,9 +844,10 @@ void GFitsTableBitCol::load_column(void)
                                   (FPTR(m_fitsfile)->HDUposition)+1,
                                   NULL, &status);
             if (status != 0) {
-                throw GException::fits_hdu_not_found(G_LOAD_COLUMN,
-                                  (FPTR(m_fitsfile)->HDUposition)+1,
-                                  status);
+                std::string msg = "FITS HDU number "+
+                                  gammalib::str((FPTR(m_fitsfile)->HDUposition)+1)+
+                                  " not found in FITS file.";
+                throw GException::fits_error(G_LOAD_COLUMN, status, msg);
             }
 
             // Load data 8 Bits at once
@@ -887,9 +890,10 @@ void GFitsTableBitCol::save_column(void)
                               (FPTR(m_fitsfile)->HDUposition)+1, NULL,
                               &status);
         if (status != 0) {
-            throw GException::fits_hdu_not_found(G_SAVE_COLUMN,
-                              (FPTR(m_fitsfile)->HDUposition)+1,
-                              status);
+            std::string msg = "FITS HDU number "+
+                              gammalib::str((FPTR(m_fitsfile)->HDUposition)+1)+
+                              " not found in FITS file.";
+            throw GException::fits_error(G_SAVE_COLUMN, status, msg);
         }
 
         // Save data 8 Bits at once
@@ -912,9 +916,8 @@ void GFitsTableBitCol::save_column(void)
  * @param[in] row Row of column.
  * @param[in] inx Vector index in column row.
  *
- * @exception GException::fits_invalid_row
- *            Table row out of valid range.
  * @exception GException::out_of_range
+ *            Table row out of valid range.
  *            Table vector index out of valid range.
  *
  * Set the Bit for boolean data access. Note that this method assumes that
@@ -925,14 +928,16 @@ void GFitsTableBitCol::get_bit(const int& row, const int& inx)
     // Check row value
     #if defined(G_RANGE_CHECK)
     if (row < 0 || row >= m_length) {
-        throw GException::fits_invalid_row(G_GET_BIT, row, m_length-1);
+        throw GException::out_of_range(G_GET_BIT, "FITS table row number",
+                                       row, m_length);
     }
     #endif
 
     // Check inx value
     #if defined(G_RANGE_CHECK)
     if (inx < 0 || inx >= m_number) {
-        throw GException::out_of_range(G_GET_BIT, inx, 0, m_number-1);
+        throw GException::out_of_range(G_GET_BIT, "FITS table column vector index",
+                                       inx, m_number);
     }
     #endif
 

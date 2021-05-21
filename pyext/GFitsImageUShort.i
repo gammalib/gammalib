@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GFitsImageUShort.i - Unsigned short FITS image class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -117,8 +117,9 @@ public:
                            GTuple1D4D[4]);
         }
         else {
-            throw GException::fits_wrong_image_operator("__getitem__(int)",
-                                                        self->naxis(), GTuple1D4D[0]);
+            std::string msg = "Image dimension "+gammalib::str(GTuple1D4D[0])+
+                              " must be within [1,4].";
+            throw GException::invalid_argument("__getitem__(int)", msg);
         }
     }
     void __setitem__(int GTuple1D4D[], unsigned short value) {
@@ -137,9 +138,9 @@ public:
                      GTuple1D4D[4]) = value;
         }
         else {
-            throw GException::fits_wrong_image_operator("__setitem__(int)",
-                                                        self->naxis(),
-                                                        GTuple1D4D[0]);
+            std::string msg = "Image dimension "+gammalib::str(GTuple1D4D[0])+
+                              " must be within [1,4].";
+            throw GException::invalid_argument("__setitem__(int)", msg);
         }
     }
     PyObject* pixels(void) {

@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for support module                                            #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016 Juergen Knoedlseder                                    #
+# Copyright (C) 2016-2021 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -22,7 +22,9 @@
 # Set include directories
 INCLUDES = -I$(top_srcdir)/include \
            -I$(top_builddir)/src \
-           -I$(top_srcdir)/src
+           -I$(top_srcdir)/src \
+           -I$(top_builddir)/src/fits \
+           -I$(top_srcdir)/src/fits
 
 # Define sources for this directory
 sources = GException.cpp \

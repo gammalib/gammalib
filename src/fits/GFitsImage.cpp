@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GFitsImage.cpp - Abstract FITS image base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -709,7 +709,7 @@ void GFitsImage::load_image(int datatype, const void* pixels,
  * @param[in] datatype Datatype of pixels to be saved
  * @param[in] pixels Pixel array to be saved
  *
- * @exception GException::fits_file_not_open
+ * @exception GException::runtime_error
  *            No FITS file has been opened.
  * @exception GException::fits_error
  *            FITS error.
@@ -722,8 +722,9 @@ void GFitsImage::save_image(int datatype, const void* pixels)
 {
     // Throw an exception if FITS file is not open
     if (FPTR(m_fitsfile)->Fptr == NULL) {
-        throw GException::fits_file_not_open(G_SAVE_IMAGE, 
-              "Open file before saving the image.");
+        std::string msg = "FITS file not open. Please open the FITS file "
+                          "before saving the image.";
+        throw GException::runtime_error(G_SAVE_IMAGE, msg);
     }
 
     // Move to HDU. We use here an explicit cfitsio moveto function since we
@@ -838,7 +839,7 @@ void GFitsImage::fetch_data(void)
 /***********************************************************************//**
  * @brief Return pixel offset
  *
- * @param[in] ix Pixel index (starting from 0).
+ * @param[in] ix Pixel index [0,...,m_num_pixels-1].
  *
  * @exception GException::out_of_range
  *            Pixel index is outside valid range.
@@ -848,7 +849,7 @@ int GFitsImage::offset(const int& ix) const
     // Check if axis is within the range
     #if defined(G_RANGE_CHECK)
     if (ix < 0 || ix >= m_num_pixels) {
-        throw GException::out_of_range(G_OFFSET_1D, ix, 0, m_num_pixels-1);
+        throw GException::out_of_range(G_OFFSET_1D, "Pixel index", ix, m_num_pixels);
     }
     #endif
 
@@ -863,7 +864,7 @@ int GFitsImage::offset(const int& ix) const
  * @param[in] ix Pixel index in first dimension (starting from 0).
  * @param[in] iy Pixel index in second dimension (starting from 0).
  *
- * @exception GException::fits_wrong_image_operator
+ * @exception GException::invalid_argument
  *            Pixel array has less than 2 dimensions.
  * @exception GException::out_of_range
  *            Image axis not valid.
@@ -875,16 +876,23 @@ int GFitsImage::offset(const int& ix, const int& iy) const
 {
     // Operator is only valid for 2D images
     if (m_naxis < 2) {
-        throw GException::fits_wrong_image_operator(G_OFFSET_2D, m_naxis, 2);
+        std::string msg = "2D pixel access operator used for image with "+
+                          gammalib::str(m_naxis)+" dimensions. Please use "
+                          "the correct pixel access operator.";
+        throw GException::invalid_argument(G_OFFSET_2D, msg);
     }
 
     // Check if axis is within the range
     #if defined(G_RANGE_CHECK)
     if (ix < 0 || ix >= m_naxes[0]) {
-        throw GException::out_of_range(G_OFFSET_2D, ix, 0, m_naxes[0]-1);
+        throw GException::out_of_range(G_OFFSET_2D,
+                                       "Pixel index for first dimension",
+                                       ix, m_naxes[0]);
     }
     if (iy < 0 || iy >= m_naxes[1]) {
-        throw GException::out_of_range(G_OFFSET_2D, iy, 0, m_naxes[1]-1);
+        throw GException::out_of_range(G_OFFSET_2D,
+                                       "Pixel index for second dimension",
+                                       iy, m_naxes[1]);
     }
     #endif
 
@@ -900,7 +908,7 @@ int GFitsImage::offset(const int& ix, const int& iy) const
  * @param[in] iy Pixel index in second dimension (starting from 0).
  * @param[in] iz Pixel index in third dimension (starting from 0).
  *
- * @exception GException::fits_wrong_image_operator
+ * @exception GException::invalid_argument
  *            Pixel array has less than 3 dimensions.
  * @exception GException::out_of_range
  *            Image axis not valid.
@@ -912,19 +920,28 @@ int GFitsImage::offset(const int& ix, const int& iy, const int& iz) const
 {
     // Operator is only valid for 3D images
     if (m_naxis < 3) {
-        throw GException::fits_wrong_image_operator(G_OFFSET_3D, m_naxis, 3);
+        std::string msg = "3D pixel access operator used for image with "+
+                          gammalib::str(m_naxis)+" dimensions. Please use "
+                          "the correct pixel access operator.";
+        throw GException::invalid_argument(G_OFFSET_3D, msg);
     }
 
     // Check if axis is within the range
     #if defined(G_RANGE_CHECK)
     if (ix < 0 || ix >= m_naxes[0]) {
-        throw GException::out_of_range(G_OFFSET_3D, ix, 0, m_naxes[0]-1);
+        throw GException::out_of_range(G_OFFSET_3D,
+                                       "Pixel index for first dimension",
+                                       ix, m_naxes[0]);
     }
     if (iy < 0 || iy >= m_naxes[1]) {
-        throw GException::out_of_range(G_OFFSET_3D, iy, 0, m_naxes[1]-1);
+        throw GException::out_of_range(G_OFFSET_3D,
+                                       "Pixel index for second dimension",
+                                       iy, m_naxes[1]);
     }
     if (iz < 0 || iz >= m_naxes[2]) {
-        throw GException::out_of_range(G_OFFSET_3D, iz, 0, m_naxes[2]-1);
+        throw GException::out_of_range(G_OFFSET_3D,
+                                       "Pixel index for third dimension",
+                                       iz, m_naxes[2]);
     }
     #endif
 
@@ -941,7 +958,7 @@ int GFitsImage::offset(const int& ix, const int& iy, const int& iz) const
  * @param[in] iz Pixel index in third dimension (starting from 0).
  * @param[in] it Pixel index in forth dimension (starting from 0).
  *
- * @exception GException::fits_wrong_image_operator
+ * @exception GException::invalid_argument
  *            Pixel array has less than 4 dimensions.
  * @exception GException::out_of_range
  *            Image axis not valid.
@@ -954,22 +971,33 @@ int GFitsImage::offset(const int& ix, const int& iy, const int& iz,
 {
     // Operator is only valid for 4D images
     if (m_naxis < 4) {
-        throw GException::fits_wrong_image_operator(G_OFFSET_4D, m_naxis, 4);
+        std::string msg = "4D pixel access operator used for image with "+
+                          gammalib::str(m_naxis)+" dimensions. Please use "
+                          "the correct pixel access operator.";
+        throw GException::invalid_argument(G_OFFSET_4D, msg);
     }
 
     // Check if axis is within the range
     #if defined(G_RANGE_CHECK)
     if (ix < 0 || ix >= m_naxes[0]) {
-        throw GException::out_of_range(G_OFFSET_4D, ix, 0, m_naxes[0]-1);
+        throw GException::out_of_range(G_OFFSET_4D,
+                                       "Pixel index for first dimension",
+                                       ix, m_naxes[0]);
     }
     if (iy < 0 || iy >= m_naxes[1]) {
-        throw GException::out_of_range(G_OFFSET_4D, iy, 0, m_naxes[1]-1);
+        throw GException::out_of_range(G_OFFSET_4D,
+                                       "Pixel index for second dimension",
+                                       iy, m_naxes[1]);
     }
     if (iz < 0 || iz >= m_naxes[2]) {
-        throw GException::out_of_range(G_OFFSET_4D, iz, 0, m_naxes[2]-1);
+        throw GException::out_of_range(G_OFFSET_4D,
+                                       "Pixel index for third dimension",
+                                       iz, m_naxes[2]);
     }
     if (it < 0 || it >= m_naxes[3]) {
-        throw GException::out_of_range(G_OFFSET_4D, it, 0, m_naxes[3]-1);
+        throw GException::out_of_range(G_OFFSET_4D,
+                                       "Pixel index for third dimension",
+                                       it, m_naxes[3]);
     }
     #endif
 

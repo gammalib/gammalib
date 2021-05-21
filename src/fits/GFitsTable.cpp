@@ -189,29 +189,35 @@ GFitsTable& GFitsTable::operator=(const GFitsTable& table)
  * @param[in] colnum Column number [0,...,ncols()-1].
  * @return Table column pointer.
  *
- * @exception GException::fits_no_data
+ * @exception GException::invalid_argument
  *            No data found in table.
  * @exception GException::out_of_range
  *            Column number is out of range.
+ * @exception GException::runtime_error
+ *            Empty FITS column pointer encountered.
  ***************************************************************************/
 GFitsTableCol* GFitsTable::operator[](const int& colnum)
 {
     // If there is no data then throw an exception
     if (m_columns == NULL) {
-        throw GException::fits_no_data(G_ACCESS1, "No columns in table.");
+        std::string msg = "FITS table empty. Please use the column access "
+                          "operator only on FITS tables that contain columns.";
+        throw GException::invalid_argument(G_ACCESS1, msg);
     }
 
     // Compile option: raise exception if column number is out of range
     #if defined(G_RANGE_CHECK)
     if (colnum < 0 || colnum >= m_cols) {
-        throw GException::out_of_range(G_ACCESS1, colnum, 0, m_cols-1);
+        throw GException::out_of_range(G_ACCESS1, "FITS table column number",
+                                       colnum, m_cols);
     }
     #endif
 
     // Get column pointer
     GFitsTableCol* ptr = m_columns[colnum];
     if (ptr == NULL) {
-        throw GException::fits_no_data(G_ACCESS1, "No data for this column.");
+        std::string msg = "Empty FITS column pointer encountered.";
+        throw GException::runtime_error(G_ACCESS1, msg);
     }
 
     // Return pointer
@@ -225,29 +231,35 @@ GFitsTableCol* GFitsTable::operator[](const int& colnum)
  * @param[in] colnum Column number [0,...,ncols()-1].
  * @return Table column pointer.
  *
- * @exception GException::fits_no_data
+ * @exception GException::invalid_argument
  *            No data found in table.
  * @exception GException::out_of_range
  *            Column number is out of range.
+ * @exception GException::runtime_error
+ *            Empty FITS column pointer encountered.
  ***************************************************************************/
 const GFitsTableCol* GFitsTable::operator[](const int& colnum) const
 {
     // If there is no data then throw an exception
     if (m_columns == NULL) {
-        throw GException::fits_no_data(G_ACCESS1, "No columns in table.");
+        std::string msg = "FITS table empty. Please use the column access "
+                          "operator only on FITS tables that contain columns.";
+        throw GException::invalid_argument(G_ACCESS1, msg);
     }
 
     // Compile option: raise exception if column number is out of range
     #if defined(G_RANGE_CHECK)
     if (colnum < 0 || colnum >= m_cols) {
-        throw GException::out_of_range(G_ACCESS1, colnum, 0, m_cols-1);
+        throw GException::out_of_range(G_ACCESS1, "FITS table column number",
+                                       colnum, m_cols);
     }
     #endif
 
     // Get column pointer
     const GFitsTableCol* ptr = m_columns[colnum];
     if (ptr == NULL) {
-        throw GException::fits_no_data(G_ACCESS1, "No data for this column.");
+        std::string msg = "Empty FITS column pointer encountered.";
+        throw GException::runtime_error(G_ACCESS1, msg);
     }
 
     // Return pointer
@@ -261,16 +273,18 @@ const GFitsTableCol* GFitsTable::operator[](const int& colnum) const
  * @param[in] colname Column name.
  * @return Table column pointer.
  *
- * @exception GException::fits_no_data
+ * @exception GException::invalid_argument
  *            No data found in table.
- * @exception GException::fits_column_not_found
- *            Column name not found.
+ * @exception GException::invalid_argument
+ *            FITS column name not found.
  ***************************************************************************/
 GFitsTableCol* GFitsTable::operator[](const std::string& colname)
 {
     // If there is no data then throw an exception
     if (m_columns == NULL) {
-        throw GException::fits_no_data(G_ACCESS2, "No columns in table.");
+        std::string msg = "FITS table empty. Please use the column access "
+                          "operator only on FITS tables that contain columns.";
+        throw GException::invalid_argument(G_ACCESS2, msg);
     }
 
     // Get column pointer
@@ -278,7 +292,9 @@ GFitsTableCol* GFitsTable::operator[](const std::string& colname)
 
     // If column has not been found throw an exception
     if (ptr == NULL) {
-        throw GException::fits_column_not_found(G_ACCESS2, colname);
+        std::string msg = "FITS table column \""+colname+"\" not found. "
+                          "Please specify an existing column name";
+        throw GException::invalid_argument(G_ACCESS2, msg);
     }
 
     // Return pointer
@@ -292,16 +308,18 @@ GFitsTableCol* GFitsTable::operator[](const std::string& colname)
  * @param[in] colname Column name.
  * @return Table column pointer.
  *
- * @exception GException::fits_no_data
+ * @exception GException::invalid_argument
  *            No data found in table.
- * @exception GException::fits_column_not_found
- *            Column name not found.
+ * @exception GException::invalid_argument
+ *            FITS column name not found.
  ***************************************************************************/
 const GFitsTableCol* GFitsTable::operator[](const std::string& colname) const
 {
     // If there is no data then throw an exception
     if (m_columns == NULL) {
-        throw GException::fits_no_data(G_ACCESS2, "No columns in table.");
+        std::string msg = "FITS table empty. Please use the column access "
+                          "operator only on FITS tables that contain columns.";
+        throw GException::invalid_argument(G_ACCESS2, msg);
     }
 
     // Get column pointer
@@ -309,7 +327,9 @@ const GFitsTableCol* GFitsTable::operator[](const std::string& colname) const
 
     // If column has not been found throw an exception
     if (ptr == NULL) {
-        throw GException::fits_column_not_found(G_ACCESS2, colname);
+        std::string msg = "FITS table column \""+colname+"\" not found. "
+                          "Please specify an existing column name";
+        throw GException::invalid_argument(G_ACCESS2, msg);
     }
 
     // Return pointer
@@ -337,7 +357,8 @@ GFitsTableCol* GFitsTable::set(const int& colnum, const GFitsTableCol& column)
 {
     // Check if column number is valid
     if (colnum < 0 || colnum >= ncols()) {
-        throw GException::out_of_range(G_SET1, "Column number", colnum, ncols());
+        throw GException::out_of_range(G_SET1, "FITS table column number",
+                                       colnum, ncols());
     }
 
     // Free existing column only if it differs from current column. This
@@ -364,6 +385,9 @@ GFitsTableCol* GFitsTable::set(const int& colnum, const GFitsTableCol& column)
  * @param[in] column Table column.
  * @return Pointer to table column that has been set.
  *
+ * @xception GException::invalid_argument
+ *           FITS table column not found.
+ *
  * Sets the column of a table by making a deep copy of the @p column
  * provided.
  ***************************************************************************/
@@ -375,7 +399,9 @@ GFitsTableCol* GFitsTable::set(const std::string&   colname,
 
     // If column has not been found throw an exception
     if (colnum < 0) {
-        throw GException::fits_column_not_found(G_SET2, colname);
+        std::string msg = "FITS table column \""+colname+"\" not found. "
+                          "Please specify an existing column name";
+        throw GException::invalid_argument(G_SET2, msg);
     }
 
     // Set column and return pointer to column
@@ -391,7 +417,7 @@ GFitsTableCol* GFitsTable::set(const std::string&   colname,
  * @param[in] column Table column.
  * @return Pointer to table column that has been appended.
  *
- * @exception GException::fits_bad_col_length
+ * @exception GException::invalid_argument
  *            The length of the column is incompatible with the number of
  *            rows in the table.
  *
@@ -408,7 +434,8 @@ GFitsTableCol* GFitsTable::insert(int colnum, const GFitsTableCol& column)
 {
     // Check if column number is valid
     if (colnum < 0 || colnum > ncols()) {
-        throw GException::out_of_range(G_INSERT1, "Column number", colnum, ncols()+1);
+        throw GException::out_of_range(G_INSERT1, "FITS table column number",
+                                       colnum, ncols()+1);
     }
 
     // If the table is empty and has 0 rows then set the number of rows in
@@ -420,8 +447,12 @@ GFitsTableCol* GFitsTable::insert(int colnum, const GFitsTableCol& column)
     // Throw exception if the column length is incompatible with number of
     // rows in the table
     if (m_rows != column.nrows()) {
-        throw GException::fits_bad_col_length(G_INSERT1,
-                                              column.nrows(), m_rows);
+        std::string msg = "Specified FITS table column has "+
+                          gammalib::str(column.nrows())+" rows while the "
+                          "table has "+gammalib::str(m_rows)+" rows. Please "
+                          "specify a FITS table column with the same number "
+                          "of rows as the table.";
+        throw GException::invalid_argument(G_INSERT1, msg);
     }
 
     // If no column data exist then allocate them now
@@ -484,6 +515,9 @@ GFitsTableCol* GFitsTable::insert(int colnum, const GFitsTableCol& column)
  * @param[in] column Table column.
  * @return Pointer to table column that has been appended
  *
+ * @exception GException::invalid_argument
+ *            FITS table column not found.
+ *
  * Inserts the column at the position given by the specified column name.
  ***************************************************************************/
 GFitsTableCol* GFitsTable::insert(const std::string&   colname,
@@ -494,7 +528,9 @@ GFitsTableCol* GFitsTable::insert(const std::string&   colname,
 
     // If column has not been found throw an exception
     if (colnum < 0) {
-        throw GException::fits_column_not_found(G_INSERT2, colname);
+        std::string msg = "FITS table column \""+colname+"\" not found. "
+                          "Please specify an existing column name";
+        throw GException::invalid_argument(G_INSERT2, msg);
     }
 
     // Insert column and return pointer to column
@@ -507,9 +543,8 @@ GFitsTableCol* GFitsTable::insert(const std::string&   colname,
  *
  * @param[in] colnum Column number [0,...,ncols()-1].
  *
- * @exception GException::fits_bad_col_length
- *            The length of the column is incompatible with the number of
- *            rows in the table.
+ * @exception GException::out_of_range
+ *            Column number is out of range.
  *
  * Remove the column at position @p colnum from the table.
  ***************************************************************************/
@@ -517,7 +552,8 @@ void GFitsTable::remove(const int& colnum)
 {
     // Check if column number is valid
     if (colnum < 0 || colnum >= ncols()) {
-        throw GException::out_of_range(G_REMOVE1, "Column number", colnum, ncols());
+        throw GException::out_of_range(G_REMOVE1, "FITS table column number",
+                                       colnum, ncols());
     }
 
     // At this point we should have at least one column in the table and we
@@ -574,6 +610,9 @@ void GFitsTable::remove(const int& colnum)
  *
  * @param[in] colname Column name.
  *
+ * @exception GException::invalid_argument
+ *            FITS table column not found.
+ *
  * Remove the column with name @p colname from the table.
  ***************************************************************************/
 void GFitsTable::remove(const std::string& colname)
@@ -583,7 +622,9 @@ void GFitsTable::remove(const std::string& colname)
 
     // If column has not been found throw an exception
     if (colnum < 0) {
-        throw GException::fits_column_not_found(G_REMOVE2, colname);
+        std::string msg = "FITS table column \""+colname+"\" not found. "
+                          "Please specify an existing column name";
+        throw GException::invalid_argument(G_REMOVE2, msg);
     }
 
     // Remove column
@@ -622,8 +663,8 @@ void GFitsTable::append_rows(const int& nrows)
  * @param[in] row Row at which rows are inserted [0,...,nrows()].
  * @param[in] nrows Number of rows to be inserted.
  *
- * @exception GException::fits_invalid_row
- *            Specified rownum is invalid.
+ * @exception GException::out_of_range
+ *            Specified @p row is invalid.
  *
  * Inserts @p nrows table rows at the specified @p row into the table. If the
  * @p row index is set to the number of existing rows, nrows(), @p nrows
@@ -635,7 +676,8 @@ void GFitsTable::insert_rows(const int& row, const int& nrows)
 {
     // Make sure that row is valid
     if (row < 0 || row > m_rows) {
-        throw GException::fits_invalid_row(G_INSERT_ROWS, row, m_rows);
+        throw GException::out_of_range(G_INSERT_ROWS, "FITS table row number",
+                                       row, m_rows+1);
     }
 
     // Continue only if there are rows to be inserted
@@ -665,10 +707,9 @@ void GFitsTable::insert_rows(const int& row, const int& nrows)
  * @param[in] row Row from which on rows are removed [0,...,nrows()-1].
  * @param[in] nrows Number of rows to be removed.
  *
- * @exception GException::fits_invalid_row
- *            Specified rownum is invalid.
- * @exception GException::fits_invalid_nrows
- *            Invalid number of rows specified.
+ * @exception GException::out_of_range
+ *            Specified @p row is outside valid range.
+ *            Specified @p nrows is outside valid range.
  *
  * Removes @p nrows table rows from the specified @p row on from the table.
  *
@@ -678,12 +719,14 @@ void GFitsTable::remove_rows(const int& row, const int& nrows)
 {
     // Make sure that row is valid
     if (row < 0 || row >= m_rows) {
-        throw GException::fits_invalid_row(G_REMOVE_ROWS, row, m_rows-1);
+        throw GException::out_of_range(G_REMOVE_ROWS, "FITS table row number",
+                                       row, m_rows);
     }
 
     // Make sure that we don't remove beyond the limit
     if (nrows < 0 || nrows > m_rows-row) {
-        throw GException::fits_invalid_nrows(G_REMOVE_ROWS, nrows, m_rows-row);
+        throw GException::out_of_range(G_REMOVE_ROWS, "Number of FITS table rows",
+                                       nrows, m_rows-row+1);
     }
 
     // Continue only if there are rows to be removed
@@ -1065,13 +1108,10 @@ void GFitsTable::update_header(void)
  *
  * @param[in] vptr FITS file pointer.
  *
- * @exception GException::fits_hdu_not_found
- *            Specified HDU not found in FITS file.
  * @exception GException::fits_error
  *            A CFITSIO error occured during loading the table.
- * @exception GException::fits_unknown_coltype
+ * @exception GException::runtime_error
  *            FITS column of unsupported type has been found in the FITS file.
- * @exception GException::fits_inconsistent_tdim
  *            The TDIM information provided in the header is inconsistent
  *            with the size of the column.
  *
@@ -1222,7 +1262,10 @@ void GFitsTable::data_open(void* vptr)
         if (m_columns[i] == NULL) {
             std::ostringstream colname;
             colname << value;
-            throw GException::fits_unknown_coltype(G_DATA_OPEN, colname.str(), typecode);
+            std::string msg = "FITS table column \""+colname.str()+"\" has "
+                              "unsupported typecode "+
+                              gammalib::str(typecode)+".";
+            throw GException::runtime_error(G_DATA_OPEN, msg);
         }
 
         // Store column definition
@@ -1263,10 +1306,39 @@ void GFitsTable::data_open(void* vptr)
 
             // Compare with real size
             if (num != m_columns[i]->number()) {
-                throw GException::fits_inconsistent_tdim(G_DATA_OPEN,
-                                                         vdim,
-                                                         m_columns[i]->number());
-            }
+
+                // Initialise message
+                std::string msg;
+
+                // Set exception message
+                if (vdim.size() < 1) {
+                    msg = "Empty TDIM keyword encountered while there are "+
+                          gammalib::str(m_columns[i]->number())+" elements in "
+                          "the FITS table column \""+m_columns[i]->name()+"\".";
+                }
+                else {
+
+                    // Compute expectation
+                    std::string sdim = "("+gammalib::str(vdim[0]);
+                    int         num  = vdim[0];
+                    for (int k = 1; k < vdim.size(); ++k) {
+                        sdim += ","+gammalib::str(vdim[k]);
+                        num  *= vdim[k];
+                    }
+                    sdim += ")";
+                    
+                    // Set message
+                    msg = "TDIM keyword "+sdim+" predicts "+gammalib::str(num)+
+                          " column elements while there are "+
+                          gammalib::str(m_columns[i]->number())+" elements in "
+                          "the FITS table column \""+m_columns[i]->name()+"\".";
+
+                }
+
+                // Throw exception
+                throw GException::runtime_error(G_DATA_OPEN, msg);
+
+            } // endif: invalid number of elements in column
 
         } // endif: Valid TDIM information was found
 
@@ -1282,7 +1354,7 @@ void GFitsTable::data_open(void* vptr)
  *
  * @exception GException::fits_error
  *            A CFITSIO error occured in this method.
- * @exception GException::fits_bad_col_length
+ * @exception GException::runtime_error
  *            Table columns have inconsistent lengths.
  *
  * Saves the FITS table into the FITS file.
@@ -1319,9 +1391,13 @@ void GFitsTable::data_save(void)
     for (int i = 0; i < m_cols; ++i) {
         if (m_columns[i] != NULL && m_columns[i]->nrows() > 0) {
             if (m_columns[i]->nrows() != m_rows) {
-                throw GException::fits_bad_col_length(G_DATA_SAVE,
-                                                      m_columns[i]->nrows(),
-                                                      m_rows);
+                std::string msg = "Number of rows in column \""+
+                                  m_columns[i]->name()+"\" ("+
+                                  gammalib::str(m_columns[i]->nrows())+") "
+                                  "does not correspond to the number of rows "
+                                  "in the FITS table ("+
+                                  gammalib::str(m_rows)+").";
+                throw GException::runtime_error(G_DATA_SAVE, msg);
             }
         }
     }
@@ -1373,9 +1449,6 @@ void GFitsTable::data_save(void)
 
             // Delete current FITS HDU
             status = __ffdhdu(FPTR(m_fitsfile), NULL, &status);
-            //if (status != 0) {
-            //    throw GException::fits_error(G_DATA_SAVE, status);
-            //}
             if (status == 0) {
 
                 // Insert either ASCII or Binary table at current HDU position
@@ -1390,9 +1463,6 @@ void GFitsTable::data_save(void)
                     status = __ffibin(FPTR(m_fitsfile), m_rows, tfields, ttype, tform,
                                       tunit, NULL, 0, &status);
                 }
-                //if (status != 0) {
-                //    throw GException::fits_error(G_DATA_SAVE, status);
-                //}
 
             } // endif: deletion of current FITS HDU successful
 
@@ -1402,9 +1472,6 @@ void GFitsTable::data_save(void)
         else {
             status = __ffcrtb(FPTR(m_fitsfile), m_type, m_rows, tfields,
                               ttype, tform, tunit, NULL, &status);
-            //if (status != 0) {
-            //    throw GException::fits_error(G_DATA_SAVE, status);
-            //}
         }
 
         // De-allocate column definition arrays
@@ -1752,7 +1819,9 @@ char* GFitsTable::get_tform(const int& colnum) const
             std::strncpy(ptr, m_columns[colnum]->tform_binary().c_str(), size);
             break;
         default:
-            throw GException::fits_unknown_tabtype(G_GET_TFORM, m_type);
+            std::string msg = "FITS table type \""+gammalib::str(m_type)+
+                              "\" is unknown.";
+            throw GException::runtime_error(G_GET_TFORM, msg);
         }
         ptr[size] = '\0';
     }

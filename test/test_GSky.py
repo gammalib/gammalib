@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib sky module.
 #
-# Copyright (C) 2012-2020 Juergen Knoedlseder
+# Copyright (C) 2012-2021 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -335,7 +335,7 @@ class Test(gammalib.GPythonTestSuite):
         try:
             pixels.save(file2, True)
             pixels.save(file2)
-        except RuntimeError:
+        except ValueError:
             pass
         else:
             raise RuntimeError('*** TEST ERROR: FITS file overwritten!')

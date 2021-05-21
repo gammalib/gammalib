@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for fits module                                               #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016 Juergen Knoedlseder                                    #
+# Copyright (C) 2016-2021 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -55,8 +55,7 @@ sources = GFitsHeaderCard.cpp \
           GFitsTableCFloatCol.cpp \
           GFitsTableCDoubleCol.cpp \
           GFitsHDU.cpp \
-          GFits.cpp \
-          GException_fits.cpp
+          GFits.cpp
 
 # Build libtool library
 noinst_LTLIBRARIES = libfits.la

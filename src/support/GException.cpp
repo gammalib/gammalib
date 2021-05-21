@@ -27,6 +27,7 @@
 /* __ Includes ___________________________________________________________ */
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GFitsCfitsio.hpp"
 
 
 /***********************************************************************//**
@@ -169,6 +170,36 @@ GException::runtime_error::runtime_error(const std::string& origin,
     m_message = "Runtime error.";
     if (message.length() > 0) {
         m_message += (" " + message);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief General FITS error
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] status cfitsio status.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::fits_error::fits_error(const std::string& origin,
+                                   const int&         status,
+                                   const std::string& message)
+{
+    // Set origin
+    m_origin  = origin;
+
+    // Set FITS message
+    char err_text[31];
+    __ffgerr(status, err_text);
+    m_message  = std::string(err_text);
+    m_message += " (status=" + gammalib::str(status) + ").";
+
+    // Add optional error message
+    if (message.length() > 0) {
+        m_message += " " + message;
     }
 
     // Return

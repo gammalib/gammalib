@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GFits.cpp - FITS file access class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -224,7 +224,7 @@ GFits* GFits::clone(void) const
  *
  * @exception GException::out_of_range
  *            Extension number is out of range.
- * @exception GException::fits_hdu_not_found
+ * @exception GException::runtime_error
  *            No HDU found for specified extension number.
  *
  * Returns a pointer to the HDU with the specified extension number @p extno.
@@ -235,7 +235,8 @@ GFitsHDU* GFits::at(const int& extno)
     // Compile option: raise an exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (extno < 0 || extno >= size()) {
-        throw GException::out_of_range(G_AT1, "Extension number", extno, size());
+        throw GException::out_of_range(G_AT1, "FITS extension number",
+                                       extno, size());
     }
     #endif
 
@@ -244,8 +245,9 @@ GFitsHDU* GFits::at(const int& extno)
 
     // Throw an error if HDU has not been found
     if (ptr == NULL) {
-        std::string extname = "extno="+gammalib::str(extno);
-        throw GException::fits_hdu_not_found(G_AT1, extname);
+        std::string msg = "FITS HDU with extension number "+
+                          gammalib::str(extno)+" not found in FITS file.";
+        throw GException::runtime_error(G_AT1, msg);
     }
 
     // Return pointer
@@ -261,7 +263,7 @@ GFitsHDU* GFits::at(const int& extno)
  *
  * @exception GException::out_of_range
  *            Extension number is out of range.
- * @exception GException::fits_hdu_not_found
+ * @exception GException::runtime_error
  *            No HDU found for specified extension number.
  *
  * Returns a pointer to the HDU with the specified extension number @p extno.
@@ -272,7 +274,8 @@ const GFitsHDU* GFits::at(const int& extno) const
     // Compile option: raise an exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (extno < 0 || extno >= size()) {
-        throw GException::out_of_range(G_AT1, "Extension number", extno, size());
+        throw GException::out_of_range(G_AT1, "FITS extension number",
+                                       extno, size());
     }
     #endif
 
@@ -281,8 +284,9 @@ const GFitsHDU* GFits::at(const int& extno) const
 
     // Throw an error if HDU has not been found
     if (ptr == NULL) {
-        std::string extname = "extno="+gammalib::str(extno);
-        throw GException::fits_hdu_not_found(G_AT1, extname);
+        std::string msg = "FITS HDU with extension number "+
+                          gammalib::str(extno)+" not found in FITS file.";
+        throw GException::runtime_error(G_AT1, msg);
     }
 
     // Return pointer
@@ -296,7 +300,7 @@ const GFitsHDU* GFits::at(const int& extno) const
  * @param[in] extname Name of HDU extension.
  * @return Pointer to HDU.
  *
- * @exception GException::fits_hdu_not_found
+ * @exception GException::invalid_argument
  *            No HDU with specified name has been found.
  *
  * Returns a pointer to the HDU with the specified @p extname. An exception
@@ -307,7 +311,9 @@ GFitsHDU* GFits::at(const std::string& extname)
     // Get extenion number
     int extno = this->extno(extname);
     if (extno == -1) {
-        throw GException::fits_hdu_not_found(G_AT2, extname);
+        std::string msg = "FITS extension \""+extname+"\" not found in FITS "
+                          "file. Please specify a valid extension name.";
+        throw GException::invalid_argument(G_AT2, msg);
     }
 
     // Get HDU pointer
@@ -324,7 +330,7 @@ GFitsHDU* GFits::at(const std::string& extname)
  * @param[in] extname Name of HDU extension.
  * @return Pointer to HDU.
  *
- * @exception GException::fits_hdu_not_found
+ * @exception GException::invalid_argument
  *            No HDU with specified name has been found.
  *
  * Returns a pointer to the HDU with the specified @p extname. An exception
@@ -335,7 +341,9 @@ const GFitsHDU* GFits::at(const std::string& extname) const
     // Get extenion number
     int extno = this->extno(extname);
     if (extno == -1) {
-        throw GException::fits_hdu_not_found(G_AT2, extname);
+        std::string msg = "FITS extension \""+extname+"\" not found in FITS "
+                          "file. Please specify a valid extension name.";
+        throw GException::invalid_argument(G_AT2, msg);
     }
 
     // Get HDU pointer
@@ -352,7 +360,7 @@ const GFitsHDU* GFits::at(const std::string& extname) const
  * @param[in] extno Extension number [0,...,size()-1].
  * @return Pointer to FITS image.
  *
- * @exception GException::fits_hdu_not_image
+ * @exception GException::invalid_argument
  *            Requested HDU is not an image.
  *
  * Returns a pointer to the image HDU with extension number extno.
@@ -364,9 +372,10 @@ GFitsImage* GFits::image(const int& extno)
 
     // Throw an error if HDU is not an image
     if (ptr == NULL) {
-        throw GException::fits_hdu_not_image(G_IMAGE1,
-                                             "(extno="+gammalib::str(extno)+")",
-                                             at(extno)->exttype());
+        std::string msg = "FITS extension number "+gammalib::str(extno)+" is "
+                          "not an image. Please specify the extension number "
+                          "of an image.";
+        throw GException::invalid_argument(G_IMAGE1, msg);
     }
 
     // Return pointer
@@ -380,7 +389,7 @@ GFitsImage* GFits::image(const int& extno)
  * @param[in] extno Extension number [0,...,size()-1].
  * @return Pointer to FITS image.
  *
- * @exception GException::fits_hdu_not_image
+ * @exception GException::invalid_argument
  *            Requested HDU is not an image.
  *
  * Returns a pointer to the image HDU with extension number extno.
@@ -392,9 +401,10 @@ const GFitsImage* GFits::image(const int& extno) const
 
     // Throw an error if HDU is not an image
     if (ptr == NULL) {
-        throw GException::fits_hdu_not_image(G_IMAGE1,
-                                             "(extno="+gammalib::str(extno)+")",
-                                             at(extno)->exttype());
+        std::string msg = "FITS extension number "+gammalib::str(extno)+" is "
+                          "not an image. Please specify the extension number "
+                          "of an image.";
+        throw GException::invalid_argument(G_IMAGE1, msg);
     }
 
     // Return pointer
@@ -408,7 +418,7 @@ const GFitsImage* GFits::image(const int& extno) const
  * @param[in] extname Name of HDU extension.
  * @return Pointer to FITS image.
  *
- * @exception GException::fits_hdu_not_image
+ * @exception GException::invalid_argument
  *            Requested HDU is not an image.
  *
  * Returns a pointer to the image HDU with extension name extname.
@@ -420,9 +430,9 @@ GFitsImage* GFits::image(const std::string& extname)
 
     // Throw an error if HDU is not an image
     if (ptr == NULL) {
-        throw GException::fits_hdu_not_image(G_IMAGE2,
-                                             extname,
-                                             at(extname)->exttype());
+        std::string msg = "FITS extension \""+extname+"\" is not an image. "
+                          "Please specify the name of an image extension.";
+        throw GException::invalid_argument(G_IMAGE2, msg);
     }
 
     // Return pointer
@@ -436,7 +446,7 @@ GFitsImage* GFits::image(const std::string& extname)
  * @param[in] extname Name of HDU extension.
  * @return Pointer to FITS image.
  *
- * @exception GException::fits_hdu_not_image
+ * @exception GException::invalid_argument
  *            Requested HDU is not an image.
  *
  * Returns a pointer to the image HDU with extension name extname.
@@ -448,9 +458,9 @@ const GFitsImage* GFits::image(const std::string& extname) const
 
     // Throw an error if HDU is not an image
     if (ptr == NULL) {
-        throw GException::fits_hdu_not_image(G_IMAGE2,
-                                             extname,
-                                             at(extname)->exttype());
+        std::string msg = "FITS extension \""+extname+"\" is not an image. "
+                          "Please specify the name of an image extension.";
+        throw GException::invalid_argument(G_IMAGE2, msg);
     }
 
     // Return pointer
@@ -464,7 +474,7 @@ const GFitsImage* GFits::image(const std::string& extname) const
  * @param[in] extno Extension number [0,...,size()-1].
  * @return Pointer to FITS table.
  *
- * @exception GException::fits_hdu_not_table
+ * @exception GException::invalid_argument
  *            Requested HDU is not a table.
  *
  * Returns a pointer to the table HDU with extension number extno.
@@ -476,9 +486,10 @@ GFitsTable* GFits::table(const int& extno)
 
     // Throw an error if HDU is not an image
     if (ptr == NULL) {
-        throw GException::fits_hdu_not_table(G_TABLE1,
-                                             "(extno="+gammalib::str(extno)+")",
-                                             at(extno)->exttype());
+        std::string msg = "FITS extension number "+gammalib::str(extno)+" is "
+                          "not a table. Please specify the extension number "
+                          "of a table.";
+        throw GException::invalid_argument(G_TABLE1, msg);
     }
 
     // Return pointer
@@ -492,7 +503,7 @@ GFitsTable* GFits::table(const int& extno)
  * @param[in] extno Extension number [0,...,size()-1].
  * @return Pointer to FITS table.
  *
- * @exception GException::fits_hdu_not_table
+ * @exception GException::invalid_argument
  *            Requested HDU is not a table.
  *
  * Returns a pointer to the table HDU with extension number extno.
@@ -504,9 +515,10 @@ const GFitsTable* GFits::table(const int& extno) const
 
     // Throw an error if HDU is not an image
     if (ptr == NULL) {
-        throw GException::fits_hdu_not_table(G_TABLE1,
-                                             "(extno="+gammalib::str(extno)+")",
-                                             at(extno)->exttype());
+        std::string msg = "FITS extension number "+gammalib::str(extno)+" is "
+                          "not a table. Please specify the extension number "
+                          "of a table.";
+        throw GException::invalid_argument(G_TABLE1, msg);
     }
 
     // Return pointer
@@ -520,7 +532,7 @@ const GFitsTable* GFits::table(const int& extno) const
  * @param[in] extname Name of HDU extension.
  * @return Pointer to FITS table.
  *
- * @exception GException::fits_hdu_not_table
+ * @exception GException::invalid_argument
  *            Requested HDU is not a table.
  *
  * Returns a pointer to the table HDU with extension name extname.
@@ -532,9 +544,9 @@ GFitsTable* GFits::table(const std::string& extname)
 
     // Throw an error if HDU is not an image
     if (ptr == NULL) {
-        throw GException::fits_hdu_not_table(G_TABLE2,
-                                             extname,
-                                             at(extname)->exttype());
+        std::string msg = "FITS extension \""+extname+"\" is not a table. "
+                          "Please specify the name of a table extension.";
+        throw GException::invalid_argument(G_TABLE2, msg);
     }
 
     // Return pointer
@@ -548,7 +560,7 @@ GFitsTable* GFits::table(const std::string& extname)
  * @param[in] extname Name of HDU extension.
  * @return Pointer to FITS table.
  *
- * @exception GException::fits_hdu_not_table
+ * @exception GException::invalid_argument
  *            Requested HDU is not a table.
  *
  * Returns a pointer to the table HDU with extension name extname.
@@ -560,9 +572,9 @@ const GFitsTable* GFits::table(const std::string& extname) const
 
     // Throw an error if HDU is not an image
     if (ptr == NULL) {
-        throw GException::fits_hdu_not_table(G_TABLE2,
-                                             extname,
-                                             at(extname)->exttype());
+        std::string msg = "FITS extension \""+extname+"\" is not a table. "
+                          "Please specify the name of a table extension.";
+        throw GException::invalid_argument(G_TABLE2, msg);
     }
 
     // Return pointer
@@ -587,7 +599,8 @@ GFitsHDU* GFits::set(const int& extno, const GFitsHDU& hdu)
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (extno < 0 || extno >= size()) {
-        throw GException::out_of_range(G_SET1, "Extension number", extno, size());
+        throw GException::out_of_range(G_SET1, "FITS extension number",
+                                       extno, size());
     }
     #endif
 
@@ -767,7 +780,8 @@ GFitsHDU* GFits::insert(const int& extno, const GFitsHDU& hdu)
     // Compile option: raise exception if extension number is out of range
     #if defined(G_RANGE_CHECK)
     if (extno < 0 || extno >= size()) {
-        throw GException::out_of_range(G_INSERT1, "Extension number", extno, size());
+        throw GException::out_of_range(G_INSERT1, "FITS extension number",
+                                       extno, size());
     }
     #endif
 
@@ -850,7 +864,8 @@ void GFits::remove(const int& extno)
     // Compile option: raise an exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (extno < 0 || extno >= size()) {
-        throw GException::out_of_range(G_REMOVE1, "Extension number", extno, size());
+        throw GException::out_of_range(G_REMOVE1, "FITS extension number",
+                                       extno, size());
     }
     #endif
 
@@ -1006,12 +1021,10 @@ int GFits::extno(const std::string& extname) const
  * @exception GException::invalid_argument
  *            Class instance contains already an opened FITS file.
  *            Close file before opening a new one using GFits::close().
- * @exception GException::fits_open_error 
- *            Unable to open the specified file.
- * @exception GException::fits_hdu_not_found
- *            Requested HDU not found.
  * @exception GException::fits_error
  *            Unable to determine number of HDUs in the FITS file.
+ * @exception GException::runtime_error
+ *            Unknown HDU type encountered.
  *
  * This method opens all HDUs that are found in the specified FITS file.
  * If the file does not exist, and if create=true, a new FITS file is created.
@@ -1079,13 +1092,17 @@ void GFits::open(const GFilename& filename, const bool& create)
     // Throw special exception if status=202 (keyword not found). This error
     // may occur if the file is opened with an expression
     if (status == 202) {
-        throw GException::fits_open_error(G_OPEN, filename, status,
-                          "Keyword not found when opening file.");
+        std::string msg = "Keyword not found when opening FITS file \""+
+                          filename+"\". Please specify a valid keyword.";
+        throw GException::fits_error(G_OPEN, status, msg);
     }
 
     // Throw any other error
     else if (status != 0) {
-        throw GException::fits_open_error(G_OPEN, filename, status);
+        std::string msg = "Error occured when opening FITS file \""+
+                          filename+"\".";
+        throw GException::fits_error(G_OPEN, status, msg);
+
     }
 
     // Store FITS file name as GFilename object
@@ -1117,8 +1134,9 @@ void GFits::open(const GFilename& filename, const bool& create)
             hdu = new GFitsBinTable;
             break;
         default:
-            std::string msg = "Unknown HDU type \""+gammalib::str(type)+"\"";
-            throw GException::fits_invalid_type(G_OPEN, msg);
+            std::string msg = "Unknown HDU type \""+gammalib::str(type)+"\" "
+                              "encountered.";
+            throw GException::runtime_error(G_OPEN, msg);
             break;
         }
 
@@ -1140,10 +1158,9 @@ void GFits::open(const GFilename& filename, const bool& create)
  *
  * @param[in] clobber Overwrite existing FITS file? (default: false).
  *
- * @exception GException::fits_file_exist
+ * @exception GException::invalid_value
  *            Attemting to overwrite an existing file without having specified
  *            clobber=true.
- * @exception GException::fits_file_not_open
  *            FITS file needs to be opened before saving.
  *
  * Saves all HDUs of an open FITS file to disk. After saving, the FITS file
@@ -1166,13 +1183,17 @@ void GFits::save(const bool& clobber)
     // If we attempt to save an existing file without overwriting permission
     // then throw an error
     if (!m_created && !clobber) {
-        throw GException::fits_file_exist(G_SAVE, m_filename);
+        std::string msg = "Attempted to overwrite FITS file \""+m_filename+
+                          "\". Please set clobber flag to true.";
+        throw GException::invalid_value(G_SAVE, msg);
     }
 
     // If no FITS file has been opened then throw an error
     if (m_fitsfile == NULL) {
-        throw GException::fits_file_not_open(G_SAVE, 
-              "Either open FITS file before saving or use saveto() method.");
+        std::string msg = "Cannot save FITS file that was not open. Please "
+                          "open FITS file before saving or use saveto() "
+                          "method.";
+        throw GException::invalid_value(G_SAVE, msg);
     }
 
     // We have to make sure that all data are online before we can save them.
@@ -1256,9 +1277,9 @@ void GFits::save(const bool& clobber)
  * @brief Saves to specified FITS file
  *
  * @param[in] filename Filename.
- * @param[in] clobber Overwrite existing FITS file? (default: false)
+ * @param[in] clobber Overwrite existing FITS file?
  *
- * @exception GException::fits_file_exist
+ * @exception GException::invalid_value
  *            Specified file exists already. Overwriting requires
  *            clobber=true.
  *
@@ -1278,7 +1299,9 @@ void GFits::saveto(const GFilename& filename, const bool& clobber)
         filename.remove();
     }
     else if (filename.exists()) {
-        throw GException::fits_file_exist(G_SAVETO, filename);
+        std::string msg = "Attempted to overwrite FITS file \""+filename.url()+
+                          "\". Please set clobber flag to true.";
+        throw GException::invalid_value(G_SAVETO, msg);
     }
 
     // Create or open FITS file
@@ -1596,6 +1619,9 @@ void GFits::free_members(void)
 /***********************************************************************//**
  * @brief Allocate new FITS image and return memory pointer
  *
+ * @exception runtime_error
+ *            Invalid number of bits per pixel.
+ *
  * Depending on the number of bits per pixel, a FITS image is allocated
  * and the pointer is returned. The following FITS image classes are
  * handled:
@@ -1677,7 +1703,9 @@ GFitsImage* GFits::new_image(void)
         image = new GFitsImageDouble;
         break;
     default:
-        throw GException::fits_bad_bitpix(G_NEW_IMAGE, bitpix);
+        std::string msg = "Invalid number of bits per pixel (bitpix="+
+                          gammalib::str(bitpix)+").";
+        throw GException::runtime_error(G_NEW_IMAGE, msg);
         break;
     }
 
