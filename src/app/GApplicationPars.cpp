@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GApplicationPars.cpp - Application parameters             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -35,8 +35,8 @@
 #include <cstdlib>         // std::getenv() function
 #include <cstdio>          // std::fopen(), etc. functions
 #include <sstream>
-#include "GTools.hpp"
 #include "GException.hpp"
+#include "GTools.hpp"
 #include "GFilename.hpp"
 #include "GApplicationPars.hpp"
 
@@ -464,8 +464,6 @@ GApplicationPar& GApplicationPars::insert(const int& index, const GApplicationPa
  *
  * @exception GException::invalid_argument
  *            Parameter with specified name not found in container.
- * @exception GException::invalid_value
- *            Name of parameter exists already in container.
  *
  * Inserts a parameter into the container before the parameter with the
  * specified @p name.
@@ -478,9 +476,9 @@ GApplicationPar& GApplicationPars::insert(const std::string&     name,
 
     // Throw exception if parameter name was not found
     if (index == -1) {
-        std::string msg = "Parameter \""+name+"\" has not been found in"
-                          " parameter file.\n"
-                          "Please specify a valid parameter name.";
+        std::string msg = "Parameter \""+name+"\" has not been found in "
+                          "parameter file. Please specify a valid parameter "
+                          "name.";
         throw GException::invalid_argument(G_INSERT2, msg);
     }
 
@@ -544,9 +542,9 @@ void GApplicationPars::remove(const std::string& name)
 
     // Throw exception if parameter name was not found
     if (index == -1) {
-        std::string msg = "Parameter \""+name+"\" has not been found in"
-                          " parameter file.\n"
-                          "Please specify a valid parameter name.";
+        std::string msg = "Parameter \""+name+"\" has not been found in "
+                          "parameter file. Please specify a valid parameter "
+                          "name.";
         throw GException::invalid_argument(G_REMOVE2, msg);
     }
 
@@ -562,6 +560,9 @@ void GApplicationPars::remove(const std::string& name)
  * @brief Append parameter container
  *
  * @param[in] pars Parameter container.
+ *
+ * @exception GException::invalid_value
+ *            Parameter with the same name exists already.
  *
  * Append parameter container to the container.
  ***************************************************************************/
@@ -586,11 +587,10 @@ void GApplicationPars::extend(const GApplicationPars& pars)
             if (inx != -1) {
                 std::string msg =
                     "Attempt to append parameter with name \""+pars[i].name()+
-                    "\" to parameter container, but a parameter with the same name"
-                    " exists already at index "+gammalib::str(inx)+" in the"
-                    " container.\n"
-                    "Every parameter in the parameter container needs a unique"
-                    " name.";
+                    "\" to parameter container, but a parameter with the same "
+                    "name exists already at index "+gammalib::str(inx)+" in "
+                    "the container. Every parameter in the parameter container "
+                    "needs to have a unique name.";
                 throw GException::invalid_value(G_EXTEND, msg);
             }
 
@@ -630,7 +630,7 @@ bool GApplicationPars::contains(const std::string& name) const
  *
  * @param[in] filename Parameter filename.
  *
- * @exception GException::par_file_not_found
+ * @exception GException::invalid_argument
  *            Parameter file not found.
  *
  * Loads all parameters from parameter file.
@@ -676,7 +676,10 @@ void GApplicationPars::load(const GFilename& filename)
 
         // If file path is empty then throw an exception
         if (path.empty()) {
-            throw GException::par_file_not_found(G_LOAD1, filename.url());
+            std::string msg = "Parameter file \""+filename.url()+"\" not "
+                              "found. Please specify an existing parameter "
+                              "file.";
+            throw GException::invalid_argument(G_LOAD1, msg);
         }
 
         // Read parfile
@@ -698,7 +701,7 @@ void GApplicationPars::load(const GFilename& filename)
  * @param[in] filename Parameter filename.
  * @param[in] args Command line arguments. 
  *
- * @exception GException::bad_cmdline_argument
+ * @exception GException::invalid_argument
  *            Invalid command line argument encountered.
  *
  * Loads all parameters from parameter file. Parameters are overwritten by
@@ -716,28 +719,38 @@ void GApplicationPars::load(const GFilename&                filename,
         // Extract parameter name and value (empty values are permitted)
         size_t pos = args[i].find("=");
         if (pos == std::string::npos) {
-            throw GException::bad_cmdline_argument(G_LOAD2, args[i],
-                                                   "no \"=\" specified");
+            std::string msg = "No \"=\" symbol found for command line "
+                              "parameter \""+args[i]+"\". Please specify a "
+                              "valid command line parameter of the form "
+                              "\"name=value\".";
+            throw GException::invalid_argument(G_LOAD2, msg);
         }
         std::string name  = args[i].substr(0, pos);
         std::string value = args[i].substr(pos+1);
         if (name.length() < 1) {
-            throw GException::bad_cmdline_argument(G_LOAD2, args[i],
-                                       "no parameter name before \"=\"");
+            std::string msg = "No parameter name found for before the \"=\" "
+                              "symbol for command line parameter \""+args[i]+
+                              "\". Please specify a valid command line "
+                              "parameter of the form \"name=value\".";
+            throw GException::invalid_argument(G_LOAD2, msg);
         }
         
         // Check if parameter exists
         if (!contains(name)) {
-            throw GException::bad_cmdline_argument(G_LOAD2, args[i],
-                                  "invalid parameter name \""+name+"\"");
+            std::string msg = "No parameter with name \""+name+"\" found. "
+                              "Please specify an existing command line "
+                              "parameter.";
+            throw GException::invalid_argument(G_LOAD2, msg);
         }
 
         // Assign value
         try {
             (*this)[name].value(value);
         }
-        catch (GException::par_error &e) {
-            throw GException::bad_cmdline_argument(G_LOAD2, args[i]);
+        catch (GException::invalid_value &e) {
+            std::string msg = "Assignment of command line parameter \""+
+                              args[i]+"\" failed.";
+            throw GException::invalid_argument(G_LOAD2, msg);
         }
 
         // Set mode to hidden to prevent querying the parameter
@@ -763,7 +776,7 @@ void GApplicationPars::load(const GFilename&                filename,
  *
  * @param[in] filename Parameter filename.
  *
- * @exception GException::par_file_not_found
+ * @exception GException::file_error
  *            No valid directory to write the parameter file has been found.
  ***************************************************************************/
 void GApplicationPars::save(const GFilename& filename)
@@ -771,7 +784,10 @@ void GApplicationPars::save(const GFilename& filename)
     // Get path to parameter file for output
     std::string path = outpath(filename.url());
     if (path.size() == 0) {
-        throw GException::par_file_not_found(G_SAVE, filename.url());
+        std::string msg = "Parameter file \""+filename+"\" not found. Please "
+                          "make sure that the PFILES environment variable is "
+                          "set correctly.";
+        throw GException::file_error(G_LOAD2, msg);
     }
 
     // Update parameter file
@@ -815,8 +831,6 @@ void GApplicationPars::pickle(const std::vector<std::string>& string)
         int n_par   = gammalib::toint(string[istring]);
         int i_start = istring + 1;
         int i_end   = i_start + n_par;
-        //std::vector<std::string> sub(string.begin()+i_start,
-        //                             string.begin()+i_end);
         GApplicationPar par;
         par.pickle(std::vector<std::string>(string.begin()+i_start,
                                             string.begin()+i_end));
@@ -1174,11 +1188,9 @@ std::string GApplicationPars::syspfiles_path(const std::string& filename) const
  *
  * @param[in] filename Parameter filename.
  *
- * @exception GException::home_not_found
+ * @exception GException::runtime_error
  *            Unable to determine users home directory.
- * @exception GException::could_not_create_pfiles
  *            Unable to create pfiles directory.
- * @exception GException::pfiles_not_accessible
  *            Unable to make pfiles directory accessible to user.
  *
  * Searchs for first writable directory listed in PFILES environment
@@ -1220,7 +1232,8 @@ std::string GApplicationPars::outpath(const std::string& filename) const
         gid_t gid         = getegid();
         struct passwd* pw = getpwuid(uid);
         if (pw == NULL) {
-            throw GException::home_not_found(G_OUTPATH);
+            std::string msg = "Unable to determine users home directory.";
+            throw GException::runtime_error(G_OUTPATH, msg);
         }
 
         // Set path
@@ -1230,7 +1243,8 @@ std::string GApplicationPars::outpath(const std::string& filename) const
         if (access(path.c_str(), F_OK) != 0) {
             if (mkdir(path.c_str(), 
                 S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
-                throw GException::could_not_create_pfiles(G_OUTPATH, path);
+                std::string msg = "Unable to create \""+path+"\".";
+                throw GException::runtime_error(G_OUTPATH, msg);
             }
         }
 
@@ -1239,7 +1253,10 @@ std::string GApplicationPars::outpath(const std::string& filename) const
             if (chown(path.c_str(), uid, gid) != 0 ||
                 chmod(path.c_str(), 
                       S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
-                throw GException::pfiles_not_accessible(G_OUTPATH, path);
+                std::string msg = "Could not make \""+path+"\" write "
+                                  "accessible for writing of the applications "
+                                  "parameter file.";
+                throw GException::runtime_error(G_OUTPATH, msg);
             }
         }
 
@@ -1258,7 +1275,7 @@ std::string GApplicationPars::outpath(const std::string& filename) const
  *
  * @param[in] filename Parameter filename (absolut path).
  *
- * @exception GException::par_file_open_error
+ * @exception GException::file_error
  *            Unable to open parameter file (read access requested).
  *
  * Read all lines of the parameter file. Each line is terminated by a newline
@@ -1287,13 +1304,15 @@ void GApplicationPars::read(const std::string& filename)
         lock.l_pid    = getpid(); // Current process ID
         int fd;
         if ((fd = open(filename.c_str(), O_RDONLY)) == -1) {
-            throw GException::par_file_open_error(G_READ, filename,
-                  "Could not open file for locking.");
+            std::string msg = "Could not open parameter file \""+filename+
+                              "\" for locking.";
+            throw GException::file_error(G_READ, msg);
         }
         #if defined(G_CHECK_LOCK_PARFILE)
         if (fcntl(fd, F_SETLKW, &lock) == -1) { // F_SETLKW: wait until unlocked
-            throw GException::par_file_open_error(G_READ, filename,
-                  "Could not get a lock on the file.");
+            std::string msg = "Could not get a lock on the parameter file \""+
+                              filename+"\".";
+            throw GException::file_error(G_READ, msg);
         }
         #else
         fcntl(fd, F_SETLKW, &lock);
@@ -1303,7 +1322,9 @@ void GApplicationPars::read(const std::string& filename)
         // Open parameter file
         FILE* fptr = fopen(filename.c_str(), "r");
         if (fptr == NULL) {
-            throw GException::par_file_open_error(G_READ, filename);
+            std::string msg = "Could not open the parameter file \""+
+                              filename+"\" for reading.";
+            throw GException::file_error(G_READ, msg);
         }
 
         // Read lines
@@ -1320,8 +1341,9 @@ void GApplicationPars::read(const std::string& filename)
             lock.l_type = F_UNLCK;
             #if defined(G_CHECK_LOCK_PARFILE)
             if (fcntl(fd, F_SETLK, &lock) == -1) {
-                throw GException::par_file_open_error(G_READ, filename,
-                      "Could not unlock the file.");
+                std::string msg = "Could not unlock the parameter file \""+
+                                  filename+"\".";
+                throw GException::file_error(G_READ, msg);
             }
             #else
             fcntl(fd, F_SETLK, &lock);
@@ -1341,7 +1363,7 @@ void GApplicationPars::read(const std::string& filename)
  *
  * @param[in] filename Parameter filename (absolut path).
  *
- * @exception GException::par_file_open_error
+ * @exception GException::file_error
  *            Unable to open parameter file (write access requested).
  *
  * Writes all lines of the parameter file. The file will be locked to avoid
@@ -1369,8 +1391,9 @@ void GApplicationPars::write(const std::string& filename) const
         if ((fd = open(filename.c_str(), O_WRONLY)) != -1) {
             #if defined(G_CHECK_LOCK_PARFILE)
             if (fcntl(fd, F_SETLKW, &lock) == -1) { // F_SETLKW: wait until unlocked
-                throw GException::par_file_open_error(G_WRITE, filename,
-                      "Could not get a lock on the file.");
+                std::string msg = "Could not get a lock on the parameter file \""+
+                                  filename+"\".";
+                throw GException::file_error(G_WRITE, msg);
             }
             #else
             fcntl(fd, F_SETLKW, &lock);
@@ -1381,7 +1404,9 @@ void GApplicationPars::write(const std::string& filename) const
         // Open parameter file.
         FILE* fptr = fopen(filename.c_str(), "w");
         if (fptr == NULL) {
-            throw GException::par_file_open_error(G_WRITE, filename);
+            std::string msg = "Could not open the parameter file \""+
+                              filename+"\" for writing.";
+            throw GException::file_error(G_WRITE, msg);
         }
 
         // If file is not locked then lock it now.
@@ -1391,8 +1416,9 @@ void GApplicationPars::write(const std::string& filename) const
                 #if defined(G_CHECK_LOCK_PARFILE)
                 if (fcntl(fd, F_SETLKW, &lock) == -1) { // F_SETLKW: wait until unlocked
                     fclose(fptr);
-                    throw GException::par_file_open_error(G_WRITE, filename,
-                          "Could not get a lock on the file.");
+                    std::string msg = "Could not get a lock on the parameter "
+                                      "file \""+filename+"\".";
+                    throw GException::file_error(G_WRITE, msg);
                 }
                 #else
                 fcntl(fd, F_SETLKW, &lock);
@@ -1415,8 +1441,9 @@ void GApplicationPars::write(const std::string& filename) const
             lock.l_type = F_UNLCK;
             #if defined(G_CHECK_LOCK_PARFILE)
             if (fcntl(fd, F_SETLK, &lock) == -1) {
-                throw GException::par_file_open_error(G_WRITE, filename,
-                      "Could not unlock the file.");
+                std::string msg = "Could not unlock the parameter file \""+
+                                  filename+"\".";
+                throw GException::file_error(G_WRITE, msg);
             }
             #else
             fcntl(fd, F_SETLK, &lock);
@@ -1434,7 +1461,7 @@ void GApplicationPars::write(const std::string& filename) const
 /***********************************************************************//**
  * @brief Parse parameter file
  *
- * @exception GException::par_file_syntax_error
+ * @exception GException::invalid_value
  *            Syntax error encountered in parameter file.
  *
  * The parameter type has to be one b,i,r,s,f,fr,fw,fe,fn. The fr,fw,fe,fn
@@ -1504,23 +1531,30 @@ void GApplicationPars::parse(void)
 
         // Throw an error if quotes are not balanced
         if (quotes != 0) {
-            throw GException::par_file_syntax_error(G_PARSE, 
-                                                    gammalib::strip_chars(line,"\n"),
-                                                    "quotes are not balanced");
+            std::string msg = "Quotes are not balanced in the following line "
+                              "of the parameter file: "+
+                              gammalib::strip_chars(line,"\n")+". Please "
+                              "correct the parameter file.";
+            throw GException::invalid_value(G_PARSE, msg);
         }
 
         // Throw an error if line has not 7 fields
         if (index != 7) {
-            throw GException::par_file_syntax_error(G_PARSE, 
-                                                    gammalib::strip_chars(line,"\n"),
-                                 "found "+gammalib::str(index)+" fields, require 7");
+            std::string msg = "Number of fields ("+gammalib::str(index)+") "
+                              "does not correspond to the expected number of "
+                              "7 fields in the following line of the parameter "
+                              "file: "+gammalib::strip_chars(line,"\n")+". "
+                              "Please correct the parameter file.";
+            throw GException::invalid_value(G_PARSE, msg);
         }
 
         // Verify if parameter name does not yet exist
         if (contains(fields[0])) {
-            throw GException::par_file_syntax_error(G_PARSE, 
-                                                    gammalib::strip_chars(line,"\n"),
-                          "redefinition of parameter name \""+fields[0]+"\"");
+            std::string msg = "Redefinition of parameter name \""+fields[0]+
+                              "\" in the following line of the parameter "
+                              "file: "+gammalib::strip_chars(line,"\n")+". "
+                              "Please correct the parameter file.";
+            throw GException::invalid_value(G_PARSE, msg);
         }
 
         // Add parameter
@@ -1532,10 +1566,12 @@ void GApplicationPars::parse(void)
             m_vstart.push_back(vstart);
             m_vstop.push_back(vstop);
         }
-        catch (GException::par_error &e) {
-            throw GException::par_file_syntax_error(G_PARSE, 
-                                                    gammalib::strip_chars(line,"\n"),
-                                                                 e.what());
+        catch (GException::invalid_value &e) {
+            std::string msg = "Error \""+std::string(e.what())+"\" encountered "
+                              "in the following line of the parameter file: "+
+                              gammalib::strip_chars(line,"\n")+". "
+                              "Please correct the parameter file.";
+            throw GException::invalid_value(G_PARSE, msg);
         }
 
         // If parameter name is mode then store the effective mode
@@ -1543,9 +1579,12 @@ void GApplicationPars::parse(void)
             if (fields[3] != "h"  && fields[3] != "q" &&
                 fields[3] != "hl" && fields[3] != "ql" &&
                 fields[3] != "lh" && fields[3] != "lq") {
-                throw GException::par_file_syntax_error(G_PARSE, 
-                                                    gammalib::strip_chars(line,"\n"),
-                       "mode parameter has invalid value \""+fields[3]+"\"");
+                std::string msg = "Mode parameter has invalid value \""+
+                                  fields[3]+"\" in the following line of the "
+                                  "parameter file: "+
+                                  gammalib::strip_chars(line,"\n")+". "
+                                  "Please correct the parameter file.";
+                throw GException::invalid_value(G_PARSE, msg);
             }
             m_mode = fields[3];
         }

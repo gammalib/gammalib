@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GException.hpp - Exception handler                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2021cby Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -474,62 +474,6 @@ public:
     public:
         wcs_invalid_phi_theta(std::string origin, int num, std::string message = "");
     };
-
-
-    // Application exceptions
-    class app_error : public GExceptionHandler {
-    public:
-        app_error(const std::string& origin,
-                  const std::string& message = "");
-    };
-    class par_file_not_found : public GExceptionHandler {
-    public:
-        par_file_not_found(const std::string& origin,
-                           const std::string& filename,
-                           const std::string& message = "");
-    };
-    class par_file_open_error : public GExceptionHandler {
-    public:
-        par_file_open_error(const std::string& origin,
-                            const std::string& filename,
-                            const std::string& message = "");
-    };
-    class home_not_found : public GExceptionHandler {
-    public:
-        home_not_found(const std::string& origin,
-                       const std::string& message = "");
-    };
-    class could_not_create_pfiles : public GExceptionHandler {
-    public:
-        could_not_create_pfiles(const std::string& origin,
-                                const std::string& home,
-                                const std::string& message = "");
-    };
-    class pfiles_not_accessible : public GExceptionHandler {
-    public:
-        pfiles_not_accessible(const std::string& origin,
-                              const std::string& home,
-                              const std::string& message = "");
-    };
-    class par_file_syntax_error : public GExceptionHandler {
-    public:
-        par_file_syntax_error(const std::string& origin,
-                              const std::string& home,
-                              const std::string& message = "");
-    };
-    class par_error : public GExceptionHandler {
-    public:
-        par_error(const std::string& origin,
-                  const std::string& name,
-                  const std::string& message = "");
-    };
-    class bad_cmdline_argument : public GExceptionHandler {
-    public:
-        bad_cmdline_argument(const std::string& origin,
-                             const std::string& arg,
-                             const std::string& message = "");
-    };
-
 
     // Observation exceptions
     class no_response : public GExceptionHandler {

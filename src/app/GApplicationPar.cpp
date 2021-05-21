@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GApplicationPar.cpp - Application parameter               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,11 +33,11 @@
 #include <readline/readline.h>
 #endif
 #include <climits>            //!< Needed for declaration of LONG_MAX
-#include "GApplicationPar.hpp"
-#include "GTools.hpp"
 #include "GException.hpp"
+#include "GTools.hpp"
 #include "GFilename.hpp"
 #include "GTime.hpp"
+#include "GApplicationPar.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_STRING_SET                  "GApplicationPar::string(std::string&)"
