@@ -30,11 +30,11 @@
 #endif
 #include <cstdio>             // std::fopen, std::fgets, and std::fclose
 #include <cmath>
+#include "GException.hpp"
 #include "GTools.hpp"
 #include "GMath.hpp"
 #include "GRan.hpp"
 #include "GCTAPsfPerfTable.hpp"
-#include "GCTAException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_LOAD                           "GCTAPsfPerfTable::load(GFilename&)"
@@ -252,7 +252,7 @@ GCTAPsfPerfTable* GCTAPsfPerfTable::clone(void) const
  *
  * @param[in] filename Performance table file name.
  *
- * @exception GCTAExceptionHandler::file_open_error
+ * @exception GException::file_error
  *            File could not be opened for read access.
  *
  * This method loads the point spread function information from an ASCII
@@ -276,7 +276,10 @@ void GCTAPsfPerfTable::load(const GFilename& filename)
     // Open performance table readonly
     FILE* fptr = std::fopen(filename.url().c_str(), "r");
     if (fptr == NULL) {
-        throw GCTAException::file_open_error(G_LOAD, filename);
+        std::string msg = "Point spread function file \""+filename.url()+
+                          "\" not found or readable. Please specify a valid "
+                          "and readable point spread function file.";
+        throw GException::file_error(G_LOAD, msg);
     }
 
     // Read lines

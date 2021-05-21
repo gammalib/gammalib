@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTAEventBin.cpp - CTA event bin class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,9 +30,9 @@
 #endif
 #include <string>
 #include <cmath>
-#include "GCTAEventBin.hpp"
-#include "GCTAException.hpp"
+#include "GException.hpp"
 #include "GTools.hpp"
+#include "GCTAEventBin.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_DIR_GET                                       "GCTAEventBin::dir()"
@@ -209,7 +209,7 @@ double GCTAEventBin::size(void) const
  * @return Instrument direction of event bin
  *
  * @exception GException::invalid_value
- *            Invalid instrument direction pointer.
+ *            Invalid instrument direction pointer encountered.
  *
  * Returns reference to the instrument direction of the event bin.
  ***************************************************************************/
@@ -217,7 +217,8 @@ const GCTAInstDir& GCTAEventBin::dir(void) const
 {
     // Throw an exception if instrument direction pointer is not valid
     if (m_dir == NULL) {
-        std::string msg = "No valid instrument direction found in event bin";
+        std::string msg = "Invalid instrument direction pointer encountered. "
+                          "Please set up the event bin correctly.";
         throw GException::invalid_value(G_DIR_GET, msg);
     }
 
@@ -232,7 +233,7 @@ const GCTAInstDir& GCTAEventBin::dir(void) const
  * @return Energy of event bin
  *
  * @exception GException::invalid_value
- *            Invalid energy pointer.
+ *            Invalid energy pointer encountered.
  *
  * Returns reference to the energy of the event bin.
  ***************************************************************************/
@@ -240,7 +241,8 @@ const GEnergy& GCTAEventBin::energy(void) const
 {
     // Throw an exception if energy pointer is not valid
     if (m_energy == NULL) {
-        std::string msg = "No valid energy found in event bin";
+        std::string msg = "Invalid energy pointer encountered. Please set up "
+                          "the event bin correctly.";
         throw GException::invalid_value(G_ENERGY, msg);
     }
 
@@ -255,15 +257,16 @@ const GEnergy& GCTAEventBin::energy(void) const
  * @return Time of event bin
  *
  * @exception GException::invalid_value
- *            Invalid time pointer.
+ *            Invalid time pointer encountered.
  *
  * Returns reference to the time of the event bin.
  ***************************************************************************/
 const GTime& GCTAEventBin::time(void) const
 {
     // Throw an exception if time pointer is not valid
-    if (m_energy == NULL) {
-        std::string msg = "No valid time found in event bin";
+    if (m_time == NULL) {
+        std::string msg = "Invalid time pointer encountered. Please set up "
+                          "the event bin correctly.";
         throw GException::invalid_value(G_TIME, msg);
     }
 
@@ -277,7 +280,7 @@ const GTime& GCTAEventBin::time(void) const
  *
  * @return Number of counts in event bin
  *
- * @exception GCTAException::invalid_value
+ * @exception GException::invalid_value
  *            Invalid counts pointer.
  *
  * Returns reference to the number of counts in the event bin.
@@ -286,7 +289,8 @@ double GCTAEventBin::counts(void) const
 {
     // Throw an exception if counts pointer is not valid
     if (m_counts == NULL) {
-        std::string msg = "No valid counts found in event bin";
+        std::string msg = "Invalid counts pointer encountered. Please set up "
+                          "the event bin correctly.";
         throw GException::invalid_value(G_COUNTS_GET, msg);
     }
 
@@ -324,7 +328,7 @@ double GCTAEventBin::error(void) const
  * @return Solid angle of event bin
  *
  * @exception GException::invalid_value
- *            Invalid solid angle pointer.
+ *            Invalid solid angle pointer encountered.
  *
  * Returns reference to the solid angle of the event bin.
  ***************************************************************************/
@@ -332,7 +336,8 @@ const double& GCTAEventBin::solidangle(void) const
 {
     // Throw an exception if counts pointer is not valid
     if (m_solidangle == NULL) {
-        std::string msg = "No valid solid angle found in event bin";
+        std::string msg = "Invalid solid angle pointer encountered. Please "
+                          "set up the event bin correctly.";
         throw GException::invalid_value(G_SOLIDANGLE, msg);
     }
 
@@ -381,7 +386,7 @@ GEnergy GCTAEventBin::emin(void) const
  * @return Energy width of event bin
  *
  * @exception GException::invalid_value
- *            Invalid energy width pointer.
+ *            Invalid energy width pointer encountered.
  *
  * Returns reference to the energy width of the event bin.
  ***************************************************************************/
@@ -389,7 +394,8 @@ const GEnergy& GCTAEventBin::ewidth(void) const
 {
     // Throw an exception if energy width pointer is not valid
     if (m_ewidth == NULL) {
-        std::string msg = "No valid energy width found in event bin";
+        std::string msg = "Invalid energy width pointer encountered. Please "
+                          "set up the event bin correctly.";
         throw GException::invalid_value(G_EWIDTH, msg);
     }
 
@@ -404,7 +410,7 @@ const GEnergy& GCTAEventBin::ewidth(void) const
  * @return Ontime of event bin
  *
  * @exception GException::invalid_value
- *            Invalid ontime pointer.
+ *            Invalid ontime pointer encountered.
  *
  * Returns reference to the ontime of the event bin.
  ***************************************************************************/
@@ -412,7 +418,8 @@ const double& GCTAEventBin::ontime(void) const
 {
     // Throw an exception if energy width pointer is not valid
     if (m_ontime == NULL) {
-        std::string msg = "No valid ontime found in event bin";
+        std::string msg = "Invalid ontime pointer encountered. Please set up "
+                          "the event bin correctly.";
         throw GException::invalid_value(G_ONTIME, msg);
     }
 
@@ -427,7 +434,7 @@ const double& GCTAEventBin::ontime(void) const
  * @return Weight of event bin
  *
  * @exception GException::invalid_value
- *            Invalid weight pointer.
+ *            Invalid weight pointer encountered.
  *
  * Returns reference to the weight of the event bin.
  ***************************************************************************/
@@ -435,7 +442,8 @@ const double& GCTAEventBin::weight(void) const
 {
     // Throw an exception if weight pointer is not valid
     if (m_weight == NULL) {
-        std::string msg = "No valid weight found in event bin";
+        std::string msg = "Invalid weight pointer encountered. Please set up "
+                          "the event bin correctly.";
         throw GException::invalid_value(G_WEIGHT, msg);
     }
 
@@ -502,7 +510,7 @@ void GCTAEventBin::energy(const GEnergy& energy)
  * @param[in] time Time of event bin
  *
  * @exception GException::invalid_value
- *            No memory available to hold instrument direction.
+ *            No memory available to hold time.
  *
  * Sets the time of the event bin.
  ***************************************************************************/
@@ -655,7 +663,7 @@ void GCTAEventBin::weight(const double& weight)
 /***********************************************************************//**
  * @brief Print event information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing event information.
  ***************************************************************************/
 std::string GCTAEventBin::print(const GChatter& chatter) const

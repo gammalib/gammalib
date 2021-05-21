@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GCTAAeffPerfTable.hpp - CTA performance table effective area class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,11 +29,11 @@
 #include <config.h>
 #endif
 #include <cstdio>             // std::fopen, std::fgets, and std::fclose
+#include "GException.hpp"
 #include "GTools.hpp"
 #include "GMath.hpp"
 #include "GFitsTable.hpp"
 #include "GCTAAeffPerfTable.hpp"
-#include "GCTAException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_LOAD                        "GCTAAeffPerfTable::load(std::string&)"
@@ -250,7 +250,7 @@ GCTAAeffPerfTable* GCTAAeffPerfTable::clone(void) const
  *
  * @param[in] filename Performance table file name.
  *
- * @exception GCTAExceptionHandler::file_open_error
+ * @exception GException::file_error
  *            File could not be opened for read access.
  *
  * This method loads the effective area information from an ASCII
@@ -269,7 +269,10 @@ void GCTAAeffPerfTable::load(const GFilename& filename)
     // Open performance table readonly
     FILE* fptr = std::fopen(filename.url().c_str(), "r");
     if (fptr == NULL) {
-        throw GCTAException::file_open_error(G_LOAD, filename.url());
+        std::string msg = "Effective area file \""+filename.url()+"\" not "
+                          "found or readable. Please specify a valid and "
+                          "readable effective area file.";
+        throw GException::file_error(G_LOAD, msg);
     }
 
     // Read lines

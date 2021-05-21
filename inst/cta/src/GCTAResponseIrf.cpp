@@ -31,9 +31,10 @@
 #include <cmath>
 #include <vector>
 #include <string>
-#include "GFits.hpp"
+#include "GException.hpp"
 #include "GTools.hpp"
 #include "GMath.hpp"
+#include "GFits.hpp"
 #include "GFilename.hpp"
 #include "GIntegral.hpp"
 #include "GCaldb.hpp"
@@ -54,7 +55,6 @@
 #include "GCTAEventAtom.hpp"
 #include "GCTAEventList.hpp"
 #include "GCTARoi.hpp"
-#include "GCTAException.hpp"
 #include "GCTASupport.hpp"
 #include "GCTAAeff.hpp"
 #include "GCTAAeff2D.hpp"
@@ -2289,7 +2289,7 @@ double GCTAResponseIrf::irf_ptsrc(const GEvent&       event,
  * @param[in] source Source.
  * @param[in] obs Observation.
  *
- * @exception GCTAException::bad_model_type
+ * @exception GException::invalid_argument
  *            Model is not a radial model.
  *
  * Integrates the product of the spatial model and the instrument response
@@ -2339,7 +2339,11 @@ double GCTAResponseIrf::irf_radial(const GEvent&       event,
     const GModelSpatialRadial* model =
           dynamic_cast<const GModelSpatialRadial*>(source.model());
     if (model == NULL) {
-        throw GCTAException::bad_model_type(G_IRF_RADIAL);
+        std::string cls = std::string(typeid(source.model()).name());
+        std::string msg = "Invalid spatial model type \""+cls+"\" specified. "
+                          "Please specify a \"GModelSpatialRadial\" source "
+                          "model as argument.";
+        throw GException::invalid_argument(G_IRF_RADIAL, msg);
     }
 
     // Get pointer on shell model (will be NULL for other models)
@@ -2522,9 +2526,7 @@ double GCTAResponseIrf::irf_radial(const GEvent&       event,
  * @param[in] source Source.
  * @param[in] obs Observation.
  *
- * @exception GCTAException::bad_instdir_type
- *            Instrument direction is not a valid CTA instrument direction.
- * @exception GCTAException::bad_model_type
+ * @exception GException::invalid_argument
  *            Model is not an elliptical model.
  *
  * Integrates the product of the model and the IRF over the true photon
@@ -2571,7 +2573,11 @@ double GCTAResponseIrf::irf_elliptical(const GEvent&       event,
     const GModelSpatialElliptical* model =
           dynamic_cast<const GModelSpatialElliptical*>(source.model());
     if (model == NULL) {
-        throw GCTAException::bad_model_type(G_IRF_ELLIPTICAL);
+        std::string cls = std::string(typeid(source.model()).name());
+        std::string msg = "Invalid spatial model type \""+cls+"\" specified. "
+                          "Please specify a \"GModelSpatialElliptical\" source "
+                          "model as argument.";
+        throw GException::invalid_argument(G_IRF_ELLIPTICAL, msg);
     }
 
     // Get event attributes (measured photon)
@@ -2774,7 +2780,11 @@ double GCTAResponseIrf::irf_diffuse(const GEvent&       event,
     const GModelSpatial* model =
         dynamic_cast<const GModelSpatial*>(source.model());
     if (model == NULL) {
-        throw GCTAException::bad_model_type(G_IRF_DIFFUSE);
+        std::string cls = std::string(typeid(source.model()).name());
+        std::string msg = "Invalid spatial model type \""+cls+"\" specified. "
+                          "Please specify a \"GModelSpatial\" source "
+                          "model as argument.";
+        throw GException::invalid_argument(G_IRF_DIFFUSE, msg);
     }
 
     // Get resolution of spatial model
@@ -2936,6 +2946,10 @@ double GCTAResponseIrf::nroi_ptsrc(const GModelSky&    model,
  * @param[in] obsEng Observed event energy.
  * @param[in] obsTime Observed event arrival time.
  * @param[in] obs Observation.
+ * @return Spatial integral of radial source model.
+ *
+ * @exception GException::invalid_argument
+ *            Invalid spatial model specified.
  *
  * Computes the integral
  *
@@ -2978,7 +2992,11 @@ double GCTAResponseIrf::nroi_radial(const GModelSky&    model,
     const GModelSpatialRadial* spatial =
           dynamic_cast<const GModelSpatialRadial*>(model.spatial());
     if (spatial == NULL) {
-        throw GCTAException::bad_model_type(G_NROI_RADIAL);
+        std::string cls = std::string(typeid(model.spatial()).name());
+        std::string msg = "Invalid spatial model type \""+cls+"\" specified. "
+                          "Please specify a \"GModelSpatialRadial\" source "
+                          "model as argument.";
+        throw GException::invalid_argument(G_NROI_RADIAL, msg);
     }
 
     // Get source attributes
@@ -3131,6 +3149,10 @@ double GCTAResponseIrf::nroi_radial(const GModelSky&    model,
  * @param[in] obsEng Observed event energy.
  * @param[in] obsTime Observed event arrival time.
  * @param[in] obs Observation.
+ * @return Spatial integral of elliptical source model.
+ *
+ * @exception GException::invalid_argument
+ *            Invalid spatial model specified.
  *
  * Computes the integral
  *
@@ -3173,7 +3195,11 @@ double GCTAResponseIrf::nroi_elliptical(const GModelSky&    model,
     const GModelSpatialElliptical* spatial =
           dynamic_cast<const GModelSpatialElliptical*>(model.spatial());
     if (spatial == NULL) {
-        throw GCTAException::bad_model_type(G_NROI_ELLIPTICAL);
+        std::string cls = std::string(typeid(model.spatial()).name());
+        std::string msg = "Invalid spatial model type \""+cls+"\" specified. "
+                          "Please specify a \"GModelSpatialElliptical\" source "
+                          "model as argument.";
+        throw GException::invalid_argument(G_NROI_ELLIPTICAL, msg);
     }
 
     // Get source attributes
@@ -3318,6 +3344,10 @@ double GCTAResponseIrf::nroi_elliptical(const GModelSky&    model,
  * @param[in] obsEng Observed event energy.
  * @param[in] obsTime Observed event arrival time.
  * @param[in] obs Observation.
+ * @return Spatial integral of diffuse source model.
+ *
+ * @exception GException::invalid_argument
+ *            Invalid spatial model specified.
  *
  * Computes the integral
  *
@@ -3360,7 +3390,11 @@ double GCTAResponseIrf::nroi_diffuse(const GModelSky&    model,
     const GModelSpatial* spatial =
         dynamic_cast<const GModelSpatial*>(model.spatial());
     if (spatial == NULL) {
-        throw GCTAException::bad_model_type(G_NROI_DIFFUSE);
+        std::string cls = std::string(typeid(model.spatial()).name());
+        std::string msg = "Invalid spatial model type \""+cls+"\" specified. "
+                          "Please specify a \"GModelSpatial\" source "
+                          "model as argument.";
+        throw GException::invalid_argument(G_NROI_DIFFUSE, msg);
     }
 
     // Get pointing direction zenith angle and azimuth [radians]

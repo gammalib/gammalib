@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAEventAtom.cpp - CTA event atom class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2021 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,9 +30,8 @@
 #endif
 #include <string>
 #include <cmath>
-#include "GCTAEventAtom.hpp"
-#include "GCTAException.hpp"
 #include "GTools.hpp"
+#include "GCTAEventAtom.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 

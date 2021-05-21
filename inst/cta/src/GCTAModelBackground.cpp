@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GCTAModelBackground.cpp - Background model class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2018-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2018-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,7 +28,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GException.hpp"
 #include "GTools.hpp"
 #include "GMath.hpp"
 #include "GModelRegistry.hpp"
@@ -42,7 +41,6 @@
 #include "GCTAPointing.hpp"
 #include "GCTAInstDir.hpp"
 #include "GCTARoi.hpp"
-#include "GCTAException.hpp"
 #include "GCTASupport.hpp"
 
 /* __ Constants __________________________________________________________ */

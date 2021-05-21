@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 #include <cmath>
+#include "GException.hpp"
 #include "GTools.hpp"
 #include "GMath.hpp"
 #include "GException.hpp"
@@ -38,7 +39,6 @@
 #include "GFitsTable.hpp"
 #include "GFitsBinTable.hpp"
 #include "GCTAPsfKing.hpp"
-#include "GCTAException.hpp"
 #include "GCTASupport.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -569,10 +569,10 @@ double GCTAPsfKing::containment_radius(const double& fraction,
 
     // Check input argument
     if (fraction <= 0.0 || fraction >= 1.0) {
-        std::string message = "Containment fraction "+
-                              gammalib::str(fraction)+" must be between " +
-                              "0.0 and 1.0, not inclusive.";
-        throw GException::invalid_argument(G_CONTAINMENT_RADIUS, message);
+        std::string msg = "Containment fraction "+gammalib::str(fraction)+
+                          " must be in interval ]0,1[. Please specify a valid "
+                          "containment fraction.";
+        throw GException::invalid_argument(G_CONTAINMENT_RADIUS, msg);
     }
 
     // Update the parameter cache

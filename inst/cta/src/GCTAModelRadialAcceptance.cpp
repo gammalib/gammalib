@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTAModelRadialAcceptance.cpp - Radial acceptance model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -42,7 +42,6 @@
 #include "GCTAPointing.hpp"
 #include "GCTAInstDir.hpp"
 #include "GCTARoi.hpp"
-#include "GCTAException.hpp"
 #include "GCTASupport.hpp"
 
 /* __ Constants __________________________________________________________ */
@@ -479,11 +478,6 @@ double GCTAModelRadialAcceptance::eval(const GEvent&       event,
  * @return Spatially integrated background rate
  *         (events MeV\f$^{-1}\f$ s\f$^{-1}\f$)
  *
- * @exception GException::no_list
- *            No valid CTA event list found in observation
- * @exception GCTAException::no_pointing
- *            No valid CTA pointing found in observation
- *
  * Spatially integrates the data model for a given measured event energy and
  * event time. The method returns a real rate, defined as the number of
  * counts per MeV and ontime.
@@ -537,9 +531,6 @@ double GCTAModelRadialAcceptance::npred(const GEnergy&      obsEng,
  *
  * @param[in] obs Observation.
  * @param[in] ran Random number generator.
- *
- * @exception GCTAException::no_pointing
- *            No CTA pointing found in observation.
  *
  * Draws a sample of events from the radial acceptance model using a Monte
  * Carlo simulation. The pointing information, the energy boundaries and the
@@ -962,7 +953,7 @@ bool GCTAModelRadialAcceptance::valid_model(void) const
  *
  * @param[in] radial XML element containing radial model information.
  *
- * @exception GCTAException::model_invalid_radial
+ * @exception GException::invalid_argument
  *            Invalid radial model type encountered.
  *
  * Returns pointer to a radial model that is defined in an XML element.
@@ -983,7 +974,10 @@ GCTAModelRadial* GCTAModelRadialAcceptance::xml_radial(const GXmlElement& radial
 
     // ... otherwise throw an exception
     else {
-        throw GCTAException::model_invalid_radial(G_XML_RADIAL, type);
+        std::string msg = "Invalid radial model type \""+type+"\" encountered. "
+                          "No such model exists in the registry of radial "
+                          "models. Please specify valid radial model type.";
+        throw GException::invalid_argument(G_XML_RADIAL, msg);
     }
 
     // Return pointer

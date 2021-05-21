@@ -34,7 +34,6 @@
 #include "GCTATypemaps.hpp"
 
 /* __ CTA specific headers _______________________________________________ */
-#include "GCTAException.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAOnOffObservation.hpp"
 #include "GCTAEventList.hpp"

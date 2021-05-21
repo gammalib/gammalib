@@ -36,7 +36,6 @@ INCLUDES = -I$(top_srcdir)/include \
 # Define sources for this directory
 sources = src/cta_helpers_response_stacked_vector.cpp \
           src/GCTASupport.cpp \
-          src/GCTAException.cpp \
           src/GCTAObservation.cpp \
           src/GCTAOnOffObservation.cpp \
           src/GCTAEventList.cpp \
@@ -94,7 +93,6 @@ sources = src/cta_helpers_response_stacked_vector.cpp \
 
 # Define headers to be installed
 pkginclude_HEADERS = include/GCTATypemaps.hpp \
-                     include/GCTAException.hpp \
                      include/GCTAObservation.hpp \
                      include/GCTAOnOffObservation.hpp \
                      include/GCTAEventList.hpp \

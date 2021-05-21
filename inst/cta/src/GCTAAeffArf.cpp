@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAAeffArf.cpp - CTA ARF effective area class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,7 +38,6 @@
 #include "GCTAAeffArf.hpp"
 #include "GCTAResponseIrf.hpp"
 #include "GCTAResponse_helpers.hpp"
-#include "GCTAException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 

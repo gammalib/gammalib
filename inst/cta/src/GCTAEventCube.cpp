@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GCTAEventCube.cpp  -  CTA event bin container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,11 +28,11 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GException.hpp"
 #include "GTools.hpp"
 #include "GFits.hpp"
 #include "GCTAEventCube.hpp"
 #include "GCTATypemaps.hpp"
-#include "GCTAException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_NAXIS                                   "GCTAEventCube::naxis(int)"
@@ -864,7 +864,7 @@ void GCTAEventCube::read_gti(const GFitsTable& hdu)
 /***********************************************************************//**
  * @brief Set sky directions and solid angles of events cube.
  *
- * @exception GCTAException::no_sky
+ * @exception GException::invalid_value
  *            No sky pixels found in event cube.
  *
  * This method computes the sky directions and solid angles for all event
@@ -882,8 +882,9 @@ void GCTAEventCube::set_directions(void)
 {
     // Throw an error if we have no sky pixels
     if (npix() < 1) {
-        throw GCTAException::no_sky(G_SET_DIRECTIONS, "Every CTA event cube"
-                                   " needs a definition of the sky pixels.");
+        std::string msg = "CTA event cube contains no sky pixels. Please "
+                          "provide a valid CTA event cube.";
+        throw GException::invalid_value(G_SET_DIRECTIONS, msg);
     }
 
     // Clear old pixel directions and solid angle
@@ -945,7 +946,7 @@ void GCTAEventCube::set_detxy(const GCTAPointing& pnt)
 /***********************************************************************//**
  * @brief Set log mean energies and energy widths of event cube.
  *
- * @exception GCTAException::no_ebds
+ * @exception GException::invalid_value
  *            No energy boundaries found in event cube.
  *
  * This method computes the log mean energies and the energy widths of the
@@ -959,8 +960,9 @@ void GCTAEventCube::set_energies(void)
 
     // Throw an error if we have no energy bins
     if (ebins < 1) {
-        throw GCTAException::no_ebds(G_SET_ENERGIES, "Every CTA event cube"
-                             " needs a definition of the energy boundaries.");
+        std::string msg = "CTA event cube contains no energy boundaries. "
+                          "Please provide a valid CTA event cube.";
+        throw GException::invalid_value(G_SET_ENERGIES, msg);
     }
 
     // Clear old bin energies and energy widths
@@ -1044,9 +1046,8 @@ void GCTAEventCube::init_bin(void)
  *
  * @exception GException::out_of_range
  *            Event index is outside valid range.
- * @exception GCTAException::no_energies
+ * @exception GException::invalid_value
  *            Energy vectors have not been set up.
- * @exception GCTAException::no_dirs
  *            Sky directions and solid angles vectors have not been set up.
  *
  * This method provides the event attributes to the event bin. The event bin
@@ -1066,12 +1067,24 @@ void GCTAEventCube::set_bin(const int& index)
 
     // Check for the existence of energies and energy widths
     if (m_energies.size() != ebins() || m_ewidth.size() != ebins()) {
-        throw GCTAException::no_energies(G_SET_BIN);
+        std::string msg = "Number of energy bins ("+gammalib::str(ebins())+
+                          ") is incompatible with size of energies ("+
+                          gammalib::str(m_energies.size())+") an/or size of "
+                          "energy widths ("+gammalib::str(m_ewidth.size())+
+                          "). Please provide an correctly initialised event "
+                          "cube.";
+        throw GException::invalid_value(G_SET_BIN, msg);
     }
 
     // Check for the existence of sky directions and solid angles
     if (m_dirs.size() != npix() || m_solidangle.size() != npix()) {
-        throw GCTAException::no_dirs(G_SET_BIN);
+        std::string msg = "Number of sky pixels ("+gammalib::str(npix())+
+                          ") is incompatible with size of sky directions ("+
+                          gammalib::str(m_dirs.size())+") and/or size of "
+                          "solid angles ("+gammalib::str(m_solidangle.size())+
+                          "). Please provide an correctly initialised event "
+                          "cube.";
+        throw GException::invalid_value(G_SET_BIN, msg);
     }
 
     // Set pixel and energy bin indices.
