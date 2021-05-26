@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCsv.cpp - Comma-separated values table class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -178,15 +178,18 @@ GCsv& GCsv::operator=(const GCsv& csv)
 /***********************************************************************//**
  * @brief Table element access operator
  *
- * @param[in] row Table row.
- * @param[in] col Table column.
+ * @param[in] row Table row [0,...,m_rows[.
+ * @param[in] col Table column [0,...,m_cols[.
  ***************************************************************************/
 std::string& GCsv::operator()(const int& row, const int& col)
 {
     // Perform range check
     #if defined(G_RANGE_CHECK)
-    if (row < 0 || row >= m_rows || col < 0 || col >= m_cols) {
-        throw GException::out_of_range(G_ACCESS, row, col, m_rows-1, m_cols-1);
+    if (row < 0 || row >= m_rows) {
+        throw GException::out_of_range(G_ACCESS, "Table row", row, m_rows);
+    }
+    if (col < 0 || col >= m_cols) {
+        throw GException::out_of_range(G_ACCESS, "Table column", col, m_cols);
     }
     #endif
 
@@ -198,15 +201,18 @@ std::string& GCsv::operator()(const int& row, const int& col)
 /***********************************************************************//**
  * @brief Table element access operator (const version)
  *
- * @param[in] row Table row.
- * @param[in] col Table column.
+ * @param[in] row Table row [0,...,m_rows[.
+ * @param[in] col Table column [0,...,m_cols[.
  ***************************************************************************/
 const std::string& GCsv::operator()(const int& row, const int& col) const
 {
     // Perform range check
     #if defined(G_RANGE_CHECK)
-    if (row < 0 || row >= m_rows || col < 0 || col >= m_cols) {
-        throw GException::out_of_range(G_ACCESS, row, col, m_rows, m_cols);
+    if (row < 0 || row >= m_rows) {
+        throw GException::out_of_range(G_ACCESS, "Table row", row, m_rows);
+    }
+    if (col < 0 || col >= m_cols) {
+        throw GException::out_of_range(G_ACCESS, "Table column", col, m_cols);
     }
     #endif
 

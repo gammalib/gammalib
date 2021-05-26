@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GModelSpectralTablePars.i - Spectral table model par container class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2019-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2019-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -79,7 +79,8 @@ public:
             return (*self)[self->size()+index];
         }
         else {
-            throw GException::out_of_range("__getitem__(int)", "Parameter index",
+            throw GException::out_of_range("__getitem__(int)",
+                                           "Parameter index",
                                            index, self->size());
         }
     }
@@ -125,7 +126,8 @@ public:
             self->set(self->size()+index, val);
         }
         else {
-            throw GException::out_of_range("__setitem__(int)", "Model index",
+            throw GException::out_of_range("__setitem__(int)",
+                                           "Parameter index",
                                            index, self->size());
         }
     }

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GPhotons.cpp - Photon container class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -130,7 +130,8 @@ GPhotons& GPhotons::operator=(const GPhotons& photons)
 /***********************************************************************//**
  * @brief Return reference to photon
  *
- * @param[in] index Index of photon [0,...,size()-1]
+ * @param[in] index Photon index [0,...,size()[.
+ * @return Photon.
  *
  * @exception GException::out_of_range
  *            Photon index is out of range.
@@ -140,7 +141,8 @@ GPhoton& GPhotons::operator[](const int& index)
     // If index is outside boundary then throw an error
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_OP_ACCESS, index, 0, size()-1);
+        throw GException::out_of_range(G_OP_ACCESS, "Photon index",
+                                       index, size());
     }
     #endif
     
@@ -152,7 +154,8 @@ GPhoton& GPhotons::operator[](const int& index)
 /***********************************************************************//**
  * @brief Return reference to photon (const version)
  *
- * @param[in] index Index of photon [0,...,size()-1]
+ * @param[in] index Photon index [0,...,size()[.
+ * @return Photon.
  *
  * @exception GException::out_of_range
  *            Photon index is out of range.
@@ -162,7 +165,8 @@ const GPhoton& GPhotons::operator[](const int& index) const
     // If index is outside boundary then throw an error
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_OP_ACCESS, index, 0, size()-1);
+        throw GException::out_of_range(G_OP_ACCESS, "Photon index",
+                                       index, size());
     }
     #endif
 
@@ -225,7 +229,7 @@ void GPhotons::append(const GPhoton& photon)
 /***********************************************************************//**
  * @brief Insert photon into container
  *
- * @param[in] index Photon index (0,...,size()-1).
+ * @param[in] index Photon index [0,...,size()[.
  * @param[in] photon Photon.
  *
  * @exception GException::out_of_range
@@ -240,12 +244,14 @@ void GPhotons::insert(const int& index, const GPhoton& photon)
     #if defined(G_RANGE_CHECK)
     if (is_empty()) {
         if (index > 0) {
-            throw GException::out_of_range(G_INSERT, index, 0, size()-1);
+            throw GException::out_of_range(G_INSERT, "Photon index",
+                                           index, size());
         }
     }
     else {
         if (index < 0 || index >= size()) {
-            throw GException::out_of_range(G_INSERT, index, 0, size()-1);
+            throw GException::out_of_range(G_INSERT, "Photon index",
+                                           index, size());
         }
     }
     #endif
@@ -261,7 +267,7 @@ void GPhotons::insert(const int& index, const GPhoton& photon)
 /***********************************************************************//**
  * @brief Remove photon from container
  *
- * @param[in] index Photon index (0,...,size()-1).
+ * @param[in] index Photon index [0,...,size()[.
  *
  * @exception GException::out_of_range
  *            Photon index is out of range.
@@ -273,7 +279,8 @@ void GPhotons::remove(const int& index)
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_REMOVE, index, 0, size()-1);
+        throw GException::out_of_range(G_REMOVE, "Photon index",
+                                       index, size());
     }
     #endif
 
@@ -337,7 +344,7 @@ void GPhotons::reserve(const int& num)
 /***********************************************************************//**
  * @brief Print photon container information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing photon container information.
  ***************************************************************************/
 std::string GPhotons::print(const GChatter& chatter) const

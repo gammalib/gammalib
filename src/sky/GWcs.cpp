@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GWcs.cpp - Abstract world coordinate system base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -873,7 +873,7 @@ void GWcs::set(const std::string& coords,
 /***********************************************************************//**
  * @brief Return value of reference pixel
  *
- * @param[in] inx Coordinate index.
+ * @param[in] inx Coordinate index [0,...,m_naxis[.
  * @return Value of reference pixel.
  *
  * @exception GException::out_of_range
@@ -884,7 +884,8 @@ double GWcs::crval(const int& inx) const
     // Compile option: raise an exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (inx < 0 || inx >= m_naxis) {
-        throw GException::out_of_range(G_CRVAL, inx, m_naxis-1);
+        throw GException::out_of_range(G_CRVAL, "Coordinate index",
+                                       inx, m_naxis);
     }
     #endif
 
@@ -896,7 +897,7 @@ double GWcs::crval(const int& inx) const
 /***********************************************************************//**
  * @brief Return reference pixel
  *
- * @param[in] inx Coordinate index.
+ * @param[in] inx Coordinate index [0,...,m_naxis[.
  * @return Reference pixel.
  *
  * @exception GException::out_of_range
@@ -907,7 +908,8 @@ double GWcs::crpix(const int& inx) const
     // Compile option: raise an exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (inx < 0 || inx >= m_naxis) {
-        throw GException::out_of_range(G_CRPIX, inx, m_naxis-1);
+        throw GException::out_of_range(G_CRPIX, "Coordinate index",
+                                       inx, m_naxis);
     }
     #endif
 
@@ -919,7 +921,7 @@ double GWcs::crpix(const int& inx) const
 /***********************************************************************//**
  * @brief Return pixel size
  *
- * @param[in] inx Coordinate index.
+ * @param[in] inx Coordinate index [0,...,m_naxis[.
  * @return Pixel size.
  *
  * @exception GException::out_of_range
@@ -930,7 +932,8 @@ double GWcs::cdelt(const int& inx) const
     // Compile option: raise an exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (inx < 0 || inx >= m_naxis) {
-        throw GException::out_of_range(G_CDELT, inx, m_naxis-1);
+        throw GException::out_of_range(G_CDELT, "Coordinate index",
+                                       inx, m_naxis);
     }
     #endif
 

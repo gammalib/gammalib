@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GLATLtCubeMap.cpp - Fermi LAT livetime cube map class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -434,7 +434,7 @@ void GLATLtCubeMap::write(GFits& fits, const std::string& extname) const
 /***********************************************************************//**
  * @brief Return cos theta value for an index
  *
- * @param[in] index Bin index (starting from 0).
+ * @param[in] index Cos theta bin index [0,...,m_num_ctheta[
  *
  * @exception GException::out_of_range
  *            Bin index outside value range.
@@ -454,7 +454,8 @@ double GLATLtCubeMap::costheta(const int& index) const
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= m_num_ctheta) {
-        throw GException::out_of_range(G_COSTHETA, index, 0, m_num_ctheta-1);
+        throw GException::out_of_range(G_COSTHETA, "cos theta bin index",
+                                       index, m_num_ctheta);
     }
     #endif
 
@@ -475,7 +476,7 @@ double GLATLtCubeMap::costheta(const int& index) const
 /***********************************************************************//**
  * @brief Return phi value (in radians) for an index
  *
- * @param[in] index Bin index (starting from 0).
+ * @param[in] index Phi bin index [0,...,m_num_phi[
  *
  * @exception GException::out_of_range
  *            Bin index outside value range.
@@ -491,7 +492,8 @@ double GLATLtCubeMap::phi(const int& index) const
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= m_num_phi) {
-        throw GException::out_of_range(G_PHI, index, 0, m_num_phi-1);
+        throw GException::out_of_range(G_PHI, "Phi bin index",
+                                       index, m_num_phi);
     }
     #endif
 

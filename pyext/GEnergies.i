@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GEnergies.i - Energy container class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -91,7 +91,9 @@ public:
             return (*self)[self->size()+index];
         }
         else {
-            throw GException::out_of_range("__getitem__(int)", index, self->size());
+            throw GException::out_of_range("__getitem__(int)",
+                                           "Energy index",
+                                           index, self->size());
         }
     }
     GEnergies* __getitem__(PyObject *param) {
@@ -133,7 +135,9 @@ public:
             (*self)[self->size()+index] = val;
         }
         else {
-            throw GException::out_of_range("__setitem__(int)", index, self->size());
+            throw GException::out_of_range("__setitem__(int)",
+                                           "Energy index",
+                                           index, self->size());
         }
     }
     GEnergies copy() {

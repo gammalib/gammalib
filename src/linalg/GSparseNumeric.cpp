@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GSparseNumeric.cpp - Sparse matrix numeric analysis class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,7 +28,14 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GException.hpp"
+#include "GMatrixSparse.hpp"
 #include "GSparseNumeric.hpp"
+#include "GSparseSymbolic.hpp"
+
+/* __ Method name definitions ____________________________________________ */
+#define G_CHOLESKY               "GSparseNumeric::cholesky_numeric_analysis("\
+                                          "GMatrixSparse&, GSparseSymbolic&)"
 
 /* __ Macros _____________________________________________________________ */
 #define CS_FLIP(i) (-(i)-2)
@@ -47,16 +54,16 @@
  ***************************************************************************/
 GSparseNumeric::GSparseNumeric()
 {
-  // Initialise private members for clean destruction
-  m_L      = NULL;
-  m_U      = NULL;
-  m_pinv   = NULL;
-  m_B      = NULL;
-  m_n_pinv = 0;
-  m_n_B    = 0;
+    // Initialise private members for clean destruction
+    m_L      = NULL;
+    m_U      = NULL;
+    m_pinv   = NULL;
+    m_B      = NULL;
+    m_n_pinv = 0;
+    m_n_B    = 0;
   
-  // Return
-  return;
+    // Return
+    return;
 }
 
 
@@ -65,14 +72,14 @@ GSparseNumeric::GSparseNumeric()
  ***************************************************************************/
 GSparseNumeric::~GSparseNumeric()
 {
-  // De-allocate only if memory has indeed been allocated
-  if (m_L    != NULL) delete m_L;
-  if (m_U    != NULL) delete m_U;
-  if (m_pinv != NULL) delete [] m_pinv;
-  if (m_B    != NULL) delete [] m_B;
+    // De-allocate only if memory has indeed been allocated
+    if (m_L    != NULL) delete m_L;
+    if (m_U    != NULL) delete m_U;
+    if (m_pinv != NULL) delete [] m_pinv;
+    if (m_B    != NULL) delete [] m_B;
   
-  // Return
-  return;
+    // Return
+    return;
 }
 
 
@@ -105,26 +112,30 @@ GSparseNumeric& GSparseNumeric::operator= (const GSparseNumeric& n)
         m_n_B    = 0;
 
 	    // Copy m_L if it exists
-	    if (n.m_L != NULL)
-	        m_L = new GMatrixSparse(*n.m_L);
+	    if (n.m_L != NULL) {
+            m_L = new GMatrixSparse(*n.m_L);
+        }
 
 	    // Copy m_U if it exists
-	    if (n.m_U != NULL)
+	    if (n.m_U != NULL) {
 	        m_U = new GMatrixSparse(*n.m_U);
+        }
 	
 	    // Copy m_pinv array if it exists
 	    if (n.m_pinv != NULL && n.m_n_pinv > 0) {
 	        m_pinv = new int[n.m_n_pinv];
-            for (int i = 0; i < n.m_n_pinv; ++i)
+            for (int i = 0; i < n.m_n_pinv; ++i) {
                 m_pinv[i] = n.m_pinv[i];
+            }
 	        m_n_pinv = n.m_n_pinv;
 	    }
 
 	    // Copy m_B array if it exists
 	    if (n.m_B != NULL && n.m_n_B > 0) {
 	        m_B = new double[n.m_n_B];
-            for (int i = 0; i < n.m_n_B; ++i)
+            for (int i = 0; i < n.m_n_B; ++i) {
                 m_B[i] = n.m_B[i];
+            }
 	        m_n_B = n.m_n_B;
 	    }
 
@@ -142,40 +153,39 @@ GSparseNumeric& GSparseNumeric::operator= (const GSparseNumeric& n)
  ==========================================================================*/
 
 /***************************************************************************
- *                        cholesky_numeric_analysis                        *
- * ----------------------------------------------------------------------- *
- * L = chol (A, [pinv parent cp]), pinv is optional. This function         *
- * allocates the memory to hold the information.                           *
- * ----------------------------------------------------------------------- *
- * Input:   A                    Sparse matrix                             *
- *          S                    Symbolic analysis of sparse matrix        *
+ * @brief Numerical Cholesky analysis
+ *
+ * @param[in] A Spare matrix.
+ * @param[in] S Symbolic analysis of sparse matrix.
  ***************************************************************************/
-void GSparseNumeric::cholesky_numeric_analysis(const GMatrixSparse& A, 
+void GSparseNumeric::cholesky_numeric_analysis(const GMatrixSparse&   A,
                                                const GSparseSymbolic& S)
 {
-  // De-allocate memory that has indeed been previously allocated
-  if (m_L    != NULL) delete m_L;
-  if (m_U    != NULL) delete m_U;
-  if (m_pinv != NULL) delete [] m_pinv;
-  if (m_B    != NULL) delete [] m_B;
+    // De-allocate memory that has indeed been previously allocated
+    if (m_L    != NULL) delete m_L;
+    if (m_U    != NULL) delete m_U;
+    if (m_pinv != NULL) delete [] m_pinv;
+    if (m_B    != NULL) delete [] m_B;
 
-  // Initialise members
-  m_L      = NULL;
-  m_U      = NULL;
-  m_pinv   = NULL;
-  m_B      = NULL;
-  m_n_pinv = 0;
-  m_n_B    = 0;
+    // Initialise members
+    m_L      = NULL;
+    m_U      = NULL;
+    m_pinv   = NULL;
+    m_B      = NULL;
+    m_n_pinv = 0;
+    m_n_B    = 0;
 
-  // Return if arrays in the symbolic analysis have not been allocated
-  if (!S.m_cp || !S.m_parent) return;
+    // Return if arrays in the symbolic analysis have not been allocated
+    if (!S.m_cp || !S.m_parent) {
+        return;
+    }
   
-  // Declare
-  double lki;
-  int top, i, p, k;
+    // Declare
+    double lki;
+    int top, i, p, k;
 
-  // Assign input matrix attributes
-  int n = A.m_cols;
+    // Assign input matrix attributes
+    int n = A.m_cols;
 
     // Allocate int workspace
     int  wrk_size = 2*n;
@@ -185,90 +195,96 @@ void GSparseNumeric::cholesky_numeric_analysis(const GMatrixSparse& A,
     wrk_size = n;
     double* wrk_double = new double[wrk_size];
 
-  // Assign pointers
-  int* cp     = S.m_cp;
-  int* pinv   = S.m_pinv;
-  int* parent = S.m_parent;
+    // Assign pointers
+    int* cp     = S.m_cp;
+    int* pinv   = S.m_pinv;
+    int* parent = S.m_parent;
 
-  // Assign C = A(p,p) where A and C are symmetric and the upper part stored
-  GMatrixSparse C = (pinv) ? cs_symperm(A, pinv) : (A);
+    // Assign C = A(p,p) where A and C are symmetric and the upper part stored
+    GMatrixSparse C = (pinv) ? cs_symperm(A, pinv) : (A);
 
-  // Assign workspace pointer
-  int*    c = wrk_int;
-  int*    s = wrk_int + n;
-  double* x = wrk_double;
+    // Assign workspace pointer
+    int*    c = wrk_int;
+    int*    s = wrk_int + n;
+    double* x = wrk_double;
   
-  // Assign C matrix pointers 
-  int*    Cp = C.m_colstart;
-  int*    Ci = C.m_rowinx; 
-  double* Cx = C.m_data;
+    // Assign C matrix pointers
+    int*    Cp = C.m_colstart;
+    int*    Ci = C.m_rowinx;
+    double* Cx = C.m_data;
   
     // Allocate L matrix
     m_L = new GMatrixSparse(n, n, cp[n]);
 
-  // Assign L matrix pointers 
-  int*    Lp = m_L->m_colstart;
-  int*    Li = m_L->m_rowinx; 
-  double* Lx = m_L->m_data;
+    // Assign L matrix pointers
+    int*    Lp = m_L->m_colstart;
+    int*    Li = m_L->m_rowinx;
+    double* Lx = m_L->m_data;
 
-  // Initialise column pointers of L and c
-  for (k = 0; k < n; ++k) 
-    Lp[k] = c[k] = cp[k];
+    // Initialise column pointers of L and c
+    for (k = 0; k < n; ++k) {
+        Lp[k] = c[k] = cp[k];
+    }
 	
-  // Compute L(:,k) for L*L' = C
-  for (k = 0; k < n; k++) {
+    // Compute L(:,k) for L*L' = C
+    for (k = 0; k < n; k++) {
   
-	// Nonzero pattern of L(k,:). 
-	// Returns -1 if parent = NULL, s = NULL or c = NULL
-    top  = cs_ereach(&C, k, parent, s, c);      // find pattern of L(k,:)
-	x[k] = 0;                                   // x (0:k) is now zero
+        // Nonzero pattern of L(k,:).
+        // Returns -1 if parent = NULL, s = NULL or c = NULL
+        top  = cs_ereach(&C, k, parent, s, c);      // find pattern of L(k,:)
+        x[k] = 0;                                   // x (0:k) is now zero
 	
-	// x = full(triu(C(:,k)))
-	for (p = Cp[k]; p < Cp[k+1]; p++) {
-      if (Ci[p] <= k) 
-	    x[Ci[p]] = Cx[p];
-	}
+        // x = full(triu(C(:,k)))
+        for (p = Cp[k]; p < Cp[k+1]; p++) {
+            if (Ci[p] <= k) {
+                x[Ci[p]] = Cx[p];
+            }
+        }
 	
-	// d = C(k,k)
-	double d = x[k];
+        // d = C(k,k)
+        double d = x[k];
 	
-	// Clear x for k+1st iteration
-	x[k] = 0;
+        // Clear x for k+1st iteration
+        x[k] = 0;
 	
-	// Triangular solve: Solve L(0:k-1,0:k-1) * x = C(:,k)
-	for ( ; top < n; top++) {
-      i    = s[top];                            // s [top..n-1] is pattern of L(k,:)
-      lki  = x[i]/Lx[Lp[i]];                    // L(k,i) = x (i) / L(i,i)
-      x[i] = 0;                                 // clear x for k+1st iteration
-	  for (p = Lp[i]+1; p < c[i]; p++)
-		x[Li[p]] -= Lx[p] * lki;
-	  d    -= lki * lki;                        // d = d - L(k,i)*L(k,i)
-	  p     = c[i]++;
-	  Li[p] = k;                                // store L(k,i) in column i
-	  Lx[p] = lki;
-	}
+        // Triangular solve: Solve L(0:k-1,0:k-1) * x = C(:,k)
+        for ( ; top < n; top++) {
+            i    = s[top];                            // s [top..n-1] is pattern of L(k,:)
+            lki  = x[i]/Lx[Lp[i]];                    // L(k,i) = x (i) / L(i,i)
+            x[i] = 0;                                 // clear x for k+1st iteration
+            for (p = Lp[i]+1; p < c[i]; p++) {
+                x[Li[p]] -= Lx[p] * lki;
+            }
+            d    -= lki * lki;                        // d = d - L(k,i)*L(k,i)
+            p     = c[i]++;
+            Li[p] = k;                                // store L(k,i) in column i
+            Lx[p] = lki;
+        }
 	
-	// Compute L(k,k)
-	if (d <= 0)
-	  throw GException::matrix_not_pos_definite(
-	        "GSparseNumeric::cholesky_numeric_analysis(GMatrixSparse&, const GSparseSymbolic&)",
-			k, d);
+        // Compute L(k,k)
+        if (d <= 0) {
+            std::string msg = "Matrix is not positive definite, the sum "+
+                              gammalib::str(d)+" occured in row and column "+
+                              gammalib::str(k)+".";
+            throw GException::runtime_error(G_CHOLESKY, msg);
+        }
 
-    // Store L(k,k) = sqrt (d) in column k
-	p     = c[k]++;
-	Li[p] = k;
-	Lx[p] = sqrt(d);
-  }
-  
-  // Finalize L
-  Lp[n] = cp[n];
-  
-  // Free workspace
-  delete [] wrk_int;
-  delete [] wrk_double;
+        // Store L(k,k) = sqrt (d) in column k
+        p     = c[k]++;
+        Li[p] = k;
+        Lx[p] = sqrt(d);
 
-  // Return void
-  return; 
+    }
+  
+    // Finalize L
+    Lp[n] = cp[n];
+  
+    // Free workspace
+    delete [] wrk_int;
+    delete [] wrk_double;
+
+    // Return void
+    return;
 }
 
 
@@ -279,62 +295,70 @@ void GSparseNumeric::cholesky_numeric_analysis(const GMatrixSparse& A,
  ==========================================================================*/
 
 /***************************************************************************
- *                                 cs_ereach                               *
- * ----------------------------------------------------------------------- *
- * Find nonzero pattern of Cholesky L(k,1:k-1) using etree and             *
- * triu(A(:,k))                                                            *
- * ----------------------------------------------------------------------- *
- * Input:   A                    Sparse matrix                             *
- *          k                    Node                                      *
- *          parent               ...                                       *
- *          s                    ...                                       *
- *          w                    ...                                       *
- * Input:   top                  Index, where s[top..n-1] contains pattern *
- *                               of L(k,:); -1 if arrays have not been     *
- *                               allocated                                 *
+ * @brief cs_ereach
+ *
+ * @param[in] A Sparse matrix.
+ * @param[in] k Node.
+ * @param[in] parent Argument.
+ * @param[in] s Argument.
+ * @param[in] w Argument.
+ * @return Index, where s[top..n-1] contains pattern of L(k,:); -1 if
+ *         arrays have not been allocated
+ *
+ * Find nonzero pattern of Cholesky L(k,1:k-1) using etree and triu(A(:,k))
  ***************************************************************************/
-int GSparseNumeric::cs_ereach(const GMatrixSparse* A, int k, 
-                                          const int* parent, int* s, int* w)
+int GSparseNumeric::cs_ereach(const GMatrixSparse* A,
+                              int                  k,
+                              const int*           parent,
+                              int*                 s,
+                              int*                 w)
 {
-  // Return -1 if arrays have not been allocated
-  if (!parent || !s || !w) return (-1);
+    // Return -1 if arrays have not been allocated
+    if (!parent || !s || !w) {
+        return (-1);
+    }
 
-  // Assign A matrix attributes and pointers 
-  int  n   = A->m_cols;
-  int  top = n;
-  int* Ap  = A->m_colstart;
-  int* Ai  = A->m_rowinx; 
+    // Assign A matrix attributes and pointers
+    int  n   = A->m_cols;
+    int  top = n;
+    int* Ap  = A->m_colstart;
+    int* Ai  = A->m_rowinx;
     
-  // Mark node k as visited
-  CS_MARK(w, k);
+    // Mark node k as visited
+    CS_MARK(w, k);
   
-  // Loop over elements of node
-  int i;
-  for (int p = Ap[k]; p < Ap[k+1]; ++p) {
-	i = Ai[p];                  // A(i,k) is nonzero
-	if (i > k) continue;        // only use upper triangular part of A
+    // Loop over elements of node
+    int i;
+    for (int p = Ap[k]; p < Ap[k+1]; ++p) {
+        i = Ai[p];                  // A(i,k) is nonzero
+        if (i > k) {
+            continue;               // only use upper triangular part of A
+        }
 
-    // Traverse up etree
-	int len;
-	for (len = 0; !CS_MARKED(w,i); i = parent[i]) {
-      s[len++] = i;             // L(k,i) is nonzero
-	  CS_MARK(w, i);            // mark i as visited
-	}
+        // Traverse up etree
+        int len;
+        for (len = 0; !CS_MARKED(w,i); i = parent[i]) {
+        s[len++] = i;             // L(k,i) is nonzero
+        CS_MARK(w, i);            // mark i as visited
+        }
 	
-	// Push path onto stack
-	while (len > 0) 
-	  s[--top] = s[--len];
-  }
+        // Push path onto stack
+        while (len > 0) {
+            s[--top] = s[--len];
+        }
+
+    } // endfor: looped over elements of node
   
-  // Unmark all nodes
-  for (int p = top; p < n; ++p) 
-    CS_MARK(w, s[p]);
+    // Unmark all nodes
+    for (int p = top; p < n; ++p) {
+        CS_MARK(w, s[p]);
+    }
 	
-  // Unmark node k
-  CS_MARK(w, k);
+    // Unmark node k
+    CS_MARK(w, k);
   
-  // Return index top, where s[top..n-1] contains pattern of L(k,:)
-  return top;
+    // Return index top, where s[top..n-1] contains pattern of L(k,:)
+    return top;
 }
 
 
@@ -355,43 +379,38 @@ int GSparseNumeric::cs_ereach(const GMatrixSparse* A, int k,
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GSparseNumeric& n)
 {
-  // Put header is stream
-  os << "=== GSparseNumeric ===";
+    // Put header is stream
+    os << "=== GSparseNumeric ===";
 
-  // Show L or V matrix
-  if (n.m_L != NULL) {
-    os << std::endl <<
-	   " === L or V ";
-	os << *n.m_L << std::endl;
-  }
+    // Show L or V matrix
+    if (n.m_L != NULL) {
+        os << std::endl << " === L or V ";
+        os << *n.m_L << std::endl;
+    }
 
-  // Show U or R matrix
-  if (n.m_U != NULL) {
-    os << std::endl <<
-       " === U or R matrix ";
-	os << *n.m_U << std::endl;
-  }
+    // Show U or R matrix
+    if (n.m_U != NULL) {
+        os << std::endl << " === U or R matrix ";
+        os << *n.m_U << std::endl;
+    }
 
-  // Show inverse permutation if it exists
-  if (n.m_pinv != NULL) {
-    os << std::endl << " Inverse permutation (of " << n.m_n_pinv << " elements)" << std::endl;
-	for (int i = 0; i < n.m_n_pinv; ++i)
-	  os << " " << n.m_pinv[i];
-  } 
+    // Show inverse permutation if it exists
+    if (n.m_pinv != NULL) {
+        os << std::endl << " Inverse permutation (of ";
+        os << n.m_n_pinv << " elements)" << std::endl;
+        for (int i = 0; i < n.m_n_pinv; ++i) {
+            os << " " << n.m_pinv[i];
+        }
+    }
 
-  // Show beta array if it exists
-  if (n.m_B != NULL) {
-    os << std::endl << " Beta[0.." << n.m_n_B << "]" << std::endl;
-	for (int i = 0; i < n.m_n_B; ++i)
-	  os << " " << n.m_B[i];
-  } 
+    // Show beta array if it exists
+    if (n.m_B != NULL) {
+        os << std::endl << " Beta[0.." << n.m_n_B << "]" << std::endl;
+        for (int i = 0; i < n.m_n_B; ++i) {
+            os << " " << n.m_B[i];
+        }
+    }
   
-  // Return output stream
-  return os;
+    // Return output stream
+    return os;
 }
-
-/*==========================================================================
- =                                                                         =
- =                      GSparseNumeric exception classes                   =
- =                                                                         =
- ==========================================================================*/

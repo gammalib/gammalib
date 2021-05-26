@@ -86,7 +86,9 @@ public:
             return (*self)[self->size()+index];
         }
         else {
-            throw GException::out_of_range("__getitem__(int)", index, self->size());
+            throw GException::out_of_range("__getitem__(int)",
+                                           "Node index",
+                                           index, self->size());
         }
     }
     GXml* __getitem__(PyObject *param) {
@@ -128,7 +130,9 @@ public:
             self->set(self->size()+index, node);
         }
         else {
-            throw GException::out_of_range("__setitem__(int)", index, self->size());
+            throw GException::out_of_range("__setitem__(int)",
+                                           "Node index",
+                                           index, self->size());
         }
     }
     GXml copy() {

@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for linalg module                                             #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016 Juergen Knoedlseder                                    #
+# Copyright (C) 2016-2021 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -31,8 +31,7 @@ sources = GVector.cpp \
           GMatrixSparse.cpp \
           GMatrixSymmetric.cpp \
           GSparseSymbolic.cpp \
-          GSparseNumeric.cpp \
-          GException_linalg.cpp
+          GSparseNumeric.cpp
 
 # Build libtool library
 noinst_LTLIBRARIES = liblinalg.la

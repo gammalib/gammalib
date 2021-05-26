@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GXmlNode.i - Abstract XML node base class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -98,7 +98,9 @@ public:
             return (*self)[self->size()+index];
         }
         else {
-            throw GException::out_of_range("__getitem__(int)", index, self->size());
+            throw GException::out_of_range("__getitem__(int)",
+                                           "Node index",
+                                           index, self->size());
         }
     }
     void __setitem__(const int& index, const GXmlNode& node) {
@@ -111,7 +113,9 @@ public:
             self->set(self->size()+index, node);
         }
         else {
-            throw GException::out_of_range("__setitem__(int)", index, self->size());
+            throw GException::out_of_range("__setitem__(int)",
+                                           "Node index",
+                                           index, self->size());
         }
     }
 %pythoncode {

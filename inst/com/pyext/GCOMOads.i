@@ -73,7 +73,8 @@ public:
             return (*self)[self->size()+index];
         }
         else {
-            throw GException::out_of_range("__getitem__(int)", index, self->size());
+            throw GException::out_of_range("__getitem__(int)", "OAD index",
+                                           index, self->size());
         }
     }
     GCOMOads* __getitem__(PyObject *param) {
@@ -115,7 +116,8 @@ public:
             (*self)[self->size()+index] = val;
         }
         else {
-            throw GException::out_of_range("__setitem__(int)", index, self->size());
+            throw GException::out_of_range("__setitem__(int)", "OAD index",
+                                           index, self->size());
         }
     }
     GCOMOads copy() {

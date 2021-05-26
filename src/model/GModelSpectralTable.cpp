@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GModelSpectralTable.cpp - Spectral table model class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2019-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2019-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -905,14 +905,15 @@ void GModelSpectralTable::save(const GFilename& filename,
 /***********************************************************************//**
  * @brief Return reference to table parameter
  *
- * @param[in] index Table parameter index.
+ * @param[in] index Table parameter index [0,...,size()[.
  * @return Reference to table parameter.
  ***************************************************************************/
 GModelSpectralTablePar& GModelSpectralTable::table_par(const int& index)
 {
     // Raise exception if index is out of range
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_TABLE_PAR, index, size());
+        throw GException::out_of_range(G_TABLE_PAR, "Table parameter index",
+                                       index, size());
     }
 
     // Return reference
@@ -923,14 +924,15 @@ GModelSpectralTablePar& GModelSpectralTable::table_par(const int& index)
 /***********************************************************************//**
  * @brief Return const reference to table parameter
  *
- * @param[in] index Table parameter index.
+ * @param[in] index Table parameter index [0,...,size()[.
  * @return Const reference to table parameter.
  ***************************************************************************/
 const GModelSpectralTablePar& GModelSpectralTable::table_par(const int& index) const
 {
     // Raise exception if index is out of range
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_TABLE_PAR, index, size());
+        throw GException::out_of_range(G_TABLE_PAR, "Table parameter index",
+                                       index, size());
     }
 
     // Return reference

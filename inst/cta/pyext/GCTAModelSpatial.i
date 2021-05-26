@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTAModelSpatial.i - Spatial model abstract base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2018-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2018-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -77,7 +77,9 @@ public:
         if (index >= 0 && index < self->size())
             return (*self)[index];
         else
-            throw GException::out_of_range("__getitem__(int)", index, self->size());
+            throw GException::out_of_range("__getitem__(int)",
+                                           "Model parameter index",
+                                           index, self->size());
     }
     GModelPar& __getitem__(const std::string& name) {
         return (*self)[name];
@@ -88,7 +90,9 @@ public:
             return;
         }
         else
-            throw GException::out_of_range("__setitem__(int)", index, self->size());
+            throw GException::out_of_range("__setitem__(int)",
+                                           "Model parameter index",
+                                           index, self->size());
     }
     void __setitem__(const std::string& name, const GModelPar& val) {
         (*self)[name] = val;

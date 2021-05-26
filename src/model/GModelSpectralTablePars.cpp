@@ -1,7 +1,7 @@
 /***************************************************************************
  * GModelSpectralTablePars.cpp - Spectral table model par container class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2019-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2019-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -256,7 +256,7 @@ const GModelSpectralTablePar* GModelSpectralTablePars::at(const int& index) cons
 /***********************************************************************//**
  * @brief Set table model parameter in container
  *
- * @param[in] index Table model parameter index [0,...,size()-1].
+ * @param[in] index Table model parameter index [0,...,size()[.
  * @param[in] par Table model parameter.
  * @return Pointer to deep copy of table model parameter.
  *
@@ -276,7 +276,8 @@ GModelSpectralTablePar* GModelSpectralTablePars::set(const int&                 
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_SET1, index, size());
+        throw GException::out_of_range(G_SET1, "Table model parameter index",
+                                       index, size());
     }
     #endif
 
@@ -381,7 +382,7 @@ GModelSpectralTablePar* GModelSpectralTablePars::append(const GModelSpectralTabl
 /***********************************************************************//**
  * @brief Insert table model parameter into container
  *
- * @param[in] index Table model parameter index [0,...,size()-1].
+ * @param[in] index Table model parameter index [0,...,size()[.
  * @param[in] par Table model parameter.
  * @return Pointer to deep copy of table model parameter.
  *
@@ -400,12 +401,14 @@ GModelSpectralTablePar* GModelSpectralTablePars::insert(const int&              
     #if defined(G_RANGE_CHECK)
     if (is_empty()) {
         if (index > 0) {
-            throw GException::out_of_range(G_INSERT1, index, size());
+            throw GException::out_of_range(G_INSERT1, "Table model parameter index",
+                                           index, size());
         }
     }
     else {
         if (index < 0 || index >= size()) {
-            throw GException::out_of_range(G_INSERT1, index, size());
+            throw GException::out_of_range(G_INSERT1, "Table model parameter index",
+                                           index, size());
         }
     }
     #endif
@@ -468,7 +471,7 @@ GModelSpectralTablePar* GModelSpectralTablePars::insert(const std::string&      
 /***********************************************************************//**
  * @brief Remove table model parameter from container
  *
- * @param[in] index Table model parameter index [0,...,size()-1].
+ * @param[in] index Table model parameter index [0,...,size()[.
  *
  * @exception GException::out_of_range
  *            Table model parameter index is out of range.
@@ -480,7 +483,8 @@ void GModelSpectralTablePars::remove(const int& index)
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_REMOVE1, index, size());
+        throw GException::out_of_range(G_REMOVE1, "Table model parameter index",
+                                       index, size());
     }
     #endif
 

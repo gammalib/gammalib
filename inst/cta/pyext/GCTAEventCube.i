@@ -81,13 +81,17 @@ public:
         if (index >= 0 && index < self->size())
             return (*self)[index];
         else
-            throw GException::out_of_range("__getitem__(int)", index, self->size());
+            throw GException::out_of_range("__getitem__(int)",
+                                           "Event bin",
+                                           index, self->size());
     }
     void __setitem__(int index, const GCTAEventBin& val) {
         if (index>=0 && index < self->size())
             *((*self)[index]) = val;
         else
-            throw GException::out_of_range("__setitem__(int)", index, self->size());
+            throw GException::out_of_range("__setitem__(int)",
+                                           "Event bin",
+                                           index, self->size());
     }
     GCTAEventCube copy() {
         return (*self);

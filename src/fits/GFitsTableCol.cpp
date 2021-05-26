@@ -897,8 +897,8 @@ void GFitsTableCol::save_column_variable(void)
 /***********************************************************************//**
  * @brief Compute offset of column element in memory
  *
- * @param[in] row Row of column.
- * @param[in] inx Vector index in column row.
+ * @param[in] row Row of column [0,...,m_length[.
+ * @param[in] inx Vector index in column row [0,...,elements(row)[.
  *
  * @exception GException::out_of_range
  *            Table row or vector index are out of valid range.
@@ -912,14 +912,15 @@ int GFitsTableCol::offset(const int& row, const int& inx) const
     // Check row value
     #if defined(G_RANGE_CHECK)
     if (row < 0 || row >= m_length) {
-        throw GException::out_of_range(G_OFFSET, row, 0, m_length-1);
+        throw GException::out_of_range(G_OFFSET, "Row", row, m_length);
     }
     #endif
 
     // Check inx value
     #if defined(G_RANGE_CHECK)
     if (inx < 0 || inx >= elements(row)) {
-        throw GException::out_of_range(G_OFFSET, inx, 0, elements(row));
+        throw GException::out_of_range(G_OFFSET, "Vector index", inx,
+                                       elements(row));
     }
     #endif
 

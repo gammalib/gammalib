@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GSparseNumeric.hpp - Sparse matrix numeric analysis class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,11 +28,7 @@
 #define GSPARSENUMERIC_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GException.hpp"
-#include "GVector.hpp"
-#include "GMatrix.hpp"
 #include "GMatrixSparse.hpp"
-#include "GSparseSymbolic.hpp"
 
 /* __ Definitions ________________________________________________________ */
 
@@ -50,34 +46,34 @@
  ***************************************************************************/
 class GSparseNumeric {
 
-  // Friend classes
-  friend class GMatrixSparse;
+    // Friend classes
+    friend class GMatrixSparse;
 
-  // I/O friends
-  friend std::ostream& operator<< (std::ostream& os, const GSparseNumeric& n);
+    // I/O friends
+    friend std::ostream& operator<< (std::ostream& os, const GSparseNumeric& n);
 
 public:
-  // Constructors and destructors
-  GSparseNumeric(void);
-  virtual ~GSparseNumeric(void);
+    // Constructors and destructors
+    GSparseNumeric(void);
+    virtual ~GSparseNumeric(void);
 
-  // Assignment operator
-  GSparseNumeric& operator=(const GSparseNumeric& n);
+    // Assignment operator
+    GSparseNumeric& operator=(const GSparseNumeric& n);
 
-  // Functions
-  void cholesky_numeric_analysis(const GMatrixSparse& m, const GSparseSymbolic& s);
+    // Methods
+    void cholesky_numeric_analysis(const GMatrixSparse& m, const GSparseSymbolic& s);
 
 private:
-  // Functions
-  int cs_ereach(const GMatrixSparse* A, int k, const int* parent, int* s, int* w);
+    // Methods
+    int cs_ereach(const GMatrixSparse* A, int k, const int* parent, int* s, int* w);
 
-  // Data
-  GMatrixSparse* m_L;        // L for LU and Cholesky, V for QR
-  GMatrixSparse* m_U;        // U for LU, R for QR, not used for Cholesky
-  int*           m_pinv;     // partial pivoting for LU
-  double*        m_B;        // beta [0..n-1] for QR
-  int            m_n_pinv;   // Number of elements in m_pinv
-  int            m_n_B;      // Number of elements in m_B
+    // Data
+    GMatrixSparse* m_L;        // L for LU and Cholesky, V for QR
+    GMatrixSparse* m_U;        // U for LU, R for QR, not used for Cholesky
+    int*           m_pinv;     // partial pivoting for LU
+    double*        m_B;        // beta [0..n-1] for QR
+    int            m_n_pinv;   // Number of elements in m_pinv
+    int            m_n_B;      // Number of elements in m_B
 };
 
 #endif /* GSPARSENUMERIC_HPP */

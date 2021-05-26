@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GObservations.cpp - Observation container class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -197,8 +197,8 @@ GObservations* GObservations::clone(void) const
 /***********************************************************************//**
  * @brief Return pointer to observation
  *
- * @param[in] index Observation index [0,...,size()-1].
- * @return Observation.
+ * @param[in] index Observation index [0,...,size()[.
+ * @return Pointer to observation.
  *
  * @exception GException::out_of_range
  *            Operation index is out of range.
@@ -209,7 +209,8 @@ GObservation* GObservations::at(const int& index)
 {
     // Raise exception if index is out of range
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_AT, index, 0, size()-1);
+        throw GException::out_of_range(G_AT, "Observation index",
+                                       index, size());
     }
 
     // Return pointer
@@ -220,7 +221,8 @@ GObservation* GObservations::at(const int& index)
 /***********************************************************************//**
  * @brief Return pointer to observation (const version)
  *
- * @param[in] index Observation index [0,...,size()-1].
+ * @param[in] index Observation index [0,...,size()[.
+ * @return Pointer to observation.
  *
  * @exception GException::out_of_range
  *            Operation index is out of range.
@@ -231,7 +233,8 @@ const GObservation* GObservations::at(const int& index) const
 {
     // Raise exception if index is out of range
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_AT, index, 0, size()-1);
+        throw GException::out_of_range(G_AT, "Observation index",
+                                       index, size());
     }
 
     // Return pointer
@@ -242,7 +245,7 @@ const GObservation* GObservations::at(const int& index) const
 /***********************************************************************//**
  * @brief Set observation in container
  *
- * @param[in] index Observation index [0,...,size()-1].
+ * @param[in] index Observation index [0,...,size()[.
  * @param[in] obs Observation.
  * @return Pointer to deep copy of observation.
  *
@@ -260,7 +263,8 @@ GObservation* GObservations::set(const int& index, const GObservation& obs)
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_SET, index, 0, size()-1);
+        throw GException::out_of_range(G_SET, "Observation index",
+                                       index, size());
     }
     #endif
 
@@ -332,7 +336,7 @@ GObservation* GObservations::append(const GObservation& obs)
 /***********************************************************************//**
  * @brief Insert observation into container
  *
- * @param[in] index Observation index [0,...,size()-1].
+ * @param[in] index Observation index [0,...,size()[.
  * @param[in] obs Observation.
  * @return Pointer to deep copy of observation.
  *
@@ -351,12 +355,14 @@ GObservation* GObservations::insert(const int& index, const GObservation& obs)
     #if defined(G_RANGE_CHECK)
     if (is_empty()) {
         if (index > 0) {
-            throw GException::out_of_range(G_INSERT, index, 0, size()-1);
+            throw GException::out_of_range(G_INSERT, "Observation index",
+                                           index, size());
         }
     }
     else {
         if (index < 0 || index >= size()) {
-            throw GException::out_of_range(G_INSERT, index, 0, size()-1);
+            throw GException::out_of_range(G_INSERT, "Observation index",
+                                           index, size());
         }
     }
     #endif
@@ -390,7 +396,7 @@ GObservation* GObservations::insert(const int& index, const GObservation& obs)
 /***********************************************************************//**
  * @brief Remove observation from container
  *
- * @param[in] index Observation index [0,...,size()-1].
+ * @param[in] index Observation index [0,...,size()[.
  *
  * @exception GException::out_of_range
  *            Observation index is out of range.
@@ -402,7 +408,8 @@ void GObservations::remove(const int& index)
     // Compile option: If index is outside boundary then raise exception
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_REMOVE, index, 0, size()-1);
+        throw GException::out_of_range(G_REMOVE, "Observation index",
+                                       index, size());
     }
     #endif
 
@@ -788,13 +795,7 @@ void GObservations::errors_hessian(void)
                 unit[ipar] = 0.0;
             }
         }
-        catch (GException::matrix_zero &e) {
-            std::cout << "GObservations::errors_hessian: "
-                      << "All hessian matrix elements are zero."
-                      << std::endl;
-            break;
-        }
-        catch (GException::matrix_not_pos_definite &e) {
+        catch (GException::runtime_error &e) {
 
             // Load diagonal if this has not yet been tried
             if (!diag_loaded) {

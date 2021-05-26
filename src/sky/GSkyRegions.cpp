@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GSkyRegions.cpp - Sky region container class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2020 by Pierrick Martin                             *
+ *  copyright (C) 2013-2021 by Pierrick Martin                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -201,18 +201,19 @@ GSkyRegions* GSkyRegions::clone(void) const
 /***********************************************************************//**
  * @brief Return pointer to region
  *
- * @param[in] index region index [0,...,size()-1].
+ * @param[in] index Sky region index [0,...,size()[.
  *
  * @exception GException::out_of_range
- *            region index is out of range.
+ *            Sky region index is out of range.
  *
  * Returns a pointer to the region with the specified @p index.
  ***************************************************************************/
 GSkyRegion* GSkyRegions::at(const int& index)
 {
-    // Raise exception if index is out of range
+    // Throw exception if index is out of range
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_AT, index, 0, size()-1);
+        throw GException::out_of_range(G_AT, "Sky region index",
+                                       index, size());
     }
 
     // Return pointer
@@ -223,10 +224,10 @@ GSkyRegion* GSkyRegions::at(const int& index)
 /***********************************************************************//**
  * @brief Return pointer to region (const version)
  *
- * @param[in] index region index [0,...,size()-1].
+ * @param[in] index Sky region index [0,...,size()[.
  *
  * @exception GException::out_of_range
- *            region index is out of range.
+ *            Sky region index is out of range.
  *
  * Returns a const pointer to the region with the specified @p index.
  ***************************************************************************/
@@ -234,7 +235,8 @@ const GSkyRegion* GSkyRegions::at(const int& index) const
 {
     // Raise exception if index is out of range
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_AT, index, 0, size()-1);
+        throw GException::out_of_range(G_AT, "Sky Region index",
+                                       index, size());
     }
 
     // Return pointer
@@ -245,12 +247,12 @@ const GSkyRegion* GSkyRegions::at(const int& index) const
 /***********************************************************************//**
  * @brief Set region in container
  *
- * @param[in] index sky region index [0,...,size()-1].
- * @param[in] region sky region.
+ * @param[in] index Sky region index [0,...,size()[.
+ * @param[in] region Sky region.
  * @return Pointer to deep copy of sky region.
  *
  * @exception GException::out_of_range
- *            region index is out of range.
+ *            Sky region index is out of range.
  * @exception GException::invalid_value
  *            Name of region exists already in container.
  *
@@ -261,7 +263,8 @@ GSkyRegion* GSkyRegions::set(const int& index, const GSkyRegion& region)
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_SET1, index, 0, size()-1);
+        throw GException::out_of_range(G_SET1, "Sky Region index",
+                                       index, size());
     }
     #endif
 
@@ -307,12 +310,12 @@ GSkyRegion* GSkyRegions::append(const GSkyRegion& region)
 /***********************************************************************//**
  * @brief Insert region into container
  *
- * @param[in] index region index [0,...,size()-1].
- * @param[in] region region.
- * @return Pointer to deep copy of region.
+ * @param[in] index Sky region index [0,...,size()[.
+ * @param[in] region Sky region.
+ * @return Pointer to deep copy of sky region.
  *
  * @exception GException::out_of_range
- *            region index is out of range.
+ *            Sky region index is out of range.
  * @exception GException::invalid_value
  *            Name of region exists already in container.
  *
@@ -325,12 +328,14 @@ GSkyRegion* GSkyRegions::insert(const int& index, const GSkyRegion& region)
     #if defined(G_RANGE_CHECK)
     if (is_empty()) {
         if (index > 0) {
-            throw GException::out_of_range(G_INSERT1, index, 0, size()-1);
+            throw GException::out_of_range(G_INSERT1, "Sky Region index",
+                                           index, size());
         }
     }
     else {
         if (index < 0 || index >= size()) {
-            throw GException::out_of_range(G_INSERT1, index, 0, size()-1);
+            throw GException::out_of_range(G_INSERT1, "Sky Region index",
+                                           index, size());
         }
     }
     #endif
@@ -349,19 +354,20 @@ GSkyRegion* GSkyRegions::insert(const int& index, const GSkyRegion& region)
 /***********************************************************************//**
  * @brief Remove region from container
  *
- * @param[in] index region index [0,...,size()-1].
+ * @param[in] index Sky region index [0,...,size()[.
  *
  * @exception GException::out_of_range
- *            region index is out of range.
+ *            Sky region index is out of range.
  *
- * Remove region of specified @p index from container.
+ * Remove sky region of specified @p index from container.
  ***************************************************************************/
 void GSkyRegions::remove(const int& index)
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_REMOVE1, index, 0, size()-1);
+        throw GException::out_of_range(G_REMOVE1, "Sky Region index",
+                                       index, size());
     }
     #endif
 

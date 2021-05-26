@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GOptimizerLM.cpp - Levenberg Marquardt optimizer            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -493,16 +493,7 @@ void GOptimizerLM::errors(GOptimizerFunction& fct, GOptimizerPars& pars)
                 unit[ipar] = 0.0;
             }
         }
-        catch (GException::matrix_zero &e) {
-            m_status = G_LM_SINGULAR;
-            if (m_logger != NULL) {
-                *m_logger << "GOptimizerLM::terminate: "
-                          << "All curvature matrix elements are zero."
-                          << std::endl;
-            }
-            break;
-        }
-        catch (GException::matrix_not_pos_definite &e) {
+        catch (GException::runtime_error &e) {
 
             // Load diagonal if this has not yet been tried
             if (!diag_loaded) {
@@ -782,16 +773,7 @@ double GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
         try {
             *grad = curvature->solve(*grad);
         }
-        catch (GException::matrix_zero &e) {
-            m_status = G_LM_SINGULAR;
-            if (m_logger != NULL) {
-                *m_logger << "GOptimizerLM::iteration: "
-                          << "All curvature matrix elements are zero."
-                          << std::endl;
-            }
-            continue;
-        }
-        catch (GException::matrix_not_pos_definite &e) {
+        catch (GException::runtime_error &e) {
             m_status = G_LM_NOT_POSTIVE_DEFINITE;
             if (m_logger != NULL) {
                 *m_logger << "GOptimizerLM::iteration: "

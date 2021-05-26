@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GSPIEventCube.cpp - INTEGRAL/SPI event bin container class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2020 by Juergen Knoedlseder                              *
+ *  copyright (C) 2020-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1482,7 +1482,7 @@ void GSPIEventCube::init_bin(void)
 /***********************************************************************//**
  * @brief Set event bin
  *
- * @param[in] index Event index [0,...,size()-1].
+ * @param[in] index Event index [0,...,size()[.
  *
  * @exception GException::out_of_range
  *            Event index is outside valid range.
@@ -1500,7 +1500,7 @@ void GSPIEventCube::set_bin(const int& index)
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_SET_BIN, index, size());
+        throw GException::out_of_range(G_SET_BIN, "Event index", index, size());
     }
     #endif
 

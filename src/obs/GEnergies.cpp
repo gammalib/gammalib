@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GEnergies.cpp - Energy container class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -253,7 +253,7 @@ GEnergies* GEnergies::clone(void) const
 /***********************************************************************//**
  * @brief Return reference to energy
  *
- * @param[in] index Energy index [0,...,size()-1].
+ * @param[in] index Energy index [0,...,size()[.
  *
  * @exception GException::out_of_range
  *            Energy index is out of range.
@@ -264,7 +264,7 @@ GEnergy& GEnergies::at(const int& index)
 {
     // Raise exception if index is out of range
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_AT, index, 0, size()-1);
+        throw GException::out_of_range(G_AT, "Energy index", index, size());
     }
 
     // Return reference
@@ -275,7 +275,7 @@ GEnergy& GEnergies::at(const int& index)
 /***********************************************************************//**
  * @brief Return reference to energy (const version)
  *
- * @param[in] index Energy index [0,...,size()-1].
+ * @param[in] index Energy index [0,...,size()[.
  *
  * @exception GException::out_of_range
  *            Energy index is out of range.
@@ -286,7 +286,7 @@ const GEnergy& GEnergies::at(const int& index) const
 {
     // Raise exception if index is out of range
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_AT, index, 0, size()-1);
+        throw GException::out_of_range(G_AT, "Energy index", index, size());
     }
 
     // Return reference
@@ -315,7 +315,7 @@ GEnergy& GEnergies::append(const GEnergy& energy)
 /***********************************************************************//**
  * @brief Insert energy into container
  *
- * @param[in] index Energy index (0,...,size()-1).
+ * @param[in] index Energy index (0,...,size()[.
  * @param[in] energy Energy.
  *
  * @exception GException::out_of_range
@@ -330,12 +330,14 @@ GEnergy& GEnergies::insert(const int& index, const GEnergy& energy)
     #if defined(G_RANGE_CHECK)
     if (is_empty()) {
         if (index > 0) {
-            throw GException::out_of_range(G_INSERT, index, 0, size()-1);
+            throw GException::out_of_range(G_INSERT, "Energy index",
+                                           index, size());
         }
     }
     else {
         if (index < 0 || index >= size()) {
-            throw GException::out_of_range(G_INSERT, index, 0, size()-1);
+            throw GException::out_of_range(G_INSERT, "Energy index",
+                                           index, size());
         }
     }
     #endif
@@ -351,7 +353,7 @@ GEnergy& GEnergies::insert(const int& index, const GEnergy& energy)
 /***********************************************************************//**
  * @brief Remove energy from container
  *
- * @param[in] index Energy index (0,...,size()-1).
+ * @param[in] index Energy index (0,...,size()[.
  *
  * @exception GException::out_of_range
  *            Energy index is out of range.
@@ -363,7 +365,8 @@ void GEnergies::remove(const int& index)
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_REMOVE, index, 0, size()-1);
+        throw GException::out_of_range(G_REMOVE, "Energy index",
+                                       index, size());
     }
     #endif
 
@@ -548,7 +551,8 @@ void GEnergies::load(const GFilename& filename)
     GFits fits(filename);
 
     // Get energies table
-    const GFitsTable& table = *fits.table(filename.extname(gammalib::extname_energies));
+    const GFitsTable& table =
+          *fits.table(filename.extname(gammalib::extname_energies));
 
     // Read energies from table
     read(table);

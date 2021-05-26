@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTAModelRadialRegistry.cpp - CTA Radial model registry class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -233,7 +233,7 @@ std::string GCTAModelRadialRegistry::name(const int& index) const
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_NAME, index, 0, size()-1);
+        throw GException::out_of_range(G_NAME, "Model index", index, size());
     }
     #endif
 

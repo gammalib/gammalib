@@ -284,7 +284,7 @@ bool GVector::operator!=(const GVector& vector) const
 {
     // Get negated result of equality operation
     bool result = !(this->operator==(vector));
-	
+
     // Return result
     return result;
 }
@@ -296,7 +296,7 @@ bool GVector::operator!=(const GVector& vector) const
  * @param[in] vector Vector.
  * @return Vector.
  *
- * @exception GException::vector_mismatch
+ * @exception GException::invalid_argument
  *            Vectors have not the same size.
  *
  * Adds vector.
@@ -305,7 +305,11 @@ GVector& GVector::operator+=(const GVector& vector)
 {
     // Raise exception if vectors mismatch
     if (m_num != vector.m_num) {
-        throw GException::vector_mismatch(G_OP_ADD, m_num, vector.m_num);
+        std::string msg = "Vector size "+gammalib::str(vector.m_num)+
+                          " differs from expected size "+gammalib::str(m_num)+
+                          ". Please specify a vector of size "+
+                          gammalib::str(m_num)+".";
+        throw GException::invalid_argument(G_OP_ADD, msg);
     }
 
     // Add elements
@@ -333,7 +337,11 @@ GVector& GVector::operator-=(const GVector& vector)
 {
     // Raise exception if vectors mismatch
     if (m_num != vector.m_num) {
-        throw GException::vector_mismatch(G_OP_SUB, m_num, vector.m_num);
+        std::string msg = "Vector size "+gammalib::str(vector.m_num)+
+                          " differs from expected size "+gammalib::str(m_num)+
+                          ". Please specify a vector of size "+
+                          gammalib::str(m_num)+".";
+        throw GException::invalid_argument(G_OP_SUB, msg);
     }
 
     // Subtract elements
@@ -457,7 +465,7 @@ GVector GVector::operator-(void) const
 {
     // Copy vector
     GVector result = *this;
-    
+
     // Negate all elements
     for (int i = 0; i < m_num; ++i) {
         result.m_data[i] = -result.m_data[i];
@@ -484,7 +492,7 @@ void GVector::clear(void)
 
     // Initialise private members
     init_members();
-    
+
     // Return
     return; 
 }
@@ -505,7 +513,7 @@ GVector* GVector::clone(void) const
 /***********************************************************************//**
  * @brief Vector element access with range checking
  *
- * @param[in] index Element index [0,...,size()-1].
+ * @param[in] index Element index [0,...,size()[.
  *
  * @exception GException::out_of_range
  *            Element index is out of range.
@@ -514,7 +522,7 @@ double& GVector::at(const int& index)
 {
     // Raise an exception if index is out of range
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_AT, index, size()-1);
+        throw GException::out_of_range(G_AT, "Vector element index", index, size());
     }
 
     // Return vector element
@@ -525,7 +533,7 @@ double& GVector::at(const int& index)
 /***********************************************************************//**
  * @brief Vector element access with range checking (const variant)
  *
- * @param[in] index Element index [0,...,size()-1].
+ * @param[in] index Element index [0,...,size()[.
  *
  * @exception GException::out_of_range
  *            Element index is out of range.
@@ -534,7 +542,7 @@ const double& GVector::at(const int& index) const
 {
     // Raise an exception if index is out of range
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_AT, index, size()-1);
+        throw GException::out_of_range(G_AT, "Vector element index", index, size());
     }
 
     // Return vector element
@@ -632,7 +640,7 @@ GVector GVector::slice(const int& start, const int& stop) const
 
     // Allocate vector
     GVector vector(num);
-    
+
     // Build vector slice between original elements a and b (inclusive)
     for (int i = start; i <= stop; ++i) {
         vector.m_data[i-start] = m_data[i];
@@ -646,7 +654,7 @@ GVector GVector::slice(const int& start, const int& stop) const
 /***********************************************************************//**
  * @brief Print vector information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing vector information.
  ***************************************************************************/
 std::string GVector::print(const GChatter& chatter) const
@@ -700,7 +708,7 @@ void GVector::init_members(void)
  ***************************************************************************/
 void GVector::alloc_members(void)
 {
-    // Continue only if vector has non-zero length
+    // Continue only if vector has non-zero size
     if (m_num > 0) {
 
         // Allocate vector
@@ -711,7 +719,7 @@ void GVector::alloc_members(void)
             m_data[i] = 0.0;
         }
 
-    } // endif: vector had non-zero length
+    } // endif: vector had non-zero size
 
     // Return
     return;
@@ -728,7 +736,7 @@ void GVector::copy_members(const GVector& vector)
     // Copy attributes
     m_num = vector.m_num;
 
-    // Continue only if vector has non-zero length
+    // Continue only if vector has non-zero size
     if (m_num > 0) {
 
         // Allocate vector
@@ -739,7 +747,7 @@ void GVector::copy_members(const GVector& vector)
             m_data[i] = vector.m_data[i];
         }
 
-    } // endif: vector had non-zero length
+    } // endif: vector had non-zero size
 
     // Return
     return;
@@ -775,8 +783,8 @@ void GVector::free_members(void)
  * @param[in] b Vector.
  * @return Vector cross product.
  *
- * @exception GException::vector_mismatch
- *            Mismatch between vector size.
+ * @exception GException::invalid_argument
+ *            Mismatch between vector size or vector not of size 3.
  *
  * Computes the cross product between two 3-element vectors (note that the
  * cross product is only defined for 3-element vectors).
@@ -785,12 +793,20 @@ GVector cross(const GVector& a, const GVector& b)
 {
     // Verify that vectors have same dimensions
     if (a.m_num != b.m_num) {
-        throw GException::vector_mismatch(G_CROSS, a.m_num, b.m_num);
+        std::string msg = "Size "+gammalib::str(a.m_num)+" of first vector "
+                          "differs from size "+gammalib::str(b.m_num)+" of "
+                          "second vector. Please specify vectors of identical "
+                          "size.";
+        throw GException::invalid_argument(G_CROSS, msg);
     }
 
     // Verify that vectors have 3 elements
     if (a.m_num != 3) {
-       throw GException::vector_bad_cross_dim(G_CROSS, a.m_num);
+        std::string msg = "Vector size "+gammalib::str(a.m_num)+" is not 3. "
+                          "The vector cross product is only defined for "
+                          "vectors of size 3. Please specify vectors of "
+                          "size 3.";
+       throw GException::invalid_argument(G_CROSS, msg);
     }
 
     // Compute cross product
@@ -811,16 +827,20 @@ GVector cross(const GVector& a, const GVector& b)
  * @param[in] b Vector.
  * @return Product between vector @p a and @p b.
  *
- * @exception GException::vector_mismatch
+ * @exception GException::invalid_argument
  *            Mismatch between vector size.
  *
  * Returns the scalar product between vector @p a and @p b.
  ***************************************************************************/
 double operator*(const GVector& a, const GVector& b)
 {
-    // Verify that vectors have same dimensions
+    // Verify that vectors have same size
     if (a.m_num != b.m_num) {
-        throw GException::vector_mismatch(G_SCALAR, a.m_num, b.m_num);
+        std::string msg = "Size "+gammalib::str(a.m_num)+" of first vector "
+                          "differs from size "+gammalib::str(b.m_num)+" of "
+                          "second vector. Please specify vectors of identical "
+                          "size.";
+        throw GException::invalid_argument(G_SCALAR, msg);
     }
 
     // Compute scalar product
@@ -869,7 +889,7 @@ double min(const GVector& vector)
 
     // Continue only if we have elements
     if (vector.m_num > 0) {
-    
+
         // Search for minimum
         result = vector.m_data[0];
         for (int i = 1; i < vector.m_num; ++i) {
@@ -898,7 +918,7 @@ double max(const GVector& vector)
 
     // Continue only if we have elements
     if (vector.m_num > 0) {
-    
+
         // Search for maximum
         result = vector.m_data[0];
         for (int i = 1; i < vector.m_num; ++i) {

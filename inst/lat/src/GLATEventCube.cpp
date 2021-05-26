@@ -1051,7 +1051,7 @@ void GLATEventCube::set_bin(const int& index)
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_SET_BIN, index, 0, size()-1);
+        throw GException::out_of_range(G_SET_BIN, "Event index", index, size());
     }
     #endif
 

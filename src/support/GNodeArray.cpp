@@ -527,7 +527,7 @@ void GNodeArray::nodes(const std::vector<double>& vector)
  *
  * @exception GException::not_enough_nodes
  *            Not enough nodes for interpolation in node array.
- * @exception GException::vector_mismatch
+ * @exception GException::invalid_argument
  *            Size of node vector does not match the size of vector argument.
  *
  * This method performs a linear interpolation of values \f$y_i\f$. The
@@ -543,8 +543,11 @@ double GNodeArray::interpolate(const double& value,
 
     // Throw exception if vectors have not the same size
     if (m_node.size() != vector.size()) {
-        throw GException::vector_mismatch(G_INTERPOLATE, m_node.size(),
-                                          vector.size());
+        std::string msg = "Vector length "+gammalib::str(vector.size())+
+                          " differs from size "+gammalib::str(m_node.size())+
+                          " of node array. Please specify a vector of "
+                          "length "+gammalib::str(m_node.size())+".";
+        throw GException::invalid_argument(G_INTERPOLATE, msg);
     }
 
     // Set interpolation value

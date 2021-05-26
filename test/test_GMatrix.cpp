@@ -606,7 +606,7 @@ void TestGMatrix::matrix_operations(void)
         GVector test2 = m_bigger * v_test;
         test_try_failure("Expected GException::matrix_vector_mismatch exception.");
     }
-    catch (GException::matrix_vector_mismatch &e) {
+    catch (GException::invalid_argument &e) {
         test_try_success();
     }
     catch (std::exception &e) {
@@ -646,7 +646,7 @@ void TestGMatrix::matrix_operations(void)
         GMatrix test4 = m_bigger * m_test;
         test_try_failure("Expected GException::matrix_mismatch exception.");
     }
-    catch (GException::matrix_mismatch &e) {
+    catch (GException::invalid_argument &e) {
         test_try_success();
     }
     catch (std::exception &e) {
@@ -659,7 +659,7 @@ void TestGMatrix::matrix_operations(void)
         GMatrix test5 = m_bigger * m_test;
         test_try_failure("Expected GException::matrix_mismatch exception.");
     }
-    catch (GException::matrix_mismatch &e) {
+    catch (GException::invalid_argument &e) {
         test_try_success();
     }
     catch (std::exception &e) {
@@ -775,7 +775,7 @@ void TestGMatrix::matrix_arithmetics(void)
         test += m_bigger;
         test_try_failure("Expected GException::matrix_mismatch exception.");
     }
-    catch (GException::matrix_mismatch &e) {
+    catch (GException::invalid_argument &e) {
         test_try_success();
     }
     catch (std::exception &e) {
@@ -854,7 +854,7 @@ void TestGMatrix::matrix_functions(void)
         test2 = m_test.extract_lower_triangle();
         test_try_failure("Expected GException::matrix_not_square exception.");
     }
-    catch (GException::matrix_not_square &e) {
+    catch (GException::invalid_argument &e) {
         test_try_success();
     }
     catch (std::exception &e) {
@@ -867,7 +867,7 @@ void TestGMatrix::matrix_functions(void)
         test2 = m_test.extract_upper_triangle();
         test_try_failure("Expected GException::matrix_not_square exception.");
     }
-    catch (GException::matrix_not_square &e) {
+    catch (GException::invalid_argument &e) {
         test_try_success();
     }
     catch (std::exception &e) {

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GEbounds.cpp - Energy boundary class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -414,7 +414,7 @@ void GEbounds::merge(const GEnergy& emin, const GEnergy& emax)
 /***********************************************************************//**
  * @brief Remove energy interval
  *
- * @param[in] index Energy interval index (0,...,size()-1).
+ * @param[in] index Energy interval index [0,...,size()[.
  *
  * Removes energy interval at @p index from the energy boundaries container.
  * All intervals after the specified @p index are moved forward by one
@@ -428,7 +428,8 @@ void GEbounds::remove(const int& index)
     #if defined(G_RANGE_CHECK)
     // If index is outside boundary then throw an error
     if (index < 0 || index >= m_num) {
-        throw GException::out_of_range(G_REMOVE, index, 0, m_num-1);
+        throw GException::out_of_range(G_REMOVE, "Energy interval index",
+                                       index, m_num);
     }
     #endif
 
@@ -1004,7 +1005,7 @@ GEnergy GEbounds::emax(const int& index) const
 /***********************************************************************//**
  * @brief Returns mean energy for a given energy interval
  *
- * @param[in] index Energy interval index (0,...,size()-1).
+ * @param[in] index Energy interval index [0,...,size()[.
  * @return Mean energy of interval.
  *
  * @exception GException::out_of_range
@@ -1019,7 +1020,8 @@ GEnergy GEbounds::emean(const int& index) const
     #if defined(G_RANGE_CHECK)
     // If index is outside boundary then throw an error
     if (index < 0 || index >= m_num) {
-        throw GException::out_of_range(G_EMEAN, index, 0, m_num-1);
+        throw GException::out_of_range(G_EMEAN, "Energy interval index",
+                                       index, m_num);
     }
     #endif
 
@@ -1034,7 +1036,7 @@ GEnergy GEbounds::emean(const int& index) const
 /***********************************************************************//**
  * @brief Returns logarithmic mean energy for a given energy interval
  *
- * @param[in] index Energy interval index (0,...,size()-1).
+ * @param[in] index Energy interval index [0,...,size()[.
  * @return Logarithmic mean energy of interval.
  *
  * @exception GException::out_of_range
@@ -1049,7 +1051,8 @@ GEnergy GEbounds::elogmean(const int& index) const
     #if defined(G_RANGE_CHECK)
     // If index is outside boundary then throw an error
     if (index < 0 || index >= m_num) {
-        throw GException::out_of_range(G_ELOGMEAN, index, 0, m_num-1);
+        throw GException::out_of_range(G_ELOGMEAN, "Energy interval index",
+                                       index, m_num);
     }
     #endif
 
@@ -1065,7 +1068,7 @@ GEnergy GEbounds::elogmean(const int& index) const
 /***********************************************************************//**
  * @brief Returns energy interval width
  *
- * @param[in] index Energy interval index (0,...,size()-1).
+ * @param[in] index Energy interval index [0,...,size()[.
  * @return Energy interval width.
  *
  * @exception GException::out_of_range
@@ -1076,7 +1079,8 @@ GEnergy GEbounds::ewidth(const int& index) const
     #if defined(G_RANGE_CHECK)
     // If index is outside boundary then throw an error
     if (index < 0 || index >= m_num) {
-        throw GException::out_of_range(G_EWIDTH, index, 0, m_num-1);
+        throw GException::out_of_range(G_EWIDTH, "Energy interval index",
+                                       index, m_num);
     }
     #endif
 

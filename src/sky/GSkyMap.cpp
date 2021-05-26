@@ -842,28 +842,30 @@ const double& GSkyMap::operator()(const int& index, const int& map) const
  * @brief Sky map pixel access operator
  *
  * @param[in] pixel Sky map pixel.
- * @param[in] map Map index [0,...,nmaps()-1].
+ * @param[in] map Sky map index [0,...,nmaps()[.
  *
+ * @exception GException::invalid_argument
+ *            Sky pixel is not contained in sky map.
  * @exception GException::out_of_range
- *            Sky pixel and/or map index are outside valid range.
+ *            Sky map index is out of range.
  *
  * Access sky map pixel by its 2D index (x,y) that is implemented by the
  * GSkyPixel class.
- *
- * @todo Implement proper skymap exception (actual is for matrix elements)
  ***************************************************************************/
 double& GSkyMap::operator()(const GSkyPixel& pixel, const int& map)
 {
     // Throw an error if pixel index or map index is not in valid range
     #if defined(G_RANGE_CHECK)
     if (!contains(pixel)) {
-        throw GException::out_of_range(G_OP_ACCESS_2D,
-                                       int(pixel.x()), int(pixel.y()),
-                                       m_num_x-1, m_num_y-1);
+        std::string msg = "Sky pixel ("+gammalib::str(pixel.x())+","+
+                          gammalib::str(pixel.y())+") is not contained in "
+                          "sky map comprised of ("+gammalib::str(m_num_x)+","+
+                          gammalib::str(m_num_y)+") pixels. Please specify "
+                          "a valid sky pixel.";
+        throw GException::invalid_argument(G_OP_ACCESS_2D, msg);
     }
     if (map < 0 || map >= m_num_maps) {
-        throw GException::out_of_range(G_OP_ACCESS_2D,
-                                       "Sky map map index",
+        throw GException::out_of_range(G_OP_ACCESS_2D, "Sky map index",
                                        map, m_num_maps);
     }
     #endif
@@ -880,28 +882,30 @@ double& GSkyMap::operator()(const GSkyPixel& pixel, const int& map)
  * @brief Sky map pixel access operator
  *
  * @param[in] pixel Sky map pixel.
- * @param[in] map Map index [0,...,nmaps()-1].
+ * @param[in] map Sky map index [0,...,nmaps()[.
  *
+ * @exception GException::invalid_argument
+ *            Sky pixel is not contained in sky map.
  * @exception GException::out_of_range
- *            Sky pixel and/or map index are outside valid range.
+ *            Sky map index is out of range.
  *
  * Access sky map pixel by its 2D index (x,y) that is implemented by the
  * GSkyPixel class.
- *
- * @todo Implement proper skymap exception (actual is for matrix elements)
  ***************************************************************************/
 const double& GSkyMap::operator()(const GSkyPixel& pixel, const int& map) const
 {
     // Throw an error if pixel index or map index is not in valid range
     #if defined(G_RANGE_CHECK)
     if (!contains(pixel)) {
-        throw GException::out_of_range(G_OP_ACCESS_2D,
-                                       int(pixel.x()), int(pixel.y()),
-                                       m_num_x-1, m_num_y-1);
+        std::string msg = "Sky pixel ("+gammalib::str(pixel.x())+","+
+                          gammalib::str(pixel.y())+") is not contained in "
+                          "sky map comprised of ("+gammalib::str(m_num_x)+","+
+                          gammalib::str(m_num_y)+") pixels. Please specify "
+                          "a valid sky pixel.";
+        throw GException::invalid_argument(G_OP_ACCESS_2D, msg);
     }
     if (map < 0 || map >= m_num_maps) {
-        throw GException::out_of_range(G_OP_ACCESS_2D,
-                                       "Sky map map index",
+        throw GException::out_of_range(G_OP_ACCESS_2D, "Sky map index",
                                        map, m_num_maps);
     }
     #endif

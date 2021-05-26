@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GArf.cpp - XSPEC Auxiliary Response File class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -418,7 +418,7 @@ GArf* GArf::clone(void) const
 /***********************************************************************//**
  * @brief Return content of spectral bin
  *
- * @param[in] index Bin index [0,...,size()-1].
+ * @param[in] index Spectral bin index [0,...,size()[.
  *
  * @exception GException::out_of_range
  *            Spectral bin index is out of range.
@@ -429,7 +429,8 @@ double& GArf::at(const int& index)
 {
     // Throw an exception if index is out of range
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_AT1, index, 0, size()-1);
+        throw GException::out_of_range(G_AT1, "Spectral bin index",
+                                       index, size());
     }
 
     // Return reference
@@ -440,18 +441,19 @@ double& GArf::at(const int& index)
 /***********************************************************************//**
  * @brief Return content of spectral bin (const version)
  *
- * @param[in] index Bin index [0,...,size()-1].
+ * @param[in] index Spectral bin index [0,...,size()[.
  *
  * @exception GException::out_of_range
  *            Spectral bin index is out of range.
- *
+ * *
  * Returns reference to content of spectral bin with specified @p index.
  ***************************************************************************/
 const double& GArf::at(const int& index) const
 {
     // Throw an exception if index is out of range
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_AT1, index, 0, size()-1);
+        throw GException::out_of_range(G_AT1, "Spectral bin index",
+                                       index, size());
     }
 
     // Return reference

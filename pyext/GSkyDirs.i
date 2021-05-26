@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GSkyDirs.i - Sky directions container class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2020 by Juergen Knoedlseder                              *
+ *  copyright (C) 2020-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -73,7 +73,9 @@ public:
             return (*self)[self->size()+index];
         }
         else {
-            throw GException::out_of_range("__getitem__(int)", index, self->size());
+            throw GException::out_of_range("__getitem__(int)",
+                                           "Sky direction index",
+                                           index, self->size());
         }
     }
     GSkyDirs* __getitem__(PyObject *param) {
@@ -115,7 +117,9 @@ public:
             (*self)[self->size()+index] = val;
         }
         else {
-            throw GException::out_of_range("__setitem__(int)", index, self->size());
+            throw GException::out_of_range("__setitem__(int)",
+                                           "Sky direction index",
+                                           index, self->size());
         }
     }
     GSkyDirs copy() {

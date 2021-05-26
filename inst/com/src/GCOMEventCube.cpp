@@ -773,7 +773,7 @@ void GCOMEventCube::init_bin(void)
 /***********************************************************************//**
  * @brief Set event bin
  *
- * @param[in] index Event index [0,...,size()-1].
+ * @param[in] index Event index [0,...,size()[.
  *
  * @exception GException::out_of_range
  *            Event index is outside valid range.
@@ -791,7 +791,7 @@ void GCOMEventCube::set_bin(const int& index)
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_SET_BIN, index, 0, size()-1);
+        throw GException::out_of_range(G_SET_BIN, "Event index", index, size());
     }
     #endif
 

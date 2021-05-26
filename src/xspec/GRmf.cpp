@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GRmf.cpp - XSPEC Redistribution Matrix File class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -338,24 +338,26 @@ GRmf* GRmf::clone(void) const
 /***********************************************************************//**
  * @brief Return content of redistribution matrix bin
  *
- * @param[in] itrue True energy index [0,...,ntrue()-1].
- * @param[in] imeasured Measured energy index [0,...,nmeasured()-1].
+ * @param[in] itrue True energy index [0,...,ntrue()[.
+ * @param[in] imeasured Measured energy index [0,...,nmeasured()[.
  *
  * @exception GException::out_of_range
- *            Bin index is out of range.
+ *            True or measured energy index is out of range.
  *
  * Returns reference to content of redistribution matrix bin bin with true
  * energy index @p itrue and measured energy index @p imeasured.
  ***************************************************************************/
 double& GRmf::at(const int& itrue, const int& imeasured)
 {
-    // Raise exception if indices are out of range
+    // Throw exception if indices are out of range
     if (itrue < 0 || itrue >= ntrue()) {
-        throw GException::out_of_range(G_AT, itrue, 0, ntrue()-1);
+        throw GException::out_of_range(G_AT, "True energy index",
+                                       itrue, ntrue());
     }
-    // Raise exception if indices are out of range
+    // Throw exception if indices are out of range
     if (imeasured < 0 || imeasured >= nmeasured()) {
-        throw GException::out_of_range(G_AT, imeasured, 0, nmeasured()-1);
+        throw GException::out_of_range(G_AT, "Measured energy index",
+                                       imeasured,  nmeasured());
     }
 
     // Return reference
@@ -366,24 +368,26 @@ double& GRmf::at(const int& itrue, const int& imeasured)
 /***********************************************************************//**
  * @brief Return content of redistribution matrix bin (const version)
  *
- * @param[in] itrue True energy index [0,...,ntrue()-1].
- * @param[in] imeasured Measured energy index [0,...,nmeasured()-1].
+ * @param[in] itrue True energy index [0,...,ntrue()[.
+ * @param[in] imeasured Measured energy index [0,...,nmeasured()[.
  *
  * @exception GException::out_of_range
- *            Bin index is out of range.
+ *            True or measured energy index is out of range.
  *
  * Returns reference to content of redistribution matrix bin bin with true
  * energy index @p itrue and measured energy index @p imeasured.
  ***************************************************************************/
 const double& GRmf::at(const int& itrue, const int& imeasured) const
 {
-    // Raise exception if indices are out of range
+    // Throw exception if indices are out of range
     if (itrue < 0 || itrue >= ntrue()) {
-        throw GException::out_of_range(G_AT, itrue, 0, ntrue()-1);
+        throw GException::out_of_range(G_AT, "True energy index",
+                                       itrue, ntrue());
     }
-    // Raise exception if indices are out of range
+    // Throw exception if indices are out of range
     if (imeasured < 0 || imeasured >= nmeasured()) {
-        throw GException::out_of_range(G_AT, imeasured, 0, nmeasured()-1);
+        throw GException::out_of_range(G_AT, "Measured energy index",
+                                       imeasured,  nmeasured());
     }
 
     // Return reference

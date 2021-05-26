@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GModel.cpp - Abstract virtual model base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -223,7 +223,7 @@ const GModelPar& GModel::operator[](const std::string& name) const
 /***********************************************************************//**
  * @brief Returns reference to model parameter by index
  *
- * @param[in] index Parameter index [0,...,size()-1].
+ * @param[in] index Parameter index [0,...,size()[.
  * @return Reference to model parameter.
  *
  * @exception GException::out_of_range
@@ -236,7 +236,7 @@ GModelPar& GModel::at(const int& index)
 {
     // Raise exception if index is out of range
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_AT, index, 0, size()-1);
+        throw GException::out_of_range(G_AT, "Parameter index", index, size());
     }
 
     // Return reference
@@ -247,7 +247,7 @@ GModelPar& GModel::at(const int& index)
 /***********************************************************************//**
  * @brief Returns reference to model parameter by index (const version)
  *
- * @param[in] index Parameter index [0,...,size()-1].
+ * @param[in] index Parameter index [0,...,size()[.
  * @return Const reference to model parameter.
  *
  * @exception GException::out_of_range
@@ -260,7 +260,7 @@ const GModelPar& GModel::at(const int& index) const
 {
     // Raise exception if index is out of range
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_AT, index, 0, size()-1);
+        throw GException::out_of_range(G_AT, "Parameter index", index, size());
     }
 
     // Return reference
@@ -353,7 +353,7 @@ void GModel::instruments(const std::string& instruments)
 /***********************************************************************//**
  * @brief Returns reference to scale parameter by index
  *
- * @param[in] index Parameter index [0,...,size()-1].
+ * @param[in] index Scale parameter index [0,...,scales()[.
  * @return Reference to scale parameter.
  *
  * @exception GException::out_of_range
@@ -366,7 +366,8 @@ GModelPar& GModel::scale(const int& index)
 {
     // Raise exception if index is out of range
     if (index < 0 || index >= scales()) {
-        throw GException::out_of_range(G_SCALE, index, scales());
+        throw GException::out_of_range(G_SCALE, "Scale parameter index",
+                                       index, scales());
     }
 
     // Return reference
@@ -377,7 +378,7 @@ GModelPar& GModel::scale(const int& index)
 /***********************************************************************//**
  * @brief Returns reference to scale parameter by index (const version)
  *
- * @param[in] index Parameter index [0,...,size()-1].
+ * @param[in] index Scale parameter index [0,...,scales()[.
  * @return Reference to scale parameter.
  *
  * @exception GException::out_of_range
@@ -390,7 +391,8 @@ const GModelPar& GModel::scale(const int& index) const
 {
     // Raise exception if index is out of range
     if (index < 0 || index >= scales()) {
-        throw GException::out_of_range(G_SCALE, index, scales());
+        throw GException::out_of_range(G_SCALE, "Scale parameter index",
+                                       index, scales());
     }
 
     // Return reference

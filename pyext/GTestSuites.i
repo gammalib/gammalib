@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GTestSuites.i - Test suite container class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2018 Jean-Baptiste Cayrou                           *
+ *  copyright (C) 2012-2021 Jean-Baptiste Cayrou                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -81,7 +81,9 @@ public:
             return (*self)[self->size()+index];
         }
         else {
-            throw GException::out_of_range("__getitem__(int)", index, self->size());
+            throw GException::out_of_range("__getitem__(int)",
+                                           "Test suite index",
+                                           index, self->size());
         }
     }
     GTestSuites* __getitem__(PyObject *param) {
@@ -123,7 +125,9 @@ public:
             self->set(self->size()+index, suite);
         }
         else {
-            throw GException::out_of_range("__setitem__(int)", index, self->size());
+            throw GException::out_of_range("__setitem__(int)",
+                                           "Test suite index",
+                                           index, self->size());
         }
     }
     GTestSuites copy() {

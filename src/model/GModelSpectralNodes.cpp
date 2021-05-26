@@ -856,7 +856,7 @@ void GModelSpectralNodes::append(const GEnergy& energy,
 /***********************************************************************//**
  * @brief Insert node
  *
- * @param[in] index Node index [0,...,nodes()-1].
+ * @param[in] index Node index [0,...,nodes()[.
  * @param[in] energy Node energy.
  * @param[in] intensity Node intensity.
  *
@@ -877,12 +877,14 @@ void GModelSpectralNodes::insert(const int&     index,
     #if defined(G_RANGE_CHECK)
     if (m_energies.empty()) {
         if (index > 0) {
-            throw GException::out_of_range(G_INSERT, index, 0, nodes()-1);
+            throw GException::out_of_range(G_INSERT, "Node index",
+                                           index, nodes());
         }
     }
     else {
         if (index < 0 || index >= nodes()) {
-            throw GException::out_of_range(G_INSERT, index, 0, nodes()-1);
+            throw GException::out_of_range(G_INSERT, "Node index",
+                                           index, nodes());
         }
     }
     #endif
@@ -937,7 +939,7 @@ void GModelSpectralNodes::insert(const int&     index,
 /***********************************************************************//**
  * @brief Remove node
  *
- * @param[in] index Node index [0,...,nodes()-1].
+ * @param[in] index Node index [0,...,nodes()[.
  *
  * @exception GException::out_of_range
  *            Node index is out of range.
@@ -949,7 +951,8 @@ void GModelSpectralNodes::remove(const int& index)
     // Raise exception if index is outside boundary
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= nodes()) {
-        throw GException::out_of_range(G_REMOVE, index, 0, nodes()-1);
+        throw GException::out_of_range(G_REMOVE, "Node index",
+                                       index, nodes());
     }
     #endif
 
@@ -1028,7 +1031,7 @@ void GModelSpectralNodes::extend(const GModelSpectralNodes& nodes)
 /***********************************************************************//**
  * @brief Return node energy
  *
- * @param[in] index Node index [0,...,nodes()-1].
+ * @param[in] index Node index [0,...,nodes()[.
  * @return Energy of node @p index.
  *
  * @exception GException::out_of_range
@@ -1041,7 +1044,8 @@ GEnergy GModelSpectralNodes::energy(const int& index) const
     // Raise an exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= nodes()) {
-        throw GException::out_of_range(G_ENERGY_GET, index, nodes()-1);
+        throw GException::out_of_range(G_ENERGY_GET, "Node index",
+                                       index, nodes());
     }
     #endif
 
@@ -1057,7 +1061,7 @@ GEnergy GModelSpectralNodes::energy(const int& index) const
 /***********************************************************************//**
  * @brief Set node energy
  *
- * @param[in] index Node index [0,...,nodes()-1].
+ * @param[in] index Node index [0,...,nodes()[.
  * @param[in] energy Node energy.
  *
  * @exception GException::out_of_range
@@ -1072,7 +1076,8 @@ void GModelSpectralNodes::energy(const int& index, const GEnergy& energy)
     // Raise an exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= nodes()) {
-        throw GException::out_of_range(G_ENERGY_SET, index, nodes()-1);
+        throw GException::out_of_range(G_ENERGY_SET, "Node index",
+                                       index, nodes());
     }
     #endif
 
@@ -1097,7 +1102,7 @@ void GModelSpectralNodes::energy(const int& index, const GEnergy& energy)
 /***********************************************************************//**
  * @brief Return node intensity
  *
- * @param[in] index Node index [0,...,nodes()-1].
+ * @param[in] index Node index [0,...,nodes()[.
  * @return Intensity of node @p index.
  *
  * @exception GException::out_of_range
@@ -1110,7 +1115,8 @@ double GModelSpectralNodes::intensity(const int& index) const
     // Raise an exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= nodes()) {
-        throw GException::out_of_range(G_INTENSITY_GET, index, nodes()-1);
+        throw GException::out_of_range(G_INTENSITY_GET, "Node index",
+                                       index, nodes());
     }
     #endif
 
@@ -1122,7 +1128,7 @@ double GModelSpectralNodes::intensity(const int& index) const
 /***********************************************************************//**
  * @brief Return intensity error of node
  *
- * @param[in] index Node index [0,...,nodes()-1].
+ * @param[in] index Node index [0,...,nodes()[.
  * @return Intensity error of node @p index.
  *
  * @exception GException::out_of_range
@@ -1135,7 +1141,8 @@ double GModelSpectralNodes::error(const int& index) const
     // Raise an exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= nodes()) {
-        throw GException::out_of_range(G_ERROR_GET, index, nodes()-1);
+        throw GException::out_of_range(G_ERROR_GET, "Node index",
+                                       index, nodes());
     }
     #endif
 
@@ -1147,7 +1154,7 @@ double GModelSpectralNodes::error(const int& index) const
 /***********************************************************************//**
  * @brief Set node intensity
  *
- * @param[in] index Node index [0,...,nodes()-1].
+ * @param[in] index Node index [0,...,nodes()[.
  * @param[in] intensity Node Intensity.
  *
  * @exception GException::out_of_range
@@ -1162,7 +1169,8 @@ void GModelSpectralNodes::intensity(const int& index, const double& intensity)
     // Raise an exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= nodes()) {
-        throw GException::out_of_range(G_INTENSITY_SET, index, nodes()-1);
+        throw GException::out_of_range(G_INTENSITY_SET, "Node index",
+                                       index, nodes());
     }
     #endif
 

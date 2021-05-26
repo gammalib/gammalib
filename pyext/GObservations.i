@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GObservations.i - Observations container class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -125,7 +125,9 @@ typedef GObservations::likelihood likelihood;
             return (*self)[self->size()+index];
         }
         else {
-            throw GException::out_of_range("__getitem__(int)", index, self->size());
+            throw GException::out_of_range("__getitem__(int)",
+                                           "Observation index",
+                                           index, self->size());
         }
     }
     GObservations* __getitem__(PyObject *param) {
@@ -168,7 +170,9 @@ typedef GObservations::likelihood likelihood;
             self->set(self->size()+index, val);
         }
         else {
-            throw GException::out_of_range("__setitem__(int)", index, self->size());
+            throw GException::out_of_range("__setitem__(int)",
+                                           "Observation index",
+                                           index, self->size());
         }
     }
     GObservations copy() {

@@ -453,11 +453,11 @@ void TestGMatrixSymmetric::empty(void)
     TEST_FAILURE("Matrix solution with non-zero vector",
                  GVector vector = matrix1.solve(GVector(3)),
                  "Exception expected for matrix solution with non-zero vector.",
-                 GException::matrix_vector_mismatch)
+                 GException::invalid_argument)
     TEST_FAILURE("Matrix Cholesky solver with non-zero vector",
                  GVector vector = matrix1.cholesky_solver(GVector(3)),
                  "Exception expected for matrix Cholesky solver with non-zero vector.",
-                 GException::matrix_vector_mismatch)
+                 GException::invalid_argument)
 
     // Return
     return;
@@ -581,7 +581,7 @@ void TestGMatrixSymmetric::matrix_operations(void)
         GVector test2 = m_bigger * v_test;
         test_try_failure();
     }
-    catch (GException::matrix_vector_mismatch &e) {
+    catch (GException::invalid_argument &e) {
         test_try_success();
     }
     catch (std::exception &e) {
@@ -621,7 +621,7 @@ void TestGMatrixSymmetric::matrix_operations(void)
         GMatrixSymmetric test4 = m_test * m_bigger;
         test_try_failure("Expected GException::matrix_mismatch exception.");
     }
-    catch (GException::matrix_mismatch &e) {
+    catch (GException::invalid_argument &e) {
         test_try_success();
     }
     catch (std::exception &e) {
@@ -634,7 +634,7 @@ void TestGMatrixSymmetric::matrix_operations(void)
         GMatrixSymmetric test5 = m_bigger * m_test;
         test_try_failure("Expected GException::matrix_mismatch exception.");
     }
-    catch (GException::matrix_mismatch &e) {
+    catch (GException::invalid_argument &e) {
         test_try_success();
     }
     catch (std::exception &e) {
@@ -750,7 +750,7 @@ void TestGMatrixSymmetric::matrix_arithmetics(void)
         test += m_bigger;
         test_try_failure("Expected GException::matrix_mismatch exception.");
     }
-    catch (GException::matrix_mismatch &e) {
+    catch (GException::invalid_argument &e) {
         test_try_success();
     }
     catch (std::exception &e) {

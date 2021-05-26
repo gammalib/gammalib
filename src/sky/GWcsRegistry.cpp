@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GWcsRegistry.cpp - World Coordinate Projection registry class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -227,7 +227,7 @@ GWcs* GWcsRegistry::alloc(const std::string& code) const
 /***********************************************************************//**
  * @brief Returns projection code
  *
- * @param[in] index Projection index [0,...,size()-1].
+ * @param[in] index Projection index [0,...,size()[.
  * @return Projection code.
  *
  * @exception GException::out_of_range
@@ -238,7 +238,8 @@ std::string GWcsRegistry::code(const int& index) const
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_CODE, index, 0, size()-1);
+        throw GException::out_of_range(G_CODE, "Projection index",
+                                       index, size());
     }
     #endif
 
@@ -250,7 +251,7 @@ std::string GWcsRegistry::code(const int& index) const
 /***********************************************************************//**
  * @brief Returns projection name
  *
- * @param[in] index Projection index [0,...,size()-1].
+ * @param[in] index Projection index [0,...,size()[.
  * @return Projection name.
  *
  * @exception GException::out_of_range
@@ -261,7 +262,8 @@ std::string GWcsRegistry::name(const int& index) const
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_NAME, index, 0, size()-1);
+        throw GException::out_of_range(G_CODE, "Projection index",
+                                       index, size());
     }
     #endif
 

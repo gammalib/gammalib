@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GTimes.cpp - Time container class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -130,7 +130,7 @@ GTimes& GTimes::operator=(const GTimes& times)
 /***********************************************************************//**
  * @brief Return reference to time
  *
- * @param[in] index Index of time [0,...,size()-1]
+ * @param[in] index Time index [0,...,size()[.
  *
  * @exception GException::out_of_range
  *            Time index is out of range.
@@ -140,7 +140,8 @@ GTime& GTimes::operator[](const int& index)
     // If index is outside boundary then throw an error
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_OP_ACCESS, index, 0, size()-1);
+        throw GException::out_of_range(G_OP_ACCESS, "Time index",
+                                       index, size());
     }
     #endif
 
@@ -152,7 +153,7 @@ GTime& GTimes::operator[](const int& index)
 /***********************************************************************//**
  * @brief Return reference to time (const version)
  *
- * @param[in] index Index of time [0,...,size()-1]
+ * @param[in] index Time index [0,...,size()[.
  *
  * @exception GException::out_of_range
  *            Time index is out of range.
@@ -162,7 +163,8 @@ const GTime& GTimes::operator[](const int& index) const
     // If index is outside boundary then throw an error
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_OP_ACCESS, index, 0, size()-1);
+        throw GException::out_of_range(G_OP_ACCESS, "Time index",
+                                       index, size());
     }
     #endif
 
@@ -224,7 +226,7 @@ void GTimes::append(const GTime& time)
 /***********************************************************************//**
  * @brief Insert time into container
  *
- * @param[in] index Time index (0,...,size()-1).
+ * @param[in] index Time index [0,...,size()[.
  * @param[in] time Time.
  *
  * @exception GException::out_of_range
@@ -239,12 +241,14 @@ void GTimes::insert(const int& index, const GTime& time)
     #if defined(G_RANGE_CHECK)
     if (is_empty()) {
         if (index > 0) {
-            throw GException::out_of_range(G_INSERT, index, 0, size()-1);
+            throw GException::out_of_range(G_INSERT, "Time index",
+                                           index, size());
         }
     }
     else {
         if (index < 0 || index >= size()) {
-            throw GException::out_of_range(G_INSERT, index, 0, size()-1);
+            throw GException::out_of_range(G_INSERT, "Time index",
+                                           index, size());
         }
     }
     #endif
@@ -260,7 +264,7 @@ void GTimes::insert(const int& index, const GTime& time)
 /***********************************************************************//**
  * @brief Remove time from container
  *
- * @param[in] index Time index (0,...,size()-1).
+ * @param[in] index Time index [0,...,size()[.
  *
  * @exception GException::out_of_range
  *            Time index is out of range.
@@ -272,7 +276,8 @@ void GTimes::remove(const int& index)
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_REMOVE, index, 0, size()-1);
+        throw GException::out_of_range(G_REMOVE, "Time index",
+                                       index, size());
     }
     #endif
 
@@ -336,7 +341,7 @@ void GTimes::reserve(const int& num)
 /***********************************************************************//**
  * @brief Print time container information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing time container information.
  ***************************************************************************/
 std::string GTimes::print(const GChatter& chatter) const

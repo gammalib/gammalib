@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GLATResponseTable.cpp - Fermi/LAT Response table class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -278,8 +278,8 @@ void GLATResponseTable::write(GFitsTable& hdu) const
 /***********************************************************************//**
  * @brief Return table index
  *
- * @param[in] ie Energy bin (starting from 0)
- * @param[in] ic cos theta bin (starting from 0)
+ * @param[in] ie Energy bin [0,...,m_energy_num[
+ * @param[in] ic cos theta bin [0,...,m_ctheta_num[
  *
  * @exception GException::out_of_range
  *            Energy or cos theta bin index out of range
@@ -290,10 +290,13 @@ int GLATResponseTable::index(const int& ie, const int& ic) const
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (ie < 0 || ie >= m_energy_num ||
-        ic < 0 || ic >= m_ctheta_num) {
-        throw GException::out_of_range(G_INDEX, ie, ic, 
-                                       m_energy_num-1, m_ctheta_num-1);
+    if (ie < 0 || ie >= m_energy_num) {
+        throw GException::out_of_range(G_INDEX, "Energy bin index",
+                                       ie, m_energy_num);
+    }
+    if (ic < 0 || ic >= m_ctheta_num) {
+        throw GException::out_of_range(G_INDEX, "cos theta bin index",
+                                       ic, m_ctheta_num);
     }
     #endif
 
@@ -308,7 +311,7 @@ int GLATResponseTable::index(const int& ie, const int& ic) const
 /***********************************************************************//**
  * @brief Return mean energy of bin (units: MeV)
  *
- * @param[in] ie Index of energy bin (starting from 0)
+ * @param[in] ie Index of energy bin [0,...,m_energy_num[
  *
  * @exception GException::out_of_range
  *            Energy bin index out of range
@@ -326,7 +329,8 @@ double GLATResponseTable::energy(const int& ie) const
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
     if (ie < 0 || ie >= m_energy_num) {
-        throw GException::out_of_range(G_ENERGY, ie, 0, m_energy_num-1);
+        throw GException::out_of_range(G_ENERGY, "Energy bin index",
+                                       ie, m_energy_num);
     }
     #endif
 
@@ -456,7 +460,7 @@ double GLATResponseTable::interpolate(const double&              logE,
 /***********************************************************************//**
  * @brief Return lower bin energy (units: MeV)
  *
- * @param[in] inx Index of energy bin (starting from 0)
+ * @param[in] inx Index of energy bin [0,...,m_energy_num[
  *
  * @exception GException::out_of_range
  *            Energy bin index out of range
@@ -466,7 +470,8 @@ double GLATResponseTable::energy_lo(const int& inx) const
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
     if (inx < 0 || inx >= m_energy_num) {
-        throw GException::out_of_range(G_ENERGY_LO, inx, 0, m_energy_num-1);
+        throw GException::out_of_range(G_ENERGY_LO, "Energy bin index",
+                                       inx, m_energy_num);
     }
     #endif
 
@@ -478,7 +483,7 @@ double GLATResponseTable::energy_lo(const int& inx) const
 /***********************************************************************//**
  * @brief Return upper bin energy (units: MeV)
  *
- * @param[in] inx Index of energy bin (starting from 0)
+ * @param[in] inx Index of energy bin [0,...,m_energy_num[
  *
  * @exception GException::out_of_range
  *            Energy bin index out of range
@@ -488,7 +493,8 @@ double GLATResponseTable::energy_hi(const int& inx) const
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
     if (inx < 0 || inx >= m_energy_num) {
-        throw GException::out_of_range(G_ENERGY_HI, inx, 0, m_energy_num-1);
+        throw GException::out_of_range(G_ENERGY_HI, "Energy bin index",
+                                       inx, m_energy_num);
     }
     #endif
 
@@ -499,8 +505,8 @@ double GLATResponseTable::energy_hi(const int& inx) const
 
 /***********************************************************************//**
  * @brief Return lower bin cos theta
- *
- * @param[in] inx Index of cos theta bin (starting from 0)
+ *[
+ * @param[in] inx Index of cos theta bin [0,...,m_ctheta_num[
  *
  * @exception GException::out_of_range
  *            Cos theta bin index out of range
@@ -510,7 +516,8 @@ double GLATResponseTable::costheta_lo(const int& inx) const
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
     if (inx < 0 || inx >= m_ctheta_num) {
-        throw GException::out_of_range(G_COSTHETA_LO, inx, 0, m_ctheta_num-1);
+        throw GException::out_of_range(G_COSTHETA_LO, "cos thera bin index",
+                                       inx, m_ctheta_num);
     }
     #endif
 
@@ -532,7 +539,8 @@ double GLATResponseTable::costheta_hi(const int& inx) const
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
     if (inx < 0 || inx >= m_ctheta_num) {
-        throw GException::out_of_range(G_COSTHETA_HI, inx, 0, m_ctheta_num-1);
+        throw GException::out_of_range(G_COSTHETA_HI, "cos thera bin index",
+                                       inx, m_ctheta_num);
     }
     #endif
 

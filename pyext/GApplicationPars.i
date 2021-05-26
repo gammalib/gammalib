@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GApplicationPars.i - Application parameter container          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -87,7 +87,9 @@ public:
             return (*self)[self->size()+index];
         }
         else {
-            throw GException::out_of_range("__getitem__(int)", index, self->size());
+            throw GException::out_of_range("__getitem__(int)",
+                                           "Application parameter index",
+                                           index, self->size());
         }
     }
     GApplicationPar& __getitem__(const std::string& name) {
@@ -133,7 +135,9 @@ public:
             (*self)[self->size()+index] = par;
         }
         else {
-            throw GException::out_of_range("__setitem__(int)", index, self->size());
+            throw GException::out_of_range("__setitem__(int)",
+                                           "Application parameter index",
+                                           index, self->size());
         }
     }
     void __setitem__(const std::string& name, const GApplicationPar& par) {

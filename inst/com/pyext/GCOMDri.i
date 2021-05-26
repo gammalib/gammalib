@@ -109,7 +109,8 @@ public:
             return (*self)[self->size()+index];
         }
         else {
-            throw GException::out_of_range("__getitem__(int)", index, self->size());
+            throw GException::out_of_range("__getitem__(int)", "Element index",
+                                           index, self->size());
         }
     }
     void __setitem__(const int& index, const double& val) {
@@ -122,7 +123,8 @@ public:
             (*self)[self->size()+index] = val;
         }
         else {
-            throw GException::out_of_range("__setitem__(int)", index, self->size());
+            throw GException::out_of_range("__setitem__(int)", "Element index",
+                                           index, self->size());
         }
     }
     GCOMDri copy() {

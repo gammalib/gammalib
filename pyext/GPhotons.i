@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GPhotons.i - Photon container class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -69,7 +69,9 @@ public:
             return (*self)[self->size()+index];
         }
         else {
-            throw GException::out_of_range("__getitem__(int)", index, self->size());
+            throw GException::out_of_range("__getitem__(int)",
+                                           "Photon index",
+                                           index, self->size());
         }
     }
     GPhotons* __getitem__(PyObject *param) {
@@ -111,7 +113,9 @@ public:
             (*self)[self->size()+index] = val;
         }
         else {
-            throw GException::out_of_range("__setitem__(int)", index, self->size());
+            throw GException::out_of_range("__setitem__(int)",
+                                           "Photon index",
+                                           index, self->size());
         }
     }
     GPhotons copy() {

@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelTemporal.cpp - Abstract temporal model base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -186,7 +186,7 @@ const GModelPar& GModelTemporal::operator[](const std::string& name) const
 /***********************************************************************//**
  * @brief Returns model parameter
  *
- * @param[in] index Parameter index [0,...,size()-1].
+ * @param[in] index Parameter index [0,...,size()[.
  * @return Model parameter.
  *
  * @exception GException::out_of_range
@@ -198,7 +198,7 @@ GModelPar& GModelTemporal::at(const int& index)
 {
     // Compile option: raise exception if index is out of range
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_AT, index, 0, size()-1);
+        throw GException::out_of_range(G_AT, "Parameter index", index, size());
     }
 
     // Return reference
@@ -209,7 +209,7 @@ GModelPar& GModelTemporal::at(const int& index)
 /***********************************************************************//**
  * @brief Returns model parameter (const version)
  *
- * @param[in] index Parameter index [0,...,size()-1].
+ * @param[in] index Parameter index [0,...,size()[.
  * @return Model parameter.
  *
  * @exception GException::out_of_range
@@ -221,7 +221,7 @@ const GModelPar& GModelTemporal::at(const int& index) const
 {
     // Compile option: raise exception if index is out of range
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_AT, index, 0, size()-1);
+        throw GException::out_of_range(G_AT, "Parameter index", index, size());
     }
 
     // Return reference

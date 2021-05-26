@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GSPIEventCube.i - INTEGRAL/SPI event bin container class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2020 by Juergen Knoedlseder                              *
+ *  copyright (C) 2020-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -78,7 +78,9 @@ public:
             return (*self)[index];
         }
         else {
-            throw GException::out_of_range("__getitem__(int)", index, self->size());
+            throw GException::out_of_range("__getitem__(int)",
+                                           "Event bin",
+                                           index, self->size());
         }
     }
     void __setitem__(int index, const GSPIEventBin& val) {
@@ -86,7 +88,9 @@ public:
             *((*self)[index]) = val;
         }
         else {
-            throw GException::out_of_range("__setitem__(int)", index, self->size());
+            throw GException::out_of_range("__setitem__(int)",
+                                           "Event bin",
+                                           index, self->size());
         }
     }
     GSPIEventCube copy() {

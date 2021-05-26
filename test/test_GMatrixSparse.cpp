@@ -508,15 +508,15 @@ void TestGMatrixSparse::empty(void)
     TEST_FAILURE("Matrix solution with non-zero vector",
                  GVector vector = matrix1.solve(GVector(3)),
                  "Exception expected for matrix solution with non-zero vector.",
-                 GException::matrix_vector_mismatch)
+                 GException::invalid_argument)
     TEST_FAILURE("Matrix Cholesky solver with zero vector",
                  GVector vector = matrix1.cholesky_solver(GVector(0)),
                  "Exception expected for matrix Cholesky solver with zero vector.",
-                 GException::matrix_not_factorised)
+                 GException::invalid_value)
     TEST_FAILURE("Matrix Cholesky solver with non-zero vector",
                  GVector vector = matrix1.cholesky_solver(GVector(3)),
                  "Exception expected for matrix Cholesky solver with non-zero vector.",
-                 GException::matrix_vector_mismatch)
+                 GException::invalid_argument)
 
     // Test stack
     TEST_FAILURE("Push vector column on stack of empty matrix",
@@ -563,9 +563,6 @@ void TestGMatrixSparse::alloc_matrix(void)
                     "Found:\n"+back_matrix.print()+"\nExpected:\n"+symmetric.print());
         test_try_success();
     }
-    catch (GException::empty &e) {
-        test_try_success();
-    }
     catch (std::exception &e) {
         test_try_failure(e);
     }
@@ -604,7 +601,7 @@ void TestGMatrixSparse::alloc_matrix(void)
         GMatrixSymmetric bad_sym = GMatrixSymmetric(m_test);
         test_try_failure("Expected GException::matrix_not_symmetric exception.");
     }
-    catch (GException::matrix_not_symmetric &e) {
+    catch (GException::invalid_argument &e) {
         test_try_success();
     }
     catch (std::exception &e) {
@@ -923,7 +920,7 @@ void TestGMatrixSparse::matrix_operations(void)
         GVector test2 = m_bigger * v_test;
         test_try_failure("Expected GException::matrix_vector_mismatch exception.");
     }
-    catch (GException::matrix_vector_mismatch &e) {
+    catch (GException::invalid_argument &e) {
         test_try_success();
     }
     catch (std::exception &e) {
@@ -976,7 +973,7 @@ void TestGMatrixSparse::matrix_operations(void)
         GMatrixSparse test4 = m_bigger * m_test;
         test_try_failure("Expected GException::matrix_mismatch exception.");
     }
-    catch (GException::matrix_mismatch &e) {
+    catch (GException::invalid_argument &e) {
         test_try_success();
     }
     catch (std::exception &e) {
@@ -989,7 +986,7 @@ void TestGMatrixSparse::matrix_operations(void)
         GMatrixSparse test5 = m_bigger * m_test;
         test_try_failure("Expected GException::matrix_mismatch exception.");
     }
-    catch (GException::matrix_mismatch &e) {
+    catch (GException::invalid_argument &e) {
         test_try_success();
     }
     catch (std::exception &e) {
@@ -1105,7 +1102,7 @@ void TestGMatrixSparse::matrix_arithmetics(void)
         test += m_bigger;
         test_try_failure("Expected GException::matrix_mismatch exception.");
     }
-    catch (GException::matrix_mismatch &e) {
+    catch (GException::invalid_argument &e) {
         test_try_success();
     }
     catch (std::exception &e) {
@@ -1241,7 +1238,7 @@ void TestGMatrixSparse::matrix_cholesky(void)
         vector = chol_test.cholesky_solver(vector);
         test_try_failure("Expected GException::matrix_not_factorised exception.");
     }
-    catch (GException::matrix_not_factorised &e) {
+    catch (GException::invalid_value &e) {
         test_try_success();
     }
     catch (std::exception &e) {

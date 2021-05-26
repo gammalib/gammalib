@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GVector.i - Vector class                          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -75,7 +75,9 @@ public:
             return (*self)[index];
         }
         else {
-            throw GException::out_of_range("__getitem__(int)", index, self->size());
+            throw GException::out_of_range("__getitem__(int)",
+                                           "Vector element index",
+                                           index, self->size());
         }
     }
     void __setitem__(const int& index, const double& val) {
@@ -83,7 +85,9 @@ public:
             (*self)[index] = val;
         }
         else {
-            throw GException::out_of_range("__setitem__(int)", index, self->size());
+            throw GException::out_of_range("__setitem__(int)",
+                                           "Vector element index",
+                                           index, self->size());
         }
     }
     GVector __add__(const GVector &a) {

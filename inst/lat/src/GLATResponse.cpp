@@ -707,14 +707,15 @@ void GLATResponse::save(const std::string& rspname) const
 /***********************************************************************//**
  * @brief Return pointer on effective area
  *
- * @param[in] index Response index (starting from 0).
+ * @param[in] index Response index [0,...,m_aeff.size()-1].
  ***************************************************************************/
 GLATAeff* GLATResponse::aeff(const int& index) const
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= m_aeff.size()) {
-        throw GException::out_of_range(G_AEFF, index, 0, m_aeff.size()-1);
+        throw GException::out_of_range(G_AEFF, "Response index", index,
+                                       m_aeff.size());
     }
     #endif
 

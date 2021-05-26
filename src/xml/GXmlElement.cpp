@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GXmlElement.cpp - XML element node class implementation        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -319,15 +319,19 @@ std::string GXmlElement::value(void) const
 /***********************************************************************//**
  * @brief Return attribute
  *
- * @param[in] index Attribute index.
+ * @param[in] index Attribute index [0,...,attributes()[.
  * @return Pointer to attribute.
+ *
+ * @exception GException::out_of_range
+ *            Index out of range.
  ***************************************************************************/
 const GXmlAttribute* GXmlElement::attribute(const int& index) const
 {
-    // Compile option: raise exception if index is out of range
+    // Throw exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= attributes()) {
-        throw GException::out_of_range(G_ATTRIBUTE, index, attributes());
+        throw GException::out_of_range(G_ATTRIBUTE, "Attribute index",
+                                       index, attributes());
     }
     #endif
 

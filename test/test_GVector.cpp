@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   test_GVector.cpp - Test vector class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -502,7 +502,7 @@ void TestGVector::arithmetics(void){
         m_result = m_test + m_bigger;
         test_try_failure();
     }
-    catch (GException::vector_mismatch &e) {
+    catch (GException::invalid_argument &e) {
         test_try_success();
     }
     catch (std::exception &e) {
@@ -515,7 +515,7 @@ void TestGVector::arithmetics(void){
         cross(m_test,m_test);
         test_try_failure();
     }
-    catch (GException::vector_bad_cross_dim &e) {
+    catch (GException::invalid_argument &e) {
         test_try_success();
     }
     catch (std::exception &e) {
@@ -528,7 +528,7 @@ void TestGVector::arithmetics(void){
         cross(m_test,m_bigger);
         test_try_failure();
     }
-    catch (GException::vector_mismatch &e) {
+    catch (GException::invalid_argument &e) {
         test_try_success();
     }
     catch (std::exception &e) {

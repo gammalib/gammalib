@@ -97,7 +97,9 @@ public:
             return (*self)[index];
         }
         else {
-            throw GException::out_of_range("__getitem__(int)", index, self->size());
+            throw GException::out_of_range("__getitem__(int)",
+                                           "Parameter index",
+                                           index, self->size());
         }
     }
     GModelPar& __getitem__(const std::string& name) {
@@ -109,7 +111,9 @@ public:
             return;
         }
         else {
-            throw GException::out_of_range("__setitem__(int)", index, self->size());
+            throw GException::out_of_range("__setitem__(int)",
+                                           "Parameter index",
+                                           index, self->size());
         }
     }
     void __setitem__(const std::string& name, const GModelPar& val) {

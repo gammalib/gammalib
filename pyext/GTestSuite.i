@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GTestSuite.i - Abstract test suite base class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 Jean-Baptiste Cayrou                           *
+ *  copyright (C) 2012-2021 Jean-Baptiste Cayrou                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -285,7 +285,9 @@ public:
             return (*self)[index];
         }
         else {
-            throw GException::out_of_range("__getitem__(int)", index, self->size());
+            throw GException::out_of_range("__getitem__(int)",
+                                           "Test case",
+                                           index, self->size());
         }
     }
     void __setitem__(const int& index, const GTestCase& val) {
@@ -294,7 +296,9 @@ public:
             return;
         }
         else {
-            throw GException::out_of_range("__setitem__(int)", index, self->size());
+            throw GException::out_of_range("__setitem__(int)",
+                                           "Test case",
+                                           index, self->size());
         }
     }
 };

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GModelRegistry.cpp - Model registry class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -225,7 +225,7 @@ GModel* GModelRegistry::alloc(const std::string& name) const
 /***********************************************************************//**
  * @brief Returns model name
  *
- * @param[in] index Model index [0,...,size()-1].
+ * @param[in] index Model index [0,...,size()[.
  * @return Model name.
  *
  * @exception GException::out_of_range
@@ -236,7 +236,7 @@ std::string GModelRegistry::name(const int& index) const
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_NAME, index, 0, size()-1);
+        throw GException::out_of_range(G_NAME, "Model index", index, size());
     }
     #endif
 
@@ -248,7 +248,7 @@ std::string GModelRegistry::name(const int& index) const
 /***********************************************************************//**
  * @brief Print registry information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return Registry content.
  ***************************************************************************/
 std::string GModelRegistry::print(const GChatter& chatter) const

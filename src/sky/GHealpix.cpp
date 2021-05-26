@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GHealpix.cpp - Healpix projection class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1391,7 +1391,7 @@ int GHealpix::xy2pix(int x, int y) const
 /***********************************************************************//**
  * @brief Convert pixel index to (theta,phi) angles for ring ordering
  *
- * @param[in] ipix Pixel index for which (theta,phi) are to be computed.
+ * @param[in] ipix Pixel index [0,...,m_num_pixels[.
  * @param[out] theta Pointer to result zenith angle in radians.
  * @param[out] phi Pointer to result azimuth angle in radians.
  *
@@ -1402,7 +1402,8 @@ void GHealpix::pix2ang_ring(int ipix, double* theta, double* phi) const
 {
     // Check if ipix is in range
     if (ipix < 0 || ipix >= m_num_pixels) {
-        throw  GException::out_of_range(G_PIX2ANG_RING, ipix, 0, m_num_pixels-1);
+        throw GException::out_of_range(G_PIX2ANG_RING, "Pixel index",
+                                       ipix, m_num_pixels);
     }
 
     // Handle North Polar cap
@@ -1441,7 +1442,7 @@ void GHealpix::pix2ang_ring(int ipix, double* theta, double* phi) const
 /***********************************************************************//**
  * @brief Convert pixel index to (theta,phi) angles for nested ordering
  *
- * @param[in] ipix Pixel index for which (theta,phi) are to be computed.
+ * @param[in] ipix Pixel index [0,...,m_num_pixels[.
  * @param[out] theta Pointer to result zenith angle in radians.
  * @param[out] phi Pointer to result azimuth angle in radians.
  *
@@ -1452,7 +1453,8 @@ void GHealpix::pix2ang_nest(int ipix, double* theta, double* phi) const
 {
     // Check if ipix is in range
     if (ipix < 0 || ipix >= m_num_pixels) {
-        throw GException::out_of_range(G_PIX2ANG_NEST, ipix, 0, m_num_pixels-1);
+        throw GException::out_of_range(G_PIX2ANG_NEST, "Pixel index",
+                                       ipix, m_num_pixels);
     }
 
     // Get face number and index in face

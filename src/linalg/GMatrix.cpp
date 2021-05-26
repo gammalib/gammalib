@@ -65,10 +65,7 @@
 /***********************************************************************//**
  * @brief Void matrix constructor
  *
- * Constructs an empty matrix (i.e. a matrix without any elements; the number
- * of rows and columns of the matrix will be zero).
- *
- * @todo Verify that the class is save against empty matrix objects.
+ * Constructs an empty matrix. An empty matrix has zero rows and columns.
  ***************************************************************************/
 GMatrix::GMatrix(void) : GMatrixBase()
 {
@@ -95,8 +92,7 @@ GMatrix::GMatrix(void) : GMatrixBase()
  ***************************************************************************/
 GMatrix::GMatrix(const int& rows, const int& columns) : GMatrixBase()
 {
-    // Compile option: raise an exception if number of rows or columns is
-    // negative
+    // Throw exception if number of rows or columns is negative
     #if defined(G_RANGE_CHECK)
     if (rows < 0) {
         std::string msg = "Number of rows "+gammalib::str(rows)+" is negative. "
@@ -281,20 +277,24 @@ GMatrix& GMatrix::operator=(const double& value)
  *
  * @param[in] vector Vector.
  *
- * @exception GException::matrix_vector_mismatch
- *            Vector length differs from number of columns in matrix.
+ * @exception GException::invalid_argument
+ *            Vector size differs from number of columns in matrix.
  *
  * This method performs a vector multiplication of a matrix. The vector
- * multiplication will produce a vector. The matrix multiplication can only
- * be performed when the number of matrix columns is identical to the length
- * of the vector.
+ * multiplication will produce a vector. The multiplication can only be
+ * performed when the number of matrix columns is identical to the size
+ * of the vector. If the size of the vector differs an exception will be
+ * thrown.
  ***************************************************************************/
 GVector GMatrix::operator*(const GVector& vector) const
 {
     // Raise an exception if the matrix and vector dimensions are not compatible
     if (m_cols != vector.size()) {
-        throw GException::matrix_vector_mismatch(G_OP_MUL_VEC, vector.size(),
-                                                 m_rows, m_cols);
+        std::string msg = "Vector size "+gammalib::str(vector.size())+" does "
+                          "not match "+gammalib::str(m_cols)+" matrix columns. "
+                          "Please specify a vector of size "+
+                          gammalib::str(m_cols)+".";
+        throw GException::invalid_argument(G_OP_MUL_VEC, msg);
     }
 
     // Perform vector multiplication
@@ -342,19 +342,28 @@ GMatrix GMatrix::operator-(void) const
  *
  * @param[in] matrix Matrix.
  *
- * @exception GException::matrix_mismatch
- *            Incompatible matrix size.
+ * @exception GException::invalid_argument
+ *            Incompatible number of matrix rows or columns.
  *
- * This method performs a matrix addition. The operation can only succeed
- * when the dimensions of both matrices are identical.
+ * This method performs a matrix addition. The method throws an exception if
+ * the number of matrix rows or columns are not identical.
  ***************************************************************************/
 GMatrix& GMatrix::operator+=(const GMatrix& matrix)
 {
-    // Raise an exception if the matrix dimensions are not compatible
-    if (m_rows != matrix.m_rows || m_cols != matrix.m_cols) {
-        throw GException::matrix_mismatch(G_OP_ADD,
-                                          m_rows, m_cols,
-                                          matrix.m_rows, matrix.m_cols);
+    // Throw an exception if the matrix dimensions are not compatible
+    if (m_rows != matrix.m_rows) {
+        std::string msg = "Number of matrix rows "+gammalib::str(matrix.m_rows)+
+                          " differs from the expected number of "+
+                          gammalib::str(m_rows)+" rows. Please specify a "
+                          "matrix with "+gammalib::str(m_rows)+" rows.";
+        throw GException::invalid_argument(G_OP_ADD, msg);
+    }
+    if (m_cols != matrix.m_cols) {
+        std::string msg = "Number of matrix columns "+gammalib::str(matrix.m_cols)+
+                          " differs from the expected number of "+
+                          gammalib::str(m_cols)+" columns. Please specify a "
+                          "matrix with "+gammalib::str(m_cols)+" columns.";
+        throw GException::invalid_argument(G_OP_ADD, msg);
     }
 
     // Add all matrix elements
@@ -394,19 +403,28 @@ GMatrix& GMatrix::operator+=(const double& scalar)
  *
  * @param[in] matrix Matrix.
  *
- * @exception GException::matrix_mismatch
- *            Incompatible matrix size.
+ * @exception GException::invalid_argument
+ *            Incompatible number of matrix rows or columns.
  *
- * This method performs a matrix addition. The operation can only succeed
- * when the dimensions of both matrices are identical.
+ * This method performs a matrix addition. The method throws an exception if
+ * the number of matrix rows or columns are not identical.
  ***************************************************************************/
 GMatrix& GMatrix::operator-=(const GMatrix& matrix)
 {
-    // Raise an exception if the matrix dimensions are not compatible
-    if (m_rows != matrix.m_rows || m_cols != matrix.m_cols) {
-        throw GException::matrix_mismatch(G_OP_SUB,
-                                          m_rows, m_cols,
-                                          matrix.m_rows, matrix.m_cols);
+    // Throw an exception if the matrix dimensions are not compatible
+    if (m_rows != matrix.m_rows) {
+        std::string msg = "Number of matrix rows "+gammalib::str(matrix.m_rows)+
+                          " differs from the expected number of "+
+                          gammalib::str(m_rows)+" rows. Please specify a "
+                          "matrix with "+gammalib::str(m_rows)+" rows.";
+        throw GException::invalid_argument(G_OP_SUB, msg);
+    }
+    if (m_cols != matrix.m_cols) {
+        std::string msg = "Number of matrix columns "+gammalib::str(matrix.m_cols)+
+                          " differs from the expected number of "+
+                          gammalib::str(m_cols)+" columns. Please specify a "
+                          "matrix with "+gammalib::str(m_cols)+" columns.";
+        throw GException::invalid_argument(G_OP_SUB, msg);
     }
 
     // Subtract all matrix elements
@@ -446,8 +464,9 @@ GMatrix& GMatrix::operator-=(const double& scalar)
  *
  * @param[in] matrix Matrix.
  *
- * @exception GException::matrix_mismatch
- *            Incompatible matrix size.
+ * @exception GException::invalid_argument
+ *            Number of rows in @p matrix is different from number of
+ *            matrix columns.
  *
  * This method performs a matrix multiplication. The operation can only
  * succeed when the dimensions of both matrices are compatible.
@@ -459,11 +478,14 @@ GMatrix& GMatrix::operator-=(const double& scalar)
  ***************************************************************************/
 GMatrix& GMatrix::operator*=(const GMatrix& matrix)
 {
-    // Raise an exception if the matrix dimensions are not compatible
+    // Throw exception if the matrix dimensions are not compatible
     if (m_cols != matrix.m_rows) {
-        throw GException::matrix_mismatch(G_OP_MAT_MUL,
-                                          m_rows, m_cols,
-                                          matrix.m_rows, matrix.m_cols);
+        std::string msg = "Number of "+gammalib::str(m_cols)+" columns in "
+                          "the first matrix differs from number of "+
+                          gammalib::str(matrix.m_rows)+" rows in the second "
+                          "matrix. Please specify a second matrix with "+
+                          gammalib::str(m_cols)+" rows.";
+        throw GException::invalid_argument(G_OP_MAT_MUL, msg);
     }
 
     // Case A: Matrices are rectangular, so perform 'inplace' multiplication
@@ -544,21 +566,25 @@ GMatrix* GMatrix::clone(void) const
 /***********************************************************************//**
  * @brief Return reference to matrix element
  *
- * @param[in] row Matrix row [0,...,rows()-1].
- * @param[in] column Matrix column [0,...,columns()-1].
+ * @param[in] row Matrix row [0,...,rows()[.
+ * @param[in] column Matrix column [0,...,columns()[.
  * @return Reference to matrix element.
  *
  * @exception GException::out_of_range
- *            Row or column index out of range.
+ *            Matrix row or column out of range.
  *
  * Returns a reference to the matrix element at @p row and @p column.
- * Verifies the validity of the @p row and @p column argument.
+ *
+ * This method verifies the validity of the @p row and @p column argument.
  ***************************************************************************/
 double& GMatrix::at(const int& row, const int& column)
 {
-    // Raise exception if row or column index is out of range
-    if (row < 0 || row >= m_rows || column < 0 || column >= m_cols) {
-        throw GException::out_of_range(G_AT, row, column, m_rows, m_cols);
+    // Throw exception if row or column is out of range
+    if (row < 0 || row >= m_rows) {
+        throw GException::out_of_range(G_AT, "Matrix row", row, m_rows);
+    }
+    if (column < 0 || column >= m_cols) {
+        throw GException::out_of_range(G_AT, "Matrix column", column, m_cols);
     }
 
     // Return element
@@ -569,21 +595,25 @@ double& GMatrix::at(const int& row, const int& column)
 /***********************************************************************//**
  * @brief Return reference to matrix element (const version)
  *
- * @param[in] row Matrix row [0,...,rows()-1].
- * @param[in] column Matrix column [0,...,columns()-1].
+ * @param[in] row Matrix row [0,...,rows()[.
+ * @param[in] column Matrix column [0,...,columns()[.
  * @return Const reference to matrix element.
  *
  * @exception GException::out_of_range
- *            Row or column index out of range.
+ *            Matrix row or column out of range.
  *
  * Returns a const reference to the matrix element at @p row and @p column.
- * Verifies the validity of the @p row and @p column argument.
+ *
+ * This method verifies the validity of the @p row and @p column argument.
  ***************************************************************************/
 const double& GMatrix::at(const int& row, const int& column) const
 {
-    // Raise exception if row or column index is out of range
-    if (row < 0 || row >= m_rows || column < 0 || column >= m_cols) {
-        throw GException::out_of_range(G_AT, row, column, m_rows, m_cols);
+    // Throw exception if row or column is out of range
+    if (row < 0 || row >= m_rows) {
+        throw GException::out_of_range(G_AT, "Matrix row", row, m_rows);
+    }
+    if (column < 0 || column >= m_cols) {
+        throw GException::out_of_range(G_AT, "Matrix column", column, m_cols);
     }
 
     // Return element
@@ -595,21 +625,21 @@ const double& GMatrix::at(const int& row, const int& column) const
 /***********************************************************************//**
  * @brief Extract row as vector from matrix
  *
- * @param[in] row Matrix row [0,...,rows()-1].
+ * @param[in] row Matrix row [0,...,rows()[.
  * @return Vector of matrix row elements (columns() elements).
  *
  * @exception GException::out_of_range
- *            Invalid row index specified.
+ *            Invalid matrix row specified.
  *
  * Extracts one @p row of the matrix into a vector. The vector will contain
  * columns() elements.
  ***************************************************************************/
 GVector GMatrix::row(const int& row) const
 {
-    // Raise an exception if the row index is invalid
+    // Throw exception if the row is invalid
     #if defined(G_RANGE_CHECK)
     if (row < 0 || row >= m_rows) {
-        throw GException::out_of_range(G_EXTRACT_ROW, row, 0, m_rows-1);
+        throw GException::out_of_range(G_EXTRACT_ROW, "Matrix row", row, m_rows);
     }
     #endif
 
@@ -631,32 +661,35 @@ GVector GMatrix::row(const int& row) const
 /***********************************************************************//**
  * @brief Set row in matrix
  *
- * @param[in] row Matrix row [0,...,rows()-1].
+ * @param[in] row Matrix row [0,...,rows()[.
  * @param[in] vector Vector of matrix row elements (columns() elements).
  *
  * @exception GException::out_of_range
- *            Invalid row index specified.
- * @exception GException::matrix_vector_mismatch
- *            Vector does not match the matrix dimensions.
+ *            Invalid matrix row specified.
+ * @exception GException::invalid_argument
+ *            Vector size does not match number of matrix columns.
  *
  * Sets the elements from a vector as the elements of a matrix row. The
- * length of the vector must be identical to the number of columns in the
+ * size of the vector must be identical to the number of columns in the
  * matrix.
  ***************************************************************************/
 void GMatrix::row(const int& row, const GVector& vector)
 {
-    // Raise an exception if the row index is invalid
+    // Throw an exception if the row is invalid
     #if defined(G_RANGE_CHECK)
     if (row < 0 || row >= m_rows) {
-        throw GException::out_of_range(G_SET_ROW, row, 0, m_rows-1);
+        throw GException::out_of_range(G_SET_ROW, "Matrix row", row, m_rows);
     }
     #endif
 
-    // Raise an exception if the matrix and vector dimensions are not
+    // Throw an exception if the matrix and vector dimensions are not
     // compatible
     if (m_cols != vector.size()) {
-        throw GException::matrix_vector_mismatch(G_SET_ROW, vector.size(),
-                                                 m_rows, m_cols);
+        std::string msg = "Vector size "+gammalib::str(vector.size())+
+                          " does not match "+gammalib::str(m_cols)+" matrix "
+                          "columns. Please specify a vector of size "+
+                          gammalib::str(m_cols)+".";
+        throw GException::invalid_argument(G_SET_ROW, msg);
     }
 
     // Set row from vector. Recall that the matrix elements are stored
@@ -674,19 +707,21 @@ void GMatrix::row(const int& row, const GVector& vector)
 /***********************************************************************//**
  * @brief Extract column as vector from matrix
  *
- * @param[in] column Column index [0,...,columns()-1].
+ * @param[in] column Matrix column [0,...,columns()[.
+ * @return Vector of matrix column elements (rows() elements).
  *
  * @exception GException::out_of_range
- *            Invalid row index specified.
+ *            Invalid matrix column specified.
  *
  * This method extracts a matrix column into a vector.
  ***************************************************************************/
 GVector GMatrix::column(const int& column) const
 {
-    // Raise an exception if the column index is invalid
+    // Throw exception if the column is invalid
     #if defined(G_RANGE_CHECK)
     if (column < 0 || column >= m_cols) {
-        throw GException::out_of_range(G_EXTRACT_COLUMN, column, 0, m_cols-1);
+        throw GException::out_of_range(G_EXTRACT_COLUMN, "Matrix column",
+                                       column, m_cols);
     }
     #endif
 
@@ -714,31 +749,35 @@ GVector GMatrix::column(const int& column) const
 /***********************************************************************//**
  * @brief Set matrix column from vector
  *
- * @param[in] column Column index [0,...,columns()-1].
+ * @param[in] column Matrix column [0,...,columns()[.
  * @param[in] vector Vector.
  *
  * @exception GException::out_of_range
- *            Invalid column index specified.
- * @exception GException::matrix_vector_mismatch
- *            Matrix dimension mismatches the vector size.
+ *            Invalid matrix column specified.
+ * @exception GException::invalid_argument
+ *            Vector size does not match number of matrix rows.
  *
  * Inserts the content of a vector into a matrix column. Any previous
  * content in the matrix column will be overwritted.
  ***************************************************************************/
 void GMatrix::column(const int& column, const GVector& vector)
 {
-    // Raise an exception if the column index is invalid
+    // Throw exception if the column is invalid
     #if defined(G_RANGE_CHECK)
     if (column < 0 || column >= m_cols) {
-        throw GException::out_of_range(G_SET_COLUMN, column, 0, m_cols-1);
+        throw GException::out_of_range(G_SET_COLUMN, "Matrix column",
+                                       column, m_cols);
     }
     #endif
 
-    // Raise an exception if the matrix and vector dimensions are not
-    // compatible
+    // Throw exception if the vector size does not match the number of rows
+    // in the matrix
     if (m_rows != vector.size()) {
-        throw GException::matrix_vector_mismatch(G_SET_COLUMN, vector.size(),
-                                                 m_rows, m_cols);
+        std::string msg = "Vector size "+gammalib::str(vector.size())+
+                          " does not match "+gammalib::str(m_rows)+" matrix "
+                          "rows. Please specify a vector of size "+
+                          gammalib::str(m_rows)+".";
+        throw GException::invalid_argument(G_SET_COLUMN, msg);
     }
 
     // Continue only if we have elements
@@ -762,28 +801,32 @@ void GMatrix::column(const int& column, const GVector& vector)
 /***********************************************************************//**
  * @brief Add row to matrix elements
  *
- * @param[in] row Matrix row [0,...,rows()-1].
+ * @param[in] row Matrix row [0,...,rows()[.
  * @param[in] vector Vector of matrix row elements (columns() elements).
  *
  * @exception GException::out_of_range
- *            Invalid row index specified.
+ *            Invalid matrix row specified.
  * @exception GException::matrix_vector_mismatch
  *            Vector does not match the matrix dimensions.
  ***************************************************************************/
 void GMatrix::add_to_row(const int& row, const GVector& vector)
 {
-    // Raise an exception if the row index is invalid
+    // Throw exception if the row is invalid
     #if defined(G_RANGE_CHECK)
     if (row < 0 || row >= m_rows) {
-        throw GException::out_of_range(G_ADD_TO_ROW, row, 0, m_rows-1);
+        throw GException::out_of_range(G_ADD_TO_ROW, "Matrix row", row, m_rows);
+
     }
     #endif
 
-    // Raise an exception if the matrix and vector dimensions are not
+    // Throw exception if the matrix and vector dimensions are not
     // compatible
     if (m_cols != vector.size()) {
-        throw GException::matrix_vector_mismatch(G_ADD_TO_ROW, vector.size(),
-                                                 m_rows, m_cols);
+        std::string msg = "Vector size "+gammalib::str(vector.size())+
+                          " does not match "+gammalib::str(m_cols)+" matrix "
+                          "columns. Please specify a vector of size "+
+                          gammalib::str(m_cols)+".";
+        throw GException::invalid_argument(G_ADD_TO_ROW, msg);
     }
 
     // Add row from vector. Recall that the matrix elements are stored
@@ -801,30 +844,35 @@ void GMatrix::add_to_row(const int& row, const GVector& vector)
 /***********************************************************************//**
  * @brief Add vector column into matrix
  *
- * @param[in] column Column index [0,...,columns()-1].
+ * @param[in] column Matrix column [0,...,columns()[.
  * @param[in] vector Vector.
  *
  * @exception GException::out_of_range
- *            Invalid column index specified.
+ *            Invalid matrix column specified.
  * @exception GException::matrix_vector_mismatch
- *            Matrix dimension mismatches the vector size.
+ *            Vector size does not match number of matrix rows.
  *
  * Adds the content of a vector to a matrix column.
  ***************************************************************************/
 void GMatrix::add_to_column(const int& column, const GVector& vector)
 {
-    // Raise an exception if the column index is invalid
+    // Raise an exception if the column is invalid
     #if defined(G_RANGE_CHECK)
     if (column < 0 || column >= m_cols) {
-        throw GException::out_of_range(G_ADD_TO_COLUMN, column, 0, m_cols-1);
+        throw GException::out_of_range(G_ADD_TO_COLUMN, "Matrix column",
+                                       column, m_cols);
+
     }
     #endif
 
     // Raise an exception if the matrix and vector dimensions are not
     // compatible
     if (m_rows != vector.size()) {
-        throw GException::matrix_vector_mismatch(G_ADD_TO_COLUMN, vector.size(),
-                                                 m_rows, m_cols);
+        std::string msg = "Vector size "+gammalib::str(vector.size())+
+                          " does not match "+gammalib::str(m_rows)+" matrix "
+                          "rows. Please specify a vector of size "+
+                          gammalib::str(m_rows)+".";
+        throw GException::invalid_argument(G_ADD_TO_COLUMN, msg);
     }
 
     // Continue only if we have elements
@@ -989,7 +1037,7 @@ double GMatrix::fill(void) const
 /***********************************************************************//**
  * @brief Extract lower triangle of matrix
  *
- * @exception GException::matrix_not_square
+ * @exception GException::invalid_argument
  *            Matrix is not a square matrix.
  *
  * This method extracts the lower triangle of a matrix into another matrix.
@@ -1000,9 +1048,13 @@ double GMatrix::fill(void) const
  ***************************************************************************/
 GMatrix GMatrix::extract_lower_triangle(void) const
 {
-    // Raise an exception if matrix is not square
+    // Throw exception if matrix is not square
     if (m_rows != m_cols) {
-        throw GException::matrix_not_square(G_EXTRACT_LOWER, m_rows, m_cols);
+        std::string msg = "Number of matrix rows "+gammalib::str(m_rows)+
+                          " differs from number of matrix columns "+
+                          gammalib::str(m_cols)+". This method only works "
+                          "on square matrices.";
+        throw GException::invalid_argument(G_EXTRACT_LOWER, msg);
     }
 
     // Define result matrix
@@ -1024,7 +1076,7 @@ GMatrix GMatrix::extract_lower_triangle(void) const
 /***********************************************************************//**
  * @brief Extract upper triangle of matrix
  *
- * @exception GException::matrix_not_square
+ * @exception GException::invalid_argument
  *            Matrix is not a square matrix.
  *
  * This method extracts the upper triangle of a matrix into another matrix.
@@ -1035,9 +1087,13 @@ GMatrix GMatrix::extract_lower_triangle(void) const
  ***************************************************************************/
 GMatrix GMatrix::extract_upper_triangle(void) const
 {
-    // Raise an exception if matrix is not squared
+    // Throw exception if matrix is not squared
     if (m_rows != m_cols) {
-        throw GException::matrix_not_square(G_EXTRACT_UPPER, m_rows, m_cols);
+        std::string msg = "Number of matrix rows "+gammalib::str(m_rows)+
+                          " differs from number of matrix columns "+
+                          gammalib::str(m_cols)+". This method only works "
+                          "on square matrices.";
+        throw GException::invalid_argument(G_EXTRACT_UPPER, msg);
     }
 
     // Define result matrix
@@ -1170,6 +1226,7 @@ void GMatrix::eulerz(const double& angle)
 /***********************************************************************//**
  * @brief Print matrix
  *
+ * @param[in] chatter Chattiness.
  * @return String containing matrix information.
  ***************************************************************************/
 std::string GMatrix::print(const GChatter& chatter) const

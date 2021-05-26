@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GModels.cpp - Model container class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -303,7 +303,7 @@ const GModel* GModels::at(const int& index) const
 /***********************************************************************//**
  * @brief Set model in container
  *
- * @param[in] index Model index [0,...,size()-1].
+ * @param[in] index Model index [0,...,size()[.
  * @param[in] model Model.
  * @return Pointer to deep copy of model.
  *
@@ -319,7 +319,7 @@ GModel* GModels::set(const int& index, const GModel& model)
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_SET1, index, 0, size()-1);
+        throw GException::out_of_range(G_SET1, "Model index", index, size());
     }
     #endif
 
@@ -438,7 +438,7 @@ GModel* GModels::append(const GModel& model)
 /***********************************************************************//**
  * @brief Insert model into container
  *
- * @param[in] index Model index [0,...,size()-1].
+ * @param[in] index Model index [0,...,size()[.
  * @param[in] model Model.
  * @return Pointer to deep copy of model.
  *
@@ -456,12 +456,14 @@ GModel* GModels::insert(const int& index, const GModel& model)
     #if defined(G_RANGE_CHECK)
     if (is_empty()) {
         if (index > 0) {
-            throw GException::out_of_range(G_INSERT1, index, 0, size()-1);
+            throw GException::out_of_range(G_INSERT1, "Model index",
+                                           index, size());
         }
     }
     else {
         if (index < 0 || index >= size()) {
-            throw GException::out_of_range(G_INSERT1, index, 0, size()-1);
+            throw GException::out_of_range(G_INSERT1, "Model index",
+                                           index, size());
         }
     }
     #endif
@@ -540,7 +542,7 @@ GModel* GModels::insert(const std::string& name, const GModel& model)
 /***********************************************************************//**
  * @brief Remove model from container
  *
- * @param[in] index Model index [0,...,size()-1].
+ * @param[in] index Model index [0,...,size()[.
  *
  * @exception GException::out_of_range
  *            Model index is out of range.
@@ -552,7 +554,8 @@ void GModels::remove(const int& index)
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_REMOVE1, index, 0, size()-1);
+        throw GException::out_of_range(G_REMOVE1, "Model index",
+                                       index, size());
     }
     #endif
 

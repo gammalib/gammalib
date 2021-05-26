@@ -92,11 +92,6 @@ public:
     // Out of range
     class out_of_range : public GExceptionHandler {
     public:
-        out_of_range(std::string origin, int inx, int min, int max);
-        out_of_range(std::string origin, double value, double min, double max);
-        out_of_range(std::string origin, int inx, int elements);
-        out_of_range(std::string origin, int row, int col, int rows, int cols);
-        // New methods
         out_of_range(const std::string& origin,
                      const std::string& what,
                      const int&         index,
@@ -205,6 +200,7 @@ public:
     };
 
     // Empty object exception class
+    /*
     class empty : public GExceptionHandler {
     public:
         empty(std::string origin);
@@ -271,7 +267,7 @@ public:
         invalid_order(std::string origin, int order, int min_order, 
                       int max_order);
     };
-
+    */
 
 
     // GSkyMap exceptions

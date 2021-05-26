@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GArf.i - XSPEC Auxiliary Response File class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -87,7 +87,9 @@ public:
             return (*self)[index];
         }
         else {
-            throw GException::out_of_range("__getitem__(int)", index, self->size());
+            throw GException::out_of_range("__getitem__(int)",
+                                           "Spectral bin index",
+                                           index, self->size());
         }
     }
     std::vector<double> __getitem__(const std::string& colname) {
@@ -99,7 +101,9 @@ public:
             return;
         }
         else {
-            throw GException::out_of_range("__setitem__(int)", index, self->size());
+            throw GException::out_of_range("__setitem__(int)",
+                                           "Spectral bin index",
+                                           index, self->size());
         }
     }
     int __len__() {

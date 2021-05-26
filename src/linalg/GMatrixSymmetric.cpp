@@ -67,11 +67,7 @@
 /***********************************************************************//**
  * @brief Void constructor
  *
- * Constructs an empty matrix (i.e. a matrix without any elements; the number
- * of rows and columns of the matrix will be zero).
- *
- * @todo Check the entire matrix class to see whether handling with an
- *       empty matrix may lead to some conflicts.
+ * Constructs an empty matrix. An empty matrix has zero rows and columns.
  ***************************************************************************/
 GMatrixSymmetric::GMatrixSymmetric(void) : GMatrixBase()
 {
@@ -128,7 +124,7 @@ GMatrixSymmetric::GMatrixSymmetric(const int& rows, const int& columns) :
  *
  * @param[in] matrix General matrix (GMatrix).
  *
- * @exception GException::matrix_not_symmetric
+ * @exception GException::invalid_argument
  *            Matrix is not symmetric.
  *
  * Converts a general matrix into the symmetric storage class. If the input
@@ -148,9 +144,16 @@ GMatrixSymmetric::GMatrixSymmetric(const GMatrix& matrix)
             double value_ll = matrix(row,col);
             double value_ur = matrix(col,row);
             if (value_ll != value_ur) {
-                throw GException::matrix_not_symmetric(G_MATRIX,
-                                                       matrix.rows(),
-                                                       matrix.columns());
+                std::string msg = "Value "+gammalib::str(value_ll)+" of "
+                                  "matrix element at (row,column)=("+
+                                  gammalib::str(row)+","+
+                                  gammalib::str(col)+") differs from value "+
+                                  gammalib::str(value_ur)+" of "
+                                  "matrix element at (row,column)=("+
+                                  gammalib::str(col)+","+
+                                  gammalib::str(row)+"). Please specify a "
+                                  "symmetric matrix.";
+                throw GException::invalid_argument(G_MATRIX, msg);
             }
             (*this)(row, col) = matrix(row, col);
         }
@@ -166,7 +169,7 @@ GMatrixSymmetric::GMatrixSymmetric(const GMatrix& matrix)
  *
  * @param[in] matrix Sparse matrix (GMatrixSparse).
  *
- * @exception GException::matrix_not_symmetric
+ * @exception GException::invalid_argument
  *            Sparse matrix is not symmetric.
  *
  * Converts a sparse matrix into the symmetric storage class. If the input
@@ -186,9 +189,16 @@ GMatrixSymmetric::GMatrixSymmetric(const GMatrixSparse& matrix)
             double value_ll = matrix(row,col);
             double value_ur = matrix(col,row);
             if (value_ll != value_ur) {
-                throw GException::matrix_not_symmetric(G_SPARSEMATRIX,
-                                                       matrix.rows(),
-                                                       matrix.columns());
+                std::string msg = "Value "+gammalib::str(value_ll)+" of "
+                                  "matrix element at (row,column)=("+
+                                  gammalib::str(row)+","+
+                                  gammalib::str(col)+") differs from value "+
+                                  gammalib::str(value_ur)+" of "
+                                  "matrix element at (row,column)=("+
+                                  gammalib::str(col)+","+
+                                  gammalib::str(row)+"). Please specify a "
+                                  "symmetric matrix.";
+                throw GException::invalid_argument(G_MATRIX, msg);
             }
             (*this)(row, col) = matrix(row, col);
         }
@@ -334,20 +344,24 @@ const double& GMatrixSymmetric::operator()(const int& row,
  *
  * @param[in] vector Vector.
  *
- * @exception GException::matrix_vector_mismatch
- *            Vector length differs from number of columns in matrix.
+ * @exception GException::invalid_argument
+ *            Vector size differs from number of columns in matrix.
  *
  * This method performs a vector multiplication of a matrix. The vector
- * multiplication will produce a vector. The matrix multiplication can only
- * be performed when the number of matrix columns is equal to the length of
- * the vector.
+ * multiplication will produce a vector. The multiplication can only be
+ * performed when the number of matrix columns is identical to the size
+ * of the vector. If the size of the vector differs an exception will be
+ * thrown.
  ***************************************************************************/
 GVector GMatrixSymmetric::operator*(const GVector& vector) const
 {
     // Raise an exception if the matrix and vector dimensions are not compatible
     if (m_cols != vector.size()) {
-        throw GException::matrix_vector_mismatch(G_OP_MUL_VEC, vector.size(),
-                                                 m_rows, m_cols);
+        std::string msg = "Vector size "+gammalib::str(vector.size())+" does "
+                          "not match "+gammalib::str(m_cols)+" matrix columns. "
+                          "Please specify a vector of size "+
+                          gammalib::str(m_cols)+".";
+        throw GException::invalid_argument(G_OP_MUL_VEC, msg);
     }
 
     // Perform vector multiplication
@@ -394,19 +408,28 @@ GMatrixSymmetric GMatrixSymmetric::operator-(void) const
  *
  * @param[in] matrix Matrix.
  *
- * @exception GException::matrix_mismatch
- *            Incompatible matrix size.
+ * @exception GException::invalid_argument
+ *            Incompatible number of matrix rows or columns.
  *
  * This method performs a matrix addition. The operation can only succeed
  * when the dimensions of both matrices are identical.
  ***************************************************************************/
 GMatrixSymmetric& GMatrixSymmetric::operator+=(const GMatrixSymmetric& matrix)
 {
-    // Raise an exception if the matrix dimensions are not compatible
-    if (m_rows != matrix.m_rows || m_cols != matrix.m_cols) {
-        throw GException::matrix_mismatch(G_OP_ADD,
-                                          m_rows, m_cols,
-                                          matrix.m_rows, matrix.m_cols);
+    // Throw an exception if the matrix dimensions are not compatible
+    if (m_rows != matrix.m_rows) {
+        std::string msg = "Number of matrix rows "+gammalib::str(matrix.m_rows)+
+                          " differs from the expected number of "+
+                          gammalib::str(m_rows)+" rows. Please specify a "
+                          "matrix with "+gammalib::str(m_rows)+" rows.";
+        throw GException::invalid_argument(G_OP_ADD, msg);
+    }
+    if (m_cols != matrix.m_cols) {
+        std::string msg = "Number of matrix columns "+gammalib::str(matrix.m_cols)+
+                          " differs from the expected number of "+
+                          gammalib::str(m_cols)+" columns. Please specify a "
+                          "matrix with "+gammalib::str(m_cols)+" columns.";
+        throw GException::invalid_argument(G_OP_ADD, msg);
     }
 
     // Add all matrix elements
@@ -446,19 +469,28 @@ GMatrixSymmetric& GMatrixSymmetric::operator+=(const double& scalar)
  *
  * @param[in] matrix Matrix.
  *
- * @exception GException::matrix_mismatch
- *            Incompatible matrix size.
+ * @exception GException::invalid_argument
+ *            Incompatible number of matrix rows or columns.
  *
  * This method performs a matrix addition. The operation can only succeed
  * when the dimensions of both matrices are identical.
  ***************************************************************************/
 GMatrixSymmetric& GMatrixSymmetric::operator-=(const GMatrixSymmetric& matrix)
 {
-    // Raise an exception if the matrix dimensions are not compatible
-    if (m_rows != matrix.m_rows || m_cols != matrix.m_cols) {
-        throw GException::matrix_mismatch(G_OP_SUB,
-                                          m_rows, m_cols,
-                                          matrix.m_rows, matrix.m_cols);
+    // Throw an exception if the matrix dimensions are not compatible
+    if (m_rows != matrix.m_rows) {
+        std::string msg = "Number of matrix rows "+gammalib::str(matrix.m_rows)+
+                          " differs from the expected number of "+
+                          gammalib::str(m_rows)+" rows. Please specify a "
+                          "matrix with "+gammalib::str(m_rows)+" rows.";
+        throw GException::invalid_argument(G_OP_SUB, msg);
+    }
+    if (m_cols != matrix.m_cols) {
+        std::string msg = "Number of matrix columns "+gammalib::str(matrix.m_cols)+
+                          " differs from the expected number of "+
+                          gammalib::str(m_cols)+" columns. Please specify a "
+                          "matrix with "+gammalib::str(m_cols)+" columns.";
+        throw GException::invalid_argument(G_OP_SUB, msg);
     }
 
     // Subtract all matrix elements
@@ -530,18 +562,21 @@ GMatrixSymmetric* GMatrixSymmetric::clone(void) const
 /***********************************************************************//**
  * @brief Return reference to matrix element
  *
- * @param[in] row Matrix row [0,...,rows()-1].
- * @param[in] column Matrix column [0,...,columns()-1].
+ * @param[in] row Matrix row [0,...,rows()[.
+ * @param[in] column Matrix column [0,...,columns()[.
  * @return Reference to matrix element.
  *
  * @exception GException::out_of_range
- *            Row or column index out of range.
+ *            Matrix row or column out of range.
  ***************************************************************************/
 double& GMatrixSymmetric::at(const int& row, const int& column)
 {
-    // Raise exception if row or column index is out of range
-    if (row < 0 || row >= m_rows || column < 0 || column >= m_cols) {
-        throw GException::out_of_range(G_AT, row, column, m_rows, m_cols);
+    // Throw exception if row or column is out of range
+    if (row < 0 || row >= m_rows) {
+        throw GException::out_of_range(G_AT, "Matrix row", row, m_rows);
+    }
+    if (column < 0 || column >= m_cols) {
+        throw GException::out_of_range(G_AT, "Matrix column", column, m_cols);
     }
 
     // Get element index
@@ -556,18 +591,21 @@ double& GMatrixSymmetric::at(const int& row, const int& column)
 /***********************************************************************//**
  * @brief Return reference to matrix element (const version)
  *
- * @param[in] row Matrix row [0,...,rows()-1].
- * @param[in] column Matrix column [0,...,columns()-1].
+ * @param[in] row Matrix row [0,...,rows()[.
+ * @param[in] column Matrix column [0,...,columns()[.
  * @return Reference to matrix element.
  *
  * @exception GException::out_of_range
- *            Row or column index out of range.
+ *            Matrix row or column out of range.
  ***************************************************************************/
 const double& GMatrixSymmetric::at(const int& row, const int& column) const
 {
-    // Raise exception if row or column index is out of range
-    if (row < 0 || row >= m_rows || column < 0 || column >= m_cols) {
-        throw GException::out_of_range(G_AT, row, column, m_rows, m_cols);
+    // Throw exception if row or column is out of range
+    if (row < 0 || row >= m_rows) {
+        throw GException::out_of_range(G_AT, "Matrix row", row, m_rows);
+    }
+    if (column < 0 || column >= m_cols) {
+        throw GException::out_of_range(G_AT, "Matrix column", column, m_cols);
     }
 
     // Get element index
@@ -582,19 +620,20 @@ const double& GMatrixSymmetric::at(const int& row, const int& column) const
 /***********************************************************************//**
  * @brief Extract row as vector from matrix
  *
- * @param[in] row Row to be extracted (starting from 0).
+ * @param[in] row Matrix row [0,...,rows()[.
+ * @return Vector of matrix row elements (columns() elements).
  *
  * @exception GException::out_of_range
- *            Invalid row index specified.
+ *            Invalid matrix row specified.
  *
  * This method extracts a matrix row into a vector.
  ***************************************************************************/
 GVector GMatrixSymmetric::row(const int& row) const
 {
-    // Raise an exception if the row index is invalid
+    // Throw exception if the row is invalid
     #if defined(G_RANGE_CHECK)
     if (row < 0 || row >= m_rows) {
-        throw GException::out_of_range(G_EXTRACT_ROW, row, 0, m_rows-1);
+        throw GException::out_of_range(G_EXTRACT_ROW, "Matrix row", row, m_rows);
     }
     #endif
 
@@ -614,14 +653,17 @@ GVector GMatrixSymmetric::row(const int& row) const
 /***********************************************************************//**
  * @brief Set row in matrix
  *
+ * @param[in] row Matrix row [0,...,rows()[.
+ * @param[in] vector Vector of matrix row elements (columns() elements).
+ *
  * @todo To be implemented.
  ***************************************************************************/
 void GMatrixSymmetric::row(const int& row, const GVector& vector)
 {
-    // Raise an exception if the row index is invalid
+    // Throw an exception if the row is invalid
     #if defined(G_RANGE_CHECK)
     if (row < 0 || row >= m_rows) {
-        throw GException::out_of_range(G_SET_ROW, row, 0, m_rows-1);
+        throw GException::out_of_range(G_SET_ROW, "Matrix row", row, m_rows);
     }
     #endif
 
@@ -633,19 +675,21 @@ void GMatrixSymmetric::row(const int& row, const GVector& vector)
 /***********************************************************************//**
  * @brief Extract column as vector from matrix
  *
- * @param[in] column Column index [0,...,columns()-1].
+ * @param[in] column Matrix column [0,...,columns()[.
+ * @return Vector of matrix column elements (rows() elements).
  *
  * @exception GException::out_of_range
- *            Invalid row index specified.
+ *            Invalid matrix column specified.
  *
  * This method extracts a matrix column into a vector.
  ***************************************************************************/
 GVector GMatrixSymmetric::column(const int& column) const
 {
-    // Raise an exception if the column index is invalid
+    // Throw exception if the column is invalid
     #if defined(G_RANGE_CHECK)
     if (column < 0 || column >= m_cols) {
-        throw GException::out_of_range(G_EXTRACT_COLUMN, column, 0, m_cols-1);
+        throw GException::out_of_range(G_EXTRACT_COLUMN, "Matrix column",
+                                       column, m_cols);
     }
     #endif
 
@@ -665,31 +709,35 @@ GVector GMatrixSymmetric::column(const int& column) const
 /***********************************************************************//**
  * @brief Set matrix column from vector
  *
- * @param[in] column Column index [0,...,columns()-1].
+ * @param[in] column Matrix column [0,...,columns()[.
  * @param[in] vector Vector.
  *
  * @exception GException::out_of_range
- *            Invalid column index specified.
- * @exception GException::matrix_vector_mismatch
- *            Matrix dimension mismatches the vector size.
+ *            Invalid matrix column specified.
+ * @exception GException::invalid_argument
+ *            Vector size does not match number of matrix rows.
  *
  * Inserts the content of a vector into a matrix column. Any previous
  * content in the matrix column will be overwritted.
  ***************************************************************************/
 void GMatrixSymmetric::column(const int& column, const GVector& vector)
 {
-    // Raise an exception if the column index is invalid
+    // Throw exception if the column is invalid
     #if defined(G_RANGE_CHECK)
     if (column < 0 || column >= m_cols) {
-        throw GException::out_of_range(G_SET_COLUMN, column, 0, m_cols-1);
+        throw GException::out_of_range(G_SET_COLUMN, "Matrix column",
+                                       column, m_cols);
     }
     #endif
 
-    // Raise an exception if the matrix and vector dimensions are not
-    // compatible
+    // Throw exception if the vector size does not match the number of rows
+    // in the matrix
     if (m_rows != vector.size()) {
-        throw GException::matrix_vector_mismatch(G_SET_COLUMN, vector.size(),
-                                                 m_rows, m_cols);
+        std::string msg = "Vector size "+gammalib::str(vector.size())+
+                          " does not match "+gammalib::str(m_rows)+" matrix "
+                          "rows. Please specify a vector of size "+
+                          gammalib::str(m_rows)+".";
+        throw GException::invalid_argument(G_SET_COLUMN, msg);
     }
 
     // Insert column into vector
@@ -705,16 +753,35 @@ void GMatrixSymmetric::column(const int& column, const GVector& vector)
 /***********************************************************************//**
  * @brief Add row to matrix elements
  *
+ * @param[in] row Matrix row [0,...,rows()[.
+ * @param[in] vector Vector of matrix row elements (columns() elements).
+ *
+ * @exception GException::out_of_range
+ *            Invalid matrix row specified.
+ * @exception GException::matrix_vector_mismatch
+ *            Vector does not match the matrix dimensions.
+ *
  * @todo To be implemented.
  ***************************************************************************/
 void GMatrixSymmetric::add_to_row(const int& row, const GVector& vector)
 {
-    // Raise an exception if the row index is invalid
+    // Throw exception if the row is invalid
     #if defined(G_RANGE_CHECK)
     if (row < 0 || row >= m_rows) {
-        throw GException::out_of_range(G_ADD_TO_ROW, row, 0, m_rows-1);
+        throw GException::out_of_range(G_ADD_TO_ROW, "Matrix row", row, m_rows);
+
     }
     #endif
+
+    // Throw exception if the matrix and vector dimensions are not
+    // compatible
+    if (m_cols != vector.size()) {
+        std::string msg = "Vector size "+gammalib::str(vector.size())+
+                          " does not match "+gammalib::str(m_cols)+" matrix "
+                          "columns. Please specify a vector of size "+
+                          gammalib::str(m_cols)+".";
+        throw GException::invalid_argument(G_ADD_TO_ROW, msg);
+    }
 
     // Return
     return;
@@ -724,30 +791,35 @@ void GMatrixSymmetric::add_to_row(const int& row, const GVector& vector)
 /***********************************************************************//**
  * @brief Add vector column into matrix
  *
- * @param[in] column Column index [0,...,columns()-1].
+ * @param[in] column Matrix column [0,...,columns()[.
  * @param[in] vector Vector.
  *
  * @exception GException::out_of_range
- *            Invalid column index specified.
+ *            Invalid matrix column specified.
  * @exception GException::matrix_vector_mismatch
- *            Matrix dimension mismatches the vector size.
+ *            Vector size does not match number of matrix rows.
  *
  * Adds the content of a vector to a matrix column.
  ***************************************************************************/
 void GMatrixSymmetric::add_to_column(const int& column, const GVector& vector)
 {
-    // Raise an exception if the column index is invalid
+    // Raise an exception if the column is invalid
     #if defined(G_RANGE_CHECK)
     if (column < 0 || column >= m_cols) {
-        throw GException::out_of_range(G_ADD_TO_COLUMN, column, 0, m_cols-1);
+        throw GException::out_of_range(G_ADD_TO_COLUMN, "Matrix column",
+                                       column, m_cols);
+
     }
     #endif
 
     // Raise an exception if the matrix and vector dimensions are not
     // compatible
     if (m_rows != vector.size()) {
-        throw GException::matrix_vector_mismatch(G_ADD_TO_COLUMN, vector.size(),
-                                                 m_rows, m_cols);
+        std::string msg = "Vector size "+gammalib::str(vector.size())+
+                          " does not match "+gammalib::str(m_rows)+" matrix "
+                          "rows. Please specify a vector of size "+
+                          gammalib::str(m_rows)+".";
+        throw GException::invalid_argument(G_ADD_TO_COLUMN, msg);
     }
 
     // Insert column into vector
@@ -949,10 +1021,8 @@ GMatrix GMatrixSymmetric::extract_upper_triangle(void) const
  * @param[in] compress Use zero-row/column compression (defaults to true).
  * @return Cholesky decomposition of matrix
  *
- * @exception GException::matrix_not_pos_definite
+ * @exception GException::runtime_error
  *            Matrix is not positive definite.
- * @exception GException::matrix_zero
- *            All matrix elements are zero.
  *
  * Returns the Cholesky decomposition of a sparse matrix. The decomposition
  * is stored within a GMatrixSymmetric object.
@@ -993,7 +1063,11 @@ GMatrixSymmetric GMatrixSymmetric::cholesky_decompose(const bool& compress) cons
                 }
                 if (row == col) {
                     if (sum <= 0.0) {
-                        throw GException::matrix_not_pos_definite(G_CHOL_DECOMP, row, sum);
+                        std::string msg = "Matrix is not positive definite, "
+                                          "the sum "+gammalib::str(sum)+
+                                          " occured in row and column "+
+                                          gammalib::str(row)+".";
+                        throw GException::runtime_error(G_CHOL_DECOMP, msg);
                     }
                     *ptr = std::sqrt(sum);  // M(row,row) = sqrt(sum)
                     diag = 1.0/(*ptr);
@@ -1031,7 +1105,11 @@ GMatrixSymmetric GMatrixSymmetric::cholesky_decompose(const bool& compress) cons
                 }
                 if (*row_ptr == *col_ptr) {
                     if (sum <= 0.0) {
-                        throw GException::matrix_not_pos_definite(G_CHOL_DECOMP, *row_ptr, sum);
+                        std::string msg = "Matrix is not positive definite, "
+                                          "the sum "+gammalib::str(sum)+
+                                          " occured in row and column "+
+                                          gammalib::str(*row_ptr)+".";
+                        throw GException::runtime_error(G_CHOL_DECOMP, msg);
                     }
                     *ptr = std::sqrt(sum); // M(row,row) = sqrt(sum)
                     diag = 1.0/(*ptr);
@@ -1045,7 +1123,9 @@ GMatrixSymmetric GMatrixSymmetric::cholesky_decompose(const bool& compress) cons
 
     // Case C: all matrix elements are zero
     else {
-        throw GException::matrix_zero(G_CHOL_DECOMP);
+        std::string msg = "Matrix is not positive definite, all matrix "
+                          "elements are zero.";
+        throw GException::runtime_error(G_CHOL_DECOMP, msg);
     }
 
     // Return matrix
@@ -1059,9 +1139,9 @@ GMatrixSymmetric GMatrixSymmetric::cholesky_decompose(const bool& compress) cons
  * @param[in] vector Vector for which should be solved.
  * @param[in] compress Use zero-row/column compression (default: true).
  *
- * @exception GException::matrix_vector_mismatch
+ * @exception GException::invalid_argument
  *            Matrix and vector do not match.
- * @exception GException::matrix_zero
+ * @exception GException::runtime_error
  *            All matrix elements are zero.
  *
  * Solves the linear equation A*x=b using a Cholesky decomposition of A.
@@ -1074,8 +1154,11 @@ GVector GMatrixSymmetric::cholesky_solver(const GVector& vector,
 {
     // Raise an exception if the matrix and vector dimensions are not compatible
     if (m_rows != vector.size()) {
-        throw GException::matrix_vector_mismatch(G_CHOL_SOLVE, vector.size(),
-                                                 m_rows, m_cols);
+        std::string msg = "Vector size "+gammalib::str(vector.size())+
+                          " does not match "+gammalib::str(m_rows)+" matrix "
+                          "rows. Please specify a vector of size "+
+                          gammalib::str(m_rows)+".";
+        throw GException::invalid_argument(G_CHOL_SOLVE, msg);
     }
 
     // Allocate result vector
@@ -1140,7 +1223,8 @@ GVector GMatrixSymmetric::cholesky_solver(const GVector& vector,
 
     // Case C: all matrix elements are zero
     else {
-        throw GException::matrix_zero(G_CHOL_SOLVE);
+        std::string msg = "All matrix elements are zero.";
+        throw GException::runtime_error(G_CHOL_SOLVE, msg);
     }
 
   // Return result vector
@@ -1154,7 +1238,7 @@ GVector GMatrixSymmetric::cholesky_solver(const GVector& vector,
  * @param[in] compress Use zero-row/column compression (defaults to true).
  * @return Inverted matrix.
  *
- * @exception GException::matrix_zero
+ * @exception GException::runtime_error
  *            All matrix elements are zero.
  *
  * Inverts the matrix using a Cholesky decomposition.
@@ -1276,7 +1360,8 @@ GMatrixSymmetric GMatrixSymmetric::cholesky_invert(const bool& compress) const
 
     // Case C: all matrix elements are zero
     else {
-        throw GException::matrix_zero(G_CHOL_INVERT);
+        std::string msg = "All matrix elements are zero.";
+        throw GException::runtime_error(G_CHOL_INVERT, msg);
     }
 
     // Return matrix
@@ -1287,7 +1372,7 @@ GMatrixSymmetric GMatrixSymmetric::cholesky_invert(const bool& compress) const
 /***********************************************************************//**
  * @brief Print matrix
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing matrix information
  ***************************************************************************/
 std::string GMatrixSymmetric::print(const GChatter& chatter) const
@@ -1391,7 +1476,7 @@ void GMatrixSymmetric::free_members(void)
  * @param[in] rows Number of rows.
  * @param[in] columns Number of columns.
  *
- * @exception GException::matrix_not_symmetric
+ * @exception GException::invalid_argument
  *            Matrix is not symmetric.
  *
  * This method is the main constructor code that allocates and initialises
@@ -1411,7 +1496,10 @@ void GMatrixSymmetric::alloc_members(const int& rows, const int& columns)
 
     // Throw exception if number of rows and columns is not identical
     if (rows != columns) {
-      throw GException::matrix_not_symmetric(G_ALLOC_MEMBERS, rows, columns);
+        std::string msg = "Number of rows "+gammalib::str(rows)+" differs from "
+                          "number of columns "+gammalib::str(columns)+". Please "
+                          "specify a symmetric matrix.";
+        throw GException::invalid_argument(G_ALLOC_MEMBERS, msg);
     }
 
     // Continue only if number of elements is positive
@@ -1514,8 +1602,9 @@ void GMatrixSymmetric::set_inx(void)
  *
  * @param[in] matrix Matrix to be multiplied.
  *
- * @exception GException::matrix_mismatch
- *            Incompatible matrix size.
+ * @exception GException::invalid_argument
+ *            Number of rows in @p matrix is different from number of
+ *            matrix columns.
  *
  * This method performs a matrix multiplication. Since the product of two
  * symmetric matrices is not necessarily symmetric, this method returns a
@@ -1528,9 +1617,12 @@ GMatrix GMatrixSymmetric::operator*(const GMatrixSymmetric& matrix) const
 {
     // Raise an exception if the matrix dimensions are not compatible
     if (m_cols != matrix.m_rows) {
-        throw GException::matrix_mismatch(G_OP_MAT_MUL,
-                                          m_rows, m_cols,
-                                          matrix.m_rows, matrix.m_cols);
+        std::string msg = "Number of "+gammalib::str(m_cols)+" columns in "
+                          "the first matrix differs from number of "+
+                          gammalib::str(matrix.m_rows)+" rows in the second "
+                          "matrix. Please specify a second matrix with "+
+                          gammalib::str(m_cols)+" rows.";
+        throw GException::invalid_argument(G_OP_MAT_MUL, msg);
     }
 
     // Allocate result matrix

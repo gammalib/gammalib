@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GGti.cpp - Good time interval class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -464,7 +464,7 @@ void GGti::reduce(const GTime& tstart, const GTime& tstop)
 /***********************************************************************//**
  * @brief Remove Good Time Interval
  *
- * @param[in] index Good Time Interval index (0,...,size()-1).
+ * @param[in] index Good Time Interval index [0,...,size()[.
  *
  * Removes Good Time Interval at @p index from the container. All intervals
  * after the specified @p index are moved forward by one position.
@@ -477,7 +477,8 @@ void GGti::remove(const int& index)
     #if defined(G_RANGE_CHECK)
     // If index is outside boundary then throw an error
     if (index < 0 || index >= m_num) {
-        throw GException::out_of_range(G_REMOVE, index, 0, m_num-1);
+        throw GException::out_of_range(G_REMOVE, "Good Time Interval index",
+                                       index, m_num);
     }
     #endif
 
@@ -573,7 +574,8 @@ void GGti::load(const GFilename& filename)
     GFits fits(filename);
 
     // Get GTI table
-    const GFitsTable& table = *fits.table(filename.extname(gammalib::extname_gti));
+    const GFitsTable& table =
+          *fits.table(filename.extname(gammalib::extname_gti));
 
     // Read GTI from table
     read(table);
@@ -854,7 +856,8 @@ void GGti::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Returns start time for a given Good Time Interval
  *
- * @param[in] index Good Time Interval index (0,...,size()-1).
+ * @param[in] index Good Time Interval index [0,...,size()[.
+ * @return Start time.
  *
  * @exception GException::out_of_range
  *            Specified index is out of range.
@@ -864,7 +867,8 @@ const GTime& GGti::tstart(const int& index) const
     #if defined(G_RANGE_CHECK)
     // If index is outside boundary then throw an error
     if (index < 0 || index >= m_num) {
-        throw GException::out_of_range(G_TSTART, index, 0, m_num-1);
+        throw GException::out_of_range(G_TSTART, "Good Time Interval index",
+                                       index, m_num);
     }
     #endif
 
@@ -876,7 +880,8 @@ const GTime& GGti::tstart(const int& index) const
 /***********************************************************************//**
  * @brief Returns stop time for a given Good Time Interval
  *
- * @param[in] index Good Time Interval index (0,...,size()-1).
+ * @param[in] index Good Time Interval index [0,...,size()[.
+ * @return Stop time.
  *
  * @exception GException::out_of_range
  *            Specified index is out of range.
@@ -886,7 +891,8 @@ const GTime& GGti::tstop(const int& index) const
     #if defined(G_RANGE_CHECK)
     // If index is outside boundary then throw an error
     if (index < 0 || index >= m_num) {
-        throw GException::out_of_range(G_TSTOP, index, 0, m_num-1);
+        throw GException::out_of_range(G_TSTOP, "Good Time Interval index",
+                                       index, m_num);
     }
     #endif
 
