@@ -450,11 +450,6 @@ double GModelSpatialRadialGauss::theta_max(void) const
  *
  * @param[in] xml XML element.
  *
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
- *
  * Reads the radial Gauss model information from an XML element. The XML
  * element shall have either the format 
  *
@@ -477,14 +472,8 @@ double GModelSpatialRadialGauss::theta_max(void) const
  ***************************************************************************/
 void GModelSpatialRadialGauss::read(const GXmlElement& xml)
 {
-    // Determine number of parameter nodes in XML element
-    int npars = xml.elements("parameter");
-
-    // Verify that XML element has exactly 3 parameters
-    if (xml.elements() != 3 || npars != 3) {
-        throw GException::model_invalid_parnum(G_READ, xml,
-              "Gaussian source model requires exactly 3 parameters.");
-    }
+    // Verify number of model parameters
+    gammalib::xml_check_parnum(G_READ, xml, 3);
 
     // Read Gaussian location
     GModelSpatialRadial::read(xml);
@@ -504,13 +493,6 @@ void GModelSpatialRadialGauss::read(const GXmlElement& xml)
  * @brief Write model into XML element
  *
  * @param[in] xml XML element into which model information is written.
- *
- * @exception GException::model_invalid_spatial
- *            Existing XML element is not of type 'GaussFunction'
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
  *
  * Writes the radial disk model information into an XML element. The XML
  * element will have the format 
@@ -541,7 +523,7 @@ void GModelSpatialRadialGauss::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print Gaussian source information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing model information.
  ***************************************************************************/
 std::string GModelSpatialRadialGauss::print(const GChatter& chatter) const

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GUrlFile.cpp - File URL class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -195,7 +195,7 @@ GUrlFile* GUrlFile::clone(void) const
  * @param[in] url File name.
  * @param[in] mode File mode.
  *
- * @exception GException::file_open_error
+ * @exception GException::file_error
  *            Unable to open file.
  *
  * Opens a file @p url in the specified @p mode. Any environment variable
@@ -214,7 +214,9 @@ void GUrlFile::open(const std::string& url, const std::string& mode)
     // Try opening file. Throw an exception if opening failed.
     m_fptr = std::fopen(filename.c_str(), mode.c_str());
     if (m_fptr == NULL) {
-        throw GException::file_open_error(G_OPEN, filename);
+        std::string msg = "Unable to open file \""+filename+"\" in mode \""+
+                          mode+"\". Please specify an accessible file.";
+        throw GException::file_error(G_OPEN, msg);
     }
 
     // Store URL and mode

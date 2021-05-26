@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GModelSpectralMultiplicative.cpp - Multiplicative spectral model class *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2020 by Michael Mayer                               *
+ *  copyright (C) 2016-2021 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -469,23 +469,12 @@ void GModelSpectralMultiplicative::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element.
  *
- * @exception GException::model_invalid_spectral
- *            Existing XML element is not of the expected type.
- *
  * Writes the spectral information into an XML element.
  ***************************************************************************/
 void GModelSpectralMultiplicative::write(GXmlElement& xml) const
 {
-    // Set model type
-    if (xml.attribute("type") == "") {
-        xml.attribute("type", type());
-    }
-
     // Verify model type
-    if (xml.attribute("type") != type()) {
-        throw GException::model_invalid_spectral(G_WRITE, xml.attribute("type"),
-              "Spectral model is not of type \""+type()+"\".");
-    }
+    gammalib::xml_check_type(G_WRITE, xml, type());
 
     // Loop over model components
     for (int i = 0; i < m_spectral.size(); i++) {
@@ -630,6 +619,9 @@ const GModelSpectral* GModelSpectralMultiplicative::component(const int& index) 
  * @param[in] name Name of spectral component.
  * @return Pointer to spectral model.
  *
+ * @exception GException::invalid_argument
+ *            Model component not found.
+ *
  * Returns a component of the multiplicative spectral model by @p name.
  ***************************************************************************/
 const GModelSpectral* GModelSpectralMultiplicative::component(const std::string& name) const
@@ -645,7 +637,9 @@ const GModelSpectral* GModelSpectralMultiplicative::component(const std::string&
 
     // Check if component name was found
     if (index == -1) {
-        throw GException::model_not_found(G_COMPONENT_NAME, name);
+        std::string msg = "Model component \""+name+"\" not found. Please "
+                          "specify a valid model component name.";
+        throw GException::invalid_argument(G_COMPONENT_NAME, msg);
     }
 
     // Return spectral component

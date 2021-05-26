@@ -136,8 +136,8 @@ GModelSpatial& GModelSpatial::operator=(const GModelSpatial& model)
  * @param[in] name Parameter name.
  * @return Model parameter reference.
  *
- * @exception GException::par_not_found
- *            Parameter with specified name not found in container.
+ * @exception GException::invalid_argument
+ *            Parameter with specified name not found.
  *
  * Returns reference to the model parameter of specified @p name.
  ***************************************************************************/
@@ -153,7 +153,9 @@ GModelPar& GModelSpatial::operator[](const std::string& name)
 
     // Throw exception if parameter name was not found
     if (index >= size()) {
-        throw GException::par_not_found(G_ACCESS, name);
+        std::string msg = "Model parameter \""+name+"\" not found in model. "
+                          "Please specify a valid model parameter name.";
+        throw GException::invalid_argument(G_ACCESS, msg);
     }
 
     // Return reference
@@ -167,8 +169,8 @@ GModelPar& GModelSpatial::operator[](const std::string& name)
  * @param[in] name Parameter name.
  * @return Model parameter reference.
  *
- * @exception GException::par_not_found
- *            Parameter with specified name not found in container.
+ * @exception GException::invalid_argument
+ *            Parameter with specified name not found.
  *
  * Returns reference to the model parameter of specified @p name.
  ***************************************************************************/
@@ -184,7 +186,9 @@ const GModelPar& GModelSpatial::operator[](const std::string& name) const
 
     // Throw exception if parameter name was not found
     if (index >= size()) {
-        throw GException::par_not_found(G_ACCESS, name);
+        std::string msg = "Model parameter \""+name+"\" not found in model. "
+                          "Please specify a valid model parameter name.";
+        throw GException::invalid_argument(G_ACCESS, msg);
     }
 
     // Return reference

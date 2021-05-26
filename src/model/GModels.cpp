@@ -170,7 +170,7 @@ GModels& GModels::operator=(const GModels& models)
  *
  * @param[in] name Model name.
  *
- * @exception GException::model_not_found
+ * @exception GException::invalid_argument
  *            Model with specified name not found in container.
  *
  * Returns a pointer to the model with the specified @p name.
@@ -182,7 +182,9 @@ GModel* GModels::operator[](const std::string& name)
 
     // Throw exception if model name was not found
     if (index == -1) {
-        throw GException::model_not_found(G_ACCESS, name);
+        std::string msg = "Model \""+name+"\" not found in model container. "
+                          "Please specify the name of an available model.";
+        throw GException::invalid_argument(G_ACCESS, msg);
     }
 
     // Return pointer
@@ -195,7 +197,7 @@ GModel* GModels::operator[](const std::string& name)
  *
  * @param[in] name Model name.
  *
- * @exception GException::model_not_found
+ * @exception GException::invalid_argument
  *            Model with specified name not found in container.
  *
  * Returns a const pointer to the model with the specified @p name.
@@ -207,7 +209,9 @@ const GModel* GModels::operator[](const std::string& name) const
 
     // Throw exception if model name was not found
     if (index == -1) {
-        throw GException::model_not_found(G_ACCESS, name);
+        std::string msg = "Model \""+name+"\" not found in model container. "
+                          "Please specify the name of an available model.";
+        throw GException::invalid_argument(G_ACCESS, msg);
     }
 
     // Return pointer
@@ -356,7 +360,7 @@ GModel* GModels::set(const int& index, const GModel& model)
  * @param[in] model Model pointer.
  * @return Pointer to deep copy of model.
  *
- * @exception GException::model_not_found
+ * @exception GException::invalid_argument
  *            Model with specified name not found in container.
  * @exception GException::invalid_value
  *            Name of model exists already in container.
@@ -370,7 +374,9 @@ GModel* GModels::set(const std::string& name, const GModel& model)
 
     // Throw exception if parameter name was not found
     if (index == -1) {
-        throw GException::model_not_found(G_SET2, name);
+        std::string msg = "Model \""+name+"\" not found in model container. "
+                          "Please specify the name of an available model.";
+        throw GException::invalid_argument(G_SET2, msg);
     }
 
     // Check if a model with specified name does not yet exist
@@ -498,7 +504,7 @@ GModel* GModels::insert(const int& index, const GModel& model)
  * @param[in] model Model.
  * @return Pointer to deep copy of model.
  *
- * @exception GException::model_not_found
+ * @exception GException::invalid_argument
  *            Model with specified name not found in container.
  * @exception GException::invalid_value
  *            Name of model exists already in container.
@@ -513,7 +519,9 @@ GModel* GModels::insert(const std::string& name, const GModel& model)
 
     // Throw exception if parameter name was not found
     if (index == -1) {
-        throw GException::model_not_found(G_INSERT2, name);
+        std::string msg = "Model \""+name+"\" not found in model container. "
+                          "Please specify the name of an available model.";
+        throw GException::invalid_argument(G_INSERT2, msg);
     }
 
     // Check if a model with specified name does not yet exist
@@ -575,7 +583,7 @@ void GModels::remove(const int& index)
  *
  * @param[in] name Model name.
  *
- * @exception GException::model_not_found
+ * @exception GException::invalid_argument
  *            Model with specified name not found in container.
  *
  * Remove model of specified @p name from container.
@@ -587,7 +595,9 @@ void GModels::remove(const std::string& name)
 
     // Throw exception if parameter name was not found
     if (index == -1) {
-        throw GException::model_not_found(G_REMOVE2, name);
+        std::string msg = "Model \""+name+"\" not found in model container. "
+                          "Please specify the name of an available model.";
+        throw GException::invalid_argument(G_REMOVE2, msg);
     }
 
     // Delete model
@@ -739,7 +749,7 @@ void GModels::save(const GFilename& filename) const
  *
  * @param[in] xml XML document.
  *
- * @exception GException::model_invalid
+ * @exception GException::invalid_value
  *            Invalid model type encountered.
  *
  * Read models from the first source library found in the XML document. The
@@ -786,7 +796,17 @@ void GModels::read(const GXml& xml)
 
         // ... otherwise throw an exception
         else {
-            throw GException::model_invalid(G_READ, type);
+            std::string msg = "No model of type \""+type+"\" found in model "
+                              "registry. Please specify one of the following "
+                              "model types:";
+            for (int i = 0; i < registry.size(); ++i) {
+                if (i != 0) {
+                    msg += ",";
+                }
+                msg += " \""+registry.name(i)+"\"";
+            }
+            msg += ".";
+            throw GException::invalid_value(G_READ, msg);
         }
 
         // Append model

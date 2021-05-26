@@ -1,7 +1,7 @@
 /***************************************************************************
  * GModelSpatialRadialProfileDMBurkert.cpp - Burkert radial profile class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2020 by Nathan Kelley-Hoskins                       *
+ *  copyright (C) 2016-2021 by Nathan Kelley-Hoskins                       *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -288,6 +288,9 @@ double GModelSpatialRadialProfileDMBurkert::theta_max(void) const
  ***************************************************************************/
 void GModelSpatialRadialProfileDMBurkert::read(const GXmlElement& xml)
 {
+    // Verify number of model parameters
+    gammalib::xml_check_parnum(G_READ, xml, 8);
+
     // Read DMBurkert location
     GModelSpatialRadial::read(xml);
 
@@ -335,6 +338,9 @@ void GModelSpatialRadialProfileDMBurkert::read(const GXmlElement& xml)
  ***************************************************************************/
 void GModelSpatialRadialProfileDMBurkert::write(GXmlElement& xml) const
 {
+    // Verify model type
+    gammalib::xml_check_type(G_WRITE, xml, type());
+
     // Write DMBurkert location
     GModelSpatialRadial::write(xml);
 

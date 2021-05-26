@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpectralPlawPhotonFlux.cpp - Spectral power law model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -577,6 +577,9 @@ GEnergy GModelSpectralPlawPhotonFlux::mc(const GEnergy& emin,
  ***************************************************************************/
 void GModelSpectralPlawPhotonFlux::read(const GXmlElement& xml)
 {
+    // Verify number of model parameters
+    gammalib::xml_check_parnum(G_READ, xml, 4);
+
     // Get parameter pointers
     const GXmlElement* flux  = gammalib::xml_get_par(G_READ, xml, m_flux.name());
     const GXmlElement* index = gammalib::xml_get_par(G_READ, xml, m_index.name());
@@ -599,23 +602,12 @@ void GModelSpectralPlawPhotonFlux::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element.
  *
- * @exception GException::model_invalid_spectral
- *            Existing XML element is not of type "PowerLaw"
- *
  * Writes the spectral information into an XML element.
  ***************************************************************************/
 void GModelSpectralPlawPhotonFlux::write(GXmlElement& xml) const
 {
-    // Set model type
-    if (xml.attribute("type") == "") {
-        xml.attribute("type", type());
-    }
-
     // Verify model type
-    if (xml.attribute("type") != type()) {
-        throw GException::model_invalid_spectral(G_WRITE, xml.attribute("type"),
-              "Spectral model is not of type \""+type()+"\".");
-    }
+    gammalib::xml_check_type(G_WRITE, xml, type());
 
     // Get XML parameters
     GXmlElement* flux  = gammalib::xml_need_par(G_WRITE, xml, m_flux.name());

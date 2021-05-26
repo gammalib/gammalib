@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectralGauss.cpp - Spectral Gaussian model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2019 by Christoph Deil & Ellis Owen                 *
+ *  copyright (C) 2014-2021 by Christoph Deil & Ellis Owen                 *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -485,11 +485,6 @@ GEnergy GModelSpectralGauss::mc(const GEnergy& emin,
  *
  * @param[in] xml XML element containing Gaussian model information.
  *
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter name found in XML element.
- *
  * Read the spectral Gaussian information from an XML element.
  * The format of the XML elements is:
  *
@@ -502,6 +497,9 @@ GEnergy GModelSpectralGauss::mc(const GEnergy& emin,
  ***************************************************************************/
 void GModelSpectralGauss::read(const GXmlElement& xml)
 {
+    // Verify number of model parameters
+    gammalib::xml_check_parnum(G_READ, xml, 3);
+
     // Get parameters
     const GXmlElement* norm  = gammalib::xml_get_par(G_READ, xml, m_norm.name());
     const GXmlElement* mean  = gammalib::xml_get_par(G_READ, xml, m_mean.name());
@@ -522,13 +520,6 @@ void GModelSpectralGauss::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element into which model information is written.
  *
- * @exception GException::model_invalid_spectral
- *            Existing XML element is not of type "Gaussian"
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters or nodes found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
- *
  * Writes the spectral information into an XML element. The format of the XML
  * element is
  *
@@ -540,16 +531,8 @@ void GModelSpectralGauss::read(const GXmlElement& xml)
  ***************************************************************************/
 void GModelSpectralGauss::write(GXmlElement& xml) const
 {
-    // Set model type
-    if (xml.attribute("type") == "") {
-        xml.attribute("type", type());
-    }
-
     // Verify model type
-    if (xml.attribute("type") != type()) {
-        throw GException::model_invalid_spectral(G_WRITE, xml.attribute("type"),
-              "Spectral model is not of type \""+type()+"\".");
-    }
+    gammalib::xml_check_type(G_WRITE, xml, type());
 
     // Get XML parameters
     GXmlElement* norm  = gammalib::xml_need_par(G_WRITE, xml, m_norm.name());

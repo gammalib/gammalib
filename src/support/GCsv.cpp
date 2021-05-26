@@ -412,7 +412,7 @@ void GCsv::integer(const int& row, const int& col, const int& value)
  * @param[in] filename Filename.
  * @param[in] sep Column separator (default is whitespace).
  *
- * @exception GException::file_not_found
+ * @exception GException::file_error
  *            CSV table file not found.
  * @exception GException::csv_bad_columns
  *            Inconsistent columns encountered in CSV table file.
@@ -435,7 +435,9 @@ void GCsv::load(const GFilename& filename, const std::string& sep)
     // Open CSV table (read-only)
     FILE* fptr = std::fopen(fname.c_str(), "r");
     if (fptr == NULL) {
-        throw GException::file_not_found(G_LOAD, fname);
+        std::string msg = "Unable to open file \""+fname+"\" for read access. "
+                          "Please specify a readable file.";
+        throw GException::file_error(G_LOAD, msg);
     }
 
     // Read lines
@@ -475,8 +477,12 @@ void GCsv::load(const GFilename& filename, const std::string& sep)
         else {
             // Check table consistency
             if (m_cols != elements.size()) {
-                throw GException::csv_bad_columns(G_LOAD, fname,
-                                  iline, m_cols, elements.size());
+                std::string msg = "Number of "+gammalib::str(elements.size())+
+                                  " columns in row "+gammalib::str(iline)+
+                                  " is not consistent with number of "+
+                                  gammalib::str(m_cols)+" in first row. Please "
+                                  "specify a correctly formatted CSV file.";
+                throw GException::invalid_value(G_LOAD, msg);
             }
 
             // Append elements

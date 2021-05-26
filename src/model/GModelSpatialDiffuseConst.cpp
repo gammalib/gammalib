@@ -421,6 +421,9 @@ double GModelSpatialDiffuseConst::mc_norm(const GSkyDir& dir,
  ***************************************************************************/
 void GModelSpatialDiffuseConst::read(const GXmlElement& xml)
 {
+    // Verify number of model parameters
+    gammalib::xml_check_parnum(G_READ, xml, 1);
+
     // Get value parameter
     const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, m_value.name());
 
@@ -437,9 +440,6 @@ void GModelSpatialDiffuseConst::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element.
  *
- * @exception GException::model_invalid_spatial
- *            Existing XML element is not of type "ConstantValue"
- *
  * Write the isotropic source model information into an XML element. The XML
  * element will have the following format:
  *
@@ -450,16 +450,8 @@ void GModelSpatialDiffuseConst::read(const GXmlElement& xml)
  ***************************************************************************/
 void GModelSpatialDiffuseConst::write(GXmlElement& xml) const
 {
-    // Set model type
-    if (xml.attribute("type") == "") {
-        xml.attribute("type", type());
-    }
-
     // Verify model type
-    if (xml.attribute("type") != type()) {
-        throw GException::model_invalid_spatial(G_WRITE, xml.attribute("type"),
-              "Spatial model is not of type \""+type()+"\".");
-    }
+    gammalib::xml_check_type(G_WRITE, xml, type());
 
     // Get or create Value parameter
     GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, m_value.name());

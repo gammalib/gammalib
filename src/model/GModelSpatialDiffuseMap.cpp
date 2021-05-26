@@ -520,6 +520,9 @@ bool GModelSpatialDiffuseMap::contains(const GSkyDir& dir,
  ***************************************************************************/
 void GModelSpatialDiffuseMap::read(const GXmlElement& xml)
 {
+    // Verify number of model parameters
+    gammalib::xml_check_parnum(G_READ, xml, 1);
+
     // If "Normalization" parameter exists then read parameter from this
     // XML element
     if (gammalib::xml_has_par(xml, "Normalization")) {
@@ -596,47 +599,17 @@ void GModelSpatialDiffuseMap::read(const GXmlElement& xml)
  ***************************************************************************/
 void GModelSpatialDiffuseMap::write(GXmlElement& xml) const
 {
-    // Set model type
-    if (xml.attribute("type") == "") {
-        xml.attribute("type", type());
-    }
-
     // Verify model type
-    if (xml.attribute("type") != type()) {
-        throw GException::model_invalid_spatial(G_WRITE, xml.attribute("type"),
-              "Spatial model is not of type \""+type()+"\".");
-    }
+    gammalib::xml_check_type(G_WRITE, xml, type());
+
+    // Get or create parameter
+    GXmlElement* value = gammalib::xml_need_par(G_WRITE, xml, m_value.name());
+
+    // Write parameters
+    m_value.write(*value);
 
     // Set sky map file name
     xml.attribute("file", gammalib::xml_file_reduce(xml, m_filename));
-
-    // If XML element has 0 nodes then append parameter node. The name
-    // of the node is "Prefactor" as this is the Fermi/LAT standard.
-    // We thus assure that the XML files will be compatible with
-    // Fermi/LAT.
-    if (xml.elements() == 0) {
-        xml.append(GXmlElement("parameter name=\"Prefactor\""));
-    }
-
-    // Verify that XML element has exactly 1 parameter
-    if (xml.elements() != 1 || xml.elements("parameter") != 1) {
-        throw GException::model_invalid_parnum(G_WRITE, xml,
-              "Spatial map model requires exactly 1 parameter.");
-    }
-
-    // Get pointer on model parameter
-    GXmlElement* par = xml.element("parameter", 0);
-
-    // Set or update parameter
-    if (par->attribute("name") == "Normalization" ||
-        par->attribute("name") == "Prefactor") {
-        m_value.write(*par);
-    }
-    else {
-        throw GException::model_invalid_parnames(G_WRITE, xml,
-              "Spatial map model requires either \"Prefactor\" or"
-              " \"Normalization\" parameter.");
-    }
 
     // Set optional normalization attribute
     if (m_has_normalize || !m_normalize) {

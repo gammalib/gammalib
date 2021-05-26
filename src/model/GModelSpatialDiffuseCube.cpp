@@ -559,6 +559,9 @@ bool GModelSpatialDiffuseCube::contains(const GSkyDir& dir,
  ***************************************************************************/
 void GModelSpatialDiffuseCube::read(const GXmlElement& xml)
 {
+    // Verify number of model parameters
+    gammalib::xml_check_parnum(G_READ, xml, 1);
+
     // If "Normalization" parameter exists then read parameter from this
     // XML element
     if (gammalib::xml_has_par(xml, "Normalization")) {
@@ -599,13 +602,6 @@ void GModelSpatialDiffuseCube::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element.
  *
- * @exception GException::model_invalid_spatial
- *            Existing XML element is not of type "MapCubeFunction"
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
- *
  * Write the map cube information into an XML element. The XML element will
  * have either the format
  *
@@ -623,44 +619,14 @@ void GModelSpatialDiffuseCube::read(const GXmlElement& xml)
  ***************************************************************************/
 void GModelSpatialDiffuseCube::write(GXmlElement& xml) const
 {
-    // Set model type
-    if (xml.attribute("type") == "") {
-        xml.attribute("type", type());
-    }
-
     // Verify model type
-    if (xml.attribute("type") != type()) {
-        throw GException::model_invalid_spatial(G_WRITE, xml.attribute("type"),
-              "Spatial model is not of type \""+type()+"\".");
-    }
+    gammalib::xml_check_type(G_WRITE, xml, type());
 
-    // If XML element has 0 nodes then append parameter node. The name
-    // of the node is "Normalization" as this is the Fermi-LAT standard.
-    // We thus assure that the XML files will be compatible with
-    // Fermi-LAT.
-    if (xml.elements() == 0) {
-        xml.append(GXmlElement("parameter name=\"Normalization\""));
-    }
+    // Get or create parameter
+    GXmlElement* value = gammalib::xml_need_par(G_WRITE, xml, m_value.name());
 
-    // Verify that XML element has exactly 1 parameter
-    if (xml.elements() != 1 || xml.elements("parameter") != 1) {
-        throw GException::model_invalid_parnum(G_WRITE, xml,
-              "Map cube spatial model requires exactly 1 parameter.");
-    }
-
-    // Get pointers on model parameter
-    GXmlElement* par = xml.element("parameter", 0);
-
-    // Set or update parameter
-    if (par->attribute("name") == "Normalization" ||
-        par->attribute("name") == "Value") {
-        m_value.write(*par);
-    }
-    else {
-        throw GException::model_invalid_parnames(G_WRITE, xml,
-              "Map cube spatial model requires either \"Value\" or"
-              " \"Normalization\" parameter.");
-    }
+    // Write parameter
+    m_value.write(*value);
 
     // Set filename
     xml.attribute("file", gammalib::xml_file_reduce(xml, m_filename));

@@ -156,8 +156,8 @@ GModel& GModel::operator=(const GModel& model)
  * @param[in] name Parameter name.
  * @return Reference to model parameter.
  *
- * @exception GException::par_not_found
- *            Parameter with specified name not found in container.
+ * @exception GException::invalid_argument
+ *            Parameter with specified name not found.
  *
  * Returns a reference to the model parameter of the specified @p name.
  * Throws an exception if no parameter with @p name is found.
@@ -174,7 +174,9 @@ GModelPar& GModel::operator[](const std::string& name)
 
     // Throw exception if parameter name was not found
     if (index >= size()) {
-        throw GException::par_not_found(G_ACCESS, name);
+        std::string msg = "Model parameter \""+name+"\" not found in model. "
+                          "Please specify a valid model parameter name.";
+        throw GException::invalid_argument(G_ACCESS, msg);
     }
 
     // Return reference
@@ -188,8 +190,8 @@ GModelPar& GModel::operator[](const std::string& name)
  * @param[in] name Parameter name.
  * @return Reference to model parameter.
  *
- * @exception GException::par_not_found
- *            Parameter with specified name not found in container.
+ * @exception GException::invalid_argument
+ *            Parameter with specified name not found.
  *
  * Returns a const reference to the model parameter of the specified
  * @p name. Throws an exception if no parameter with @p name is found.
@@ -206,7 +208,9 @@ const GModelPar& GModel::operator[](const std::string& name) const
 
     // Throw exception if parameter name was not found
     if (index >= size()) {
-        throw GException::par_not_found(G_ACCESS, name);
+        std::string msg = "Model parameter \""+name+"\" not found in model. "
+                          "Please specify a valid model parameter name.";
+        throw GException::invalid_argument(G_ACCESS, msg);
     }
 
     // Return reference
@@ -879,7 +883,7 @@ void GModel::read_scales(const GXmlElement& xml)
  *
  * @param[in] xml XML source element.
  *
- * @exception GException::model_invalid_parnum
+ * @exception GException::invalid_value
  *            Invalid number of instrument tags found in XML element.
  *
  * If there are instrument scale factors then add a tag with the following
@@ -915,10 +919,21 @@ void GModel::write_scales(GXmlElement& xml) const
             scale = xml.element("scaling", 0);
         }
 
-        // Verify that scaling tag  has the required number of instruments
-        if (scale->elements() != num || scale->elements("instrument") != num) {
-            throw GException::model_invalid_parnum(G_WRITE_SCALES, *scale,
-                  "Instrument scaling needs "+gammalib::str(num)+" instrument tags.");
+        // Verify that scaling tag has the required number of instruments
+        if (scale->elements() != num) {
+            std::string msg = "Number of "+gammalib::str(scale->elements())+
+                              " scale elements in XML file does not correspond "
+                              "to expected number of "+gammalib::str(num)+
+                              " elements. Please verify the XML format.";
+            throw GException::invalid_value(G_WRITE_SCALES, msg);
+        }
+        int npars = scale->elements("instrument");
+        if (npars != num) {
+            std::string msg = "Number of "+gammalib::str(npars)+" \"instrument\" "
+                              "scale elements in XML file does not correspond to "
+                              "expected number of "+gammalib::str(num)+
+                              " elements. Please verify the XML format.";
+            throw GException::invalid_value(G_WRITE_SCALES, msg);
         }
 
         // Write all instruments

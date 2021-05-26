@@ -131,8 +131,8 @@ GModelSpectral& GModelSpectral::operator=(const GModelSpectral& model)
  *
  * @param[in] name Parameter name.
  *
- * @exception GException::par_not_found
- *            Parameter with specified name not found in container.
+ * @exception GException::invalid_argument
+ *            Parameter with specified name not found.
  ***************************************************************************/
 GModelPar& GModelSpectral::operator[](const std::string& name)
 {
@@ -146,7 +146,9 @@ GModelPar& GModelSpectral::operator[](const std::string& name)
 
     // Throw exception if parameter name was not found
     if (index >= size()) {
-        throw GException::par_not_found(G_ACCESS, name);
+        std::string msg = "Model parameter \""+name+"\" not found in model. "
+                          "Please specify a valid model parameter name.";
+        throw GException::invalid_argument(G_ACCESS, msg);
     }
 
     // Return reference
@@ -159,8 +161,8 @@ GModelPar& GModelSpectral::operator[](const std::string& name)
  *
  * @param[in] name Parameter name.
  *
- * @exception GException::par_not_found
- *            Parameter with specified name not found in container.
+ * @exception GException::invalid_argument
+ *            Parameter with specified name not found.
  ***************************************************************************/
 const GModelPar& GModelSpectral::operator[](const std::string& name) const
 {
@@ -174,7 +176,9 @@ const GModelPar& GModelSpectral::operator[](const std::string& name) const
 
     // Throw exception if parameter name was not found
     if (index >= size()) {
-        throw GException::par_not_found(G_ACCESS, name);
+        std::string msg = "Model parameter \""+name+"\" not found in model. "
+                          "Please specify a valid model parameter name.";
+        throw GException::invalid_argument(G_ACCESS, msg);
     }
 
     // Return reference

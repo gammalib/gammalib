@@ -133,6 +133,12 @@ namespace gammalib {
                                           const GXmlElement& xml,
                                           const std::string& name,
                                           const std::string& attribute);
+    void                     xml_check_parnum(const std::string& origin,
+                                              const GXmlElement& xml,
+                                              const int&         number);
+    void                     xml_check_type(const std::string& origin,
+                                            GXmlElement&       xml,
+                                            const std::string& type);
     void                     xml_check_par(const std::string& origin,
                                            const std::string& name,
                                            const int&         number);

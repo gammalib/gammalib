@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectralPlaw.cpp - Spectral power law model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -513,6 +513,9 @@ GEnergy GModelSpectralPlaw::mc(const GEnergy& emin,
  ***************************************************************************/
 void GModelSpectralPlaw::read(const GXmlElement& xml)
 {
+    // Verify number of model parameters
+    gammalib::xml_check_parnum(G_READ, xml, 3);
+
     // Get parameter pointers
     const GXmlElement* norm  = gammalib::xml_get_par(G_READ, xml, m_norm.name());
     const GXmlElement* index = gammalib::xml_get_par(G_READ, xml, m_index.name());
@@ -533,23 +536,12 @@ void GModelSpectralPlaw::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element.
  *
- * @exception GException::model_invalid_spectral
- *            Existing XML element is not of the expected type.
- *
  * Writes the spectral information into an XML element.
  ***************************************************************************/
 void GModelSpectralPlaw::write(GXmlElement& xml) const
 {
-    // Set model type
-    if (xml.attribute("type") == "") {
-        xml.attribute("type", type());
-    }
-
     // Verify model type
-    if (xml.attribute("type") != type()) {
-        throw GException::model_invalid_spectral(G_WRITE, xml.attribute("type"),
-              "Spectral model is not of type \""+type()+"\".");
-    }
+    gammalib::xml_check_type(G_WRITE, xml, type());
 
     // Get XML parameters
     GXmlElement* norm  = gammalib::xml_need_par(G_WRITE, xml, m_norm.name());

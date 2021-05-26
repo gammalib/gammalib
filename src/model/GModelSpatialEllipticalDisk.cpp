@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpatialEllipticalDisk.cpp - Elliptical disk source model class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2020 by Michael Mayer                               *
+ *  copyright (C) 2013-2021 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -459,14 +459,8 @@ double GModelSpatialEllipticalDisk::theta_max(void) const
  ***************************************************************************/
 void GModelSpatialEllipticalDisk::read(const GXmlElement& xml)
 {
-    // Determine number of parameter nodes in XML element
-    int npars = xml.elements("parameter");
-
-    // Verify that XML element has exactly 5 parameters
-    if (xml.elements() != 5 || npars != 5) {
-        throw GException::model_invalid_parnum(G_READ, xml,
-              "Elliptical disk model requires exactly 5 parameters.");
-    }
+    // Verify number of model parameters
+    gammalib::xml_check_parnum(G_READ, xml, 5);
 
     // Read disk location
     GModelSpatialElliptical::read(xml);
@@ -489,11 +483,6 @@ void GModelSpatialEllipticalDisk::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element into which model information is written.
  *
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
- *
  * Write the elliptical disk model information into an XML element. The XML
  * element will have the format 
  *
@@ -508,6 +497,9 @@ void GModelSpatialEllipticalDisk::read(const GXmlElement& xml)
  ***************************************************************************/
 void GModelSpatialEllipticalDisk::write(GXmlElement& xml) const
 {
+    // Verify model type
+    gammalib::xml_check_type(G_WRITE, xml, type());
+
     // Write disk location
     GModelSpatialElliptical::write(xml);
 

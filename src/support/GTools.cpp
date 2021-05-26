@@ -1695,6 +1695,82 @@ std::string gammalib::xml_get_attr(const std::string& origin,
 
 
 /***********************************************************************//**
+ * @brief Checks number of parameters
+ *
+ * @param[in] origin Method performing the check.
+ * @param[in] xml XML element.
+ * @param[in] number Expected number of parameters.
+ *
+ * @exception GException::invalid_value
+ *            Invalid XML format encountered.
+ *
+ * Checks the number of parameter in an XML element.
+ ***************************************************************************/
+void gammalib::xml_check_parnum(const std::string& origin,
+                                const GXmlElement& xml,
+                                const int&         number)
+{
+    // Throw exception if number of elements does not correspond to the
+    // expected number
+    if (xml.elements() != number) {
+        std::string msg = "Number of "+gammalib::str(xml.elements())+
+                          " child elements in XML file does not correspond "
+                          "to expected number of "+gammalib::str(number)+
+                          " elements. Please verify the XML format.";
+        throw GException::invalid_value(origin, msg);
+    }
+
+    // Throw exception if number of "parameter" elements does not correspond
+    // to the xpected number
+    int npars = xml.elements("parameter");
+    if (npars != number) {
+        std::string msg = "Number of "+gammalib::str(npars)+" \"parameter\" "
+                          "child elements in XML file does not correspond to "
+                          "expected number of "+gammalib::str(number)+
+                          " elements. Please verify the XML format.";
+        throw GException::invalid_value(origin, msg);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Checks the model type
+ *
+ * @param[in] origin Method performing the check.
+ * @param[in,out] xml XML element.
+ * @param[in] type Expected model typeN.
+ *
+ * @exception GException::invalid_value
+ *            Invalid XML format encountered.
+ *
+ * Checks the number of parameter in an XML element.
+ ***************************************************************************/
+void gammalib::xml_check_type(const std::string& origin,
+                              GXmlElement&       xml,
+                              const std::string& type)
+{
+    // If XML element has no model type then set model type
+    if (xml.attribute("type") == "") {
+        xml.attribute("type", type);
+    }
+
+    // Throw an exception if the model type is not the expected one
+    if (xml.attribute("type") != type) {
+        std::string msg = "Model type \""+xml.attribute("type")+"\" is not "
+                          "the expected type \""+type+"\". Please verify "
+                          "the XML format.";
+        throw GException::invalid_value(origin, msg);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Checks whether a parameter has occured once
  *
  * @param[in] origin Method performing the check.

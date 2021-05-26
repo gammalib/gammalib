@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpectralBrokenPlaw.cpp - Broken power law spectrum class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2017 by Anneli Schulz                               *
+ *  copyright (C) 2013-2021 by Anneli Schulz                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -616,6 +616,9 @@ GEnergy GModelSpectralBrokenPlaw::mc(const GEnergy& emin,
  ***************************************************************************/
 void GModelSpectralBrokenPlaw::read(const GXmlElement& xml)
 {
+    // Verify number of model parameters
+    gammalib::xml_check_parnum(G_READ, xml, 4);
+
     // Get remaining XML parameters
     const GXmlElement* prefactor   = gammalib::xml_get_par(G_READ, xml, m_norm.name());
     const GXmlElement* index1      = gammalib::xml_get_par(G_READ, xml, m_index1.name());
@@ -638,23 +641,12 @@ void GModelSpectralBrokenPlaw::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element.
  *
- * @exception GException::model_invalid_spectral
- *            Existing XML element is not of the expected type.
- *
  * Writes the spectral information into an XML element.
  ***************************************************************************/
 void GModelSpectralBrokenPlaw::write(GXmlElement& xml) const
 {
-    // Set model type
-    if (xml.attribute("type") == "") {
-        xml.attribute("type", type());
-    }
-
     // Verify model type
-    if (xml.attribute("type") != type()) {
-        throw GException::model_invalid_spectral(G_WRITE, xml.attribute("type"),
-              "Spectral model is not of type \""+type()+"\".");
-    }
+    gammalib::xml_check_type(G_WRITE, xml, type());
 
     // Get XML parameters
     GXmlElement* norm        = gammalib::xml_need_par(G_WRITE, xml, m_norm.name());

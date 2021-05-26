@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          GXml.cpp - XML class                           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -524,6 +524,9 @@ const GXmlElement* GXml::element(const std::string& name, const int& index) cons
  *
  * @param[in] filename File name.
  *
+ * @exception GException::file_error
+ *            Unable to open file.
+ *
  * Loads a XML document from a file by reading from the file's Unified
  * Resource Locator (URL). The read() method is invoked for this purpose.
  *
@@ -538,7 +541,9 @@ void GXml::load(const GFilename& filename)
 {
     // Throw an exception if file does not exist
     if (!filename.exists()) {
-        throw GException::file_open_error(G_LOAD, filename);
+        std::string msg = "Unable to open file \""+filename.url()+"\". Please "
+                          "specify a valid file name.";
+        throw GException::file_error(G_LOAD, msg);
     }
 
     // Open XML URL as file for reading

@@ -423,23 +423,12 @@ void GModelSpectralComposite::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element.
  *
- * @exception GException::model_invalid_spectral
- *            Existing XML element is not of the expected type.
- *
  * Writes the spectral information into an XML element.
  ***************************************************************************/
 void GModelSpectralComposite::write(GXmlElement& xml) const
 {
-    // Set model type
-    if (xml.attribute("type") == "") {
-        xml.attribute("type", type());
-    }
-
     // Verify model type
-    if (xml.attribute("type") != type()) {
-        throw GException::model_invalid_spectral(G_WRITE, xml.attribute("type"),
-              "Spectral model is not of type \""+type()+"\".");
-    }
+    gammalib::xml_check_type(G_WRITE, xml, type());
 
     // Loop over model components
     for (int i = 0; i < m_spectral.size(); i++) {

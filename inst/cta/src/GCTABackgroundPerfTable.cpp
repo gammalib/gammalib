@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GCTABackgroundPerfTable.cpp - CTA performance table background class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -258,7 +258,10 @@ void GCTABackgroundPerfTable::load(const GFilename& filename)
     // Open performance table readonly
     FILE* fptr = std::fopen(filename.url().c_str(), "r");
     if (fptr == NULL) {
-        throw GException::file_open_error(G_LOAD, filename.url());
+        std::string msg = "Unable to open file \""+filename.url()+"\" for "
+                          "read access. Please provide the name of a readable "
+                          "file.";
+        throw GException::file_error(G_LOAD, msg);
     }
 
     // Read lines

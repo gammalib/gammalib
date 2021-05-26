@@ -361,24 +361,12 @@ void GCTAModelSpatialMultiplicative::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element.
  *
- * @exception GException::invalid_value
- *            Existing XML element is not of the expected type.
- *
  * Writes the spatial information into an XML element.
  ***************************************************************************/
 void GCTAModelSpatialMultiplicative::write(GXmlElement& xml) const
 {
-    // Set model type
-    if (xml.attribute("type") == "") {
-        xml.attribute("type", type());
-    }
-
-    // Verify model type
-    if (xml.attribute("type") != type()) {
-        std::string msg = "Spatial model \""+xml.attribute("type")+"\" is "
-                          "not of expected type \""+type()+"\".";
-        throw GException::invalid_value(G_WRITE, msg);
-    }
+    // Check model type
+    gammalib::xml_check_type(G_WRITE, xml, type());
 
     // Loop over model components
     for (int i = 0; i < m_spatial.size(); i++) {

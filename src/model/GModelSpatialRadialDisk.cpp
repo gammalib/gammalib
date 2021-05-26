@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelSpatialRadialDisk.cpp - Radial disk source model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2020 by Christoph Deil                              *
+ *  copyright (C) 2011-2021 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -409,14 +409,8 @@ double GModelSpatialRadialDisk::theta_max(void) const
  ***************************************************************************/
 void GModelSpatialRadialDisk::read(const GXmlElement& xml)
 {
-    // Determine number of parameter nodes in XML element
-    int npars = xml.elements("parameter");
-
     // Verify that XML element has exactly 3 parameters
-    if (xml.elements() != 3 || npars != 3) {
-        throw GException::model_invalid_parnum(G_READ, xml,
-              "Disk model requires exactly 3 parameters.");
-    }
+    gammalib::xml_check_parnum(G_READ, xml, 3);
 
     // Read disk location
     GModelSpatialRadial::read(xml);
@@ -454,6 +448,9 @@ void GModelSpatialRadialDisk::read(const GXmlElement& xml)
  ***************************************************************************/
 void GModelSpatialRadialDisk::write(GXmlElement& xml) const
 {
+    // Verify model type
+    gammalib::xml_check_type(G_WRITE, xml, type());
+
     // Write disk location
     GModelSpatialRadial::write(xml);
 

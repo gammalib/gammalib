@@ -130,21 +130,25 @@ GModelTemporal& GModelTemporal::operator=(const GModelTemporal& model)
  *
  * @param[in] name Parameter name.
  *
- * @exception GException::par_not_found
- *            Parameter with specified name not found in container.
+ * @exception GException::invalid_argument
+ *            Parameter with specified name not found.
  ***************************************************************************/
 GModelPar& GModelTemporal::operator[](const std::string& name)
 {
     // Get parameter index
     int index = 0;
     for (; index < size(); ++index) {
-        if (m_pars[index]->name() == name)
+        if (m_pars[index]->name() == name) {
             break;
+        }
     }
 
     // Throw exception if parameter name was not found
-    if (index >= size())
-        throw GException::par_not_found(G_ACCESS, name);
+    if (index >= size()) {
+        std::string msg = "Model parameter \""+name+"\" not found in model. "
+                          "Please specify a valid model parameter name.";
+        throw GException::invalid_argument(G_ACCESS, msg);
+    }
 
     // Return reference
     return *(m_pars[index]);
@@ -156,21 +160,25 @@ GModelPar& GModelTemporal::operator[](const std::string& name)
  *
  * @param[in] name Parameter name.
  *
- * @exception GException::par_not_found
- *            Parameter with specified name not found in container.
+ * @exception GException::invalid_argument
+ *            Parameter with specified name not found.
  ***************************************************************************/
 const GModelPar& GModelTemporal::operator[](const std::string& name) const
 {
     // Get parameter index
     int index = 0;
     for (; index < size(); ++index) {
-        if (m_pars[index]->name() == name)
+        if (m_pars[index]->name() == name) {
             break;
+        }
     }
 
     // Throw exception if parameter name was not found
-    if (index >= size())
-        throw GException::par_not_found(G_ACCESS, name);
+    if (index >= size()) {
+        std::string msg = "Model parameter \""+name+"\" not found in model. "
+                          "Please specify a valid model parameter name.";
+        throw GException::invalid_argument(G_ACCESS, msg);
+    }
 
     // Return reference
     return *(m_pars[index]);

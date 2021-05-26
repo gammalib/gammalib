@@ -506,8 +506,8 @@ bool GSkyRegions::overlaps(const GSkyRegions& regions) const
  *
  * @param[in] filename DS9 region filename.
  *
- * @exception GException::file_open_error
- *            File could not be opened.
+ * @exception GException::file_error
+ *            Unable to open file.
  *
  * Loads all regions from a DS9 region file.
  ***************************************************************************/
@@ -604,7 +604,9 @@ void GSkyRegions::load(const GFilename& filename)
 
     // File could not be opened
     else {
-        throw GException::file_open_error(G_LOAD, filename.url());
+        std::string msg = "Unable to open file \""+filename.url()+"\". Please "
+                          "specify a valid file name.";
+        throw GException::file_error(G_LOAD, msg);
     }
 
     // Return
@@ -617,8 +619,8 @@ void GSkyRegions::load(const GFilename& filename)
  *
  * @param[in] filename DS9 region filename.
  *
- * @exception GException::file_open_error
- *            File could not be opened.
+ * @exception GException::file_error
+ *            Unable to open file.
  *
  * Saves all regions in the container into a DS9 region file.
  ***************************************************************************/
@@ -652,7 +654,9 @@ void GSkyRegions::save(const GFilename& filename) const
 
     // ... otherwise, if file could not be opened then throw an exception
     else {
-        throw GException::file_open_error(G_SAVE, filename.url());
+        std::string msg = "Unable to open file \""+filename.url()+"\". Please "
+                          "specify a valid file name.";
+        throw GException::file_error(G_SAVE, msg);
     }
 
     // Return

@@ -80,8 +80,7 @@ sources = GModelPar.cpp \
           GModelTemporalRegistry.cpp \
           GModelTemporalConst.cpp \
           GModelTemporalLightCurve.cpp \
-          GModelTemporalPhaseCurve.cpp \
-          GException_model.cpp
+          GModelTemporalPhaseCurve.cpp
 
 # Build libtool library
 noinst_LTLIBRARIES = libmodel.la

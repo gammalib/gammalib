@@ -584,11 +584,6 @@ GEnergy GModelSpectralFunc::mc(const GEnergy& emin,
  *
  * @param[in] xml XML element containing power law model information.
  *
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter name found in XML element.
- *
  * Reads the spectral information from an XML element. The format of the XML
  * elements is
  *
@@ -598,23 +593,14 @@ GEnergy GModelSpectralFunc::mc(const GEnergy& emin,
  ***************************************************************************/
 void GModelSpectralFunc::read(const GXmlElement& xml)
 {
-    // Verify that XML element has exactly 1 parameter
-    if (xml.elements() != 1 || xml.elements("parameter") != 1) {
-        throw GException::model_invalid_parnum(G_READ, xml,
-              "Spectral function requires exactly 1 parameter.");
-    }
+    // Verify number of model parameters
+    gammalib::xml_check_parnum(G_READ, xml, 1);
 
-    // Get parameter element
-    const GXmlElement* par = xml.element("parameter", 0);
+    // Get parameter
+    const GXmlElement* norm = gammalib::xml_get_par(G_READ, xml, m_norm.name());
 
-    // Get value
-    if (par->attribute("name") == "Normalization") {
-        m_norm.read(*par);
-    }
-    else {
-        throw GException::model_invalid_parnames(G_READ, xml,
-                          "Require \"Normalization\" parameter.");
-    }
+    // Read parameter
+    m_norm.read(*norm);
 
     // Load nodes from file
     load_nodes(gammalib::xml_file_expand(xml, xml.attribute("file")));
@@ -629,13 +615,6 @@ void GModelSpectralFunc::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element into which model information is written.
  *
- * @exception GException::model_invalid_spectral
- *            Existing XML element is not of type "FileFunction"
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters or nodes found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
- *
  * Writes the spectral information into an XML element. The format of the XML
  * element is
  *
@@ -648,39 +627,14 @@ void GModelSpectralFunc::read(const GXmlElement& xml)
  ***************************************************************************/
 void GModelSpectralFunc::write(GXmlElement& xml) const
 {
-    // Set model type
-    if (xml.attribute("type") == "") {
-        xml.attribute("type", "FileFunction");
-    }
-
     // Verify model type
-    if (xml.attribute("type") != "FileFunction") {
-        throw GException::model_invalid_spectral(G_WRITE, xml.attribute("type"),
-              "Spectral model is not of type \"FileFunction\".");
-    }
+    gammalib::xml_check_type(G_WRITE, xml, type());
 
-    // If XML element has 0 nodes then append 1 parameter node
-    if (xml.elements() == 0) {
-        xml.append(GXmlElement("parameter name=\"Normalization\""));
-    }
+    // Get or create parameter
+    GXmlElement* norm = gammalib::xml_need_par(G_WRITE, xml, m_norm.name());
 
-    // Verify that XML element has exactly 1 parameter
-    if (xml.elements() != 1 || xml.elements("parameter") != 1) {
-        throw GException::model_invalid_parnum(G_WRITE, xml,
-              "Spectral function requires exactly 1 parameter.");
-    }
-
-    // Get parameter element
-    GXmlElement* par = xml.element("parameter", 0);
-
-    // Set parameter
-    if (par->attribute("name") == "Normalization") {
-        m_norm.write(*par);
-    }
-    else {
-        throw GException::model_invalid_parnames(G_WRITE, xml,
-                          "Require \"Normalization\" parameter.");
-    }
+    // Write parameter
+    m_norm.write(*norm);
 
     // Set file attribute
     xml.attribute("file", gammalib::xml_file_reduce(xml, m_filename));
@@ -1209,12 +1163,8 @@ void GModelSpectralFunc::free_members(void)
  *
  * @param[in] filename File name.
  *
- * @exception GException::file_function_data
- *            File contains less than 2 nodes
- * @exception GException::file_function_columns
- *            File contains less than 2 columns
- * @exception GException::file_function_value
- *            File contains invalid value
+ * @exception GException::invalid_value
+ *            Invalid file function ASCII file.
  *
  * The file function is stored as a column separated value table (CSV) in an
  * ASCII file with (at least) 2 columns. The first column specifies the
@@ -1245,14 +1195,22 @@ void GModelSpectralFunc::load_nodes(const GFilename& filename)
 
         // Check if there are at least 2 nodes
         if (csv.nrows() < 2) {
-            throw GException::file_function_data(G_LOAD_NODES, filename.url(),
-                                                 csv.nrows());
+            std::string msg = "File function ASCII file \""+filename.url()+
+                              "\" contains "+gammalib::str(csv.nrows())+
+                              " rows but at least 2 rows are required. Please "
+                              "specify a file function ASCII file with at "
+                              "least two rows.";
+            throw GException::invalid_value(G_LOAD_NODES, msg);
         }
 
         // Check if there are at least 2 columns
         if (csv.ncols() < 2) {
-            throw GException::file_function_columns(G_LOAD_NODES, filename.url(),
-                                                    csv.ncols());
+            std::string msg = "File function ASCII file \""+filename.url()+
+                              "\" contains "+gammalib::str(csv.ncols())+
+                              " columns but at least 2 columns are required. "
+                              "Please specify a file function ASCII file with "
+                              "at least two columns.";
+            throw GException::invalid_value(G_LOAD_NODES, msg);
         }
 
         // Setup nodes
@@ -1262,25 +1220,39 @@ void GModelSpectralFunc::load_nodes(const GFilename& filename)
             // Get log10 of node energy and value. Make sure they are valid.
             double log10energy;
             double log10value;
-            if (csv.real(i,0) > 0) {
+            if (csv.real(i,0) > 0.0) {
                 log10energy = std::log10(csv.real(i,0));
             }
             else {
-                throw GException::file_function_value(G_LOAD_NODES, filename.url(),
-                      csv.real(i,0), "Energy value must be positive.");
+                std::string msg = "Non-positive energy "+
+                                  gammalib::str(csv.real(i,0))+" encountered "
+                                  "in row "+gammalib::str(i)+" of file "
+                                  "function ASCII file. Please specify only "
+                                  "positive energies in file function.";
+                throw GException::invalid_value(G_LOAD_NODES, msg);
             }
-            if (csv.real(i,1) > 0) {
+            if (csv.real(i,1) > 0.0) {
                 log10value = std::log10(csv.real(i,1));
             }
             else {
-                throw GException::file_function_value(G_LOAD_NODES, filename.url(),
-                      csv.real(i,1), "Intensity value must be positive.");
+                std::string msg = "Non-positive intensity "+
+                                  gammalib::str(csv.real(i,1))+" encountered "
+                                  "in row "+gammalib::str(i)+" of file "
+                                  "function ASCII file. Please specify only "
+                                  "positive intensities in file function.";
+                throw GException::invalid_value(G_LOAD_NODES, msg);
             }
 
             // Make sure that energies are increasing
             if (csv.real(i,0) <= last_energy) {
-                throw GException::file_function_value(G_LOAD_NODES, filename.url(),
-                      csv.real(i,0), "Energy values must be monotonically increasing.");
+                std::string msg = "Energy "+gammalib::str(csv.real(i,0))+
+                                  "in row "+gammalib::str(i)+" of file "
+                                  "function ASCII file is equal or smaller "
+                                  "than preceding energy "+
+                                  gammalib::str(last_energy)+". Please specify "
+                                  "monotonically increasing energies in the "
+                                  "file function ASCII file.";
+                throw GException::invalid_value(G_LOAD_NODES, msg);
             }
 
             // Append log10 of node energy and value

@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTAModelSpatialGradient.cpp - Spatial gradient CTA model class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2018 by Juergen Knoedlseder                              *
+ *  copyright (C) 2018-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -353,24 +353,12 @@ void GCTAModelSpatialGradient::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element.
  *
- * @exception GException::invalid_value
- *            Spatial model is not of valid type.
- *
  * Write the gradient spatial model information into an XML element.
  ***************************************************************************/
 void GCTAModelSpatialGradient::write(GXmlElement& xml) const
 {
-    // Set model type
-    if (xml.attribute("type") == "") {
-        xml.attribute("type", type());
-    }
-
-    // Verify model type
-    if (xml.attribute("type") != type()) {
-        std::string msg = "Spatial model \""+xml.attribute("type")+
-                          "\" is not of type \""+type()+"\".";
-        throw GException::invalid_value(G_WRITE, msg);
-    }
+    // Check model type
+    gammalib::xml_check_type(G_WRITE, xml, type());
 
     // Get XML parameters
     GXmlElement* detx = gammalib::xml_need_par(G_WRITE, xml, m_detx_gradient.name());

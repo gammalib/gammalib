@@ -598,10 +598,8 @@ GEnergy GModelSpectralNodes::mc(const GEnergy& emin,
  *
  * @param[in] xml XML element.
  *
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter name found in XML element.
+ * @exception GException::invalid_value
+ *            Not enough nodes in node function.
  * @exception GException::invalid_value
  *            Energy or intensity are not positive.
  *
@@ -622,6 +620,7 @@ GEnergy GModelSpectralNodes::mc(const GEnergy& emin,
  *
  * @todo Check that nodes are ordered
  * @todo Check that energy boundaries are not overlapping
+ * @todo Check whether we require at least one or two nodes
  ***************************************************************************/
 void GModelSpectralNodes::read(const GXmlElement& xml)
 {
@@ -634,9 +633,10 @@ void GModelSpectralNodes::read(const GXmlElement& xml)
 
     // Throw an error if there not at least two nodes
     if (nodes < 1) {
-        std::string message = "Node function model requires at least two"
-                              " nodes.";
-        throw GException::model_invalid_parnum(G_READ, xml, message);
+        std::string msg = "Node function model contains "+gammalib::str(nodes)+
+                          " but requires at least one node. Please specify at "
+                          "least one node.";
+        throw GException::invalid_value(G_READ, msg);
     }
 
     // Loop over all nodes
@@ -710,10 +710,8 @@ void GModelSpectralNodes::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element into which model information is written.
  *
- * @exception GException::model_invalid_spectral
- *            Existing XML element is not of required type
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters or nodes found in XML element.
+ * @exception GException::invalid_value
+ *            Invalid number of nodes found in XML element.
  *
  * Writes the spectral information into an XML element. The format of the XML
  * element is
@@ -735,16 +733,8 @@ void GModelSpectralNodes::write(GXmlElement& xml) const
     // Determine number of nodes
     int nodes = m_energies.size();
 
-    // Set model type
-    if (xml.attribute("type") == "") {
-        xml.attribute("type", type());
-    }
-
     // Verify model type
-    if (xml.attribute("type") != type()) {
-        throw GException::model_invalid_spectral(G_WRITE, xml.attribute("type"),
-              "Spectral model is not of type \""+type()+"\".");
-    }
+    gammalib::xml_check_type(G_WRITE, xml, type());
 
     // If XML element has 0 nodes then append nodes
     if (xml.elements() == 0) {
@@ -754,10 +744,20 @@ void GModelSpectralNodes::write(GXmlElement& xml) const
     }
 
     // Verify that XML element has the required number of nodes
-    if (xml.elements() != nodes || xml.elements("node") != nodes) {
-        std::string message = "Spectral model requires exactly " +
-                              gammalib::str(nodes) + " nodes.";
-        throw GException::model_invalid_parnum(G_WRITE, xml, message);
+    if (xml.elements() != nodes) {
+        std::string msg = "Number of "+gammalib::str(xml.elements())+
+                          " child elements in XML file does not correspond "
+                          "to expected number of "+gammalib::str(nodes)+
+                          " elements. Please verify the XML format.";
+        throw GException::invalid_value(G_WRITE, msg);
+    }
+    int npars = xml.elements("node");
+    if (npars != nodes) {
+        std::string msg = "Number of "+gammalib::str(npars)+" \"node\" "
+                          "child elements in XML file does not correspond to "
+                          "expected number of "+gammalib::str(nodes)+
+                          " elements. Please verify the XML format.";
+        throw GException::invalid_value(G_WRITE, msg);
     }
 
     // Loop over all nodes

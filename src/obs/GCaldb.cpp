@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCaldb.cpp - Calibration database class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -242,10 +242,8 @@ int GCaldb::size(void) const
 /***********************************************************************//**
  * @brief Return path to CALDB root directory
  *
- * @exception GException::directory_not_found
- *            Calibration directory not found.
- * @exception GException::directory_not_accessible
- *            No read permission granted to calibration directory.
+ * @exception GException::invalid_value
+ *            CALDB environment variable not set
  *
  * The calibration directory path is given by one of the following
  *
@@ -271,10 +269,10 @@ std::string GCaldb::rootdir(void) const
 
         // Throw an exception if non of the environment variables was set
         if (ptr1 == NULL) {
-            throw GException::env_not_found(G_GET_ROOTDIR,
-                  "CALDB",
-                  "Please set the CALDB environment"
-                  " variable to a valid calibration database root directory.");
+            std::string msg = "CALDB environment value not found. Please set "
+                              "the CALDB environment variable to a valid "
+                              "calibration database root directory.";
+            throw GException::invalid_value(G_GET_ROOTDIR, msg);
         }
 
         // If CALDB was set then check whether the directory exists
@@ -296,9 +294,9 @@ std::string GCaldb::rootdir(void) const
  *
  * @param[in] pathname Calibration database root directory.
  *
- * @exception GException::directory_not_found
+ * @exception GException::invalid_argument
  *            Calibration database root directory not found.
- * @exception GException::directory_not_accessible
+ * @exception GException::invalid_value
  *            No read permission granted for calibration database root
  *            directory.
  *
@@ -312,13 +310,19 @@ void GCaldb::rootdir(const std::string& pathname)
 
     // Verify that specified root directory exists
     if (!gammalib::dir_exists(rootdir)) {
-        throw GException::directory_not_found(G_SET_ROOTDIR, rootdir);
+        std::string msg = "Calibration database root directory \""+
+                          rootdir+"\" not found. Please specify a valid "
+                          "root directory name.";
+        throw GException::invalid_argument(G_SET_ROOTDIR, msg);
     }
 
     // Verify that specified root directory allows read access
     if (access(rootdir.c_str(), R_OK) != 0) {
-        throw GException::directory_not_accessible(G_SET_ROOTDIR, rootdir,
-              "Requested read permission not granted.");
+        std::string msg = "Calibration database root directory \""+
+                          rootdir+"\" is not accessible for read access. "
+                          "Please provide read access to the calibration "
+                          "database root directory.";
+        throw GException::invalid_value(G_SET_ROOTDIR, msg);
     }
 
     // Set calibration database root directory
@@ -335,9 +339,9 @@ void GCaldb::rootdir(const std::string& pathname)
  * @param[in] mission Mission name (case insensitive).
  * @param[in] instrument Instrument name (case insensitive; optional).
  *
- * @exception GException::directory_not_found
+ * @exception GException::invalid_argument
  *            Calibration directory not found.
- * @exception GException::directory_not_accessible
+ * @exception GException::invalid_value
  *            No read permission granted to calibration directory.
  *
  * The calibration directory path is given by one of the following
@@ -354,14 +358,19 @@ std::string GCaldb::path(const std::string& mission, const std::string& instrume
     // Verify that mission name is valid and directory is accessible
     std::string path = rootdir() + "/data/" + gammalib::tolower(mission);
     if (!gammalib::dir_exists(path)) {
-        throw GException::directory_not_found(G_PATH, path,
-              "Requested mission \""+gammalib::toupper(mission)+"\" not found in"
-              " calibration database.");
+        std::string msg = "Requested mission \""+gammalib::toupper(mission)+
+                          "\" not found in calibration database. Please "
+                          "specify an available mission or add mission to "
+                          "calibration database.";
+        throw GException::invalid_argument(G_PATH, msg);
     }
     if (access(path.c_str(), R_OK) != 0) {
-        throw GException::directory_not_accessible(G_PATH, path,
-              "Requested read permission not granted for mission \""+
-              gammalib::toupper(mission)+"\".");
+        std::string msg = "Calibration database directory \""+path+"\" for "
+                          " mission \""+gammalib::toupper(mission)+"\" is "
+                          "not accessible for read access. Please provide "
+                          "read access to the calibration database "
+                          "directory.";
+        throw GException::invalid_value(G_PATH, msg);
     }
 
     // If an instrument has been specified, verify that instrument name is
@@ -373,16 +382,24 @@ std::string GCaldb::path(const std::string& mission, const std::string& instrume
 
         // Verify path
         if (!gammalib::dir_exists(path)) {
-            throw GException::directory_not_found(G_PATH, path,
-                  "Requested instrument \""+gammalib::toupper(instrument)+"\" on"
-                  " mission \""+gammalib::toupper(mission)+"\" not found in"
-                  " calibration database.");
+            std::string msg = "Requested instrument \""+
+                              gammalib::toupper(instrument)+
+                              "\" on mission \""+
+                              gammalib::toupper(mission)+"\" not found in "
+                              "calibration database. Please specify an "
+                              "available instrument or add instrument to "
+                              "calibration database.";
+            throw GException::invalid_argument(G_PATH, msg);
         }
         if (access(path.c_str(), R_OK) != 0) {
-            throw GException::directory_not_accessible(G_PATH, path,
-                "Requested read permission not granted for instrument \""+
-                gammalib::toupper(instrument)+"\" on mission \""+gammalib::toupper(mission)+
-                "\".");
+            std::string msg = "Calibration database directory \""+path+"\" for "
+                              "instrument \""+gammalib::toupper(instrument)+
+                              "\" on mission \""+
+                              gammalib::toupper(mission)+"\" is not "
+                              "accessible for read access. Please provide "
+                              "read access to the calibration database "
+                              "directory.";
+            throw GException::invalid_value(G_PATH, msg);
         }
         
     } // endif: instrument has been specified

@@ -704,11 +704,6 @@ GEnergy GModelSpectralTable::mc(const GEnergy& emin,
  *
  * @param[in] xml XML element containing power law model information.
  *
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter name found in XML element.
- *
  * Reads the spectral information from an XML element. The format of the XML
  * elements is
  *
@@ -749,13 +744,6 @@ void GModelSpectralTable::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element into which model information is written.
  *
- * @exception GException::model_invalid_spectral
- *            Existing XML element is not of type "FileFunction"
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters or nodes found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
- *
  * Writes the spectral information into an XML element. The format of the XML
  * element is
  *
@@ -771,16 +759,8 @@ void GModelSpectralTable::read(const GXmlElement& xml)
  ***************************************************************************/
 void GModelSpectralTable::write(GXmlElement& xml) const
 {
-    // Set model type
-    if (xml.attribute("type") == "") {
-        xml.attribute("type", type());
-    }
-
     // Verify model type
-    if (xml.attribute("type") != type()) {
-        throw GException::model_invalid_spectral(G_WRITE, xml.attribute("type"),
-              "Spectral model is not of type \""+type()+"\".");
-    }
+    gammalib::xml_check_type(G_WRITE, xml, type());
 
     // Get normalisation parameter
     GXmlElement* norm  = gammalib::xml_need_par(G_WRITE, xml, m_norm.name());

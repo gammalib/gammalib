@@ -132,7 +132,7 @@ public:
                 (*col)(GTuple1D2D[1], GTuple1D2D[2]) = value;
         }
         else {
-            throw GException::bad_type("GFitsTableCol::__setitem__",
+            throw GException::invalid_argument("GFitsTableCol::__setitem__",
                   "Column type does not support string setting.");
         }
     }
@@ -210,7 +210,7 @@ public:
                 (*col)(GTuple1D2D[1], GTuple1D2D[2]) = (float)value;
         }
         else {
-            throw GException::bad_type("GFitsTableCol::__setitem__",
+            throw GException::invalid_argument("GFitsTableCol::__setitem__",
                   "Column type does not support integer setting.");
         }
     }
@@ -233,7 +233,7 @@ public:
         }
 
         else {
-            throw GException::bad_type("GFitsTableCol::__setitem__",
+            throw GException::invalid_argument("GFitsTableCol::__setitem__",
                   "Column type does not support floating point setting.");
         }
     }

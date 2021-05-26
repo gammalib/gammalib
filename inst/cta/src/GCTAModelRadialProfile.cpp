@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelRadialProfile.cpp - Radial Profile CTA model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -409,82 +409,29 @@ double GCTAModelRadialProfile::omega(void) const
  *
  * @param[in] xml XML element.
  *
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parvalue
- *            Non-positive parameter value found.
- * @exception GException::model_invalid_parlimit
- *            Missing or non-positive minimum parameter boundary.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
+ * Read the Profile radial model information from an XML element in the
+ * following format
  *
- * Read the Profile radial model information from an XML element. The XML
- * element is required to have 3 parameter named "Width", "Core", and "Tail". 
+ *     <radialModel type="...">
+ *       <parameter name="Width"  scale="1.0" value="1.5" min="0.1" max="10.0" free="1"/>
+ *       <parameter name="Core"   scale="1.0" value="3.0" min="1.0" max="10.0" free="1"/>
+ *       <parameter name="Tail"   scale="1.0" value="5.0" min="1.0" max="10.0" free="1"/>
+ *     </radialModel>
  ***************************************************************************/
 void GCTAModelRadialProfile::read(const GXmlElement& xml)
 {
-    // Verify that XML element has exactly 3 parameter
-    if (xml.elements() != 3 || xml.elements("parameter") != 3) {
-        throw GException::model_invalid_parnum(G_READ, xml,
-              "Radial Profile model requires exactly 3 parameters.");
-    }
+    // Verify that XML element has exactly 3 parameters
+    gammalib::xml_check_parnum(G_READ, xml, 3);
 
-    // Extract model parameters
-    int  npar[] = {0, 0, 0};
-    for (int i = 0; i < 3; ++i) {
+    // Get parameters
+    const GXmlElement* width = gammalib::xml_get_par(G_READ, xml, m_width.name());
+    const GXmlElement* core  = gammalib::xml_get_par(G_READ, xml, m_core.name());
+    const GXmlElement* tail  = gammalib::xml_get_par(G_READ, xml, m_tail.name());
 
-        // Get parameter element
-        const GXmlElement* par = xml.element("parameter", i);
-
-        // Handle Width
-        if (par->attribute("name") == "Width") {
-            m_width.read(*par);
-            if (m_width.value() <= 0.0) {
-                throw GException::model_invalid_parvalue(G_READ, xml,
-                      "\"Width\" parameter is required to be positive.");
-            }
-            if (!m_width.has_min() || m_width.min() <= 0.0) {
-                throw GException::model_invalid_parlimit(G_READ, xml,
-                      "\"Width\" parameter requires positive minimum boundary.");
-            }
-            npar[0]++;
-        }
-
-        // Handle Core
-        if (par->attribute("name") == "Core") {
-            m_core.read(*par);
-            if (m_core.value() <= 0.0) {
-                throw GException::model_invalid_parvalue(G_READ, xml,
-                      "\"Core\" parameter is required to be positive.");
-            }
-            if (!m_core.has_min() || m_core.min() <= 0.0) {
-                throw GException::model_invalid_parlimit(G_READ, xml,
-                      "\"Core\" parameter requires positive minimum boundary.");
-            }
-            npar[1]++;
-        }
-
-        // Handle Tail
-        if (par->attribute("name") == "Tail") {
-            m_tail.read(*par);
-            if (m_tail.value() <= 0.0) {
-                throw GException::model_invalid_parvalue(G_READ, xml,
-                      "\"Tail\" parameter is required to be positive.");
-            }
-            if (!m_tail.has_min() || m_tail.min() <= 0.0) {
-                throw GException::model_invalid_parlimit(G_READ, xml,
-                      "\"Tail\" parameter requires positive minimum boundary.");
-            }
-            npar[2]++;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Verify that all parameters were found
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1) {
-        throw GException::model_invalid_parnames(G_READ, xml,
-              "Require \"Width\", \"Core\" and \"Tail\" parameters.");
-    }
+    // Read parameters
+    m_width.read(*width);
+    m_core.read(*core);
+    m_tail.read(*tail);
 
     // Return
     return;
@@ -496,74 +443,29 @@ void GCTAModelRadialProfile::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element.
  *
- * @exception GException::model_invalid_spatial
- *            Existing XML element is not of type 'ProfileFunction'
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
+ * Write the radial Profile model information into an XML element in the
+ * following format
  *
- * Write the radial Profile model information into an XML element. The XML
- * element will have 3 parameter leafs named "Width", "Core" and "Tail".
+ *     <radialModel type="...">
+ *       <parameter name="Width"  scale="1.0" value="1.5" min="0.1" max="10.0" free="1"/>
+ *       <parameter name="Core"   scale="1.0" value="3.0" min="1.0" max="10.0" free="1"/>
+ *       <parameter name="Tail"   scale="1.0" value="5.0" min="1.0" max="10.0" free="1"/>
+ *     </radialModel>
  ***************************************************************************/
 void GCTAModelRadialProfile::write(GXmlElement& xml) const
 {
-    // Set model type
-    if (xml.attribute("type") == "") {
-        xml.attribute("type", type());
-    }
+    // Check model type
+    gammalib::xml_check_type(G_WRITE, xml, type());
 
-    // Verify model type
-    if (xml.attribute("type") != type()) {
-        throw GException::model_invalid_spatial(G_WRITE, xml.attribute("type"),
-              "Radial Profile model is not of type \""+type()+"\".");
-    }
+    // Get or create parameters
+    GXmlElement* width = gammalib::xml_need_par(G_WRITE, xml, m_width.name());
+    GXmlElement* core  = gammalib::xml_need_par(G_WRITE, xml, m_core.name());
+    GXmlElement* tail  = gammalib::xml_need_par(G_WRITE, xml, m_tail.name());
 
-    // If XML element has 0 nodes then append 3 parameter nodes
-    if (xml.elements() == 0) {
-        xml.append(GXmlElement("parameter name=\"Width\""));
-        xml.append(GXmlElement("parameter name=\"Core\""));
-        xml.append(GXmlElement("parameter name=\"Tail\""));
-    }
-
-    // Verify that XML element has exactly 3 parameters
-    if (xml.elements() != 3 || xml.elements("parameter") != 3) {
-        throw GException::model_invalid_parnum(G_WRITE, xml,
-              "Radial Profile model requires exactly 3 parameters.");
-    }
-
-    // Set or update model parameter attributes
-    int npar[] = {0, 0, 0};
-    for (int i = 0; i < 3; ++i) {
-
-        // Get parameter element
-        GXmlElement* par = xml.element("parameter", i);
-
-        // Handle prefactor
-        if (par->attribute("name") == "Width") {
-            m_width.write(*par);
-            npar[0]++;
-        }
-
-        // Handle index
-        else if (par->attribute("name") == "Core") {
-            m_core.write(*par);
-            npar[1]++;
-        }
-
-        // Handle pivot energy
-        else if (par->attribute("name") == "Tail") {
-            m_tail.write(*par);
-            npar[2]++;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Check of all required parameters are present
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1) {
-        throw GException::model_invalid_parnames(G_WRITE, xml,
-              "Require \"Width\", \"Core\" and \"Tail\" parameters.");
-    }
+    // Write parameters
+    m_width.write(*width);
+    m_core.write(*core);
+    m_tail.write(*tail);
 
     // Return
     return;
@@ -573,7 +475,7 @@ void GCTAModelRadialProfile::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print point source information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing point source information.
  ***************************************************************************/
 std::string GCTAModelRadialProfile::print(const GChatter& chatter) const

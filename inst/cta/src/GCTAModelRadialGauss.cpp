@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelRadialGauss.cpp - Radial Gaussian CTA model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -405,60 +405,23 @@ double GCTAModelRadialGauss::omega(void) const
  *
  * @param[in] xml XML element.
  *
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parvalue
- *            Non-positive parameter value found.
- * @exception GException::model_invalid_parlimit
- *            Missing or non-positive minimum parameter boundary.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
+ * Read the Gaussian radial model information from an XML element in the
+ * following format
  *
- * Read the Gaussian radial model information from an XML element. The XML
- * element is required to have one parameter named "Sigma". 
+ *     <radialModel type="...">
+ *       <parameter name="Sigma"  scale="1.0" value="3.0" min="0.01" max="10.0" free="1"/>
+ *     </radialModel>
  ***************************************************************************/
 void GCTAModelRadialGauss::read(const GXmlElement& xml)
 {
     // Verify that XML element has exactly 1 parameter
-    if (xml.elements() != 1 || xml.elements("parameter") != 1) {
-        throw GException::model_invalid_parnum(G_READ, xml,
-              "Radial Gaussian model requires exactly 1 parameter.");
-    }
+    gammalib::xml_check_parnum(G_READ, xml, 1);
 
-    // Extract model parameters
-    int  npar[]   = {0};
-    for (int i = 0; i < 1; ++i) {
+    // Get parameters
+    const GXmlElement* sigma = gammalib::xml_get_par(G_READ, xml, m_sigma.name());
 
-        // Get parameter element
-        const GXmlElement* par = xml.element("parameter", i);
-
-        // Handle Sigma
-        if (par->attribute("name") == "Sigma") {
-            
-            // Read parameter
-            m_sigma.read(*par);
-            
-            // Check parameter
-            if (m_sigma.value() <= 0.0) {
-                throw GException::model_invalid_parvalue(G_READ, xml,
-                      "\"Sigma\" parameter is required to be positive.");
-            }
-            if (!m_sigma.has_min() || m_sigma.min() <= 0.0) {
-                throw GException::model_invalid_parlimit(G_READ, xml,
-                      "\"Sigma\" parameter requires positive minimum boundary.");
-            }
-            
-            // Increment parameter counter
-            npar[0]++;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Verify that all parameters were found
-    if (npar[0] != 1) {
-        throw GException::model_invalid_parnames(G_READ, xml,
-              "Radial Gaussian model requires \"Sigma\" parameter.");
-    }
+    // Read parameters
+    m_sigma.read(*sigma);
 
     // Return
     return;
@@ -470,60 +433,23 @@ void GCTAModelRadialGauss::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element.
  *
- * @exception GException::model_invalid_spatial
- *            Existing XML element is not of type 'GaussFunction'
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
+ * Write the Gaussian radial model information into an XML element in the
+ * following format
  *
- * Write the Gaussian radial model information into an XML element. The XML
- * element will have one parameter leaf named "Sigma".
+ *     <radialModel type="...">
+ *       <parameter name="Sigma"  scale="1.0" value="3.0" min="0.01" max="10.0" free="1"/>
+ *     </radialModel>
  ***************************************************************************/
 void GCTAModelRadialGauss::write(GXmlElement& xml) const
 {
-    // Set model type
-    if (xml.attribute("type") == "") {
-        xml.attribute("type", type());
-    }
+    // Check model type
+    gammalib::xml_check_type(G_WRITE, xml, type());
 
-    // Verify model type
-    if (xml.attribute("type") != type()) {
-        throw GException::model_invalid_spatial(G_WRITE, xml.attribute("type"),
-              "Radial Gaussian model is not of type \""+type()+"\".");
-    }
+    // Get or create parameter
+    GXmlElement* sigma = gammalib::xml_need_par(G_WRITE, xml, m_sigma.name());
 
-    // If XML element has 0 nodes then append 1 parameter node
-    if (xml.elements() == 0) {
-        xml.append(GXmlElement("parameter name=\"Sigma\""));
-    }
-
-    // Verify that XML element has exactly 1 parameter
-    if (xml.elements() != 1 || xml.elements("parameter") != 1) {
-        throw GException::model_invalid_parnum(G_WRITE, xml,
-              "Radial Gaussian model requires exactly 1 parameter.");
-    }
-
-    // Set or update model parameter attributes
-    int npar[] = {0};
-    for (int i = 0; i < 1; ++i) {
-
-        // Get parameter element
-        GXmlElement* par = xml.element("parameter", i);
-
-        // Handle sigma
-        if (par->attribute("name") == "Sigma") {
-            m_sigma.write(*par);
-            npar[0]++;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Check of all required parameters are present
-    if (npar[0] != 1) {
-        throw GException::model_invalid_parnames(G_WRITE, xml,
-              "Radial Gaussian model requires \"Sigma\" parameter.");
-    }
+    // Write parameter
+    m_sigma.write(*sigma);
 
     // Return
     return;

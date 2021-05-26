@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelTemporalConst.cpp - Temporal constant model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -315,9 +315,6 @@ GTimes GModelTemporalConst::mc(const double& rate, const GTime&  tmin,
  *
  * @param[in] xml XML element.
  *
- * @exception GExpection::invalid_value
- *            Invalid XML format encountered.
- *
  * Writes the temporal information from an XML element having the format
  *
  *     <temporal type="Constant">
@@ -326,6 +323,9 @@ GTimes GModelTemporalConst::mc(const double& rate, const GTime&  tmin,
  ***************************************************************************/
 void GModelTemporalConst::read(const GXmlElement& xml)
 {
+    // Verify number of model parameters
+    gammalib::xml_check_parnum(G_READ, xml, 1);
+
     // Get parameter pointers
     const GXmlElement* norm  = gammalib::xml_get_par(G_READ, xml, m_norm.name());
 
@@ -342,9 +342,6 @@ void GModelTemporalConst::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element.
  *
- * @exception GExpection::invalid_value
- *            Invalid XML format encountered.
- *
  * Writes the temporal information into an XML element in the format
  *
  *     <temporal type="Constant">
@@ -353,16 +350,8 @@ void GModelTemporalConst::read(const GXmlElement& xml)
  ***************************************************************************/
 void GModelTemporalConst::write(GXmlElement& xml) const
 {
-    // Set model type
-    if (xml.attribute("type") == "") {
-        xml.attribute("type", type());
-    }
-
     // Verify model type
-    if (xml.attribute("type") != type()) {
-        throw GException::model_invalid_spectral(G_WRITE, xml.attribute("type"),
-              "Temporal model is not of type \""+type()+"\".");
-    }
+    gammalib::xml_check_type(G_WRITE, xml, type());
 
     // Get XML parameters
     GXmlElement* norm  = gammalib::xml_need_par(G_WRITE, xml, m_norm.name());

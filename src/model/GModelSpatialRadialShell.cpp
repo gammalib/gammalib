@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelSpatialRadialShell.cpp - Radial shell source model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2020 by Christoph Deil                              *
+ *  copyright (C) 2011-2021 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -435,11 +435,6 @@ double GModelSpatialRadialShell::theta_max(void) const
  *
  * @param[in] xml XML element.
  *
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
- *
  * Reads the radial shell model information from an XML element. The XML
  * element shall have either the format 
  *
@@ -465,14 +460,8 @@ double GModelSpatialRadialShell::theta_max(void) const
  ***************************************************************************/
 void GModelSpatialRadialShell::read(const GXmlElement& xml)
 {
-    // Determine number of parameter nodes in XML element
-    int npars = xml.elements("parameter");
-
-    // Verify that XML element has exactly 4 parameters
-    if (xml.elements() != 4 || npars != 4) {
-        throw GException::model_invalid_parnum(G_READ, xml,
-              "Shell model requires exactly 4 parameters.");
-    }
+    // Verify number of model parameters
+    gammalib::xml_check_parnum(G_READ, xml, 4);
 
     // Read shell location
     GModelSpatialRadial::read(xml);
@@ -495,13 +484,6 @@ void GModelSpatialRadialShell::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element into which model information is written.
  *
- * @exception GException::model_invalid_spatial
- *            Existing XML element is not of type 'GaussFunction'
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
- *
  * Writes the radial shell model information into an XML element. The XML
  * element will have the format 
  *
@@ -515,6 +497,9 @@ void GModelSpatialRadialShell::read(const GXmlElement& xml)
  ***************************************************************************/
 void GModelSpatialRadialShell::write(GXmlElement& xml) const
 {
+    // Verify model type
+    gammalib::xml_check_type(G_WRITE, xml, type());
+
     // Write shell location
     GModelSpatialRadial::write(xml);
 

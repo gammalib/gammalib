@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GModelSpatialElliptical.cpp - Abstract elliptical spatial model class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -191,11 +191,6 @@ double GModelSpatialElliptical::eval(const GPhoton& photon,
  *
  * @param[in] xml XML element.
  *
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
- *
  * Reads the elliptical source location and position angle information from
  * an XML element in the following format
  *
@@ -270,13 +265,6 @@ void GModelSpatialElliptical::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element into which model information is written.
  *
- * @exception GException::model_invalid_spatial
- *            Existing XML element is not of requested type.
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
- *
  * Writes the elliptical source location and position angle information into
  * an XML element in the following format
  *
@@ -292,16 +280,8 @@ void GModelSpatialElliptical::read(const GXmlElement& xml)
  ***************************************************************************/
 void GModelSpatialElliptical::write(GXmlElement& xml) const
 {
-    // Set model type
-    if (xml.attribute("type") == "") {
-        xml.attribute("type", type());
-    }
-
     // Verify model type
-    if (xml.attribute("type") != type()) {
-        throw GException::model_invalid_spatial(G_WRITE, xml.attribute("type"),
-              "Elliptical model is not of type \""+type()+"\".");
-    }
+    gammalib::xml_check_type(G_WRITE, xml, type());
 
     // Get or create parameters
     GXmlElement* ra  = gammalib::xml_need_par(G_WRITE, xml, m_ra.name());

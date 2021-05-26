@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelSpatialRadialRing.cpp - Radial ring source model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2020 by Pierrick Martin                                  *
+ *  copyright (C) 2020-2021 by Pierrick Martin                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -386,11 +386,6 @@ double GModelSpatialRadialRing::theta_max(void) const
  *
  * @param[in] xml XML element.
  *
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
- *
  * Reads the radial ring model information from an XML element. The XML
  * element shall have either the format 
  *
@@ -415,14 +410,8 @@ double GModelSpatialRadialRing::theta_max(void) const
  ***************************************************************************/
 void GModelSpatialRadialRing::read(const GXmlElement& xml)
 {
-    // Determine number of parameter nodes in XML element
-    int npars = xml.elements("parameter");
-
-    // Verify that XML element has exactly 4 parameters
-    if (xml.elements() != 4 || npars != 4) {
-        throw GException::model_invalid_parnum(G_READ, xml,
-              "Ring model requires exactly 4 parameters.");
-    }
+    // Verify number of model parameters
+    gammalib::xml_check_parnum(G_READ, xml, 4);
 
     // Read ring center location
     GModelSpatialRadial::read(xml);
@@ -445,11 +434,6 @@ void GModelSpatialRadialRing::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element into which model information is written.
  *
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
- *
  * Writes the radial ring model information into an XML element. The XML
  * element will have the format 
  *
@@ -463,6 +447,9 @@ void GModelSpatialRadialRing::read(const GXmlElement& xml)
  ***************************************************************************/
 void GModelSpatialRadialRing::write(GXmlElement& xml) const
 {
+    // Verify model type
+    gammalib::xml_check_type(G_WRITE, xml, type());
+
     // Write ring center location
     GModelSpatialRadial::write(xml);
 

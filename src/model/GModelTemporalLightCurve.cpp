@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelTemporalLightCurve.cpp - Temporal light curve model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -373,6 +373,9 @@ GTimes GModelTemporalLightCurve::mc(const double& rate, const GTime&  tmin,
  ***************************************************************************/
 void GModelTemporalLightCurve::read(const GXmlElement& xml)
 {
+    // Verify number of model parameters
+    gammalib::xml_check_parnum(G_READ, xml, 1);
+
     // Get parameter pointers
     const GXmlElement* norm  = gammalib::xml_get_par(G_READ, xml, m_norm.name());
 
@@ -392,9 +395,6 @@ void GModelTemporalLightCurve::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element.
  *
- * @exception GExpection::invalid_value
- *            Invalid XML format encountered.
- *
  * Writes the temporal information into an XML element in the format
  *
  *     <temporalModel type="LightCurve" file="..">
@@ -403,17 +403,8 @@ void GModelTemporalLightCurve::read(const GXmlElement& xml)
  ***************************************************************************/
 void GModelTemporalLightCurve::write(GXmlElement& xml) const
 {
-    // Set model type
-    if (xml.attribute("type") == "") {
-        xml.attribute("type", type());
-    }
-
     // Verify model type
-    if (xml.attribute("type") != type()) {
-        std::string msg = "Temporal model of type "+xml.attribute("type")+
-                          " encountered while \""+type()+"\" was expected.";
-        throw GException::invalid_value(G_WRITE, msg);
-    }
+    gammalib::xml_check_type(G_WRITE, xml, type());
 
     // Get XML parameters
     GXmlElement* norm  = gammalib::xml_need_par(G_WRITE, xml, m_norm.name());

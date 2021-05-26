@@ -282,16 +282,8 @@ void GModelSpatialRadial::read(const GXmlElement& xml)
  ***************************************************************************/
 void GModelSpatialRadial::write(GXmlElement& xml) const
 {
-    // Set model type
-    if (xml.attribute("type") == "") {
-        xml.attribute("type", type());
-    }
-
-    // Verify model type
-    if (xml.attribute("type") != type()) {
-        throw GException::model_invalid_spatial(G_WRITE, xml.attribute("type"),
-              "Radial model is not of type \""+type()+"\".");
-    }
+    // Check model type
+    gammalib::xml_check_type(G_WRITE, xml, type());
 
     // Get or create parameters
     GXmlElement* ra  = gammalib::xml_need_par(G_WRITE, xml, m_ra.name());

@@ -668,17 +668,8 @@ void GModelSpectralBins::read(const GXmlElement& xml)
  ***************************************************************************/
 void GModelSpectralBins::write(GXmlElement& xml) const
 {
-    // Set model type
-    if (xml.attribute("type") == "") {
-        xml.attribute("type", type());
-    }
-
     // Verify model type
-    if (xml.attribute("type") != type()) {
-        std::string msg = "Spectral model type \""+xml.attribute("type")+"\" "
-                          "is not of type \""+type()+"\".";
-        throw GException::invalid_value(G_WRITE, msg);
-    }
+    gammalib::xml_check_type(G_WRITE, xml, type());
 
     // Get index parameter
     GXmlElement* index = gammalib::xml_need_par(G_WRITE, xml, m_index.name());

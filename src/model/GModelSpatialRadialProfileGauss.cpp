@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpatialRadialProfileGauss.cpp - Gaussian radial profile class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2016-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -286,6 +286,9 @@ double GModelSpatialRadialProfileGauss::theta_max(void) const
  ***************************************************************************/
 void GModelSpatialRadialProfileGauss::read(const GXmlElement& xml)
 {
+    // Verify number of model parameters
+    gammalib::xml_check_parnum(G_READ, xml, 3);
+
     // Read Gaussian location
     GModelSpatialRadial::read(xml);
 
@@ -314,6 +317,9 @@ void GModelSpatialRadialProfileGauss::read(const GXmlElement& xml)
  ***************************************************************************/
 void GModelSpatialRadialProfileGauss::write(GXmlElement& xml) const
 {
+    // Verify model type
+    gammalib::xml_check_type(G_WRITE, xml, type());
+
     // Write Gaussian location
     GModelSpatialRadial::write(xml);
 
