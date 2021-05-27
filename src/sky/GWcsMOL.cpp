@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GWcsMOL.cpp - Mollweide's projection class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2015-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -341,10 +341,6 @@ void GWcsMOL::prj_set(void) const
  *                   coordinates [deg].
  * @param[out] stat Status return value for each vector element
  *
- * @exception GException::wcs_invalid_x_y
- *            One or more of the (x,y) coordinates were invalid, as indicated
- *            by the stat vector.
- *
  * Deproject pixel (x,y) coordinates in the plane of projection to native
  * spherical coordinates (phi,theta).
  *
@@ -524,20 +520,14 @@ void GWcsMOL::prj_x2s(int nx, int ny, int sxy, int spt,
 
     } // endfor: did y dependence
 
-    // Handle status code
-    if (status == 3) {
-        throw GException::wcs_invalid_x_y(G_PRJ_X2S, n_invalid);
-    }
+    // Check status code
+    gammalib::check_prj_x2s_status(G_PRJ_X2S, status, n_invalid);
 
     // Do boundary checking
     status = prj_bchk(1.0e-11, nx, my, spt, phi, theta, stat);
     
-    // Handle status code
-    if (status != 0) {
-        std::string msg = "One or more of the (x, y) coordinates were invalid "
-                          "for the "+name()+" ("+code()+") projection.";
-        throw GException::invalid_value(G_PRJ_X2S, msg);
-    }
+    // Check status code
+    gammalib::check_prj_x2s_status(G_PRJ_X2S, status, 1);
 
     // Return
     return;
@@ -558,10 +548,6 @@ void GWcsMOL::prj_x2s(int nx, int ny, int sxy, int spt,
  * @param[out] x Vector of projected x coordinates.
  * @param[out] y Vector of projected y coordinates.
  * @param[out] stat Status return value for each vector element (always 0)
- *
- * @exception GException::wcs_invalid_phi_theta
- *            One or more of the (phi,theta) coordinates were invalid, as
- *            indicated by the stat vector.
  *
  * Project native spherical coordinates (phi,theta) to pixel (x,y)
  * coordinates in the plane of projection.
@@ -668,11 +654,9 @@ void GWcsMOL::prj_s2x(int nphi, int ntheta, int spt, int sxy,
 
     } // endfor: theta dependence
   
-    // Handle status code
-    if (status == 4) {
-        throw GException::wcs_invalid_phi_theta(G_PRJ_S2X, n_invalid);
-    }
-    
+    // Check status code
+    gammalib::check_prj_s2x_status(G_PRJ_S2X, status, n_invalid);
+
     // Return
     return;
 }

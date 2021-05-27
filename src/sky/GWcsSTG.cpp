@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GWcsSTG.cpp - Stereographic (STG) projection class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -497,11 +497,9 @@ void GWcsSTG::prj_s2x(int nphi, int ntheta, int spt, int sxy,
         }
     }
   
-    // Handle status code
-    if (status == 4) {
-        throw GException::wcs_invalid_phi_theta(G_PRJ_S2X, n_invalid);
-    }
-    
+    // Check status code
+    gammalib::check_prj_s2x_status(G_PRJ_S2X, status, n_invalid);
+
     // Return
     return;
 }

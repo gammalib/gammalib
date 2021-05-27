@@ -665,8 +665,9 @@ void GXmlElement::parse_start(const std::string& segment)
 
     // Throw an error is segment is empty
     if (n < 1) {
-        throw GException::xml_syntax_error(G_PARSE_START, segment,
-                          "no element name specified");
+        std::string msg = "Empty XML segment encountered. Please verify the "
+                          "XML format.";
+        throw GException::invalid_value(G_PARSE_START, msg);
     }
 
     // If string starts with brackets then check that the brackets are
@@ -674,8 +675,10 @@ void GXmlElement::parse_start(const std::string& segment)
     if (segment[0] == '<') {
         if (n < 2 || (segment.compare(0,1,"<") != 0) ||
                      (segment.compare(n-1,1,">") != 0)) {
-            throw GException::xml_syntax_error(G_PARSE_START, segment,
-                                               "invalid tag brackets");
+            std::string msg = "Invalid tag brackets encountered in XML "
+                              "segment \""+segment+"\". Please verify the "
+                              "XML format.";
+            throw GException::invalid_value(G_PARSE_START, msg);
         }
         pos_start = 1;
     } // endif: there were brackets
@@ -683,13 +686,16 @@ void GXmlElement::parse_start(const std::string& segment)
     // Extract element name
     std::size_t pos = segment.find_first_of("\x20\x09\x0d\x0a>", 1);
     if (pos == pos_start) {
-        throw GException::xml_syntax_error(G_PARSE_START, segment,
-                          "no whitespace allowed before element name");
+        std::string msg = "Whitespace before element name encountered in XML "
+                          "segment \""+segment+"\". Please verify the "
+                          "XML format.";
+        throw GException::invalid_value(G_PARSE_START, msg);
     }
     if (pos == std::string::npos) {
         if (pos_start == 1) {
-            throw GException::xml_syntax_error(G_PARSE_START, segment,
-                              "element name not found");
+            std::string msg = "No element name found in XML segment \""+
+                              segment+"\". Please verify the XML format.";
+            throw GException::invalid_value(G_PARSE_START, msg);
         }
     }
     m_name = segment.substr(pos_start, pos-pos_start);
@@ -722,32 +728,40 @@ void GXmlElement::parse_stop(const std::string& segment)
     // Check on existence of brackets
     if (n < 3 || (segment.compare(0,2,"</") != 0) ||
                  (segment.compare(n-1,1,">") != 0)) {
-        throw GException::xml_syntax_error(G_PARSE_STOP, segment,
-                          "incorrect or missing tag brackets");
+        std::string msg = "Incorrect or missing tag brackets encountered in "
+                          "XML segment \""+segment+"\". Please verify the "
+                          "XML format.";
+        throw GException::invalid_value(G_PARSE_STOP, msg);
     }
 
     // Extract and verify element name
     size_t pos = segment.find_first_of("\x20\x09\x0d\x0a>", 2);
     if (pos == 2) {
-        throw GException::xml_syntax_error(G_PARSE_STOP, segment,
-                          "no whitespace allowed after \"</\"");
+        std::string msg = "Whitespace encountered after \"</\" in XML "
+                          "segment \""+segment+"\". Please verify the XML "
+                          "format.";
+        throw GException::invalid_value(G_PARSE_STOP, msg);
     }
     if (pos == std::string::npos) {
-        throw GException::xml_syntax_error(G_PARSE_STOP, segment,
-                          "element name not found");
+        std::string msg = "No element name found in XML segment \""+
+                          segment+"\". Please verify the XML format.";
+        throw GException::invalid_value(G_PARSE_STOP, msg);
     }
     std::string name = segment.substr(2, pos-2);
     if (name != m_name) {
-        throw GException::xml_syntax_error(G_PARSE_STOP, segment,
-                          "invalid name in element stop tag"
-                          " (found \""+name+"\", expected \""+m_name+"\"");
+        std::string msg = "Element name \""+name+"\" found in stop tag in XML "
+                          "segment \""+segment+"\" while start tag has name "
+                          "\""+m_name+"\". Please verify the XML format.";
+        throw GException::invalid_value(G_PARSE_STOP, msg);
     }
 
     // Verify that no further characters exist in element stop tag
     size_t pos2 = segment.find_first_of("\x20\x09\x0d\x0a>", pos);
     if (pos2 != n-1) {
-        throw GException::xml_syntax_error(G_PARSE_STOP, segment,
-                          "invalid characters found after element name");
+        std::string msg = "Invalid characters encountered after element name "
+                          "in XML segment \""+segment+"\". Please verify the "
+                          "XML format.";
+        throw GException::invalid_value(G_PARSE_STOP, msg);
     }
 
     // Return
@@ -761,7 +775,7 @@ void GXmlElement::parse_stop(const std::string& segment)
  * @param[in] pos Start position in string.
  * @param[in] segment Segment string.
  *
- * @exception GException::xml_syntax_error
+ * @exception GException::invalid_value
  *            XML syntax error.
  *
  * Parse the segment string for one attribute, and if attribute was found,
@@ -786,44 +800,56 @@ void GXmlElement::parse_attribute(size_t* pos, const std::string& segment)
         // Find end of name substring
         std::size_t pos_name_end = segment.find_first_of("\x20\x09\x0d\x0a=", pos_name_start);
         if (pos_name_end == std::string::npos) {
-            throw GException::xml_syntax_error(G_PARSE_ATTRIBUTE, error,
-                              "invalid or missing attribute name");
+            std::string msg = "Invalid or missing attribute name encountered "
+                              "in XML segment \""+error+"\". Please verify "
+                              "the XML format.";
+            throw GException::invalid_value(G_PARSE_ATTRIBUTE, msg);
         }
 
         // Find '=' character
         std::size_t pos_equal = segment.find_first_of("=", pos_name_end);
         if (pos_equal == std::string::npos) {
-            throw GException::xml_syntax_error(G_PARSE_ATTRIBUTE, error,
-                              "\"=\" sign not found for attribute");
+            std::string msg = "Missing \"=\" sign for attribute encountered "
+                              "in XML segment \""+error+"\". Please verify "
+                              "the XML format.";
+            throw GException::invalid_value(G_PARSE_ATTRIBUTE, msg);
         }
 
         // Find start of value substring
         std::size_t pos_value_start = segment.find_first_of("\x22\x27", pos_equal);
         if (pos_value_start == std::string::npos) {
-            throw GException::xml_syntax_error(G_PARSE_ATTRIBUTE, error,
-                              "invalid or missing attribute value start hyphen");
+            std::string msg = "Invalid or missing attribute value start "
+                              "hyphen encountered in XML segment \""+
+                              error+"\". Please verify the XML format.";
+            throw GException::invalid_value(G_PARSE_ATTRIBUTE, msg);
         }
 
         // Save hyphen character and step forward one character
         std::string hyphen = segment.substr(pos_value_start, 1);
         pos_value_start++;
         if (pos_value_start >= segment.length()) {
-            throw GException::xml_syntax_error(G_PARSE_ATTRIBUTE, error,
-                              "invalid or missing attribute value");
+            std::string msg = "Invalid or missing attribute value encountered "
+                              "in XML segment \""+error+"\". Please verify "
+                              "the XML format.";
+            throw GException::invalid_value(G_PARSE_ATTRIBUTE, msg);
         }
 
         // Find end of value substring
         std::size_t pos_value_end = segment.find_first_of(hyphen, pos_value_start);
         if (pos_value_end == std::string::npos) {
-            throw GException::xml_syntax_error(G_PARSE_ATTRIBUTE, error,
-                              "invalid or missing attribute value end hyphen");
+            std::string msg = "Invalid or missing attribute value end hyphen "
+                              "encountered in XML segment \""+error+
+                              "\". Please verify the XML format.";
+            throw GException::invalid_value(G_PARSE_ATTRIBUTE, msg);
         }
 
         // Get name substring
         std::size_t n_name = pos_name_end - pos_name_start;
         if (n_name < 1) {
-            throw GException::xml_syntax_error(G_PARSE_ATTRIBUTE, error,
-                              "invalid or missing attribute name");
+            std::string msg = "Invalid or missing attribute name encountered "
+                              "in XML segment \""+error+"\". Please verify "
+                              "the XML format.";
+            throw GException::invalid_value(G_PARSE_ATTRIBUTE, msg);
         }
         std::string name = segment.substr(pos_name_start, n_name);
 
@@ -831,10 +857,6 @@ void GXmlElement::parse_attribute(size_t* pos, const std::string& segment)
 
         // Get value substring length
         std::size_t n_value = pos_value_end - pos_value_start;
-        //if (n_value < 0) {
-        //    throw GException::xml_syntax_error(G_PARSE_ATTRIBUTE, error,
-        //                      "invalid or missing attribute value");
-        //}
         std::string value = segment.substr(pos_value_start-1, n_value+2);
 
         //@todo Check XML validity of attribute value

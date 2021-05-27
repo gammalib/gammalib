@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 #include "GException.hpp"
+#include "GTools.hpp"
 #include "GMatrixSparse.hpp"
 #include "GSparseSymbolic.hpp"
 

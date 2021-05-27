@@ -81,8 +81,7 @@
 #define G_EXTRACT_REG                        "GSkyMap::extract(GSkyRegions&)"
 #define G_READ                                     "GSkyMap::read(GFitsHDU&)"
 #define G_SET_WCS     "GSkyMap::set_wcs(std::string&, std::string&, double&,"\
-                              " double&, double&, double&, double&, double&,"\
-                                                       " GMatrix&, GVector&)"
+                              " double&, double&, double&, double&, double&)"
 #define G_READ_HEALPIX                   "GSkyMap::read_healpix(GFitsTable*)"
 #define G_READ_WCS                           "GSkyMap::read_wcs(GFitsImage*)"
 #define G_ALLOC_WCS                         "GSkyMap::alloc_wcs(GFitsImage*)"
@@ -174,8 +173,8 @@ GSkyMap::GSkyMap(const GFitsHDU& hdu)
  * @param[in] order Pixel ordering (RING or NEST).
  * @param[in] nmaps Number of maps in set.
  *
- * @exception GException::skymap_bad_par
- *            Invalid sky map parameter.
+ * @exception GException::invalid_argument
+ *            Invalid @p nmaps parameter.
  *
  * Constructs @p nmaps identical all sky maps in Healpix pixelisation. All
  * pixels of the sky maps will be initialised to values of zero.
@@ -190,8 +189,9 @@ GSkyMap::GSkyMap(const std::string& coords,
 
     // Check if nmaps parameter is >0
     if (nmaps < 1) {
-        throw GException::skymap_bad_par(G_CONSTRUCT_HPX, nmaps,
-                                         "nmaps parameter must be >0.");
+        std::string msg = "Number of maps "+gammalib::str(nmaps)+" is smaller "
+                          "than 1. Please specify at least one map.";
+        throw GException::invalid_argument(G_CONSTRUCT_HPX, msg);
     }
 
     // Allocate Healpix projection
@@ -224,8 +224,8 @@ GSkyMap::GSkyMap(const std::string& coords,
  * @param[in] ny Number of pixels in y direction.
  * @param[in] nmaps Number of maps in set (default=1).
  *
- * @exception GException::skymap_bad_par
- *            Invalid sky map parameter.
+ * @exception GException::invalid_argument
+ *            Invalid number of pixels or maps.
  *
  * Constructs @p nmaps identical all sky maps in World Coordinate System
  * projection. All pixels of the sky maps will be initialised to values of
@@ -246,16 +246,21 @@ GSkyMap::GSkyMap(const std::string& wcs,
 
     // Check parameters
     if (nx < 1) {
-        throw GException::skymap_bad_par(G_CONSTRUCT_MAP, nx,
-                                         "nx parameter must be >0.");
+        std::string msg = "Number of pixels "+gammalib::str(nx)+" in x "
+                          "direction is smaller than 1. Please specify at "
+                          "least one pixel in x direction.";
+        throw GException::invalid_argument(G_CONSTRUCT_MAP, msg);
     }
     if (ny < 1) {
-        throw GException::skymap_bad_par(G_CONSTRUCT_MAP, ny,
-                                         "ny parameter must be >0.");
+        std::string msg = "Number of pixels "+gammalib::str(ny)+" in y "
+                          "direction is smaller than 1. Please specify at "
+                          "least one pixel in y direction.";
+        throw GException::invalid_argument(G_CONSTRUCT_MAP, msg);
     }
     if (nmaps < 1) {
-        throw GException::skymap_bad_par(G_CONSTRUCT_MAP, nmaps,
-                                         "nmaps parameter must be >0.");
+        std::string msg = "Number of maps "+gammalib::str(nmaps)+" is smaller "
+                          "than 1. Please specify at least one map.";
+        throw GException::invalid_argument(G_CONSTRUCT_MAP, msg);
     }
 
     // Set WCS
@@ -265,10 +270,7 @@ GSkyMap::GSkyMap(const std::string& wcs,
     double  crpix2 = double(ny+1)/2.0;
     double  cdelt1 = dx;
     double  cdelt2 = dy;
-    GMatrix cd(2,2);
-    GVector pv2(21);
-    set_wcs(wcs, coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2, 
-            cd, pv2);
+    set_wcs(wcs, coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2);
 
     // Set number of pixels, number of maps and shape of maps
     m_num_x      = nx;
@@ -1059,7 +1061,7 @@ double GSkyMap::operator()(const GSkyDir& dir, const int& map) const
                 } // endif: pixel was contained in map
 
             } // endtry: pixel computation was successful
-            catch (GException::wcs_invalid_phi_theta) {
+            catch (GException::invalid_argument) {
                 m_contained = false;
             }
 
@@ -2180,6 +2182,9 @@ GSkyMap GSkyMap::extract(const int& map, const int& nmaps) const
  * @param[in] stopy     Last bin in Y (inclusive)
  * @return Skymap that overlaps with supplied exclusions
  *
+ * @exception GException::invalid_argument
+ *            Method not valid for HPX projection
+ *
  * This method creates a new skymap consisting of all pixels in the map in the 
  * range [startx,stopx] and [starty,stopy]. The boundary values provided are 
  * inclusive and the actual projection is unchanged. The number of maps in the 
@@ -2192,8 +2197,9 @@ GSkyMap GSkyMap::extract(const int& startx, const int& stopx,
 {
     // Make sure this isn't a 'HealPix' map
     if (m_proj->code() == "HPX") {
-        throw GException::wcs_invalid(G_EXTRACT_INT, m_proj->code(),
-                                      "Method not valid for HPX projection.");
+        std::string msg = "Method not valid for \"HPX\" projection. Please "
+                          "specify WCS projection.";
+        throw GException::invalid_argument(G_EXTRACT_INT, msg);
     }
     else if ((startx > stopx) || (starty > stopy)) {
         throw GException::invalid_argument(G_EXTRACT_INT,
@@ -2257,6 +2263,9 @@ GSkyMap GSkyMap::extract(const int& startx, const int& stopx,
  * @param[in] inclusions List of GSkyRegion objects
  * @return Skymap that overlaps with supplied exclusions
  *
+ * @exception GException::invalid_argument
+ *            Method not valid for HPX projection
+ *
  * This method computes the x,y range that covers the regions in @p inclusions, 
  * then returns that range as a new GSkyMap.
  * 
@@ -2267,8 +2276,9 @@ GSkyMap GSkyMap::extract(const GSkyRegions& inclusions) const
 {
     // Make sure this isn't a 'HealPix' map
     if (m_proj->code() == "HPX") {
-        throw GException::wcs_invalid(G_EXTRACT_REG, m_proj->code(),
-                                      "Method not valid for HPX projection.");
+        std::string msg = "Method not valid for \"HPX\" projection. Please "
+                          "specify WCS projection.";
+        throw GException::invalid_argument(G_EXTRACT_REG, msg);
     }
 
     // Preliminary variables
@@ -2910,32 +2920,32 @@ void GSkyMap::free_members(void)
  * @param[in] crpix2 Y index of reference pixel.
  * @param[in] cdelt1 Increment in x direction at reference pixel (deg).
  * @param[in] cdelt2 Increment in y direction at reference pixel (deg).
- * @param[in] cd Astrometry parameters (2x2 matrix, deg/pixel).
- * @param[in] pv2 Projection parameters (length WCS type dependent).
  *
- * @exception GException::wcs_invalid
+ * @exception GException::invalid_argument
  *            Invalid wcs parameter (World Coordinate System not known).
  *
  * This method sets the WCS projection pointer based on the WCS code and
  * sky map parameters. It makes use of the GWcsRegistry class to allocate
  * the correct derived class. Note that this method does not support the
  * HPX projection.
- *
- * @todo Remove cd and pv2 parameters.
  ***************************************************************************/
-void GSkyMap::set_wcs(const std::string& wcs, const std::string& coords,
-                      const double& crval1, const double& crval2,
-                      const double& crpix1, const double& crpix2,
-                      const double& cdelt1, const double& cdelt2,
-                      const GMatrix& cd, const GVector& pv2)
+void GSkyMap::set_wcs(const std::string& wcs,
+                      const std::string& coords,
+                      const double&      crval1,
+                      const double&      crval2,
+                      const double&      crpix1,
+                      const double&      crpix2,
+                      const double&      cdelt1,
+                      const double&      cdelt2)
 {
     // Convert WCS to upper case
     std::string uwcs = gammalib::toupper(wcs);
 
     // Check if HPX was requested (since this is not allowed)
     if (uwcs == "HPX") {
-       throw GException::wcs_invalid(G_SET_WCS, uwcs,
-                                     "Method not valid for HPX projection.");
+        std::string msg = "Method not valid for \"HPX\" projection. Please "
+                          "specify WCS projections.";
+        throw GException::invalid_argument(G_SET_WCS, msg);
     }
 
     // ... otherwise get projection from registry
@@ -2949,9 +2959,10 @@ void GSkyMap::set_wcs(const std::string& wcs, const std::string& coords,
 
         // Signal if projection type is not known
         if (projection == NULL) {
-            std::string message = "Projection code not known. "
-                                  "Should be one of "+registry.list()+".";
-            throw GException::wcs_invalid(G_SET_WCS, uwcs, message);
+            std::string msg = "WCS projection code \""+uwcs+"\" not known. "
+                              "Please specify one of the following WCS "
+                              "projections: "+registry.content()+".";
+            throw GException::invalid_argument(G_SET_WCS, msg);
         }
 
         // Setup WCS
@@ -2969,6 +2980,9 @@ void GSkyMap::set_wcs(const std::string& wcs, const std::string& coords,
  * @brief Read Healpix data from FITS table.
  *
  * @param[in] table FITS table.
+ *
+ * @exception GException::runtime_error
+ *            Incompatible HealPix projection encountered.
  *
  * HEALPix data may be stored in various formats depending on the 
  * application that has writted the data. HEALPix IDL, for example, may
@@ -3001,8 +3015,11 @@ void GSkyMap::read_healpix(const GFitsTable& table)
     // Number of map pixels has to be a multiple of the number of
     // rows in column
     if (m_num_pixels % nrows != 0) {
-        throw GException::skymap_bad_size(G_READ_HEALPIX, nrows,
-                                          m_num_pixels);
+        std::string msg = "Number of "+gammalib::str(nrows)+" rows in FITS "
+                          "table must correspond to number of "+
+                          gammalib::str(m_num_pixels)+" pixels in HealPix "
+                          "projection.";
+        throw GException::runtime_error(G_READ_HEALPIX, msg);
     }
 
     // Determine vector length for HEALPix data storage
@@ -3190,12 +3207,9 @@ void GSkyMap::read_wcs(const GFitsImage& image)
  *
  * @param[in] image FITS image.
  *
- * @exception GException::fits_key_not_found
- *            Unable to find required FITS header keyword.
- * @exception GException::skymap_bad_ctype
- *            CTYPE1 and CTYPE2 keywords are incompatible.
- * @exception GException::wcs_invalid
- *            WCS projection of FITS file not supported by GammaLib.
+ * @exception GException::invalid_argument
+ *            CTYPE1 and CTYPE2 keywords are incompatible or WCS projection
+ *            of FITS file not supported by GammaLib.
  ***************************************************************************/
 void GSkyMap::alloc_wcs(const GFitsImage& image)
 {
@@ -3209,8 +3223,10 @@ void GSkyMap::alloc_wcs(const GFitsImage& image)
 
     // Check that projection type is identical on both axes
     if (xproj != yproj) {
-        throw GException::skymap_bad_ctype(G_ALLOC_WCS,
-                                           ctype1, ctype2);
+        std::string msg = "X axis projection \""+xproj+"\" differs from Y "
+                          "axis projection \""+yproj+"\". Please specify a "
+                          "FITS image with a valid WCS header.";
+        throw GException::invalid_argument(G_ALLOC_WCS, msg);
     }
 
     // Allocate WCS registry
@@ -3221,9 +3237,10 @@ void GSkyMap::alloc_wcs(const GFitsImage& image)
 
     // Signal if projection type is not known
     if (m_proj == NULL) {
-        std::string message = "Projection code not known. "
-                              "Should be one of "+registry.list()+".";
-        throw GException::wcs_invalid(G_ALLOC_WCS, xproj, message);
+        std::string msg = "WCS projection code \""+xproj+"\" not known. Please "
+                          "specify a FITS image with one of the following "
+                          "WCS projections: "+registry.content()+".";
+        throw GException::invalid_argument(G_ALLOC_WCS, msg);
     }
 
     // Return

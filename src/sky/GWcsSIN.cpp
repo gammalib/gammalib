@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GWcsSIN.cpp - Orthographic/synthesis (SIN) projection class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2016-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -526,10 +526,8 @@ void GWcsSIN::prj_x2s(int nx, int ny, int sxy, int spt,
         
     } // endfor: do Y dependence
 
-    // Handle status code
-    if (status == 3) {
-        throw GException::wcs_invalid_x_y(G_PRJ_X2S, n_invalid);
-    }
+    // Check status code
+    gammalib::check_prj_x2s_status(G_PRJ_X2S, status, n_invalid);
 
     // Return
     return;
@@ -674,11 +672,9 @@ void GWcsSIN::prj_s2x(int nphi, int ntheta, int spt, int sxy,
         
     } // endfor: do theta dependence
 
-    // Handle status code
-    if (status == 4) {
-        throw GException::wcs_invalid_phi_theta(G_PRJ_S2X, n_invalid);
-    }
-    
+    // Check status code
+    gammalib::check_prj_s2x_status(G_PRJ_S2X, status, n_invalid);
+
     // Return
     return;
 }

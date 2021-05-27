@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GWcsARC.cpp - Zenithal/azimuthal equidistant (ARC) projection class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2018 by Juergen Knoedlseder                              *
+ *  copyright (C) 2018-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -335,10 +335,6 @@ void GWcsARC::prj_set(void) const
  *                   coordinates [deg].
  * @param[out] stat Status return value for each vector element (always 0)
  *
- * @exception GException::wcs_invalid_x_y
- *            One or more of the (x,y) coordinates were invalid, as indicated
- *            by the stat vector.
- *
  * Deproject pixel (x,y) coordinates in the plane of projection to native
  * spherical coordinates (phi,theta).
  *
@@ -407,12 +403,8 @@ void GWcsARC::prj_x2s(int nx, int ny, int sxy, int spt,
     // Do boundary checking
     int status = prj_bchk(1.0e-13, nx, my, spt, phi, theta, stat);
     
-    // Handle status code
-    if (status != 0) {
-        std::string msg = "One or more of the (x, y) coordinates were invalid "
-                          "for the "+name()+" ("+code()+") projection.";
-        throw GException::invalid_value(G_PRJ_X2S, msg);
-    }
+    // Check status code
+    gammalib::check_prj_x2s_status(G_PRJ_X2S, status, 1);
 
     // Return
     return;
@@ -433,10 +425,6 @@ void GWcsARC::prj_x2s(int nx, int ny, int sxy, int spt,
  * @param[out] x Vector of projected x coordinates.
  * @param[out] y Vector of projected y coordinates.
  * @param[out] stat Status return value for each vector element (always 0)
- *
- * @exception GException::wcs_invalid_phi_theta
- *            One or more of the (phi,theta) coordinates were invalid, as
- *            indicated by the stat vector.
  *
  * Project native spherical coordinates (phi,theta) to pixel (x,y)
  * coordinates in the plane of projection.
@@ -509,13 +497,9 @@ void GWcsARC::prj_s2x(int nphi, int ntheta, int spt, int sxy,
 
     } // endfor: theta
 
-    // Handle status code
-    /*
-    if (status == 4) {
-        throw GException::wcs_invalid_phi_theta(G_PRJ_S2X, n_invalid);
-    }
-    */
-    
+    // Check status code
+    //gammalib::check_prj_s2x_status(G_PRJ_S2X, status, n_invalid);
+
     // Return
     return;
 }

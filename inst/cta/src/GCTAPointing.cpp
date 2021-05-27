@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTAPointing.cpp - CTA pointing class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,6 +32,7 @@
 #include "GFilename.hpp"
 #include "GMatrix.hpp"
 #include "GSkyDir.hpp"
+#include "GXmlElement.hpp"
 #include "GCTAPointing.hpp"
 #include "GCTAInstDir.hpp"
 

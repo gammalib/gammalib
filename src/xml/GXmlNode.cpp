@@ -802,7 +802,7 @@ GXmlElement* GXmlNode::element(const std::string& name, const int& index)
  * @param[in] index Node index [0,...,elements(name)[.
  * @return Pointer to child element (NULL if element does not exist).
  *
- * @exception GException::xml_name_not_found
+ * @exception GException::invalid_value
  *            Child element name not found.
  * @exception GException::out_of_range
  *            Child element index is out of range.
@@ -836,7 +836,9 @@ const GXmlElement* GXmlNode::element(const std::string& name,
 
     // Signal if no children exist
     if (n < 1) {
-        throw GException::xml_name_not_found(G_ELEMENT3, name);
+        std::string msg = "XML node has no element with name \""+name+
+                          "\". Please verify the XML format.";
+        throw GException::invalid_value(G_ELEMENT3, msg);
     }
 
     // If index is outside boundary then throw an error

@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for sky module                                                #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016-2020 Juergen Knoedlseder                               #
+# Copyright (C) 2016-2021 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -49,8 +49,7 @@ sources = GSkyDir.cpp \
           GWcsSIN.cpp \
           GWcsSFL.cpp \
           GWcsSTG.cpp \
-          GWcsTAN.cpp \
-          GException_sky.cpp
+          GWcsTAN.cpp
 
 # Build libtool library
 noinst_LTLIBRARIES = libsky.la

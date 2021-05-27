@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GXmlComment.cpp - XML comment node class implementation         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -287,7 +287,7 @@ void GXmlComment::free_members(void)
  *
  * @param[in] segment Segment string.
  *
- * @exception GException::xml_syntax_error
+ * @exception GException::invalid_value
  *            XML syntax error.
  *
  * Parse the segment string and extract the comment.
@@ -310,8 +310,10 @@ void GXmlComment::parse(const std::string& segment)
         if (segment[0] == '<') {
             if (n < 7 || (segment.compare(0,4,"<!--")  != 0) ||
                          (segment.compare(n-3,3,"-->") != 0)) {
-                throw GException::xml_syntax_error(G_PARSE, segment,
-                                  "invalid comment brackets");
+                std::string msg = "Missing or invalid comment brackets "
+                                  "encountered in XML segment \""+segment+
+                                  "\". Please verify the XML format.";
+                throw GException::invalid_value(G_PARSE, msg);
             }
             else {
                 m_comment = segment.substr(4, n-7);

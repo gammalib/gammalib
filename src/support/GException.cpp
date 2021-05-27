@@ -1,5 +1,5 @@
 /***************************************************************************
- *                   GException.cpp  -  exception handlers                 *
+ *                    GException.cpp - Exception handler                   *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2006-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -294,6 +294,62 @@ GException::feature_not_implemented::feature_not_implemented(const std::string& 
 
 
 /***********************************************************************//**
+ * @brief Test nested try error
+ *
+ * @param[in] origin Method throwing the exception.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::test_nested_try_error::test_nested_try_error(const std::string& origin,
+                                                         const std::string& message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = "Nested try error ("+message+")";
+
+    // Return
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Failure test
+ *
+ * @param[in] origin Method throwing the exception.
+ * @param[in] message Optional error message.
+ *
+ * Used in unit tests to notice a fail in a try block
+ ***************************************************************************/
+GException::test_failure::test_failure(const std::string& origin,
+                                       const std::string& message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = "Failure Test ("+message+")";
+
+    // Return
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Failure test
+ *
+ * @param[in] origin Method throwing the exception.
+ * @param[in] message Optional error message.
+ *
+ * Used in unit tests to notice a fail in a try block
+ ***************************************************************************/
+GException::test_error::test_error(const std::string& origin,
+                                   const std::string& message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = "Error Test ("+message+")";
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Checks energy interval
  *
  * @param[in] origin Method performing the check.
@@ -323,6 +379,80 @@ void gammalib::check_energy_interval(const std::string& origin,
                           "minimum energy that is smaller than the maximum "
                           "energy.";
         throw GException::invalid_argument(origin, msg);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Checks status of GWcs::prj_x2s method
+ *
+ * @param[in] origin Method performing the check.
+ * @param[in] status Status flag.
+ * @param[in] number Number of invalid coordinates.
+ *
+ * @exception GException::invalid_argument
+ *            Invalid (x,y) coordinate specified.
+ *
+ * Checks the status of the GWcs::prj_x2s method.
+ ***************************************************************************/
+void gammalib::check_prj_x2s_status(const std::string& origin,
+                                    const int&         status,
+                                    const int&         number)
+{
+    // Throw an exception if energy interval is invalid
+    if (status != 0) {
+        if (number == 1) {
+            std::string msg = "One invalid (x,y) coordinate specified. Please "
+                              "make sure that only valid (x,y) coordinates "
+                              "are specified.";
+            throw GException::invalid_argument(origin, msg);
+        }
+        else {
+            std::string msg = gammalib::str(number)+" invalid (x,y) coordinates "
+                              "specified. Please make sure that only valid "
+                              "(x,y) coordinates are specified.";
+            throw GException::invalid_argument(origin, msg);
+        }
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Checks status of GWcs::prj_s2x method
+ *
+ * @param[in] origin Method performing the check.
+ * @param[in] status Status flag.
+ * @param[in] number Number of invalid coordinates.
+ *
+ * @exception GException::invalid_argument
+ *            Invalid (phi,theta) coordinate specified.
+ *
+ * Checks the status of the GWcs::prj_s2x method.
+ ***************************************************************************/
+void gammalib::check_prj_s2x_status(const std::string& origin,
+                                    const int&         status,
+                                    const int&         number)
+{
+    // Throw an exception if energy interval is invalid
+    if (status != 0) {
+        if (number == 1) {
+            std::string msg = "One invalid (phi,theta) coordinate specified. "
+                              "Please make sure that only valid (phi,theta) "
+                              "coordinates are specified.";
+            throw GException::invalid_argument(origin, msg);
+        }
+        else {
+            std::string msg = gammalib::str(number)+" invalid (phi,theta) "
+                              "coordinates specified. Please make sure that "
+                              "only valid (phi,theta) coordinates are specified.";
+            throw GException::invalid_argument(origin, msg);
+        }
     }
 
     // Return

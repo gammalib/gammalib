@@ -1,7 +1,7 @@
 /***************************************************************************
- *   GWcsAIT.cpp - Zenithal/azimuthal equidistant (AIT) projection class               *
+ *   GWcsAIT.cpp - Zenithal/azimuthal equidistant (AIT) projection class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -341,10 +341,6 @@ void GWcsAIT::prj_set(void) const
  *                   coordinates [deg].
  * @param[out] stat Status return value for each vector element (always 0)
  *
- * @exception GException::wcs_invalid_x_y
- *            One or more of the (x,y) coordinates were invalid, as indicated
- *            by the stat vector.
- *
  * Deproject pixel (x,y) coordinates in the plane of projection to native
  * spherical coordinates (phi,theta).
  *
@@ -475,10 +471,8 @@ void GWcsAIT::prj_x2s(int nx, int ny, int sxy, int spt,
         }
     }
 
-    // Handle status code
-    if (status == 3) {
-        throw GException::wcs_invalid_x_y(G_PRJ_X2S, n_invalid);
-    }
+    // Check status code
+    gammalib::check_prj_x2s_status(G_PRJ_X2S, status, n_invalid);
 
     // Do bounds checking on the native coordinates
   	// if (prj->bounds&4 && prjbchk(1.0e-13, nx, my, spt, phi, theta, stat)) {
@@ -504,10 +498,6 @@ void GWcsAIT::prj_x2s(int nx, int ny, int sxy, int spt,
  * @param[out] x Vector of projected x coordinates.
  * @param[out] y Vector of projected y coordinates.
  * @param[out] stat Status return value for each vector element (always 0)
- *
- * @exception GException::wcs_invalid_phi_theta
- *            One or more of the (phi,theta) coordinates were invalid, as
- *            indicated by the stat vector.
  *
  * Project native spherical coordinates (phi,theta) to pixel (x,y)
  * coordinates in the plane of projection.
@@ -584,10 +574,8 @@ void GWcsAIT::prj_s2x(int nphi, int ntheta, int spt, int sxy,
 
     } // endfor: theta
 
-    // Handle status code
-    if (status == 4) {
-        throw GException::wcs_invalid_phi_theta(G_PRJ_S2X, n_invalid);
-    }
+    // Check status code
+    gammalib::check_prj_s2x_status(G_PRJ_S2X, status, n_invalid);
 
     // Return
     return;

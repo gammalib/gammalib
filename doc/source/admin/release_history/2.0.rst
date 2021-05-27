@@ -1,6 +1,6 @@
 .. _2.0:
 
-GammaLib 2.0 release (21 May 2021)
+GammaLib 2.0 release (28 May 2021)
 ==================================
 
 Overview

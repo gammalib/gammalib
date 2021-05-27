@@ -273,33 +273,9 @@ std::string GWcsRegistry::name(const int& index) const
 
 
 /***********************************************************************//**
- * @brief Return list string of projection codes
- *
- * @return Projection code list.
- *
- * Returns a list of the projection codes in the format 'xxx/yyy/zzz'.
- ***************************************************************************/
-std::string GWcsRegistry::list(void) const
-{
-    // Initialise result string
-    std::string result;
-
-    // Append projections
-    for (int i = 0; i < size(); ++i) {
-        if (i > 0) {
-            result.append("/");
-        }
-        result.append(codes()[i]);
-    }
-
-    // Return result
-    return result;
-}
-
-
-/***********************************************************************//**
  * @brief Print registry information
  *
+ * @param[in] chatter Chatter level.
  * @return Registry content.
  ***************************************************************************/
 std::string GWcsRegistry::print(const GChatter& chatter) const

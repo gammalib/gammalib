@@ -664,12 +664,12 @@ void GCTAModelRadialAcceptance::read(const GXmlElement& xml)
     m_radial   = xml_radial(*rad);
     m_spectral = xml_spectral(*spec);
 
-    // Optionally get temporal model
-    try {
+    // Handle optional temporal model
+    if (xml.elements("temporal") > 0) {
         const GXmlElement* temp = xml.element("temporal", 0);
         m_temporal = xml_temporal(*temp);
     }
-    catch (GException::xml_name_not_found &e) {
+    else {
         GModelTemporalConst temporal;
         m_temporal = temporal.clone();
     }

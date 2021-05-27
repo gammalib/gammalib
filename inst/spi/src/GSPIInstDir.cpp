@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GSPIInstDir.cpp - INTEGRAL/SPI instrument direction class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2020 by Juergen Knoedlseder                              *
+ *  copyright (C) 2020-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 #include <cstring>  // memcpy
+#include "GTools.hpp"
 #include "GSPIInstDir.hpp"
 
 /* __ Method name definitions ____________________________________________ */

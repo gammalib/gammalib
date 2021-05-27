@@ -117,12 +117,8 @@ GHealpix::GHealpix(void) : GSkyProjection()
  * @param[in] order Pixel ordering ('RING' or 'NESTED').
  * @param[in] coords Coordinate system ('CEL' or 'GAL').
  *
- * @exception GException::wcs_hpx_bad_nside 
+ * @exception GException::invalid_argument
  *            Invalid nside parameter.
- * @exception GException::wcs_bad_coords 
- *            Invalid coordsys parameter.
- * @exception GException::wcs_hpx_bad_ordering 
- *            Invalid ordering parameter.
  ***************************************************************************/
 GHealpix::GHealpix(const int&         nside,
                    const std::string& order,
@@ -133,7 +129,10 @@ GHealpix::GHealpix(const int&         nside,
 
     // Check nside parameter (power of 2 between 1 and 8192)
     if (nside2order(nside) == -1) {
-        throw GException::wcs_hpx_bad_nside(G_CONSTRUCT, nside);
+        std::string msg = "Invalid nside parameter "+gammalib::str(nside)+
+                          " specified. Please specify one of 1,2,4,8,16,32,"
+                          "64,128,256,512,1024,2048,4096 or 8192.";
+        throw GException::invalid_argument(G_CONSTRUCT, msg);
     }
 
     // Set coordinate system
@@ -282,12 +281,8 @@ GHealpix* GHealpix::clone(void) const
  *
  * @param[in] hdu FITS HDU.
  *
- * @exception GException::wcs
+ * @exception GException::invalid_argument
  *            Unable to load Healpix definition from HDU.
- * @exception GException::wcs_bad_coords
- *            Invalid coordsys parameter.
- * @exception GException::wcs_hpx_bad_ordering
- *            Invalid ordering parameter.
  ***************************************************************************/
 void GHealpix::read(const GFitsHDU& hdu)
 {
@@ -296,7 +291,10 @@ void GHealpix::read(const GFitsHDU& hdu)
 
     // Check if we have a healpix representation
     if (hdu.string("PIXTYPE") != "HEALPIX") {
-        throw GException::wcs(G_READ, "HDU does not contain Healpix data");
+        std::string msg = "FITS HDU does not contain Healpix data. Please "
+                          "make sure that the \"PIXTYPE\" keyword in the FITS "
+                          "HUD is set to \"HEALPIX\".";
+        throw GException::invalid_argument(G_READ, msg);
     }
 
     // Get pixel ordering. First search for the ORDERING keyword, then
@@ -536,7 +534,7 @@ std::string GHealpix::ordering(void) const
  *
  * @param[in] ordering Pixel ordering (RING or NEST/NESTED).
  *
- * @exception GException::wcs_hpx_bad_ordering
+ * @exception GException::invalid_argument
  *            Invalid ordering parameter.
  ***************************************************************************/
 void GHealpix::ordering(const std::string& ordering)
@@ -552,7 +550,10 @@ void GHealpix::ordering(const std::string& ordering)
         m_ordering = 1;
     }
     else {
-        throw GException::wcs_hpx_bad_ordering(G_ORDERING_SET, ordering);
+        std::string msg = "Invalid ordering parameter \""+ordering+"\" "
+                          "encountered. Please specify one of \"RING\", "
+                          "\"NESTED\" or \"NEST\"";
+        throw GException::invalid_argument(G_ORDERING_SET, msg);
     }
 
     // Return

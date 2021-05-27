@@ -818,7 +818,7 @@ void TestGSky::test_GSkyMap_healpix_construct(void)
         GSkyMap map("HOR", 1, "RING", 1);
         test_try_failure();
     }
-    catch (GException::wcs_bad_coords &e) {
+    catch (GException::invalid_argument &e) {
         test_try_success();
     }
     catch (std::exception &e) {
@@ -831,7 +831,7 @@ void TestGSky::test_GSkyMap_healpix_construct(void)
         GSkyMap map("GAL", 3, "RING", 1);
         test_try_failure();
     }
-    catch (GException::wcs_hpx_bad_nside &e) {
+    catch (GException::invalid_argument &e) {
         test_try_success();
     }
     catch (std::exception &e) {
@@ -844,7 +844,7 @@ void TestGSky::test_GSkyMap_healpix_construct(void)
         GSkyMap map("GAL", 2, "SPHERICAL", 1);
         test_try_failure();
     }
-    catch (GException::wcs_hpx_bad_ordering &e) {
+    catch (GException::invalid_argument &e) {
         test_try_success();
     }
     catch (std::exception &e) {
@@ -858,7 +858,7 @@ void TestGSky::test_GSkyMap_healpix_construct(void)
         GSkyMap map("GAL", 2, "NEST", 0);
         test_try_failure();
     }
-    catch (GException::skymap_bad_par &e) {
+    catch (GException::invalid_argument &e) {
         test_try_success();
     }
     catch (std::exception &e) {

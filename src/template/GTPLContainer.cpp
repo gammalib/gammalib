@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 #include "GException.hpp"
+#include "GTools.hpp"
 #include "GTPLContainer.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -172,7 +173,7 @@ GTPLContainer* GTPLContainer::clone(void) const
  ***************************************************************************/
 GTPLBase& GTPLContainer::at(const int& index)
 {
-    // Raise exception if index is out of range
+    // Throw exception if index is out of range
     if (index < 0 || index >= size()) {
         throw GException::out_of_range(G_AT, "[WHAT] index",
                                        index, size());
@@ -195,7 +196,7 @@ GTPLBase& GTPLContainer::at(const int& index)
  ***************************************************************************/
 const GTPLBase& GTPLContainer::at(const int& index) const
 {
-    // Raise exception if index is out of range
+    // Throw exception if index is out of range
     if (index < 0 || index >= size()) {
         throw GException::out_of_range(G_AT, "[WHAT] index",
                                        index, size());
@@ -239,7 +240,7 @@ GTPLBase& GTPLContainer::append(const GTPLBase& TPL_OBJECT)
  ***************************************************************************/
 GTPLBase& GTPLContainer::insert(const int& index, const GTPLBase& TPL_OBJECT)
 {
-    // Compile option: raise exception if index is out of range
+    // Compile option: throw exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (is_empty()) {
         if (index > 0) {
@@ -275,7 +276,7 @@ GTPLBase& GTPLContainer::insert(const int& index, const GTPLBase& TPL_OBJECT)
  ***************************************************************************/
 void GTPLContainer::remove(const int& index)
 {
-    // Compile option: raise exception if index is out of range
+    // Compile option: throw exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
         throw GException::out_of_range(G_REMOVE, "[WHAT] index",

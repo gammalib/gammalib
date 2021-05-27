@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GWcsSFL.cpp - Sanson-Flamsteed (SFL) projection class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -423,20 +423,14 @@ void GWcsSFL::prj_x2s(int nx, int ny, int sxy, int spt,
 
     } // endfor: y dependence
 
-    // Handle status code
-    if (status == 3) {
-        throw GException::wcs_invalid_x_y(G_PRJ_X2S, n_invalid);
-    }
+    // Check status code
+    gammalib::check_prj_x2s_status(G_PRJ_X2S, status, n_invalid);
 
     // Do boundary checking
     status = prj_bchk(1.0e-12, nx, my, spt, phi, theta, stat);
     
-    // Handle status code
-    if (status != 0) {
-        std::string msg = "One or more of the (x, y) coordinates were invalid "
-                          "for the "+name()+" ("+code()+") projection.";
-        throw GException::invalid_value(G_PRJ_X2S, msg);
-    }
+    // Check status code
+    gammalib::check_prj_x2s_status(G_PRJ_X2S, status, 1);
 
     // Return
     return;

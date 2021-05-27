@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GWcsMER.cpp - Mercator's (MER) projection class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -388,12 +388,8 @@ void GWcsMER::prj_x2s(int nx, int ny, int sxy, int spt,
     // Do boundary checking
     int status = prj_bchk(1.0e-13, nx, my, spt, phi, theta, stat);
     
-    // Handle status code
-    if (status != 0) {
-        std::string msg = "One or more of the (x, y) coordinates were invalid "
-                          "for the "+name()+" ("+code()+") projection.";
-        throw GException::invalid_value(G_PRJ_X2S, msg);
-    }
+    // Check status code
+    gammalib::check_prj_x2s_status(G_PRJ_X2S, status, 1);
 
     // Return
     return;

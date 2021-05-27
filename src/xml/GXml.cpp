@@ -730,7 +730,7 @@ void GXml::free_members(void)
  *
  * @param[in] url Unified Resource Locator.
  *
- * @exception GException::xml_syntax_error
+ * @exception GException::invalid_value
  *            XML syntax error.
  *
  * Parses either a XML file or a XML text string and creates all associated
@@ -752,8 +752,11 @@ void GXml::parse(const GUrl& url)
         // Convert special characters into line feeds
         if (c == '\x85' || c == L'\x2028') {
             if (in_markup) {
-                 throw GException::xml_syntax_error(G_PARSE, segment,
-                                   "invalid character encountered");
+                std::string msg = "Invalid character with ASCII code "+
+                                  gammalib::str(c)+" encountered in XML "
+                                  "segment \""+segment+"\". Please verify "
+                                  "the XML format.";
+                throw GException::invalid_value(G_PARSE, msg);
             }
             else {
                 c = '\x0a';
@@ -784,9 +787,11 @@ void GXml::parse(const GUrl& url)
 
             // Markup stop encountered?
             else if (c == '>') {
-                 segment.append(1, (char)c);
-                 throw GException::xml_syntax_error(G_PARSE, segment,
-                       "unexpected closing bracket \">\" encountered");
+                segment.append(1, (char)c);
+                std::string msg = "Unexpected closing bracket \">\" "
+                                  "encountered in XML segment \""+segment+
+                                  "\". Please verify the XML format.";
+                throw GException::invalid_value(G_PARSE, msg);
             }
 
             // ... otherwise add character to segment
@@ -835,9 +840,11 @@ void GXml::parse(const GUrl& url)
                 // Append character to segment
                 segment.append(1, (char)c);
 
-                // If we encounter an opening bracket then throw an exception
-                throw GException::xml_syntax_error(G_PARSE, segment,
-                      "unexpected opening bracket \"<\" encountered");
+                // Throw an exception
+                std::string msg = "Unexpected opening bracket \"<\" "
+                                  "encountered in XML segment \""+segment+
+                                  "\". Please verify the XML format.";
+                throw GException::invalid_value(G_PARSE, msg);
             }
 
             // ... otherwise add character to segment
@@ -863,13 +870,13 @@ void GXml::parse(const GUrl& url)
 
     // Verify that we are back to the root node
     if (current != &m_root) {
-        std::string message = "closing tag ";
+        std::string msg = "Closing tag ";
         GXmlElement* element = dynamic_cast<GXmlElement*>(current);
         if (element != NULL) {
-            message += "for GXmlElement \""+element->name()+"\"";
+            msg += "for GXmlElement \""+element->name()+"\"";
         }
-        message += " is missing";
-        throw GException::xml_syntax_error(G_PARSE, "", message);
+        msg += " is missing. Please verify the XML format.";
+        throw GException::invalid_value(G_PARSE, msg);
     }
 
     // Return
@@ -882,6 +889,9 @@ void GXml::parse(const GUrl& url)
  *
  * @param[in] current Handle to current node.
  * @param[in] segment Segment string.
+ *
+ * @exception GException::invalid_value
+ *            XML syntax error encoutered.
  *
  * Process markup segment.
  ***************************************************************************/
@@ -911,8 +921,10 @@ void GXml::process_markup(GXmlNode** current, const std::string& segment)
         {
             // Check if we expect an element end tag
             if ((*current)->type() != GXmlNode::NT_ELEMENT) {
-                throw GException::xml_syntax_error(G_PROCESS, segment,
-                      "unexpected element end tag encountered");
+                std::string msg = "Unexpected element end tag encountered "
+                                  "in XML segment \""+segment+"\". Please "
+                                  "verify the XML format.";
+                throw GException::invalid_value(G_PROCESS, msg);
             }
 
             // Check if we have the correct end tag
@@ -949,12 +961,17 @@ void GXml::process_markup(GXmlNode** current, const std::string& segment)
         {
             // Verify if declaration tag is allowed
             if (*current != &m_root) {
-                throw GException::xml_syntax_error(G_PROCESS, segment,
-                      "unexpected declaration markup encountered");
+                std::string msg = "Unexpected declaration markup encountered "
+                                  "in XML segment \""+segment+"\". Please "
+                                  "verify the XML format.";
+                throw GException::invalid_value(G_PROCESS, msg);
             }
             if (!m_root.is_empty()) {
-                throw GException::xml_syntax_error(G_PROCESS, segment,
-                      "declaration markup only allowed in first line");
+                std::string msg = "Declaration markup encountered in a line "
+                                  "different from the first line in XML "
+                                  "segment \""+segment+"\". Please "
+                                  "verify the XML format.";
+                throw GException::invalid_value(G_PROCESS, msg);
             }
 
             // Create temporary element to read in declaration attributes
@@ -996,7 +1013,9 @@ void GXml::process_markup(GXmlNode** current, const std::string& segment)
 
     // Invalid tag, throw an error
     case MT_INVALID:
-        throw GException::xml_syntax_error(G_PROCESS, segment, "invalid tag");
+        std::string msg = "Invalid tag in XML segment \""+segment+"\". Please "
+                          "verify the XML format.";
+        throw GException::invalid_value(G_PROCESS, msg);
         break;
     }
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GWcsAZP.cpp - Zenithal/azimuthal perspective (AZP) projection class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -281,7 +281,7 @@ void GWcsAZP::free_members(void)
  * This method sets up the projection information. The method has been
  * adapted from the wcslib function prj.c::azpset.
  *
- * @exception GException::wcs_invalid_parameter
+ * @exception GException::runtime_error
  *            PV(1) or PV(2) are invalid.
  *
  *   Given:
@@ -322,13 +322,13 @@ void GWcsAZP::prj_set(void) const
     // Precompute 
     m_w[0] = m_r0*(m_pv[1] + 1.0);
     if (m_w[0] == 0.0) {
-        std::string message = "PV(1)=-1 encountered.";
-        throw GException::wcs_invalid_parameter(G_PRJ_SET, message);
+        std::string msg = "PV(1)=-1 encountered.";
+        throw GException::runtime_error(G_PRJ_SET, msg);
     }
     m_w[3] = gammalib::cosd(m_pv[2]);
     if (m_w[3] == 0.0) {
-        std::string message = "cos(PV(2))=0 encountered.";
-        throw GException::wcs_invalid_parameter(G_PRJ_SET, message);
+        std::string msg = "cos(PV(2))=0 encountered.";
+        throw GException::runtime_error(G_PRJ_SET, msg);
     }
     m_w[2] = 1.0/m_w[3];
     m_w[4] = gammalib::sind(m_pv[2]);
@@ -364,10 +364,6 @@ void GWcsAZP::prj_set(void) const
  * @param[out] theta Latitude of the projected point in native spherical
  *                   coordinates [deg].
  * @param[out] stat Status return value for each vector element (always 0)
- *
- * @exception GException::wcs_invalid_x_y
- *            One or more of the (x,y) coordinates were invalid, as indicated
- *            by the stat vector.
  *
  * Deproject pixel (x,y) coordinates in the plane of projection to native
  * spherical coordinates (phi,theta).
@@ -465,10 +461,8 @@ void GWcsAZP::prj_x2s(int nx, int ny, int sxy, int spt,
         }
     }
 
-    // Handle status code
-    if (status == 3) {
-        throw GException::wcs_invalid_x_y(G_PRJ_X2S, n_invalid);
-    }
+    // Check status code
+    gammalib::check_prj_x2s_status(G_PRJ_X2S, status, n_invalid);
 
     // Return
     return;
@@ -489,10 +483,6 @@ void GWcsAZP::prj_x2s(int nx, int ny, int sxy, int spt,
  * @param[out] x Vector of projected x coordinates.
  * @param[out] y Vector of projected y coordinates.
  * @param[out] stat Status return value for each vector element (always 0)
- *
- * @exception GException::wcs_invalid_phi_theta
- *            One or more of the (phi,theta) coordinates were invalid, as
- *            indicated by the stat vector.
  *
  * Project native spherical coordinates (phi,theta) to pixel (x,y)
  * coordinates in the plane of projection.
@@ -615,11 +605,9 @@ void GWcsAZP::prj_s2x(int nphi, int ntheta, int spt, int sxy,
         } // endfor: phi
     } // endfor: theta
   
-    // Handle status code
-    if (status == 4) {
-        throw GException::wcs_invalid_phi_theta(G_PRJ_S2X, n_invalid);
-    }
-    
+    // Check status code
+    gammalib::check_prj_s2x_status(G_PRJ_S2X, status, n_invalid);
+
     // Return
     return;
 }

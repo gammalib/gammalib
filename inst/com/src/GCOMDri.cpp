@@ -461,7 +461,7 @@ void GCOMDri::compute_dre(const GCOMObservation& obs,
                     num_outside_dre++;
                 }
             }
-            catch (GException::wcs_invalid_phi_theta) {
+            catch (GException::invalid_argument) {
                 num_outside_dre++;
             }
 

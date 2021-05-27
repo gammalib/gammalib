@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GXmlPI.cpp - XML PI node class implementation             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -288,7 +288,7 @@ void GXmlPI::free_members(void)
  *
  * @param[in] segment Segment string.
  *
- * @exception GException::xml_syntax_error
+ * @exception GException::invalid_value
  *            XML syntax error.
  *
  * Parse the segment string.
@@ -301,8 +301,10 @@ void GXmlPI::parse(const std::string& segment)
     // Check on existence of brackets
     if (n < 4 || (segment.compare(0,2,"<?")   != 0) ||
                  (segment.compare(n-2,2,"?>") != 0)) {
-        throw GException::xml_syntax_error(G_PARSE, segment,
-              "missing or invalid Processing Instruction brackets");
+        std::string msg = "Missing or invalid Processing Instruction brackets "
+                          "encountered in XML segment \""+segment+"\". Please "
+                          "verify the XML format.";
+        throw GException::invalid_value(G_PARSE, msg);
     }
 
     // Set comment

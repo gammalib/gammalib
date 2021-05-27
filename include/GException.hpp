@@ -29,17 +29,22 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>                             // string
-#include <vector>                             // string
-#include <sstream>                            // ostringstream
 #include <stdexcept>                          // exception
-#include "GTime.hpp"
-#include "GXmlElement.hpp"
+
+/* __ Forward declarations ______________________________________________ */
+class GEnergy;
 
 /* __ Prototypes ________________________________________________________ */
 namespace gammalib {
     void check_energy_interval(const std::string& origin,
                                const GEnergy&     emin,
                                const GEnergy&     emax);
+    void check_prj_x2s_status(const std::string& origin,
+                              const int&         status,
+                              const int&         number);
+    void check_prj_s2x_status(const std::string& origin,
+                              const int&         status,
+                              const int&         number);
 }
 
 
@@ -143,134 +148,27 @@ public:
     };
 
 
+    // --- TEST EXCEPTIONS (only used by test suite) ---
 
-
-    // --- OLD EXCEPTIONS ---
-
-    // GSkyMap exceptions
-    class skymap : public GExceptionHandler {
-    public:
-        skymap(std::string origin, std::string message = "");
-    };
-    class skymap_bad_par : public GExceptionHandler {
-    public:
-        skymap_bad_par(std::string origin, int par, std::string message = "");
-    };
-    class skymap_bad_size : public GExceptionHandler {
-    public:
-        skymap_bad_size(std::string origin, int size, int expected,
-                        std::string message = "");
-    };
-    class skymap_bad_ctype : public GExceptionHandler {
-    public:
-        skymap_bad_ctype(std::string origin, std::string ctype1,
-                         std::string ctype2, std::string message = "");
-    };
-    class skymap_bad_image_dim : public GExceptionHandler {
-    public:
-        skymap_bad_image_dim(std::string origin, int naxis,
-                             std::string message = "");
-    };
-
-
-    // GWcs exceptions
-    class wcs : public GExceptionHandler {
-    public:
-        wcs(std::string origin, std::string message = "");
-    };
-    class wcs_invalid : public GExceptionHandler {
-    public:
-        wcs_invalid(std::string origin, std::string wcs, 
-                    std::string message = "");
-    };
-    class wcs_bad_coords : public GExceptionHandler {
-    public:
-        wcs_bad_coords(std::string origin, std::string coordsys);
-    };
-    class wcs_no_proj_fct : public GExceptionHandler {
-    public:
-        wcs_no_proj_fct(std::string origin, std::string message = "");
-    };
-    class wcs_hpx_bad_nside : public GExceptionHandler {
-    public:
-        wcs_hpx_bad_nside(std::string origin, int nside);
-    };
-    class wcs_hpx_bad_ordering : public GExceptionHandler {
-    public:
-        wcs_hpx_bad_ordering(std::string origin, std::string ordering);
-    };
-    class wcs_singular_matrix : public GExceptionHandler {
-    public:
-        wcs_singular_matrix(std::string origin, int naxis,
-                            const std::vector<double>& mat);
-    };
-    class wcs_invalid_parameter : public GExceptionHandler {
-    public:
-        wcs_invalid_parameter(std::string origin, std::string message = "");
-    };
-    class wcs_invalid_x_y : public GExceptionHandler {
-    public:
-        wcs_invalid_x_y(std::string origin, int num, std::string message = "");
-    };
-    class wcs_invalid_phi_theta : public GExceptionHandler {
-    public:
-        wcs_invalid_phi_theta(std::string origin, int num, std::string message = "");
-    };
-
-
-    // XML exceptions
-    class xml_syntax_error : public GExceptionHandler {
-    public:
-        xml_syntax_error(std::string origin, std::string segment,
-                         std::string message = "");
-    };
-    class xml_attribute_value : public GExceptionHandler {
-    public:
-        xml_attribute_value(std::string origin, std::string value);
-    };
-    class xml_bad_node_type : public GExceptionHandler {
-    public:
-        xml_bad_node_type(std::string origin, std::string type,
-                          std::string message = "");
-    };
-    class xml_name_not_found : public GExceptionHandler {
-    public:
-        xml_name_not_found(std::string origin, std::string type,
-                           std::string message = "");
-    };
-    class xml_invalid_parnum : public GExceptionHandler {
-    public:
-        xml_invalid_parnum(std::string origin, GXmlElement xml,
-                           std::string message = "");
-    };
-    class xml_invalid_parnames : public GExceptionHandler {
-    public:
-        xml_invalid_parnames(std::string origin, GXmlElement xml,
-                             std::string message = "");
-    };
-
-    // CSV exceptions
-    class csv_bad_columns : public GExceptionHandler {
-    public:
-        csv_bad_columns(std::string origin, std::string filename,
-                        int rows, int cols, int elements,
-                        std::string message = "");
-    };
-
-    // Test exceptions
+    // Signal nested try
     class test_nested_try_error : public GExceptionHandler {
         public:
-            test_nested_try_error(std::string origin, std::string message = "");
+            test_nested_try_error(const std::string& origin,
+                                  const std::string& message = "");
     };
-    
+
+    // Signal test failure
     class test_failure : public GExceptionHandler {
         public:
-            test_failure(std::string origin, std::string message = "");
+            test_failure(const std::string& origin,
+                         const std::string& message = "");
     };
-    
+
+    // Signal test error
     class test_error : public GExceptionHandler {
         public:
-            test_error(std::string origin, std::string message = "");
+            test_error(const std::string& origin,
+                       const std::string& message = "");
     };
 
 };

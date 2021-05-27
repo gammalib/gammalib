@@ -212,7 +212,7 @@ GWcs& GWcs::operator=(const GWcs& wcs)
  *
  * @param[in] hdu FITS HDU.
  *
- * @exception GException::wcs_bad_coords
+ * @exception GException::invalid_value
  *            Coordinate system is not of valid type.
  *
  * This method reads the WCS definition from the FITS header.
@@ -298,7 +298,12 @@ void GWcs::read(const GFitsHDU& hdu)
             coords = "SGL";
         }
         else {
-            throw GException::wcs_bad_coords(G_READ, coordsys());
+            std::string msg = "Invalid X and/or Y coordinates \""+xcoord+"\""
+                              "/\""+ycoord+"\" encountered. Please specify a "
+                              "FITS HDU with one of \"RA--/DEC-\", "
+                              "\"GLON/GLAT\", \"ELON/ELAT\", \"HLON/HLAT\" or "
+                              "\"SLON/SLAT\".";
+            throw GException::invalid_value(G_READ, msg);
         }
 
         // Set standard parameters
@@ -1376,7 +1381,7 @@ void GWcs::wcs_set_radesys(void) const
 /***********************************************************************//**
  * @brief Set CTYPEa keywords
  *
- * @exception GException::wcs_invalid
+ * @exception GException::invalid_value
  *            WCS projection not valid.
  * @exception GException::wcs_bad_coords
  *            Coordinate system is not of valid type.
@@ -1387,8 +1392,10 @@ void GWcs::wcs_set_ctype(void) const
 {
     // Check on correct type length
     if (code().length() != 3) {
-        throw GException::wcs_invalid(G_WCS_SET_CTYPE, code(),
-              "3-character type required.");
+        std::string msg = "WCS type code has length "+
+                          gammalib::str(code().length())+" while a three "
+                          "character type code is expected.";
+        throw GException::invalid_value(G_WCS_SET_CTYPE, msg);
     }
 
     // Set longitude keyword
@@ -1416,7 +1423,11 @@ void GWcs::wcs_set_ctype(void) const
             m_ctype_c.at(m_lng) = "Supergalactic longitude, ";
         }
         else {
-            throw GException::wcs_bad_coords(G_WCS_SET_CTYPE, coordsys());
+            std::string msg = "Invalid coordinate system identifier "+
+                              gammalib::str(m_coordsys)+" encountered. The "
+                              "coordinate system identifier needs to be "
+                              "comprised with 0 and 4 (included).";
+            throw GException::invalid_value(G_WCS_SET_CTYPE, msg);
         }
 
         // Add projection name to comment
@@ -1449,7 +1460,11 @@ void GWcs::wcs_set_ctype(void) const
             m_ctype_c.at(m_lat) = "Supergalactic latitude, ";
         }
         else {
-            throw GException::wcs_bad_coords(G_WCS_SET_CTYPE, coordsys());
+            std::string msg = "Invalid coordinate system identifier "+
+                              gammalib::str(m_coordsys)+" encountered. The "
+                              "coordinate system identifier needs to be "
+                              "comprised with 0 and 4 (included).";
+            throw GException::invalid_value(G_WCS_SET_CTYPE, msg);
         }
 
         // Add projection name to comment
@@ -1480,7 +1495,7 @@ void GWcs::wcs_set_ctype(void) const
  * @param[out] world Array [ncoord][nelem] of world coordinates.
  * @param[out] stat Array [ncoord] of pixel coordinates validity.
  *
- * @exception GException::wcs_invalid_parameter
+ * @exception GException::invalid_argument
  *            Invalid input parameters provided
  *
  * This method transforms pixel coordinates to world coordinates. The method
@@ -1496,24 +1511,33 @@ void GWcs::wcs_set_ctype(void) const
  * @todo Check for constant x and/or y to speed-up computations
  * @todo Zero the unused world coordinate elements
  ***************************************************************************/
-void GWcs::wcs_p2s(int ncoord, int nelem, const double* pixcrd, double* imgcrd,
-                   double* phi, double* theta, double* world, int* stat) const
+void GWcs::wcs_p2s(int           ncoord,
+                   int           nelem,
+                   const double* pixcrd,
+                   double*       imgcrd,
+                   double*       phi,
+                   double*       theta,
+                   double*       world,
+                   int*          stat) const
 {
     // Initialize if required
     if (!m_wcsset) {
         wcs_set();
     }
 
-    // Sanity check
-    if (ncoord < 1 || (ncoord > 1 && nelem < m_naxis)) {
-        std::string message;
-        if (ncoord < 1) {
-            message = "ncoord="+gammalib::str(ncoord)+", >0 required.";
-        }
-        else {
-            message = "nelem="+gammalib::str(nelem)+", >="+gammalib::str(m_naxis)+" required.";
-        }
-        throw GException::wcs_invalid_parameter(G_WCS_P2S, message);
+    // Check argument validity
+    if (ncoord < 1) {
+        std::string msg = "Number of coordinates "+gammalib::str(ncoord)+
+                          " is less than 1. Please specify at least one "
+                          "coordinates.";
+        throw GException::invalid_argument(G_WCS_P2S, msg);
+    }
+    if ((ncoord > 1) && (nelem < m_naxis)) {
+        std::string msg = "Vector length "+gammalib::str(nelem)+" of each "
+                          "axis is smaller than the number of axes. Please "
+                          "specify a vector length that equals at least the "
+                          "number of axes.";
+        throw GException::invalid_argument(G_WCS_P2S, msg);
     }
 
     // Apply pixel-to-world linear transformation
@@ -1562,25 +1586,33 @@ void GWcs::wcs_p2s(int ncoord, int nelem, const double* pixcrd, double* imgcrd,
  * @todo Check for constant x and/or y to speed-up computations
  * @todo Zero the unused world coordinate elements
  ***************************************************************************/
-void GWcs::wcs_s2p(int ncoord, int nelem, const double* world,
-                   double* phi, double* theta,  double* imgcrd,
-                   double* pixcrd, int* stat) const
+void GWcs::wcs_s2p(int           ncoord,
+                   int           nelem,
+                   const double* world,
+                   double*       phi,
+                   double*       theta,
+                   double*       imgcrd,
+                   double*       pixcrd,
+                   int*          stat) const
 {
     // Initialize if required
     if (!m_wcsset) {
         wcs_set();
     }
 
-    // Sanity check
-    if (ncoord < 1 || (ncoord > 1 && nelem < m_naxis)) {
-        std::string message;
-        if (ncoord < 1) {
-            message = "ncoord="+gammalib::str(ncoord)+", >0 required.";
-        }
-        else {
-            message = "nelem="+gammalib::str(nelem)+", >="+gammalib::str(m_naxis)+" required.";
-        }
-        throw GException::wcs_invalid_parameter(G_WCS_S2P, message);
+    // Check argument validity
+    if (ncoord < 1) {
+        std::string msg = "Number of coordinates "+gammalib::str(ncoord)+
+                          " is less than 1. Please specify at least one "
+                          "coordinates.";
+        throw GException::invalid_argument(G_WCS_S2P, msg);
+    }
+    if ((ncoord > 1) && (nelem < m_naxis)) {
+        std::string msg = "Vector length "+gammalib::str(nelem)+" of each "
+                          "axis is smaller than the number of axes. Please "
+                          "specify a vector length that equals at least the "
+                          "number of axes.";
+        throw GException::invalid_argument(G_WCS_S2P, msg);
     }
 
     //TODO: Check for constant x and/or y
@@ -1861,8 +1893,8 @@ void GWcs::cel_ini(void) const
 /***********************************************************************//**
  * @brief Setup of celestial transformation
  *
- * @exception GException::wcs_invalid_parameter
- *            Invalid World Coordinate System parameter encountered.
+ * @exception GException::runtime_error
+ *            Invalid values encountered.
  *
  * This method sets up the celestial transformation information. The method
  * has been adapted from the wcslib function cel.c::celset. It:
@@ -1970,8 +2002,10 @@ void GWcs::cel_set(void) const
                 // Check of an invalid coordinate transformation parameter
                 // has been encountered. Since z=0 we exlect sin(lat0)=0.
                 if (slat0 != 0.0) {
-                    std::string message = "sin(lat0)="+gammalib::str(slat0)+", expected 0.";
-                    throw GException::wcs_invalid_parameter(G_CEL_SET, message);
+                    std::string msg = "Sine of reference latitude is "+
+                                      gammalib::str(slat0)+" while a value of "
+                                      "zero is expected.";
+                    throw GException::runtime_error(G_CEL_SET, msg);
                 }
 
                 // latp determined solely by LATPOLEa in this case
@@ -1998,10 +2032,10 @@ void GWcs::cel_set(void) const
                         }
                     }
                     else {
-                        std::string message;
-                        message  = "abs(slz)-1 >= "+gammalib::str(std::abs(slz) - 1.0);
-                        message += +", expected <"+gammalib::str(tol)+".";
-                        throw GException::wcs_invalid_parameter(G_CEL_SET, message);
+                        std::string msg = "Sine of reference latitude divided "
+                                          "by z "+gammalib::str(slz)+
+                                          " significantly differs from +/- 1.";
+                        throw GException::runtime_error(G_CEL_SET, msg);
                     }
                 }
                 u = gammalib::atan2d(y,x);
@@ -2078,10 +2112,9 @@ void GWcs::cel_set(void) const
             double x = (sthe0 - gammalib::sind(latp)*slat0)/z;
             double y =  sphip*cthe0/clat0;
             if (x == 0.0 && y == 0.0) {
-                std::string message;
-                message  = "x=0 and y=0";
-                message += +", expected at least that one differs from 0.";
-                throw GException::wcs_invalid_parameter(G_CEL_SET, message);
+                std::string msg = "(X,Y) values are (0,0), yet at least one "
+                                  "of X or Y should differ from zero.";
+                throw GException::runtime_error(G_CEL_SET, msg);
             }
             lngp = lng0 - gammalib::atan2d(y,x);
         }
@@ -2121,9 +2154,11 @@ void GWcs::cel_set(void) const
 
     // Check for ill-conditioned parameters
     if (std::abs(latp) > 90.0+tol) {
-        std::string message;
-        message  = "abs(latp) > 90, coordinate transformation is ill-conditioned.";
-        throw GException::wcs_invalid_parameter(G_CEL_SET, message);
+        std::string msg = "Absolute value of latitude of pole "+
+                          gammalib::str(std::abs(latp))+" differs "
+                          "significantly from 90 degrees which results in an "
+                          "ill-conditioned coordinate transformation.";
+        throw GException::runtime_error(G_CEL_SET, msg);
     }
 
     // Celestial parameter have been set
@@ -2156,10 +2191,17 @@ void GWcs::cel_set(void) const
  * celestial coordinates (lng,lat). The method has been adapted from the
  * wcslib function cel.c::celx2s.
  ***************************************************************************/
-void GWcs::cel_x2s(int nx, int ny, int sxy, int sll,
-                   const double* x, const double *y,
-                   double* phi, double* theta,
-                   double* lng, double* lat, int* stat) const
+void GWcs::cel_x2s(int           nx,
+                   int           ny,
+                   int           sxy,
+                   int           sll,
+                   const double* x,
+                   const double* y,
+                   double*       phi,
+                   double*       theta,
+                   double*       lng,
+                   double*       lat,
+                   int*          stat) const
 {
     // Initialize celestial transformations if required
     if (!m_celset) {
@@ -2202,10 +2244,17 @@ void GWcs::cel_x2s(int nx, int ny, int sxy, int sll,
  * celestial coordinates (lng,lat). The method has been adapted from the
  * wcslib function cel.c::celx2s.
  ***************************************************************************/
-void GWcs::cel_s2x(int nlng, int nlat, int sll, int sxy,
-                   const double* lng, const double* lat,
-                   double* phi, double* theta,
-                   double* x, double* y, int* stat) const
+void GWcs::cel_s2x(int           nlng,
+                   int           nlat,
+                   int           sll,
+                   int           sxy,
+                   const double* lng,
+                   const double* lat,
+                   double*       phi,
+                   double*       theta,
+                   double*       x,
+                   double*       y,
+                   int*          stat) const
 {
     // Initialize celestial transformations if required
     if (!m_celset) {
@@ -2258,9 +2307,14 @@ void GWcs::cel_s2x(int nlng, int nlat, int sll, int sxy,
  * This method has been adapted from the wcslib function sph.c::sphx2s().
  * The interface follows very closely that of wcslib.
  ***************************************************************************/
-void GWcs::sph_x2s(int nphi, int ntheta, int spt, int sll,
-                   const double* phi, const double* theta,
-                   double* lng, double* lat) const
+void GWcs::sph_x2s(int           nphi,
+                   int           ntheta,
+                   int           spt,
+                   int           sll,
+                   const double* phi,
+                   const double* theta,
+                   double*       lng,
+                   double*       lat) const
 {
     // Set tolerance
     const double tol = 1.0e-5;
@@ -2494,9 +2548,14 @@ void GWcs::sph_x2s(int nphi, int ntheta, int spt, int sll,
  * This method has been adapted from the wcslib function sph.c::sphs2x().
  * The interface follows very closely that of wcslib.
  ***************************************************************************/
-void GWcs::sph_s2x(int nlng, int nlat, int sll, int spt,
-                   const double* lng, const double* lat,
-                   double* phi, double* theta) const
+void GWcs::sph_s2x(int           nlng,
+                   int           nlat,
+                   int           sll,
+                   int           spt,
+                   const double* lng,
+                   const double* lat,
+                   double*       phi,
+                   double*       theta) const
 {
     // Set tolerance
     const double tol = 1.0e-5;
@@ -2837,7 +2896,10 @@ void GWcs::lin_set(void) const
  * computations depending of whether the PC matrix is unity or not, avoiding
  * a matrix multiplication when it is not necessary.
  ***************************************************************************/
-void GWcs::lin_p2x(int ncoord, int nelem, const double* pixcrd, double* imgcrd) const
+void GWcs::lin_p2x(int           ncoord,
+                   int           nelem,
+                   const double* pixcrd,
+                   double*       imgcrd) const
 {
     // Initialize linear transformations if required
     if (!m_linset) {
@@ -2913,7 +2975,10 @@ void GWcs::lin_p2x(int ncoord, int nelem, const double* pixcrd, double* imgcrd) 
  * computations depending of whether the PC matrix is unity or not, avoiding
  * a matrix multiplication when it is not necessary.
  ***************************************************************************/
-void GWcs::lin_x2p(int ncoord, int nelem, const double* imgcrd, double* pixcrd) const
+void GWcs::lin_x2p(int           ncoord,
+                   int           nelem,
+                   const double* imgcrd,
+                   double*       pixcrd) const
 {
     // Initialize linear transformations if required
     if (!m_linset) {
@@ -2977,14 +3042,15 @@ void GWcs::lin_x2p(int ncoord, int nelem, const double* imgcrd, double* pixcrd) 
  * @param[in] mat Matrix
  * @param[out] inv Inverted matrix
  *
- * @exception GException::wcs_singular_matrix
+ * @exception GException::runtime_error
  *            Singular matrix encountered.
  *
  * Inverts a linear transformation matrix that is stored in a vector. The
  * matrix dimension is assumed to be m_naxis*m_naxis. This method has been
  * adapted from lin.c::matinv().
  ***************************************************************************/
-void GWcs::lin_matinv(const std::vector<double>& mat, std::vector<double>& inv) const
+void GWcs::lin_matinv(const std::vector<double>& mat,
+                      std::vector<double>&       inv) const
 {
     // Continue only if naxis is valid
     if (m_naxis > 0) {
@@ -3017,7 +3083,10 @@ void GWcs::lin_matinv(const std::vector<double>& mat, std::vector<double>& inv) 
 
             // Throw exception if matrix is singular
             if (rowmax[i] == 0.0) {
-                throw GException::wcs_singular_matrix(G_LIN_MATINV, m_naxis, mat);
+                std::string msg = "Singular matrix encountered in row "+
+                                  gammalib::str(i)+" of linear transformation "
+                                  "matrix.";
+                throw GException::runtime_error(G_LIN_MATINV, msg);
             }
 
         } // endfor: initialized array
@@ -3041,7 +3110,8 @@ void GWcs::lin_matinv(const std::vector<double>& mat, std::vector<double>& inv) 
             if (pivot > k) {
 
                 // We must pivot, interchange the rows of the design matrix
-                for (int j = 0, pj = pivot*m_naxis, kj = k*m_naxis; j < m_naxis; ++j, ++pj, ++kj) {
+                for (int j = 0, pj = pivot*m_naxis, kj = k*m_naxis; j < m_naxis;
+                     ++j, ++pj, ++kj) {
                     double dtemp = lu[pj];
                     lu[pj]       = lu[kj];
                     lu[kj]       = dtemp;

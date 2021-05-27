@@ -562,7 +562,7 @@ GEbounds GCTAObservation::ebounds(void) const
  *
  * @param[in] xml XML element.
  *
- * @exception GException::xml_invalid_parnum
+ * @exception GException::invalid_value
  *            Invalid number of parameters found in XML element.
  * @exception GException::xml_invalid_parnames
  *            Invalid parameter names found in XML element.
@@ -685,8 +685,10 @@ void GCTAObservation::read(const GXmlElement& xml)
 
     // Verify that XML element has at least 1 parameter
     if (xml.elements() < 1 || npars < 1) {
-        throw GException::xml_invalid_parnum(G_READ, xml,
-              "CTA observation requires at least 1 parameter.");
+        std::string msg = "CTA observation contains "+gammalib::str(npars)+
+                          " parameters but at least one parameter is required. "
+                          "Please verify the XML format.";
+        throw GException::invalid_value(G_READ, msg);
     }
 
     // First try to extract observation parameters for an event file
@@ -828,27 +830,31 @@ void GCTAObservation::read(const GXmlElement& xml)
             (par->attribute("name") == "Background")          ||
             (par->attribute("name") == "Calibration")) {
             if (response_type == 2) {
-                throw GException::xml_invalid_parnames(G_READ, xml,
-                      "Incompatible parameter names encountered in the "
-                      "response definition of a CTA observation.\n");
+                std::string msg = "Response cube parameters expected but the "
+                                  "IRF response parameter \""+
+                                  par->attribute("name")+"\" was encountered. "
+                                  "Please verify the XML format.";
+                throw GException::invalid_value(G_READ, msg);
             }
             response_type = 1;
         }
-        
+
         // Check for response type 2 (GCTAResponseCube)
         else if ((par->attribute("name") == "ExposureCube") ||
                  (par->attribute("name") == "PsfCube")      ||
                  (par->attribute("name") == "BkgCube")) {
             if (response_type == 1) {
-                throw GException::xml_invalid_parnames(G_READ, xml,
-                      "Incompatible parameter names encountered in the "
-                      "response definition of a CTA observation.\n");
+                std::string msg = "IRF response parameters expected but the "
+                                  "response cube parameter \""+
+                                  par->attribute("name")+"\" was encountered. "
+                                  "Please verify the XML format.";
+                throw GException::invalid_value(G_READ, msg);
             }
             response_type = 2;
         }
 
     } // endfor: looped over all parameters
-    
+
     // Allocate response
     switch (response_type) {
         case 1:

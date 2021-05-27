@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCOMRoi.cpp - COMPTEL region of interest class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Juergen Knoedlseder                              *
+ *  copyright (C) 2017-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,6 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GTools.hpp"
 #include "GEvent.hpp"
 #include "GCOMRoi.hpp"
 

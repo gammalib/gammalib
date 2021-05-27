@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 #include <string>
+#include "GTools.hpp"
 #include "GCOMTools.hpp"
 #include "GCOMSupport.hpp"
 #include "GCOMEventAtom.hpp"

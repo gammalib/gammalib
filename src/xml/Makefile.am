@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for xml module                                                #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016 Juergen Knoedlseder                                    #
+# Copyright (C) 2016-2021 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -32,8 +32,7 @@ sources = GXml.cpp \
           GXmlElement.cpp \
           GXmlComment.cpp \
           GXmlAttribute.cpp \
-          GXmlPI.cpp \
-          GException_xml.cpp
+          GXmlPI.cpp
 
 # Build libtool library
 noinst_LTLIBRARIES = libxml.la

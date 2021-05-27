@@ -1,7 +1,7 @@
 /***************************************************************************
- *                      GException.i - exception handler                   *
+ *                     GException.i - Exception handler                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -42,8 +42,17 @@
     catch (const GException::invalid_argument& e) {
         SWIG_exception(SWIG_ValueError, e.what());
     }
+    catch (const GException::invalid_return_value& e) {
+        SWIG_exception(SWIG_ValueError, e.what());
+    }
     catch (const GException::fits_error& e) {
         SWIG_exception(SWIG_IOError, e.what());
+    }
+    catch (const GException::file_error& e) {
+        SWIG_exception(SWIG_IOError, e.what());
+    }
+    catch (const GException::runtime_error& e) {
+        SWIG_exception(SWIG_RuntimeError, e.what());
     }
     catch (const GException& e) {
         SWIG_exception(SWIG_RuntimeError, e.what());

@@ -264,9 +264,7 @@ void GLATObservation::response(const std::string& irfname)
  *
  * @param[in] xml XML element.
  *
- * @exception GException::xml_invalid_parnum
- *            Invalid number of parameters found in XML element.
- * @exception GException::xml_invalid_parnames
+ * @exception GException::invalid_value
  *            Invalid parameter names found in XML element.
  *
  * Reads information for a LAT observation from an XML element. The expected
@@ -307,10 +305,7 @@ void GLATObservation::read(const GXmlElement& xml)
     int npars = xml.elements("parameter");
 
     // Verify that XML element has exactly 4 parameters
-    if (xml.elements() != 4 || npars != 4) {
-        throw GException::xml_invalid_parnum(G_READ, xml,
-              "LAT observation requires exactly 4 parameters.");
-    }
+    gammalib::xml_check_parnum(G_READ, xml, 4);
 
     // Extract parameters
     int npar1[] = {0, 0, 0, 0};
@@ -358,10 +353,11 @@ void GLATObservation::read(const GXmlElement& xml)
     bool unbin_ok = (npar1[0] == 1 && npar1[1] == 1 && npar1[2] == 1 && npar1[3] == 1);
     bool bin_ok   = (npar2[0] == 1 && npar2[1] == 1 && npar2[2] == 1 && npar2[3] == 1);
     if (!bin_ok && !unbin_ok) {
-        throw GException::xml_invalid_parnames(G_READ, xml,
-              "Require either \"FT1\", \"FT2\", \"LiveTimeCube\", and \"IRF\""
-              " or \"CountsMap\", \"ExposureMap\", \"LiveTimeCube\", and"
-              " \"IRF\" parameters.");
+        std::string msg = "Require either \"FT1\", \"FT2\", \"LiveTimeCube\", "
+                          "and \"IRF\" or \"CountsMap\", \"ExposureMap\", "
+                          "\"LiveTimeCube\", and \"IRF\" parameters. Please "
+                          "verify the XML format.";
+        throw GException::invalid_value(G_READ, msg);
     }
 
     // Load data
@@ -400,13 +396,9 @@ void GLATObservation::read(const GXmlElement& xml)
  * @param[in] xml XML element.
  *
  * @exception GException::invalid_value
- *            No events allocated.
+ *            No events allocated or invalid parameter names found in XML element..
  * @exception GException::runtime_error
  *            Non-LAT events encountered.
- * @exception GException::xml_invalid_parnum
- *            Invalid number of parameters found in XML element.
- * @exception GException::xml_invalid_parnames
- *            Invalid parameter names found in XML element.
  *
  * Writes information for a LAT observation into an XML element. The expected
  * format of the XML element is
@@ -524,10 +516,11 @@ void GLATObservation::write(GXmlElement& xml) const
 
     // Verify that all required parameters are present
     if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1) {
-        throw GException::xml_invalid_parnames(G_READ, xml,
-              "Require either \"FT1\", \"FT2\", \"LiveTimeCube\", and \"IRF\""
-              " or \"CountsMap\", \"ExposureMap\", \"LiveTimeCube\", and"
-              " \"IRF\" parameters.");
+        std::string msg = "Require either \"FT1\", \"FT2\", \"LiveTimeCube\", "
+                          "and \"IRF\" or \"CountsMap\", \"ExposureMap\", "
+                          "\"LiveTimeCube\", and \"IRF\" parameters. Please "
+                          "verify the XML format.";
+        throw GException::invalid_value(G_WRITE, msg);
     }
 
     // Return

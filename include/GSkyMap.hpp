@@ -202,8 +202,7 @@ private:
     void              set_wcs(const std::string& wcs, const std::string& coords,
                               const double& crval1, const double& crval2,
                               const double& crpix1, const double& crpix2,
-                              const double& cdelt1, const double& cdelt2,
-                              const GMatrix& cd, const GVector& pv2);
+                              const double& cdelt1, const double& cdelt2);
     void              read_healpix(const GFitsTable& table);
     void              read_wcs(const GFitsImage& image);
     void              alloc_wcs(const GFitsImage& image);

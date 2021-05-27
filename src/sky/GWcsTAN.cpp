@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GWcsTAN.cpp - Gnomonic (TAN) projection class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -405,7 +405,7 @@ void GWcsTAN::prj_x2s(int nx, int ny, int sxy, int spt,
  *                  coordinates [deg].
  * @param[out] x Vector of projected x coordinates.
  * @param[out] y Vector of projected y coordinates.
- * @param[out] stat Status return value for each vector element (always 0)
+ * @param[out] stat Status return value for each vector element.
  *
  * Project native spherical coordinates (phi,theta) to pixel (x,y)
  * coordinates in the plane of projection.
@@ -499,11 +499,9 @@ void GWcsTAN::prj_s2x(int nphi, int ntheta, int spt, int sxy,
         }
     }
   
-    // Handle status code
-    if (status == 4) {
-        throw GException::wcs_invalid_phi_theta(G_PRJ_S2X, n_invalid);
-    }
-    
+    // Check status code
+    gammalib::check_prj_s2x_status(G_PRJ_S2X, status, n_invalid);
+
     // Return
     return;
 }

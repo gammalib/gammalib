@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GSkyProjection.cpp - Abstract sky projection base class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -170,8 +170,8 @@ std::string GSkyProjection::coordsys(void) const
  *
  * @param[in] coordsys Coordinate system
  *
- * @exception GException::wcs_bad_coords
- *            Invalid coordsys parameter.
+ * @exception GException::invalid_argument
+ *            Invalid @p coordsys parameter.
  *
  * Set coordinate system from std::string. The method recognizes the
  * following codes:
@@ -191,7 +191,10 @@ void GSkyProjection::coordsys(const std::string& coordsys)
         m_coordsys = 1;
     }
     else {
-        throw GException::wcs_bad_coords(G_COORDSYS_SET, coordsys);
+        std::string msg = "Invalid coordinate system "+coordsys+" specified. "
+                          "Please specify one of \"EQU\",\"CEL\",\"C\",\"GAL\""
+                          " or \"G\".";
+        throw GException::invalid_argument(G_COORDSYS_SET, msg);
     }
 
     // Return

@@ -903,7 +903,7 @@ void GCTAEventCube::set_directions(void)
                 m_dirs.push_back(GCTAInstDir(m_map.pix2dir(pixel)));
                 m_solidangle.push_back(m_map.solidangle(pixel));
             }
-            catch (GException::wcs_invalid_x_y& e) {
+            catch (GException::invalid_argument& e) {
                 m_dirs.push_back(GCTAInstDir());
                 m_solidangle.push_back(0.0);
             }

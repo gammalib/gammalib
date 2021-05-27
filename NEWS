@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-21 May 2021
+28 May 2021
 
 
 1. Introduction
@@ -24,6 +24,10 @@ The following classes have been added:
 - GCTABackground2D
 
 The following classes have been removed:
+- GCTAExceptionHandler
+- GCTAException
+- GLATExceptionHandler
+- GLATException
 - GMWLExceptionHandler
 - GMWLException
 
@@ -105,6 +109,11 @@ The following methods have been added:
 - GCOMSelection::phases()
 - gammalib::tmpnam()
 - gammalib::compare()
+- gammalib::xml_check_parnum()
+- gammalib::xml_check_type()
+- gammalib::check_energy_interval()
+- gammalib::check_prj_x2s_status()
+- gammalib::check_prj_s2x_status()
 
 The following methods have been removed:
 - GFitsTableCol::scale()
@@ -219,7 +228,6 @@ kind of regions:
 - GModelSpatialPointSource
 (#1785)
 
-
 A pre-computation cache was added to the GModelSpatialGauss class (#1300).
 
 
@@ -304,6 +312,11 @@ relative tolerance (#3552).
 
 Added gammalib::tmpnam() function to return a temporary file name, in replacement
 of the deprecated str::tmpnam() function (#3324).
+
+The GException class was reworked so that only a limited number of standard exceptions
+are thrown by GammaLib. This allows for a simpler and more coherent Python interface.
+All specific exception methods were removed, and a number of help functions were
+implemented to reduce code duplication (#35).
 
 
 15. XML module

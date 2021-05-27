@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for test module                                               #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016 Juergen Knoedlseder                                    #
+# Copyright (C) 2016-2021 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -27,8 +27,7 @@ INCLUDES = -I$(top_srcdir)/include \
 # Define sources for this directory
 sources = GTestCase.cpp \
           GTestSuite.cpp \
-          GTestSuites.cpp \
-          GException_test.cpp
+          GTestSuites.cpp
 	
 # Build libtool library
 noinst_LTLIBRARIES = libtest.la
