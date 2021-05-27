@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for numerics module                                           #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016-2020 Juergen Knoedlseder                               #
+# Copyright (C) 2016-2021 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -33,8 +33,7 @@ sources = GIntegral.cpp \
           GMath.cpp \
           GNdarray.cpp \
           GFft.cpp \
-          GFftWavetable.cpp \
-          GException_numerics.cpp
+          GFftWavetable.cpp
 
 # Build libtool library
 noinst_LTLIBRARIES = libnumerics.la
