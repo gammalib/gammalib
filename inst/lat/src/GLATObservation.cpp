@@ -399,8 +399,10 @@ void GLATObservation::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element.
  *
- * @exception GException::no_list
- *            No valid CTA event list or event cube found.
+ * @exception GException::invalid_value
+ *            No events allocated.
+ * @exception GException::runtime_error
+ *            Non-LAT events encountered.
  * @exception GException::xml_invalid_parnum
  *            Invalid number of parameters found in XML element.
  * @exception GException::xml_invalid_parnames
@@ -437,7 +439,20 @@ void GLATObservation::write(GXmlElement& xml) const
     const GLATEventList* list = dynamic_cast<const GLATEventList*>(m_events);
     const GLATEventCube* cube = dynamic_cast<const GLATEventCube*>(m_events);
     if (list == NULL && cube == NULL) {
-        throw GException::no_list(G_WRITE);
+        if (m_events == NULL) {
+            std::string msg = "No events associated with LAT observation. "
+                              "Please allocate events before calling the "
+                              "method.";
+            throw GException::invalid_value(G_WRITE, msg);
+        }
+        else {
+            std::string cls = std::string(typeid(&m_events).name());
+            std::string msg = "Invalid event type \""+cls+"\" encountered. A "
+                              "LAT observation can only contain a LAT event "
+                              "list or cube. Please set up LAT observation "
+                              "appropriately.";
+            throw GException::runtime_error(G_WRITE, msg);
+        }
     }
 
     // Set event list flag
@@ -460,10 +475,7 @@ void GLATObservation::write(GXmlElement& xml) const
     }
 
     // Verify that XML element has exactly 4 parameters
-    if (xml.elements() != 4 || xml.elements("parameter") != 4) {
-        throw GException::xml_invalid_parnum(G_WRITE, xml,
-              "LAT observation requires exactly 4 parameters.");
-    }
+    gammalib::xml_check_parnum(G_WRITE, xml, 4);
 
     // Set or update parameter attributes
     int npar[] = {0, 0, 0, 0};

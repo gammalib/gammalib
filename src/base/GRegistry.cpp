@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GRegistry.cpp - Interface class for registries             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,6 +38,35 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+
+
+/*==========================================================================
+=                                                                         =
+=                              Public methods                             =
+=                                                                         =
+==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Return list of names in registry
+ *
+ * @return String containing list of names in registry
+ ***************************************************************************/
+std::string GRegistry::content(void) const
+{
+    // Initialise names
+    std::string names;
+
+    // Loop over all entries and append names
+    for (int i = 0; i < size(); ++i) {
+        if (i != 0) {
+            names += ", ";
+        }
+        names += "\""+name(i)+"\"";
+    }
+
+    // Return names
+    return names;
+}
 
 
 /*==========================================================================

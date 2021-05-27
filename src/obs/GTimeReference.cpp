@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GTimeReference.cpp - Time reference class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -248,7 +248,7 @@ GTimeReference* GTimeReference::clone(void) const
  *
  * @param[in] hdu FITS extension.
  *
- * GException::no_valid_time_ref
+ * GException::invalid_value
  *             No valid reference MJD found in header.
  *
  * Reads the time reference information from a FITS header. The method
@@ -282,9 +282,11 @@ void GTimeReference::read(const GFitsHDU& hdu)
         set(mjdrefi, mjdreff, timeunit, timesys, timeref);
     }
     else {
-        throw GException::no_valid_time_ref(G_READ,
-              "Require either keyword \"MJDREF\" or keyword pair"
-              " \"MJDREFI\" and \"MJDREFF\".");
+        std::string msg = "No valid time reference keywords found in FITS "
+                          "header. The FITS header must contain either the "
+                          "keyword \"MJDREF\" or the keyword pair"
+                          " \"MJDREFI\" and \"MJDREFF\".";
+        throw GException::invalid_value(G_READ, msg);
     }
 
     // Return
@@ -457,7 +459,7 @@ void GTimeReference::write(GXmlElement& xml) const
  * @param[in] timesys Time system.
  * @param[in] timeref Time reference.
  *
- * @exception GException::time_invalid_unit
+ * @exception GException::invalid_argument
  *            Invalid time unit specified.
  *
  * Sets the time reference from a MJD reference day, a time unit, a time
@@ -479,9 +481,10 @@ void GTimeReference::set(const double&      mjdref,
         m_unit_sec = true;
     }
     else {
-        throw GException::time_invalid_unit(G_SET, timeunit,
-              "Valid timeunit values are: \"d\", \"day\", \"days\","
-              " \"s\", \"sec\" or \"secs\"");
+        std::string msg = "Invalid time unit \""+timeunit+"\" specified. "
+                          "Please specify one of \"d\", \"day\", \"days\", "
+                          "\"s\", \"sec\" or \"secs\"";
+        throw GException::invalid_argument(G_SET, msg);
     }
 
     // Set members

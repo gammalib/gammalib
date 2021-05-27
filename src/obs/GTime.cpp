@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          GTime.cpp - Time class                         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -98,7 +98,7 @@ GTime::GTime(const GTime& time)
  * @param[in] time Time value in TT (seconds or days).
  * @param[in] unit Time unit string.
  *
- * @exception GException::time_invalid_unit
+ * @exception GException::invalid_argument
  *            Invalid time unit specified.
  *
  * Constructs a GTime object by setting the time in the native reference
@@ -118,9 +118,10 @@ GTime::GTime(const double& time, const std::string& unit)
         secs(time);
     }
     else {
-        throw GException::time_invalid_unit(G_CONSTRUCT, unit,
-              "Valid timeunit values are: \"d\", \"day\", \"days\","
-              " \"s\", \"sec\" or \"secs\"");
+        std::string msg = "Invalid time unit \""+unit+"\" specified. Please "
+                          "specify one of \"d\", \"day\", \"days\", \"s\", "
+                          "\"sec\" or \"secs\"";
+        throw GException::invalid_argument(G_CONSTRUCT, msg);
     }
 
     // Return

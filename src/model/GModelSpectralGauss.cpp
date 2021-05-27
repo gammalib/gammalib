@@ -450,18 +450,15 @@ GEnergy GModelSpectralGauss::mc(const GEnergy& emin,
                                 const GTime&   time,
                                 GRan&          ran) const
 {
+    // Check energy interval
+    gammalib::check_energy_interval(G_MC, emin, emax);
+
     // Get energy boundaries in MeV
 	double xmax = emax.MeV();
 	double xmin = emin.MeV();
 
     // Initialize return energy
 	double energy = 0.0;
-
-    // Throw an exception if energy range is invalid
-    if (xmin >= xmax) {
-        throw GException::erange_invalid(G_MC, xmin, xmax,
-              "Minimum energy < maximum energy required.");
-    }
 
     // Sample until we find a value within the requested energy range
     do {

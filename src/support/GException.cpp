@@ -21,13 +21,14 @@
 /**
  * @file GException.cpp
  * @brief Exception handler interface implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GFitsCfitsio.hpp"
+#include "GEnergy.hpp"
 
 
 /***********************************************************************//**
@@ -286,6 +287,43 @@ GException::feature_not_implemented::feature_not_implemented(const std::string& 
                  " https://cta-redmine.irap.omp.eu/projects/gammalib/,"
                  " join this error message and provide a detailed"
                  " description of your needs.";
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Checks energy interval
+ *
+ * @param[in] origin Method performing the check.
+ * @param[in] emin Minimum energy.
+ * @param[in] emax Maximum energy.
+ *
+ * @exception GException::invalid_argument
+ *            Minimum energy is equal or larger than maximum energy.
+ *
+ * Checks that the minimum energy is smaller than the maximum energy.
+ ***************************************************************************/
+void gammalib::check_energy_interval(const std::string& origin,
+                                     const GEnergy&     emin,
+                                     const GEnergy&     emax)
+{
+    // Throw an exception if energy interval is invalid
+    if (emin == emax) {
+        std::string msg = "Minimum energy "+emin.print()+" is equal to "
+                          "maximum energy "+emax.print()+". Please specify "
+                          "a minimum energy that is smaller than the maximum "
+                          "energy.";
+        throw GException::invalid_argument(origin, msg);
+    }
+    else if (emin > emax) {
+        std::string msg = "Minimum energy "+emin.print()+" is larger than "
+                          "maximum energy "+emax.print()+". Please specify a "
+                          "minimum energy that is smaller than the maximum "
+                          "energy.";
+        throw GException::invalid_argument(origin, msg);
+    }
 
     // Return
     return;

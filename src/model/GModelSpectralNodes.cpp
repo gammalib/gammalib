@@ -526,8 +526,6 @@ double GModelSpectralNodes::eflux(const GEnergy& emin, const GEnergy& emax) cons
  * @param[in,out] ran Random number generator.
  * @return Energy.
  *
- * @exception GException::erange_invalid
- *            Energy range is invalid (emin < emax required).
  * @exception GException::invalid_return_value
  *            No valid Monte Carlo cache
  *
@@ -538,11 +536,8 @@ GEnergy GModelSpectralNodes::mc(const GEnergy& emin,
                                 const GTime&   time,
                                 GRan&          ran) const
 {
-    // Throw an exception if energy range is invalid
-    if (emin >= emax) {
-        throw GException::erange_invalid(G_MC, emin.MeV(), emax.MeV(),
-              "Minimum energy < maximum energy required.");
-    }
+    // Check energy interval
+    gammalib::check_energy_interval(G_MC, emin, emax);
 
     // Allocate energy
     GEnergy energy;

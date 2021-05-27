@@ -554,7 +554,7 @@ void GObservations::save(const GFilename& filename) const
  *
  * @param[in] xml XML document.
  *
- * @exception GException::invalid_instrument
+ * @exception GException::invalid_value
  *            Invalid instrument encountered in XML file.
  *
  * Reads observations from the first observation list that is found in the
@@ -621,7 +621,11 @@ void GObservations::read(const GXml& xml)
 
         // ... otherwise throw an exception
         else {
-            throw GException::invalid_instrument(G_READ, instrument);
+            std::string msg = "Instrument \""+instrument+"\" unknown. The "
+                              "following instruments are available: "+
+                              registry.content()+". Please specify one of "
+                              "the available instruments.";
+            throw GException::invalid_value(G_READ, msg);
         }
 
         // Append observation to container

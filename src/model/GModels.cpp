@@ -796,16 +796,10 @@ void GModels::read(const GXml& xml)
 
         // ... otherwise throw an exception
         else {
-            std::string msg = "No model of type \""+type+"\" found in model "
-                              "registry. Please specify one of the following "
-                              "model types:";
-            for (int i = 0; i < registry.size(); ++i) {
-                if (i != 0) {
-                    msg += ",";
-                }
-                msg += " \""+registry.name(i)+"\"";
-            }
-            msg += ".";
+            std::string msg = "Model type \""+type+"\" unknown. The following "
+                              "model types are available: "+registry.content()+
+                              ". Please specify one of the available model "
+                              "types.";
             throw GException::invalid_value(G_READ, msg);
         }
 

@@ -685,7 +685,7 @@ int GObservation::nobserved(void) const
  * @param[in] models Models.
  * @param[out] gradients Model parameter gradients (optional).
  *
- * @exception GException::gradient_par_mismatch
+ * @exception GException::invalid_argument
  *            Dimension of gradient vector mismatches number of parameters.
  *
  * Returns the total number of predicted counts within the analysis region.
@@ -702,9 +702,12 @@ double GObservation::npred(const GModels& models, GVector* gradients) const
     #if defined(G_RANGE_CHECK)
     if (gradients != NULL) {
         if (models.npars() != gradients->size()) {
-            throw GException::gradient_par_mismatch(G_NPRED,
-                                                    gradients->size(),
-                                                    models.npars());
+            std::string msg = "Model parameter gradients vector size "+
+                              gammalib::str(gradients->size())+" differs from "
+                              "number of "+gammalib::str(models.npars())+
+                              " model parameters. Please specify a gradients "
+                              "vector with the appropriate size.";
+            throw GException::invalid_argument(G_NPRED, msg);
         }
     }
     #endif
@@ -830,9 +833,16 @@ double GObservation::npred(const GModel& model) const
 
                 // Throw exception if time interval is not valid
                 if (tstop <= tstart) {
-                    throw GException::gti_invalid(G_NPRED,
-                                                  events()->gti().tstart(i),
-                                                  events()->gti().tstop(i));
+                    std::string msg = "Start time "+
+                                      events()->gti().tstart(i).print()+
+                                      " is past the stop time "+
+                                      events()->gti().tstop(i).print()+
+                                      " for Good Time Interval "+
+                                      gammalib::str(i)+". Please make sure "
+                                      "that all Good Time Intervals have start "
+                                      "times that are earlier than the stop "
+                                      "time.";
+                    throw GException::invalid_value(G_NPRED, msg);
                 }
 
                 // Setup integration function

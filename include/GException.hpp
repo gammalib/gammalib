@@ -35,6 +35,13 @@
 #include "GTime.hpp"
 #include "GXmlElement.hpp"
 
+/* __ Prototypes ________________________________________________________ */
+namespace gammalib {
+    void check_energy_interval(const std::string& origin,
+                               const GEnergy&     emin,
+                               const GEnergy&     emax);
+}
+
 
 /***********************************************************************//**
  * @class GExceptionHandler
@@ -208,73 +215,6 @@ public:
     class wcs_invalid_phi_theta : public GExceptionHandler {
     public:
         wcs_invalid_phi_theta(std::string origin, int num, std::string message = "");
-    };
-
-    // Observation exceptions
-    class no_response : public GExceptionHandler {
-    public:
-        no_response(std::string origin, std::string message = "");
-    };
-    class no_roi : public GExceptionHandler {
-    public:
-        no_roi(std::string origin, std::string message = "");
-    };
-    class no_events : public GExceptionHandler {
-    public:
-        no_events(std::string origin, std::string message = "");
-    };
-    class no_list : public GExceptionHandler {
-    public:
-        no_list(std::string origin, std::string message = "");
-    };
-    class no_cube : public GExceptionHandler {
-    public:
-        no_cube(std::string origin, std::string message = "");
-    };
-    class gradient_par_mismatch : public GExceptionHandler {
-    public:
-        gradient_par_mismatch(std::string origin, int nsize, int npars);
-    };
-    class caldb_not_found : public GExceptionHandler {
-    public:
-        caldb_not_found(std::string origin, std::string home, 
-                        std::string message = "");
-    };
-    class rsp_invalid_type : public GExceptionHandler {
-    public:
-        rsp_invalid_type(std::string origin, std::string type,
-                         std::string message = "");
-    };
-    class gti_invalid : public GExceptionHandler {
-    public:
-        gti_invalid(std::string origin, GTime tstart, GTime tstop,
-                    std::string message = "");
-    };
-    class erange_invalid : public GExceptionHandler {
-    public:
-        erange_invalid(std::string origin, double emin, 
-                       double emax, std::string message = "");
-    };
-    class invalid_statistics : public GExceptionHandler {
-    public:
-        invalid_statistics(std::string origin, std::string statistics,
-                           std::string message = "");
-    };
-    class invalid_instrument : public GExceptionHandler {
-    public:
-        invalid_instrument(std::string origin, std::string instrument,
-                           std::string message = "");
-    };
-    class time_invalid_unit : public GExceptionHandler {
-    public:
-        time_invalid_unit(const std::string& origin,
-                          const std::string& unit,
-                          const std::string& message = "");
-    };
-    class no_valid_time_ref : public GExceptionHandler {
-    public:
-        no_valid_time_ref(const std::string& origin,
-                          const std::string& message = "");
     };
 
 

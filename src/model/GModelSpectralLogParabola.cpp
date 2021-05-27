@@ -495,9 +495,6 @@ double GModelSpectralLogParabola::eflux(const GEnergy& emin,
  * @param[in,out] ran Random number generator.
  * @return Energy.
  *
- * @exception GException::erange_invalid
- *            Energy range is invalid (emin < emax required).
- *
  * Returns Monte Carlo energy by randomly drawing from the spectral model.
  ***************************************************************************/
 GEnergy GModelSpectralLogParabola::mc(const GEnergy& emin,
@@ -505,10 +502,8 @@ GEnergy GModelSpectralLogParabola::mc(const GEnergy& emin,
                                       const GTime&   time,
                                       GRan&          ran) const
 {
-    if (emin >= emax) {
-	    throw GException::erange_invalid(G_MC, emin.MeV(), emax.MeV(),
-	          "Minimum energy < maximum energy required.");
-	}
+    // Check energy interval
+    gammalib::check_energy_interval(G_MC, emin, emax);
 
 	// Allocate energy
 	GEnergy energy;

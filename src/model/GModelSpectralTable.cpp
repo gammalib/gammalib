@@ -637,9 +637,6 @@ double GModelSpectralTable::eflux(const GEnergy& emin,
  * @param[in,out] ran Random number generator.
  * @return Energy.
  *
- * @exception GException::invalid_argument
- *            Energy range is invalid (emin < emax required).
- *
  * Returns Monte Carlo energy by randomly drawing from a broken power law
  * defined by the file function.
  ***************************************************************************/
@@ -648,14 +645,8 @@ GEnergy GModelSpectralTable::mc(const GEnergy& emin,
                                 const GTime&   time,
                                 GRan&          ran) const
 {
-    // Throw an exception if energy range is invalid
-    if (emin >= emax) {
-        std::string msg = "Minimum energy "+emin.print()+" is equal or "
-                          "larger than maximum energy "+emax.print()+". "
-                          "Please provide a minimum energy that is smaller "
-                          "than the maximum energy.";
-        throw GException::invalid_argument(G_MC, msg);
-    }
+    // Check energy interval
+    gammalib::check_energy_interval(G_MC, emin, emax);
 
     // Allocate energy
     GEnergy energy;

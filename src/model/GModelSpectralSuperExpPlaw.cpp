@@ -517,9 +517,6 @@ double GModelSpectralSuperExpPlaw::eflux(const GEnergy& emin,
  * @param[in,out] ran Random number generator.
  * @return Energy.
  *
- * @exception GException::erange_invalid
- *            Energy range is invalid (emin < emax required).
- *
  * Simulates a random energy in the interval [emin, emax] for an
  * exponentially cut off power law. The simulation is done using a rejection
  * method. First, a random energy within [emin, emax] is drawn from an
@@ -531,11 +528,8 @@ GEnergy GModelSpectralSuperExpPlaw::mc(const GEnergy& emin,
                                        const GTime&   time,
                                        GRan&          ran) const
 {
-    // Throw an exception if energy range is invalid
-    if (emin >= emax) {
-        throw GException::erange_invalid(G_MC, emin.MeV(), emax.MeV(),
-              "Minimum energy < maximum energy required.");
-    }
+    // Check energy interval
+    gammalib::check_energy_interval(G_MC, emin, emax);
 
     // Allocate energy
     GEnergy energy;
