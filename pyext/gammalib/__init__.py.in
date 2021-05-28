@@ -1,7 +1,7 @@
 # ==========================================================================
 # GammaLib Python module
 #
-# Copyright (C) 2016-2020 Juergen Knoedlseder
+# Copyright (C) 2016-2021 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,6 +17,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
+# Make sur that library symbols are exported
+import sys
+originalDLFlags = sys.getdlopenflags()  # Get original flags
+sys.setdlopenflags(258)                 # Set RTLD_GLOBAL | RTLD_NOW
+
 # Import modules
 from gammalib.app import *
 from gammalib.base import *
@@ -38,6 +43,9 @@ from gammalib.lat import *
 from gammalib.com import *
 from gammalib.spi import *
 # Insert new module here
+
+# Reset original flags
+sys.setdlopenflags(originalDLFlags)
 
 # Remove swig register stuff
 bad_entries = [entry for entry in list(locals())
