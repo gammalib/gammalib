@@ -28,6 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <typeinfo>
 #include <cstdio>             // std::sprintf
 #include "GException.hpp"
 #include "GTools.hpp"

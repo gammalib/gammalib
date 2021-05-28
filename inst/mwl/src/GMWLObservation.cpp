@@ -28,6 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <typeinfo>
 #include "GTools.hpp"
 #include "GFilename.hpp"
 #include "GObservationRegistry.hpp"

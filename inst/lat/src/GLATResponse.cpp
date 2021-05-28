@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 #include <unistd.h>           // access() function
+#include <typeinfo>
 #include <cstdlib>            // std::getenv() function
 #include <string>
 #include "GException.hpp"
