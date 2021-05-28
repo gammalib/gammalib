@@ -18,11 +18,12 @@
 #
 # ==========================================================================
 
-# Make sur that library symbols are exported by setting the RTLD_GLOBAL flag.
-# This is necessary on some systems.
+# Make sur that library symbols are exported by setting the dynamic library
+# loading flag to RTLD_GLOBAL | RTLD_NOWflag. This is necessary on some
+# systems.
 import sys
-flags = sys.getdlopenflags()  # Get original flags
-sys.setdlopenflags(@DLFLAGS@) # Set RTLD_GLOBAL | RTLD_NOW
+flags = sys.getdlopenflags()
+sys.setdlopenflags(@DLFLAGS_RTLD_GLOBAL@ | @DLFLAGS_RTLD_NOW@)
 
 # Import modules
 from gammalib.app import *
