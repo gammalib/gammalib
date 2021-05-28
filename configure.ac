@@ -2,7 +2,7 @@
 # Configuration for GammaLib - a versatile toolbox for high-level analysis  #
 #                              of astronomical gamma-ray data               #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2006-2020 Juergen Knoedlseder                               #
+# Copyright (C) 2006-2021 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -289,17 +289,21 @@ AC_MSG_CHECKING([for the shared library paths environment variable])
 case $ac_sys_system in
     BeOS*)
         SHAREDSUFFIX='.so'
+        DLFLAGS=258
         ;;
     CYGWIN*)
         SHAREDSUFFIX='.dll.a'
+        DLFLAGS=258
         ;;
     SunOS*)
         SHAREDSUFFIX='.so'
         RUNSHARED='LD_LIBRARY_PATH'
+        DLFLAGS=258
         ;;
     Linux*|GNU*|NetBSD*|FreeBSD*|DragonFly*)
         SHAREDSUFFIX='.so'
         RUNSHARED='LD_LIBRARY_PATH'
+        DLFLAGS=258
         ;;
     hp*|HP*)
         case `uname -m` in
@@ -311,27 +315,33 @@ case $ac_sys_system in
                 ;;
         esac
         RUNSHARED='SHLIB_PATH'
+        DLFLAGS=258
         ;;
     OSF*)
         SHAREDSUFFIX='.so'
         RUNSHARED='LD_LIBRARY_PATH'
+        DLFLAGS=258
         ;;
     atheos*)
         SHAREDSUFFIX='.so'
         RUNSHARED='DLL_PATH'
+        DLFLAGS=258
 	    ;;
     Darwin*)
         SHAREDSUFFIX='.dylib'
         RUNSHARED='DYLD_LIBRARY_PATH'
+        DLFLAGS=10
         ;;
     AIX*)
         SHAREDSUFFIX='.so'
         RUNSHARED='LIBPATH'
+        DLFLAGS=258
         ;;
 esac
 AC_MSG_RESULT($RUNSHARED)
 AC_SUBST(SHAREDSUFFIX)
 AC_SUBST(RUNSHARED)
+AC_SUBST(DLFLAGS)
 
 
 #############################################################################

@@ -17,10 +17,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
-# Make sur that library symbols are exported
+
+# Make sur that library symbols are exported by setting the RTLD_GLOBAL flag.
+# This is necessary on some systems.
 import sys
-originalDLFlags = sys.getdlopenflags()  # Get original flags
-sys.setdlopenflags(258)                 # Set RTLD_GLOBAL | RTLD_NOW
+flags = sys.getdlopenflags()  # Get original flags
+sys.setdlopenflags(@DLFLAGS@) # Set RTLD_GLOBAL | RTLD_NOW
 
 # Import modules
 from gammalib.app import *
@@ -45,7 +47,7 @@ from gammalib.spi import *
 # Insert new module here
 
 # Reset original flags
-sys.setdlopenflags(originalDLFlags)
+sys.setdlopenflags(flags)
 
 # Remove swig register stuff
 bad_entries = [entry for entry in list(locals())
