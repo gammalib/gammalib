@@ -19,8 +19,7 @@
 # ==========================================================================
 
 # Make sur that library symbols are exported by setting the dynamic library
-# loading flag to RTLD_GLOBAL | RTLD_NOWflag. This is necessary on some
-# systems.
+# loading flag to RTLD_GLOBAL | RTLD_NOW. This is necessary on some systems.
 import sys
 flags = sys.getdlopenflags()
 sys.setdlopenflags(@DLFLAGS_RTLD_GLOBAL@ | @DLFLAGS_RTLD_NOW@)
