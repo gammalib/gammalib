@@ -52,11 +52,15 @@ sys.setdlopenflags(flags)
 # Remove swig register stuff
 bad_entries = [entry for entry in list(locals())
                if entry.endswith('_swigregister')]
-for entry in bad_entries:
-    del locals()[entry]
+if len(bad_entries) > 0:
+    for entry in bad_entries:
+        del locals()[entry]
 
 # Clean-up
 del gammalib.gammalib
+del flags
+del bad_entries
+del entry
 
 # Python test
 def test():
