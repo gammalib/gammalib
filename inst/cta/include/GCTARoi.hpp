@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTARoi.hpp - CTA region of interest class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -34,6 +34,7 @@
 
 /* __ Forward declarations _______________________________________________ */
 class GEvent;
+class GXmlElement;
 
 
 /***********************************************************************//**
