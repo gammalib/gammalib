@@ -111,8 +111,12 @@ GModelSpectralTable::GModelSpectralTable(const GFilename& filename,
     // Load table
     load(filename);
 
-    // Set normalization
+    // Set normalization as the scale factor and limit change in
+    // normalisation to a factor of 1000
+    m_norm.remove_range();
+    m_norm.scale(norm);
     m_norm.value(norm);
+    m_norm.range(0.0,1.0e3*norm);
 
     // Return
     return;
@@ -1410,6 +1414,9 @@ GFitsBinTable GModelSpectralTable::create_spec_table(void) const
     // Create columns
     GFitsTableFloatCol col_pars("PARAMVAL", nrows, npars);
     GFitsTableFloatCol col_spec("INTPSPEC", nrows, nebins);
+
+    // Set units
+    col_spec.unit("ph cm-2 s-1 MeV-1");
 
     // Fill columns
     std::vector<int> inx(npars+1,0);
