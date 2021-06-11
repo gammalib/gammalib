@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCOMIaq.cpp - COMPTEL instrument response representation        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1257,6 +1257,15 @@ void GCOMIaq::location_smearing(const double& zenith)
  * @param[in] zenith Zenith angle of source (deg).
  * @return Vector of location spreads in Gaussian sigma
  *
+ * The method computes the geometrical smearing widths according to D1 and
+ * D2 X,Y,Z location uncertainties. The algorithm is based on a constant
+ * D1, D2 location uncertainty for all energies. This is also why the
+ * method can be called at the end of the IAQ generation: the location
+ * spread does not have to be added for each energy separately.
+ *
+ * The location spread is a (mild) function of phigeo and source @p zenith
+ * angle.
+ *
  * The code implementation is based on the COMPASS RESPSIT2 function LOCSPR.F
  * (release 1.0, 05-JAN-93).
  ***************************************************************************/
@@ -1290,7 +1299,6 @@ std::vector<double> GCOMIaq::location_spread(const double& zenith) const
 
     // Get IAQ dimensions
     int n_phigeo = m_iaq.naxes(0);
-    //int n_phibar = m_iaq.naxes(1);
 
     // Loop over phigeo
     for (int i_phigeo = 0; i_phigeo < n_phigeo; ++i_phigeo) {
@@ -1311,10 +1319,10 @@ std::vector<double> GCOMIaq::location_spread(const double& zenith) const
 
         // Compute spread due to (z) uncertainty
         double sigz2 = (a2sq * a2sq * sphig2 * cphig2 +
-                        a2sq * a2sq * (0.5 - 3.0 * cphig2 * sphig2) +
+                        a2sq * a1sq * (0.5 - 3.0 * cphig2 * sphig2) +
                         3.0 * a1sq * a1sq * sphig2 * cphig2 / 8.0) *
                        sigvt2 / zdist2;
-    
+
         // Calculate sigma in degrees
         double siggeo = std::sqrt(sigxy2 + sigz2) * gammalib::rad2deg;
 
