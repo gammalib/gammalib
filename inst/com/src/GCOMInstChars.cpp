@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCOMInstChars.cpp - COMPTEL Instrument Characteristics class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,7 +39,7 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-#define TEST_KN
+#define USE_ICT_MEAN_FREE_PATH
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_DEBUG_READ_SELFVETO
@@ -297,85 +297,6 @@ void GCOMInstChars::load(const std::string& ictname)
 
 
 /***********************************************************************//**
- * @brief Return D1 interaction probability
- *
- * @param[in] energy Input photon energy (MeV).
- * @return D1 interaction probability.
- *
- * Computes the D1 interaction probability as function of energy using
- *
- * \f[
- *    P(E) = 1 - \exp \left(-\mu_m(E) \, l \right)
- * \f]
- *
- * where
- * \f$-\mu(E)\f$ is the energy-dependent D1 attenuation coefficient in units
- * of \f$1/cm\f$ that is interpolated using a log-log interpolation of the
- * ICT table values, and \f$l\f$ is the thickness of the D1 module in
- * \f$cm\f$.
- ***************************************************************************/
-double GCOMInstChars::prob_D1inter(const double& energy) const
-{
-    // Initialise probability
-    double prob = 0.0;
-
-    // Continue only if there are energies
-    if (m_d1inter_energies.size() > 0) {
-
-        // Get log of energy
-        double logE = std::log(energy);
-
-        // Get interaction coefficient
-        double logc  = m_d1inter_energies.interpolate(logE, m_d1inter_coeffs);
-        double coeff = std::exp(logc) * m_d1thick;
-
-        // Compute interaction probability
-        prob = 1.0 - std::exp(-coeff);
-
-    }
-
-    // Return probability
-    return prob;
-}
-
-
-/***********************************************************************//**
- * @brief Return probability that no multihit occured
- *
- * @param[in] energy Input photon energy (MeV).
- * @return Probability that no multihit occured.
- *
- * Returns the probability that there is no multihit. The probability is
- * directly interpolated using a log-log interpolation from the D1 values
- * that are given in the ICT table. The D2 values are not used.
- ***************************************************************************/
-double GCOMInstChars::prob_no_multihit(const double& energy) const
-{
-    // Initialise probability
-    double prob = 1.0;
-
-    // Continue only if there are energies
-    if (m_d1multi_energies.size() > 0) {
-
-        // Get log of energy
-        double logE = std::log(energy);
-
-        // Compute probability that there is no multihit
-        prob = std::exp(m_d1multi_energies.interpolate(logE, m_d1multi_coeffs));
-
-        // Make sure that probability does not exceed 1
-        if (prob > 1.0) {
-            prob = 1.0;
-        }
-
-    }
-
-    // Return probability
-    return prob;
-}
-
-
-/***********************************************************************//**
  * @brief Return transmission above D1
  *
  * @param[in] energy Input photon energy (MeV).
@@ -464,40 +385,37 @@ double GCOMInstChars::trans_V1(const double& energy) const
 
 
 /***********************************************************************//**
- * @brief Return D2 interaction probability
+ * @brief Return D1 interaction probability
  *
  * @param[in] energy Input photon energy (MeV).
- * @param[in] phigeo Geometrical scatter angle (deg).
- * @return D2 interaction probability.
+ * @return D1 interaction probability.
  *
- * Computes the D2 interaction probability as function of energy using
+ * Computes the D1 interaction probability as function of energy using
  *
  * \f[
- *    P(E) = 1 - \exp \left(\frac{-\mu_m(E) \, l}
- *                               {\cos \varphi_{\rm geo}} \right)
+ *    P(E) = 1 - \exp \left(-\mu_m(E) \, l \right)
  * \f]
  *
  * where
- * \f$-\mu(E)\f$ is the energy-dependent D2 attenuation coefficient in units
+ * \f$-\mu(E)\f$ is the energy-dependent D1 attenuation coefficient in units
  * of \f$1/cm\f$ that is interpolated using a log-log interpolation of the
- * ICT table values, \f$l\f$ is the thickness of the D2 module in \f$cm\f$,
- * and \f$\varphi_{\rm geo}\f$ is the geometrical scatter angle.
+ * ICT table values, and \f$l\f$ is the thickness of the D1 module in
+ * \f$cm\f$.
  ***************************************************************************/
-double GCOMInstChars::prob_D2inter(const double& energy, const double& phigeo) const
+double GCOMInstChars::prob_D1inter(const double& energy) const
 {
     // Initialise probability
     double prob = 0.0;
 
     // Continue only if there are energies
-    if (m_d2inter_energies.size() > 0) {
+    if (m_d1inter_energies.size() > 0) {
 
-        // Compute log of D2 energy deposit
-        double logE2 = std::log(gammalib::com_energy2(energy, phigeo));
+        // Get log of energy
+        double logE = std::log(energy);
 
         // Get interaction coefficient
-        double logc   = m_d2inter_energies.interpolate(logE2, m_d2inter_coeffs);
-        double length = m_d2thick / std::cos(phigeo * gammalib::deg2rad);
-        double coeff  = std::exp(logc) * length;
+        double logc  = m_d1inter_energies.interpolate(logE, m_d1inter_coeffs);
+        double coeff = std::exp(logc) * m_d1thick;
 
         // Compute interaction probability
         prob = 1.0 - std::exp(-coeff);
@@ -510,98 +428,38 @@ double GCOMInstChars::prob_D2inter(const double& energy, const double& phigeo) c
 
 
 /***********************************************************************//**
- * @brief Return transmission of material between D1 and D2
+ * @brief Return probability that no multihit occured
  *
  * @param[in] energy Input photon energy (MeV).
- * @param[in] phigeo Geometrical scatter angle (deg).
- * @return Transmission of material between D1 and D2.
+ * @return Probability that no multihit occured.
  *
- * Computes the transmission of material between D1 and D2 as function of
- * energy using
- *
- * \f[
- *    T(E) = \exp \left(\frac{-\mu(E) \, \rho \, l}
- *                           {\cos \varphi_{\rm geo}} \right)
- * \f]
- *
- * where
- * \f$\mu(E)\f$ is the energy-dependent interaction coefficient of the
- * material between D1 and D2 in units of \f$cm^{-1}\f$ that is interpolated
- * using a log-log interpolation of the ICT table values,
- * \f$l\f$ is the thickness of the material between D1 and D2 in \f$cm\f$,
- * and \f$\varphi_{\rm geo}\f$ is the geometrical scatter angle.
+ * Returns the probability that there is no multihit. The probability is
+ * directly interpolated using a log-log interpolation from the D1 values
+ * that are given in the ICT table. The D2 values are not used.
  ***************************************************************************/
-double GCOMInstChars::trans_D2(const double& energy, const double& phigeo) const
+double GCOMInstChars::prob_no_multihit(const double& energy) const
 {
-    // Initialise transmission
-    double transmission = 1.0;
+    // Initialise probability
+    double prob = 1.0;
 
     // Continue only if there are energies
-    if (m_alu_energies.size() > 0) {
+    if (m_d1multi_energies.size() > 0) {
 
-        // Compute log of D2 energy deposit
-        double logE2 = std::log(gammalib::com_energy2(energy, phigeo));
+        // Get log of energy
+        double logE = std::log(energy);
 
-        // Get attenuation coefficient
-        double logc   = m_alu_energies.interpolate(logE2, m_alu_coeffs);
-        double length = m_althick / std::cos(phigeo * gammalib::deg2rad);
-        double coeff  = std::exp(logc) * length;
+        // Compute probability that there is no multihit
+        prob = std::exp(m_d1multi_energies.interpolate(logE, m_d1multi_coeffs));
 
-        // Compute transmission
-        transmission = std::exp(-coeff);
+        // Make sure that probability does not exceed 1
+        if (prob > 1.0) {
+            prob = 1.0;
+        }
 
     }
 
-    // Return transmission
-    return transmission;
-}
-
-
-/***********************************************************************//**
- * @brief Return V2+V3 veto dome transmission
- *
- * @param[in] energy Input photon energy (MeV).
- * @param[in] phigeo Geometrical scatter angle (deg).
- * @return V2+V3 veto dome transmission.
- *
- * Computes the V2+V3 veto dome transmission as function of energy
- * using
- *
- * \f[
- *    T(E) = \exp \left(\frac{-\mu(E) \, \rho \, l}
- *                           {\cos \varphi_{\rm geo}} \right)
- * \f]
- *
- * where
- * \f$\mu(E)\f$ is the energy-dependent interaction coefficient of the V2
- * and V3 veto domes in units of \f$cm^{-1}\f$ that is interpolated using a
- * log-log interpolation of the ICT table values,
- * \f$l\f$ is the thickness of the V2+V3 veto domes in \f$cm\f$, and
- * \f$\varphi_{\rm geo}\f$ is the geometrical scatter angle.
- ***************************************************************************/
-double GCOMInstChars::trans_V23(const double& energy, const double& phigeo) const
-{
-    // Initialise transmission
-    double transmission = 1.0;
-
-    // Continue only if there are energies
-    if (m_veto_energies.size() > 0) {
-
-        // Compute log of D2 energy deposit
-        double logE2 = std::log(gammalib::com_energy2(energy, phigeo));
-
-        // Get attenuation coefficient
-        double logc   = m_veto_energies.interpolate(logE2, m_veto_coeffs);
-        double length = m_vthick / std::cos(phigeo * gammalib::deg2rad);
-        double coeff  = std::exp(logc) * length;
-
-        // Compute transmission
-        transmission = std::exp(-coeff);
-
-    }
-
-    // Return transmission
-    return transmission;
+    // Return probability
+    return prob;
 }
 
 
@@ -664,6 +522,165 @@ double GCOMInstChars::prob_no_selfveto(const double& energy, const double& zenit
 
         // And now convert into a no self veto probability
         prob = 1.0 - prob;
+
+    }
+
+    // Return probability
+    return prob;
+}
+
+
+/***********************************************************************//**
+ * @brief Return transmission of material between D1 and D2
+ *
+ * @param[in] energy Input photon energy (MeV).
+ * @param[in] phigeo Geometrical scatter angle (deg).
+ * @return Transmission of material between D1 and D2.
+ *
+ * Computes the transmission of material between D1 and D2 as function of
+ * energy using
+ *
+ * \f[
+ *    T(E) = \exp \left(\frac{-\mu(E_2) \, l \right)
+ * \f]
+ *
+ * with
+ *
+ * \f[
+ *    E_2 = \frac{E_{\gamma}}
+ *               {(1 - \cos \varphi_{\rm geo}) \frac{E_{\gamma}}{m_e c^2} + 1}
+ * \f]
+ *
+ * where
+ * \f$E_{\gamma}\f$ is the input photon @p energy in MeV,
+ * \f$\varphi_{\rm geo}\f$ is the geometrical scatter angle,
+ * \f$\mu(E_2)\f$ is the energy-dependent interaction coefficient of the
+ * material between D1 and D2 in units of \f$cm^{-1}\f$ that is interpolated
+ * using a log-log interpolation of the ICT table values, and
+ * \f$l\f$ is the thickness of the material between D1 and D2 in \f$cm\f$.
+ ***************************************************************************/
+double GCOMInstChars::trans_D2(const double& energy, const double& phigeo) const
+{
+    // Initialise transmission
+    double transmission = 1.0;
+
+    // Continue only if there are energies
+    if (m_alu_energies.size() > 0) {
+
+        // Compute log of D2 energy deposit
+        double logE2 = std::log(gammalib::com_energy2(energy, phigeo));
+
+        // Get attenuation coefficient
+        double logc  = m_alu_energies.interpolate(logE2, m_alu_coeffs);
+        double coeff = std::exp(logc) * m_althick;
+
+        // Compute transmission
+        transmission = std::exp(-coeff);
+
+    }
+
+    // Return transmission
+    return transmission;
+}
+
+
+/***********************************************************************//**
+ * @brief Return V2+V3 veto dome transmission
+ *
+ * @param[in] energy Input photon energy (MeV).
+ * @param[in] phigeo Geometrical scatter angle (deg).
+ * @return V2+V3 veto dome transmission.
+ *
+ * Computes the V2+V3 veto dome transmission as function of energy
+ * using
+ *
+ * \f[
+ *    T(E) = \exp \left(-\mu(E) \, l \right)
+ * \f]
+ *
+ * \f[
+ *    E_2 = \frac{E_{\gamma}}
+ *               {(1 - \cos \varphi_{\rm geo}) \frac{E_{\gamma}}{m_e c^2} + 1}
+ * \f]
+ *
+ * where
+ * \f$E_{\gamma}\f$ is the input photon @p energy in MeV,
+ * \f$\varphi_{\rm geo}\f$ is the geometrical scatter angle,
+ * \f$\mu(E_2)\f$ is the energy-dependent interaction coefficient of the V2
+ * and V3 veto domes in units of \f$cm^{-1}\f$ that is interpolated using a
+ * log-log interpolation of the ICT table values, and \f$l\f$ is the thickness
+ * of the V2+V3 veto domes in \f$cm\f$.
+ ***************************************************************************/
+double GCOMInstChars::trans_V23(const double& energy, const double& phigeo) const
+{
+    // Initialise transmission
+    double transmission = 1.0;
+
+    // Continue only if there are energies
+    if (m_veto_energies.size() > 0) {
+
+        // Compute log of D2 energy deposit
+        double logE2 = std::log(gammalib::com_energy2(energy, phigeo));
+
+        // Get attenuation coefficient
+        double logc  = m_veto_energies.interpolate(logE2, m_veto_coeffs);
+        double coeff = std::exp(logc) * m_vthick;
+
+        // Compute transmission
+        transmission = std::exp(-coeff);
+
+    }
+
+    // Return transmission
+    return transmission;
+}
+
+
+/***********************************************************************//**
+ * @brief Return D2 interaction probability
+ *
+ * @param[in] energy Input photon energy (MeV).
+ * @param[in] phigeo Geometrical scatter angle (deg).
+ * @return D2 interaction probability.
+ *
+ * Computes the D2 interaction probability as function of energy using
+ *
+ * \f[
+ *    P(E) = 1 - \exp \left(-\mu_m(E_2) \, l \right)
+ * \f]
+ *
+ * with
+ *
+ * \f[
+ *    E_2 = \frac{E_{\gamma}}
+ *               {(1 - \cos \varphi_{\rm geo}) \frac{E_{\gamma}}{m_e c^2} + 1}
+ * \f]
+ *
+ * where
+ * \f$E_{\gamma}\f$ is the input photon @p energy in MeV,
+ * \f$\varphi_{\rm geo}\f$ is the geometrical scatter angle,
+ * \f$\mu(E_2)\f$ is the energy-dependent D2 attenuation coefficient in units
+ * of \f$cm^{-1}\f$ that is interpolated using a log-log interpolation of the
+ * ICT table values, and \f$l\f$ is the thickness of the D2 module in
+ * \f$cm\f$.
+ ***************************************************************************/
+double GCOMInstChars::prob_D2inter(const double& energy, const double& phigeo) const
+{
+    // Initialise probability
+    double prob = 0.0;
+
+    // Continue only if there are energies
+    if (m_d2inter_energies.size() > 0) {
+
+        // Compute log of D2 energy deposit
+        double logE2 = std::log(gammalib::com_energy2(energy, phigeo));
+
+        // Get interaction coefficient
+        double logc  = m_d2inter_energies.interpolate(logE2, m_d2inter_coeffs);
+        double coeff = std::exp(logc) * m_d2thick;
+
+        // Compute interaction probability
+        prob = 1.0 - std::exp(-coeff);
 
     }
 
@@ -744,7 +761,7 @@ double GCOMInstChars::multi_scatter(const double& energy, const double& phigeo) 
 
     // Compute the integration normalisation value
     double kappa = deltau / double(nphi);
-    
+
     // Integration loop over the module radius
     double contribution_rho = 0.0;
     double total_surface    = surface;
@@ -1435,7 +1452,7 @@ void GCOMInstChars::read_selfveto(const GFitsTable& table)
 
         // Now loop over all energies and fill the missing zenith angles
         for (int ieng = 0; ieng < neng; ++ieng) {
-        
+
             // Debug: print header
             #if defined(G_DEBUG_READ_SELFVETO)
             std::cout << "Energy: " << m_selfveto_energies[ieng] << std::endl;
@@ -1509,6 +1526,17 @@ void GCOMInstChars::read_selfveto(const GFitsTable& table)
  ***************************************************************************/
 double GCOMInstChars::ne213a_mfpath(const double& energy) const
 {
+    #if defined(USE_ICT_MEAN_FREE_PATH)
+    // Get log of energy
+    double logE = std::log(energy);
+
+    // Get log of interaction coefficient
+    double logc = m_d1inter_energies.interpolate(logE, m_d1inter_coeffs);
+
+    // Convert into mean free path
+    double result = 1.0 / std::exp(logc);
+
+    #else
     // NE213A mean free path values for energies from 1,2,...,30 MeV
     const double mfpath[] = {16.19, 23.21, 29.01, 34.04, 38.46,
                              42.35, 45.64, 48.81, 51.53, 54.17,
@@ -1537,6 +1565,7 @@ double GCOMInstChars::ne213a_mfpath(const double& energy) const
         double slope = mfpath[index+1] - mfpath[index];
         result       = mfpath[index] + slope * (energy - double(index + 1));
     }
+    #endif
 
     // Return result
     return result;

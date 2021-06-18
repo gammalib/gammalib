@@ -1633,10 +1633,6 @@ void GFits::free_members(void)
  * GFitsImageDouble   (bitpix=-64)
  * The information about the number of bits per pixels is extracted from
  * the actual HDU.
- *
- * @todo Additional code is needed to detect unsigned integer images. This
- * code may be insprired by the code used for table columns as the unsigned
- * information is stored in the BZERO keyword.
  ***************************************************************************/
 GFitsImage* GFits::new_image(void)
 {

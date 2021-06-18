@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCOMD1Response.cpp - COMPTEL D1 module response class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -40,8 +40,10 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+#define G_RENORMALIZE                   //!< Renormalise Gaussian amplitude
 
 /* __ Debug definitions __________________________________________________ */
+#define G_COMPASS_THRESHOLD        //!< Use threshold as defined in COMPASS
 
 /* __ Constants __________________________________________________________ */
 
@@ -182,6 +184,9 @@ GCOMD1Response& GCOMD1Response::operator=(const GCOMD1Response& rsp)
  * \f[
  *    \int_{E} R_{\rm D1}(E|E_0) dE = 1
  * \f]
+ *
+ * The code implementation is based on the COMPASS RESD1 function
+ * SPDERC01.RESD1.F (release ?, date ?).
  ***************************************************************************/
 double GCOMD1Response::operator()(const double& etrue, const double& ereco) const
 {
@@ -206,8 +211,26 @@ double GCOMD1Response::operator()(const double& etrue, const double& ereco) cons
 
         }
 
-        // Apply threshold. We use a width of 0.1 MeV for the high-energy
-        // threshold width to assure a smooth transition to zero.
+        #if defined(G_COMPASS_THRESHOLD)
+        // Apply threshold according to COMPASS function resd1
+        double thresl = m_emin - 0.5 * m_ewidth;
+        if (ereco <= thresl) {
+            response = 0.0;
+        }
+        else {
+            if (ereco <= thresl + m_ewidth) {
+                response *= (ereco - thresl) / m_ewidth;
+            }
+            else {
+                if (ereco > m_emax) {
+                    response = 0.0;
+                }
+            }
+        }
+
+        #else
+        // Apply smooth threshold. We use a width of 0.1 MeV for the
+        // high-energy threshold width to assure a smooth transition to zero.
         if (ereco < m_emin) {
             double arg  = (m_emin-ereco) / m_ewidth;
             response   *= std::exp(-0.5 * arg * arg);
@@ -216,6 +239,7 @@ double GCOMD1Response::operator()(const double& etrue, const double& ereco) cons
             double arg  = (m_emax-ereco) / 0.1;
             response   *= std::exp(-0.5 * arg * arg);
         }
+        #endif
 
     } // endif: response was loaded
 
@@ -337,12 +361,12 @@ void GCOMD1Response::read(const GFitsTable& table)
 
         // Get column pointers
         const GFitsTableCol* ptr_energy    = table["ENERGY"];
-        const GFitsTableCol* ptr_position  = table["POSITION"];
-        const GFitsTableCol* ptr_sigma     = table["WIDTH"];
-        const GFitsTableCol* ptr_amplitude = table["AMPLITUDE"];
-        const GFitsTableCol* ptr_emin      = table["EMIN"];
-        const GFitsTableCol* ptr_ewidth    = table["EWIDTH"];
-        const GFitsTableCol* ptr_emax      = table["EMAX"];
+        const GFitsTableCol* ptr_position  = table["POSITION"];  // PD1(1)
+        const GFitsTableCol* ptr_sigma     = table["WIDTH"];     // PD1(2)
+        const GFitsTableCol* ptr_amplitude = table["AMPLITUDE"]; // PD1(3)
+        const GFitsTableCol* ptr_emin      = table["EMIN"];      // PD1(4)
+        const GFitsTableCol* ptr_ewidth    = table["EWIDTH"];    // PD1(5)
+        const GFitsTableCol* ptr_emax      = table["EMAX"];      // PD1(6)
 
         // Copy data from table into vectors
         for (int i = 0; i < num; ++i) {
@@ -575,7 +599,9 @@ void GCOMD1Response::update_cache(const double& etrue) const
             m_emax      = m_energies.interpolate(etrue, m_emaxs);
 
             // Re-compute Gaussian amplitude to assure normalization
+            #if defined(G_RENORMALIZE)
             m_amplitude = 1.0 / (m_sigma * gammalib::sqrt_twopi);
+            #endif
 
         }
 

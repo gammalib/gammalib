@@ -45,7 +45,8 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-//#define G_RESPONSE_KERNEL_LIMITS
+//#define G_COMPASS_LOCPSR
+#define G_RESPONSE_KERNEL_LIMITS
 //#define G_APPLY_PSD_CORRECTION_IN_RESPONSE_KERNEL
 #define G_COMPUTE_IAQ_BIN_NO_WARNINGS
 #define G_LOCATION_SMEARING_NO_WARNINGS
@@ -794,7 +795,18 @@ void GCOMIaq::compton_kinematics(const double& energy)
  * Since RESPSC.F only defines the threshold while RESINT.F does the real
  * job, both functions were merged.
  *
- * @todo Study impact of integration precision.
+ * Using a continuum response for 3-10 MeV the following range for the number
+ * of integration kernel calls and integration iterations were determined:
+ *
+ *        eps = 1.0e-4    calls = 17-8139      iter = 5-14
+ *        eps = 1.0e-5    calls = 17-65537     iter = 5-17
+ *        eps = 1.0e-6    calls = 17-524289    iter = 5-20
+ *        eps = 1.0e-7    calls = 17-524289    iter = 5-21
+ *        eps = 1.0e-8    calls = 17-524289    iter = 5-21
+ *
+ * Graphically there was no difference between the results for any of the
+ * values, so in order to have safety margin, a value of 1.0e-6 was selected.
+ * Note that RESINT.F implemented a trapezoid rule with 100 steps.
  ***************************************************************************/
 double GCOMIaq::compute_iaq_bin(const double& etrue1,
                                 const double& etrue2,
@@ -836,7 +848,7 @@ double GCOMIaq::compute_iaq_bin(const double& etrue1,
         GIntegral integral(&integrand);
 
         // Set precision
-        integral.eps(1.0e-4);
+        integral.eps(1.0e-6);
 
         // No warnings
         #if defined(G_COMPUTE_IAQ_BIN_NO_WARNINGS)
@@ -1063,7 +1075,7 @@ void GCOMIaq::weight_iaq(const double& energy)
     double ad1trans = m_ict.trans_D1(energy);
 
     // Compute the transmission of V1 veto dome
-    //double v1trans = m_ict.trans_V1(energy);
+    double v1trans = m_ict.trans_V1(energy);
 
     // Compute the probability that a photon was not self vetoed assuming
     // a source on axis
@@ -1073,8 +1085,7 @@ void GCOMIaq::weight_iaq(const double& energy)
     double mlhit = m_ict.prob_no_multihit(energy);
 
     // Compute the overall (shape independent) transmission coefficients
-    //double oalltr = ad1trans * v1trans * d1prob * cfract * mlhit * sveto;
-    double oalltr = ad1trans * d1prob * cfract * mlhit * sveto;
+    double oalltr = ad1trans * v1trans * d1prob * cfract * mlhit * sveto;
 
     // Debug
     #if defined(G_DEBUG_WEIGHT_IAQ)
@@ -1104,7 +1115,7 @@ void GCOMIaq::weight_iaq(const double& energy)
         double ad2trans = m_ict.trans_D2(energy, phigeo);
 
         // Compute the transmission of V2+V3 veto domes
-        //double v23trans = m_ict.trans_V23(energy, phigeo);
+        double v23trans = m_ict.trans_V23(energy, phigeo);
 
         // Compute the D2 interaction coefficient
         double d2prob = m_ict.prob_D2inter(energy, phigeo);
@@ -1121,8 +1132,7 @@ void GCOMIaq::weight_iaq(const double& energy)
         #endif
 
         // Compute the overall phigeo dependent correction
-        //double oallpg = ad2trans * v23trans * d2prob * mscatt * psdtrn;
-        double oallpg = ad2trans * d2prob * mscatt * psdtrn;
+        double oallpg = ad2trans * v23trans * d2prob * mscatt * psdtrn;
 
         // Compute the overall correction
         double weight = oalltr * oallpg;
@@ -1151,6 +1161,210 @@ void GCOMIaq::weight_iaq(const double& energy)
 }
 
 
+#if defined(G_COMPASS_LOCPSR)
+/***********************************************************************//**
+ * @brief Perform location smearing
+ *
+ * @param[in] zenith Zenith angle of source (deg).
+ *
+ * The code implementation is a reimplementation of the COMPASS RESPSIT2
+ * function LOCSPR.F (release 1.0, 05-JAN-93).
+ ***************************************************************************/
+void GCOMIaq::location_smearing(const double& zenith)
+{
+    // Set constants
+    const double ZDIST  = 158.0;
+    const double SIGHD1 = 2.30;
+    const double SIGHD2 = 1.96;
+    const double SIGVD1 = 2.45;
+    const double SIGVD2 = 2.17;
+    const double CONCRI = 5.0;
+    const int    NFINE  = 10;
+    const int    NFINEH = NFINE/2;
+
+    // Get IAQ dimensions
+    int n_phigeo = m_iaq.naxes(0);
+    int n_phibar = m_iaq.naxes(1);
+
+    // Initialise arrays
+    std::vector<double> phigeo(n_phigeo, 0.0);
+    std::vector<double> siggeo(n_phigeo, 0.0);
+    std::vector<double> cnorms(n_phigeo, 0.0);
+
+    // Initialise variables
+    double A1     = std::sin(zenith * gammalib::deg2rad);
+    double A1SQ   = A1*A1;
+    double A2     = std::cos(zenith * gammalib::deg2rad);
+    double A2SQ   = A2*A2;
+    double ZDIST2 = ZDIST * ZDIST;
+    double SIGHT2 = SIGHD1*SIGHD1 + SIGHD2*SIGHD2;
+    double SIGVT2 = SIGVD1*SIGVD1 + SIGVD2*SIGVD2;
+    double ROOT2  = std::sqrt(2.0);
+    double RT2PI  = std::sqrt(2.0 * gammalib::pi);
+    double DINTPO = m_phigeo_bin_size/double(NFINE);
+
+    // Compute arrays
+    for (int i_phigeo = 0; i_phigeo < n_phigeo; ++i_phigeo) {
+
+        // Compute Phigeo in degrees
+        phigeo[i_phigeo] = 0.0 + i_phigeo * m_phigeo_bin_size;
+
+        // Compute sigma(Phigeo) in degrees
+        double CPHIG  = std::cos(phigeo[i_phigeo] * gammalib::deg2rad);
+        double SPHIG  = std::sin(phigeo[i_phigeo] * gammalib::deg2rad);
+        double SPHIG2 = SPHIG*SPHIG;
+        double CPHIG2 = CPHIG*CPHIG;
+        double SIGXY2 = A2SQ * CPHIG2 * (4.0 * A1SQ * SPHIG2 + CPHIG2 - A1SQ) +
+                        0.5 * A1SQ * (A2SQ*CPHIG2 +A1SQ*SPHIG2*(1.-0.75*CPHIG2));
+        SIGXY2        = SIGXY2*SIGHT2/ZDIST2;
+        double SIGZ2  = A2SQ*A2SQ*SPHIG2*CPHIG2 + A2SQ*A1SQ*(0.5-3.*CPHIG2*SPHIG2) +
+                        3.*A1SQ*A1SQ*SPHIG2*CPHIG2/8.;
+        SIGZ2         = SIGZ2*SIGVT2/ZDIST2;
+
+        // Store sigma(Phigeo)
+        siggeo[i_phigeo] = std::sqrt(SIGXY2+SIGZ2) * gammalib::rad2deg;
+
+        // Compute normalisation of convolution
+        double X0        = double(phigeo[i_phigeo] / (ROOT2*siggeo[i_phigeo]));
+        cnorms[i_phigeo] = RT2PI*siggeo[i_phigeo]*(1.000 + gammalib::erf(X0))/2.0;
+        cnorms[i_phigeo] = 1./cnorms[i_phigeo];
+
+    } // endfor: looped over Phigeo
+
+    // Loop over phibar
+    for (int iphib = 0; iphib < n_phibar; ++iphib) {
+
+        // Copy phigeo vector
+        std::vector<double> values;
+        #if defined(G_DEBUG_LOCATION_SMEARING)
+        double              sum_before = 0.0;
+        #endif
+        for (int i_phigeo = 0; i_phigeo < n_phigeo; ++i_phigeo) {
+            values.push_back(m_iaq(i_phigeo, iphib));
+            #if defined(G_DEBUG_LOCATION_SMEARING)
+            sum_before += m_iaq(i_phigeo, iphib);
+            #endif
+        }
+
+        // Loop over Phigeo
+        for (int ibase = 0; ibase < n_phigeo; ++ibase) {
+
+            // Get Phigeo value
+            double PHBASE = phigeo[ibase];
+
+            // Initialise sum
+            double SUMBAS = 0.0;
+
+            // Loop over convolution
+            for (int iconv = 0; iconv < n_phigeo; ++iconv) {
+
+                // Compute convolution only if we are within 5 sigma of
+                // the smearing kernel
+                double DELTA = std::abs(PHBASE-phigeo[iconv]);
+                if (DELTA < CONCRI * siggeo[iconv]) {
+
+                    // Compute gradients for interpolation
+                    double PHICEN = phigeo[iconv];
+                    double VALMED = values[iconv];
+                    double SIGMED = siggeo[iconv];
+                    double CNOMED = cnorms[iconv];
+                    double DERPSL = 0.0;
+                    double DERSIL = 0.0;
+                    double DERCNL = 0.0;
+                    double DERPSU = 0.0;
+                    double DERSIU = 0.0;
+                    double DERCNU = 0.0;
+                    if (iconv > 0) {
+                        double VALLOW = values[iconv-1];
+                        double SIGLOW = siggeo[iconv-1];
+                        double CNOLOW = cnorms[iconv-1];
+                        DERPSL = (VALMED-VALLOW)/m_phigeo_bin_size;
+                        DERSIL = (SIGMED-SIGLOW)/m_phigeo_bin_size;
+                        DERCNL = (CNOMED-CNOLOW)/m_phigeo_bin_size;
+                    }
+                    if (iconv < (n_phigeo-1)) {
+                        double VALUPP = values[iconv+1];
+                        double SIGUPP = siggeo[iconv+1];
+                        double CNOUPP = cnorms[iconv+1];
+                        DERPSU = (VALUPP-VALMED)/m_phigeo_bin_size;
+                        DERSIU = (SIGUPP-SIGMED)/m_phigeo_bin_size;
+                        DERCNU = (CNOUPP-CNOMED)/m_phigeo_bin_size;
+                    }
+                    if (iconv == 0) {
+                        DERPSL = DERPSU;
+                        DERSIL = DERSIU;
+                        DERCNL = DERCNU;
+                    }
+                    if (iconv == (n_phigeo-1)) {
+                        DERPSU = DERPSL;
+                        DERSIU = DERSIL;
+                        DERCNU = DERCNL;
+                    }
+
+                    // Do convolution
+                    for (int ifine = 1; ifine <= NFINE; ++ifine) {
+
+                        // Declare results
+                        double SIGMAF;
+                        double VALUEF;
+                        double CNORMF;
+
+                        // Calculate the fine grid phigeo value
+                        double PHIFIN = PHICEN + (ifine-NFINEH-0.5)*DINTPO;
+                        double DELTAF = (ifine-NFINEH-0.5)*DINTPO;
+                        if (ifine <= NFINEH) {
+                            SIGMAF = SIGMED + DERSIL*DELTAF;
+                            VALUEF = VALMED + DERPSL*DELTAF;
+                            CNORMF = CNOMED + DERCNL*DELTAF;
+                        }
+                        else {
+                            SIGMAF = SIGMED + DERSIU*DELTAF;
+                            VALUEF = VALMED + DERPSU*DELTAF;
+                            CNORMF = CNOMED + DERCNU*DELTAF;
+                        }
+
+                        // Calculate the convolution contribution at PHBASE by
+                        // PHIFIN DINTPO  is the "fine" phigeo increment in
+                        // degrees, by which end result is normalized (because
+                        // CNORMS is normalisation factor in 1/degree)
+                        double arg   = (PHIFIN-PHBASE)/SIGMAF;
+                        double VALUE = VALUEF * CNORMF * std::exp(-0.5*arg*arg);
+                        SUMBAS       = SUMBAS+VALUE;
+
+                    } // endfor: convolution loop
+
+                } // endif: within 5 sigma
+
+            } // endfor: end over convolution
+
+            // Set value
+            m_iaq(ibase, iphib) = SUMBAS * DINTPO;
+
+        } // endfor: looped over Phigeo pixels
+
+        // Restore phigeo vector
+        #if defined(G_DEBUG_LOCATION_SMEARING)
+        double sum_after = 0.0;
+        for (int i_phigeo = 0; i_phigeo < n_phigeo; ++i_phigeo) {
+            sum_after += convolved_values[i_phigeo];
+        }
+
+        // Debug
+        std::cout << "phibar=" << (double(i_phibar) + 0.5) * m_phibar_bin_size;
+        std::cout << " before=" << sum_before;
+        std::cout << " after=" << sum_after;
+        if (sum_before > 0.0) {
+            std::cout << " (" << sum_after/sum_before << ")";
+        }
+        std::cout << std::endl;
+        #endif
+
+    } // endfor: looped over phibar
+
+    // Return
+    return;
+}
+#else
 /***********************************************************************//**
  * @brief Perform location smearing
  *
@@ -1211,8 +1425,8 @@ void GCOMIaq::location_smearing(const double& zenith)
             #endif
 
             // Get integration boundaries
-            double phigeo_min = phigeos[i_phigeo] - 3.0 * sigmas[i_phigeo];
-            double phigeo_max = phigeos[i_phigeo] + 3.0 * sigmas[i_phigeo];
+            double phigeo_min = phigeos[i_phigeo] - 5.0 * sigmas[i_phigeo];
+            double phigeo_max = phigeos[i_phigeo] + 5.0 * sigmas[i_phigeo];
 
             // Perform integration
             double value = integral.romberg(phigeo_min, phigeo_max);
@@ -1249,6 +1463,7 @@ void GCOMIaq::location_smearing(const double& zenith)
     // Return
     return;
 }
+#endif
 
 
 /***********************************************************************//**
@@ -1478,10 +1693,10 @@ double GCOMIaq::response_kernel::eval(const double& energy1)
 
 
 /***********************************************************************//**
- * @brief Computes product of D1 and D2 responses at energy E1 and phibar
+ * @brief Convolves response with Gaussian kernel
  *
  * @param[in] phigeo Geometrical scatter angle.
- * @return Bla ...
+ * @return Convolved response value.
  *
  ***************************************************************************/
 double GCOMIaq::smearing_kernel::eval(const double& phigeo)

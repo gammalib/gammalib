@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GCOMInstChars.i - COMPTEL Instrument Characteristics class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Juergen Knoedlseder                              *
+ *  copyright (C) 2017-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -50,14 +50,14 @@ public:
     void           caldb(const GCaldb& caldb);
     const GCaldb&  caldb(void) const;
     void           load(const std::string& ictname);
-    double         prob_D1inter(const double& energy) const;
-    double         prob_D2inter(const double& energy, const double& phigeo) const;
-    double         prob_no_multihit(const double& energy) const;
     double         trans_D1(const double& energy) const;
     double         trans_V1(const double& energy) const;
+    double         prob_D1inter(const double& energy) const;
+    double         prob_no_multihit(const double& energy) const;
+    double         prob_no_selfveto(const double& energy, const double& zenith) const;
     double         trans_D2(const double& energy, const double& phigeo) const;
     double         trans_V23(const double& energy, const double& phigeo) const;
-    double         prob_no_selfveto(const double& energy, const double& zenith) const;
+    double         prob_D2inter(const double& energy, const double& phigeo) const;
     double         multi_scatter(const double& energy, const double& phigeo) const;
     double         psd_correction(const double& energy, const double& phigeo) const;
 };

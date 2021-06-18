@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCOMD2Response.cpp - COMPTEL D2 module response class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -41,7 +41,8 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-#define G_UPDATE_RESPONSE_VECTOR_NO_WARNINGS
+#define G_UPDATE_RESPONSE_VECTOR_NO_WARNINGS //!< Supress integration warnings
+//#define G_NORMALISE_RESPONSE_VECTOR           //!< Normalise response vector
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_DEBUG_UPDATE_RESPONSE_VECTOR
@@ -92,7 +93,7 @@ GCOMD2Response::GCOMD2Response(const GCOMD2Response& rsp)
  * @brief Response constructor
  *
  * @param[in] caldb Calibration database.
- * @param[in] sdbname SDA response name.
+ * @param[in] sdbname SDB response name.
  *
  * Create COMPTEL D2 module response by loading an SDB file from a
  * calibration database.
@@ -168,7 +169,16 @@ GCOMD2Response& GCOMD2Response::operator=(const GCOMD2Response& rsp)
  * @param[in] ereco Reconstructed energy (MeV).
  * @return COMPTEL D2 module response.
  *
- * @todo Add Compton components to response
+ * Computes the D2 response for reconstructed energy @p ereco in case that
+ * the true energy was @p etrue. A zero response is returned if the
+ * reconstucted energy is outside the validity limit, defined by
+ *
+ * \f[
+ *    [{\tt m\_emin} - 0.75 {\tt m\_ewidth}, {\tt m\_emax}]
+ * \f]
+ *
+ * The code implementation is based on the COMPASS RESD1 function
+ * RESRS209.RESD2.F (release 1.0, 14-OCT-91).
  ***************************************************************************/
 double GCOMD2Response::operator()(const double& etrue, const double& ereco) const
 {
@@ -178,25 +188,38 @@ double GCOMD2Response::operator()(const double& etrue, const double& ereco) cons
     // Continue only if a response was loaded
     if (!m_energies.is_empty()) {
 
-        // Update response vector
-        update_response_vector(etrue);
+        // Update response parameters
+        update_cache(etrue);
 
-        // Get response value from response vector
-        response = m_rsp_energies.interpolate(ereco, m_rsp_values);
-        if (response < 0.0) {
-            response = 0.0;
-        }
+        // Compute response only if reconstructed energy is within validity
+        // limits
+        if ((ereco >= (m_emin - 0.75 * m_ewidth)) && (ereco <= m_emax)) {
 
-        // Apply threshold. We use a width of 0.1 MeV for the high-energy
-        // threshold width to assure a smooth transition to zero.
-        if (ereco < m_emin) {
-            double arg  = (m_emin-ereco) / m_ewidth;
-            response   *= std::exp(-0.5 * arg * arg);
-        }
-        else if (ereco > m_emax) {
-            double arg  = (m_emax-ereco) / 0.1;
-            response   *= std::exp(-0.5 * arg * arg);
-        }
+            // Update response vector
+            update_response_vector(etrue);
+
+            // Get response value from response vector
+            response = m_rsp_energies.interpolate(ereco, m_rsp_values);
+            if (response < 0.0) {
+                response = 0.0;
+            }
+
+            // Apply Gaussian shaped threshold according to COMPASS function
+            // RESD22. Note that thrinf and thrsig are computed in INITIL.F
+            double thrinf = m_emin + 0.5 * m_ewidth;
+            double thrsig = m_ewidth/(2.0 * std::sqrt(2.0 * gammalib::ln2));
+            if (ereco < thrinf) {
+                double fac = (ereco - thrinf)/thrsig;
+                fac *= fac;
+                if (fac > 50.0) {
+                    response = 0.0;
+                }
+                else {
+                    response *= std::exp(-0.5 * fac);
+                }
+            }
+
+        } // endif: reconstructed energy within validity limits
 
     } // endif: response was loaded
 
@@ -651,6 +674,11 @@ void GCOMD2Response::update_cache(const double& etrue) const
             // Derive Compton edge
             m_compton_edge = m_position / (1.0 + 0.5 * gammalib::mec2 / m_position);
 
+            // Weight Gaussian amplitudes to assure proper normalization
+            m_amplitude *= gammalib::inv_sqrt2pi * m_wgt_photo;
+            m_escape1   *= gammalib::inv_sqrt2pi * m_wgt_escape1;
+            m_escape2   *= gammalib::inv_sqrt2pi * m_wgt_escape2;
+
         } // endif: true energy is in valid range
 
     } // endif: true energy has changed
@@ -669,13 +697,12 @@ void GCOMD2Response::update_cache(const double& etrue) const
  * function of energy. The vector is computed using
  *
  * \f[
- *    R_{\rm D2}(E|E_0) = n \times \left[
+ *    R_{\rm D2}(E|E_0) =
  *    B_1 \exp \left( -\frac{1}{2} \frac{(E_0-E)^2}{\sigma^2(E_0)} \right) +
  *    B_2 \exp \left( -\frac{1}{2} \frac{(E_0-m_e c^2-E)^2}{\sigma^2(E_0-m_e c^2)} \right) +
  *    B_3 \exp \left( -\frac{1}{2} \frac{(E_0-2m_e c^2-E)^2}{\sigma^2(E_0-2m_e c^2)} \right) +
  *    B_4 \int_{E'} KN_{\rm mod}(E'|E,E_0) dE' +
  *    B_5 \int_{E'} B_{\rm c}(E'|E,E_0) dE'
- *    \right]
  * \f]
  *
  * where
@@ -693,9 +720,15 @@ void GCOMD2Response::update_cache(const double& etrue) const
  * \f]
  *
  * The method assumes that there is a valid D2 module response.
+ *
+ * The code implementation is based on the COMPASS RESRS209 function INITIL.F
+ * (release 1.0, 14-Oct-91).
  ***************************************************************************/
 void GCOMD2Response::update_response_vector(const double& etrue) const
 {
+    // Set constants
+    const double prcs = 1.0e-15;
+
     // Update only if the true energy has changed
     if (etrue != m_rsp_etrue) {
 
@@ -705,10 +738,10 @@ void GCOMD2Response::update_response_vector(const double& etrue) const
         // Update cache to determine the spectral parameters at the true
         // energy
         update_cache(etrue);
-        
+
         // Continue only if position is positive
         if (m_position > 0.0) {
-        
+
             // Clear response vectors (this is very very important, otherwise
             // some old elements reside and we just append to them, and things
             // get out of order!!!)
@@ -726,6 +759,9 @@ void GCOMD2Response::update_response_vector(const double& etrue) const
 
             // Initialise response vector normalisation
             double norm = 0.0;
+
+            // Get start bin for convolution of Compton background
+            int istart = int((etrue - 5.0 * m_sigma) / ebin);
 
             // Fill response vector
             for (int i = 0; i < nbin; ++i) {
@@ -751,7 +787,7 @@ void GCOMD2Response::update_response_vector(const double& etrue) const
                 // Add first escape peak if amplitude is positive and
                 // reconstructed energy is within 5 sigma of the Gaussian
                 // position
-                if (m_escape1 > 0.0) {
+                if (m_pos_escape1 > 0.0 && m_escape1 > 0.0) {
                     double arg  = (m_pos_escape1-ereco) * m_wgt_escape1;
                     if (std::abs(arg) < 5.0) {
                         value += m_escape1 * std::exp(-0.5 * arg * arg);
@@ -761,14 +797,14 @@ void GCOMD2Response::update_response_vector(const double& etrue) const
                 // Add second escape peak if amplitude is positive and
                 // reconstructed energy is within 5 sigma of the Gaussian
                 // position
-                if (m_escape2 > 0.0) {
+                if (m_pos_escape2 > 0.0 && m_escape2 > 0.0) {
                     double arg  = (m_pos_escape2-ereco) * m_wgt_escape2;
                     if (std::abs(arg) < 5.0) {
                         value += m_escape2 * std::exp(-0.5 * arg * arg);
                     }
                 }
 
-                // Compute sigma for continua. Since this may not work
+                // Compute sigma for continua
                 double sigma = 0.0;
                 if ((m_tail > 0.0) || (m_background > 0.0)) {
                     double e = (ereco > m_emin) ? ereco : m_emin;
@@ -778,48 +814,96 @@ void GCOMD2Response::update_response_vector(const double& etrue) const
                 // Add Compton tail if amplitude is positive
                 if (m_tail > 0.0) {
 
-                    // Setup integration kernel for Compton tail
-                    kn_gauss_kernel integrand(ereco, m_position, m_compton_edge, sigma);
-
-                    // Setup integral
-                    GIntegral integral(&integrand);
-
-                    // Set precision
-                    integral.eps(1.0e-5);
-
-                    // No warnings
-                    #if defined(G_UPDATE_RESPONSE_VECTOR_NO_WARNINGS)
-                    integral.silent(true);
-                    #endif
-
-                    // Perform integration over Gaussian width
+                    // Compute convolution limits for energy bin
                     double emin = ereco - 3.0 * sigma;
                     double emax = ereco + 3.0 * sigma;
-                    value += m_tail * integral.romberg(emin, emax);
+
+                    // Assure that maximum convolution energy is not above the
+                    // Compton edge energy and that minimum convolution energy
+                    // is below precision
+                    if (emax > m_compton_edge) {
+                        emax = m_compton_edge;
+                    }
+                    if (emin < prcs) {
+                        emin = prcs;
+                    }
+
+                    // Continue only if the minimum convolution energy is
+                    // below the Compton edge energy
+                    if (emin <= m_compton_edge - prcs) {
+
+                        // Setup integration kernel for Compton tail
+                        kn_gauss_kernel integrand(ereco, m_position, m_compton_edge, sigma);
+
+                        // Setup integral
+                        GIntegral integral(&integrand);
+
+                        // Set precision
+                        integral.eps(1.0e-5);
+
+                        // No warnings
+                        #if defined(G_UPDATE_RESPONSE_VECTOR_NO_WARNINGS)
+                        integral.silent(true);
+                        #endif
+
+                        // Perform integration over Gaussian width
+                        value += m_tail * integral.romberg(emin, emax);
+
+                    } // endif: minimum energy below Compton edge
 
                 } // endif: added Compton tail
 
                 // Add Compton background if amplitude is positive
                 if (m_background > 0.0) {
 
-                    // Setup integration kernel for Compton background
-                    bkg_gauss_kernel integrand(ereco, m_position, sigma);
+                    // If bin is before part of convolution with photo
+                    // peak then set contribution to the background level
+                    if (i < istart) {
+                        value += m_background;
+                    }
 
-                    // Setup integral
-                    GIntegral integral(&integrand);
+                    // ... otherwise convolve Compton background with
+                    // photopeak
+                    else {
 
-                    // Set precision
-                    integral.eps(1.0e-5);
+                        // Compute convolution limits
+                        double emin = ereco - 3.0 * sigma;
+                        double emax = ereco + 3.0 * sigma;
 
-                    // No warnings
-                    #if defined(G_UPDATE_RESPONSE_VECTOR_NO_WARNINGS)
-                    integral.silent(true);
-                    #endif
+                        // Assure that maximum convolution energy is not above
+                        // the true energy and that minimum convolution energy
+                        // is below precision
+                        if (emax > etrue) {
+                            emax = etrue;
+                        }
+                        if (emin < prcs) {
+                            emin = prcs;
+                        }
 
-                    // Perform integration over Gaussian width
-                    double emin = ereco - 3.0 * sigma;
-                    double emax = ereco + 3.0 * sigma;
-                    value += m_background * integral.romberg(emin, emax);
+                        // Continue only if the minimum convolution energy is
+                        // below the photo peak
+                        if (emin <= etrue-prcs) {
+
+                            // Setup integration kernel for Compton background
+                            bkg_gauss_kernel integrand(ereco, m_position, sigma);
+
+                            // Setup integral
+                            GIntegral integral(&integrand);
+
+                            // Set precision
+                            integral.eps(1.0e-5);
+
+                            // No warnings
+                            #if defined(G_UPDATE_RESPONSE_VECTOR_NO_WARNINGS)
+                            integral.silent(true);
+                            #endif
+
+                            // Perform integration over Gaussian width
+                            value += m_background * integral.romberg(emin, emax);
+
+                        } // endif: maximum energy below photo peak
+
+                    } // endelse: energy bin significantly before photo peak
 
                 } // endif: added Compton background
 
@@ -832,12 +916,14 @@ void GCOMD2Response::update_response_vector(const double& etrue) const
             } // endfor: looped over response vector bins
 
             // Normalise response vector
+            #if defined(G_NORMALISE_RESPONSE_VECTOR)
             if (norm > 0.0) {
                 norm = 1.0 / (norm * ebin);
                 for (int i = 0; i < nbin; ++i) {
                     m_rsp_values[i] *= norm;
                 }
             }
+            #endif
 
             // Debug
             #if defined(G_DEBUG_UPDATE_RESPONSE_VECTOR)
@@ -858,85 +944,106 @@ void GCOMD2Response::update_response_vector(const double& etrue) const
 
 /***********************************************************************//**
  * @brief Computes modified Klein-Nishina cross section multiplied with
- *        Gaussian
+ *        Gaussian kernel
  *
  * @param[in] e Energy (MeV).
  * @return Modified Klein-Nishina cross section multiplied with Gaussian
+ *         kernel
  *
  * Computes the modified Klein-Nishina cross section multiplied with a
- * Gaussian using
+ * Gaussian kernel using
  *
  * \f[
- *    KN_{\rm mod}(E|E',E_0) = \sigma_{\rm KN}(E|E_0) \times (1-C(E|E_0))
- *                             \times \exp \left( -\frac{1}{2}
- *                                  \frac{(E-E')^2}{\sigma^2(E')}
- *                                  \right)
+ *    KN_{\rm mod}(E|E_2,\hat{E_2}) =
+ *    \sigma_{\rm KN}(E|\hat{E_2}) \times f(E|\hat{E_2}) \times
+ *    \frac{1}{\sigma^2(E_2) \sqrt{2\pi}}
+ *    \exp \left( -\frac{1}{2} \frac{(E-E_2)^2}{\sigma^2(E_2)} \right)
  * \f]
  *
  * where
  *
  * \f[
- *    \sigma_{\rm KN}(E|E_0) = \theta(E_c-E)
- *                             \left[
- *                             \left( \frac{E/E_0}{1-E/E_0}
- *                                    \frac{m_e c^2}{E_0} \right)^2 -
- *                             \frac{E}{E_0} + \frac{1}{1-E/E_0} \right]
+ *    \sigma_{\rm KN}(E|\hat{E_2}) =
+ *    \left( \frac{E/\hat{E_2}}{1-E/\hat{E_2}}
+ *           \frac{m_e c^2}{\hat{E_2}} \right)^2 -
+ *    \frac{E}{\hat{E_2}} + \frac{1}{1-E/\hat{E_2}}
  * \f]
  *
  * is the Klein-Nishina cross section, and
  *
  * \f[
- *    C(E|E_0) = \theta(E-12.14) \times (1 - e^{-\mu(E|E_0) \, l(E_0)})
+ *    f(E|\hat{E_2}) = \left \{
+ *    \begin{array}{l l}
+ *    \displaystyle
+ *    \exp \left( -\mu(E|\hat{E_2}) \, l(\hat{E_2}) \right), &
+ *    \mbox{if $\hat{E_2} > 12.14$ MeV} \\
+ *    \displaystyle
+ *    0, & \mbox{otherwise} \\
+ *    \end{array}
+ *    \right .
  * \f]
  *
- * is a modification, where \f$\theta(x)\f$ is a step function that is 1 for
- * positive \f$x\f$ and 0 for non-positive \f$x\f$,
+ * is the probability that a photon, which has been Compton scattered, has
+ * no second interaction before escaping (aborption, compton scattering, pair
+ * creation), where
  *
  * \f[
- *    \mu(E|E_0) = 0.72 \, e^{-1.28 (E_0 - E)^{0.35}} +
- *                 0.01 \, (E_0 - E) +
- *                 0.014 \, (E_0 - E)^{-2.5}
+ *    \mu(E|\hat{E_2}) = 0.72 \, e^{-1.28 (\hat{E_2} - E)^{0.35}} +
+ *                       0.01 \, (\hat{E_2} - E) +
+ *                       0.014 \, (\hat{E_2} - E)^{-2.5}
  * \f]
  *
- * is the total linear attenuation coefficient in NaI for all processes
- * and
+ * is the total linear attenuation coefficient in NaI for all processes,
+ * which is an empirical function which describes the values given by
+ * Harshaw, and
  *
  * \f[
- *    l(E_0) = 2.9 \log( E_0 - 11.14)
+ *    l(\hat{E_2}) = 2.9 \log( \hat{E_2} - 11.14)
  * \f]
  *
- * is the pathlength in the D2 module (energies are in MeV). \f$E_0\f$ is
- * the position of the photo peak,
- *
- * \f[
- *    E_c = \frac{E_0}{1 + \frac{m_e c^2}{2 E_0}}
- * \f]
- *
- * is the Compton edge, \f$E'\f$ is the reconstructed energy,
- * \f$\sigma(E')\f$ is the standard deviation at the reconstructed energy,
+ * is an empirical path length in the D2 module (energies are in MeV).
+ * \f$\hat{E_2}\f$ is the position of the photo peak,
+ * \f$E_2\f$ is the energy deposit measured in D2,
+ * \f$\sigma(E_2)\f$ is the standard deviation at the measured energy,
  * and \f$E\f$ is the energy over which the convolution is performed.
+ *
+ * The code implementation is based on the COMPASS RESRS209 function KLNSUB.F
+ * (release 1.0, 14-Oct-91) and CHANCT.F (release 2.0, 26-JAN-93).
  ***************************************************************************/
 double GCOMD2Response::kn_gauss_kernel::eval(const double& e)
 {
     // Initialise result
     double value = 0.0;
 
-    // Continue only if the energy is below the Compton edge
-    if (e < m_ec) {
+    // Compute terms
+    double a    = e/m_e0;
+    double term = a/(1.0-a) * gammalib::mec2/m_e0 - 1.0;
 
-        // Compute terms
-        double a    = e/m_e0;
-        double term = a/(1.0-a) * gammalib::mec2/m_e0 - 1.0;
+    // Compute Klein-Nishina cross section
+    value = term * term - a + 1.0/(1.0-a);
 
-        // Compute Klein-Nishina cross section
-        value = term * term - a + 1.0/(1.0-a);
+    // If the incident energy is above 12.14 MeV then multiply-in the
+    // high-energy correction that was introduced by Rob van Dijk
+    if (m_e0 > 12.14) {
 
-        // If the incident energy is above 12.14 MeV then multiply-in the
-        // high-energy correction that was introduced by Rob van Dijk
-        if (m_e0 > 12.14) {
-        
+        // Compute energy difference between photopeak and requested
+        // energy
+        double d  = m_e0 - e;
+
+        // Set chance to 1 and hence value to zero if energy difference
+        // is not positive
+        if (d <= 0.0) {
+            value = 0.0;
+        }
+
+        // ... otherwise compute chance that a photon which has been
+        // Compton scattered has a second interaction before escaping
+        // (absorption, Compton scattering, pair creation). Note that
+        // this chance is not a physical chance, it is like a fudge
+        // factor
+        else {
+
             // Compute linear attenuation coefficient
-            double d  = m_e0 - e;
             double mu = 0.72 * std::exp(-1.28 * std::pow(d,0.35)) +
                         0.01 * d + 0.014 * std::pow(d,-2.5);
 
@@ -946,16 +1053,16 @@ double GCOMD2Response::kn_gauss_kernel::eval(const double& e)
             // Multiply-in correction factor
             value *= std::exp(-mu * l);
 
-        } // endif: Multiplied-in high-energy correction
+        }
 
-        // Compute Gaussian
-        double arg   = (e - m_ereco) * m_wgt;
-        double gauss = std::exp(-0.5*arg*arg);
+    } // endif: Multiplied-in high-energy correction
 
-        // Multiply-in Gaussian
-        value *= gauss;
+    // Compute Gaussian kernel
+    double arg   = (e - m_ereco) * m_wgt;
+    double gauss = std::exp(-0.5*arg*arg) * m_wgt * gammalib::inv_sqrt2pi;
 
-    } // endif: energy was below the Compton edge
+    // Multiply-in Gaussian
+    value *= gauss;
 
     // Return value
     return value;
@@ -966,35 +1073,31 @@ double GCOMD2Response::kn_gauss_kernel::eval(const double& e)
  * @brief Computes Compton background multiplied with Gaussian
  *
  * @param[in] e Energy (MeV).
- * @return Compton background multiplied with Gaussian
+ * @return Gaussian kernel value.
  *
- * Computes the Compton background multiplied with a Gaussian using
+ * Computes a Gaussian kernel value using
  *
  * \f[
- *    B_{\rm c}(E|E',E_0) = \theta(E_0-E)
+ *    B_{\rm c}(E|E',E_0) = \frac{1}{\sigma(E') \sqrt{2\pi}}
  *                          \exp \left( -\frac{1}{2}
  *                               \frac{(E-E')^2}{\sigma^2(E')}
  *                               \right)
  * \f]
  *
- * where \f$\theta(x)\f$ is a step function that is 1 for positive \f$x\f$
- * and 0 for non-positive \f$x\f$, \f$E_0\f$ is the position of the
- * photo peak, \f$E'\f$ is the reconstructed energy, \f$\sigma(E')\f$ is
- * the standard deviation at the reconstructed energy, and \f$E\f$
- * is the energy over which the convolution is performed.
+ * where
+ * \f$E'\f$ is the reconstructed energy,
+ * \f$\sigma(E')\f$ is the standard deviation at the reconstructed energy,
+ * and \f$E\f$ is the energy over which the convolution is performed.
+ *
+ * The code implementation is based on the COMPASS RESRS209 function FUNC2.F
+ * (release 1.0, 14-Oct-91).
  ***************************************************************************/
 double GCOMD2Response::bkg_gauss_kernel::eval(const double& e)
 {
-    // Initialise background
-    double value = (e < m_e0) ? 1.0 : 0.0;
-
     // Compute Gaussian
     double arg   = (e - m_ereco) * m_wgt;
-    double gauss = std::exp(-0.5*arg*arg);
-
-    // Multiply-in Gaussian
-    value *= gauss;
+    double gauss = std::exp(-0.5*arg*arg) * m_wgt * gammalib::inv_sqrt2pi;
 
     // Return value
-    return value;
+    return gauss;
 }
