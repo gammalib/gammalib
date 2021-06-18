@@ -60,7 +60,7 @@ if len(bad_entries) > 0:
 del gammalib.gammalib
 del flags
 del bad_entries
-del entry
+#del entry
 
 # Python test
 def test():
