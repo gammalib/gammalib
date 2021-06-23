@@ -1242,7 +1242,7 @@ void GCOMObservation::compute_drb_phinor(const GCOMDri& drm)
         if (sum_drg > 0.0) {
             double norm = (sum_dre - sum_drm) / sum_drg;
             for (int ipix = 0; ipix < npix; ++ipix) {
-                map_drb(ipix, iphibar) *= norm;
+                map_drb(ipix, iphibar) = map_drg(ipix, iphibar) * norm;
             }
         }
         else {
@@ -1652,7 +1652,7 @@ void GCOMObservation::compute_drb_bgdlixe(const GCOMDri& drm,
         }
     }
 
-    // Phibar normalise DRB (Equation 3.12 in Rob van Dijk's PhD thesis).
+    // Phibar normalise DRG (Equation 3.12 in Rob van Dijk's PhD thesis).
     for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
         double sum_dre = 0.0;
         double sum_drm = 0.0;
@@ -1670,74 +1670,7 @@ void GCOMObservation::compute_drb_bgdlixe(const GCOMDri& drm,
         }
     }
 
-    // Do 3D running average of DRE and Phibar normalised DRG (Equation 3.13
-    // in Rob van Dijk's PhD thesis). The result is a Phibar normalised DRG
-    // that is normalised over the 3D region to the DRE. The 3D region is all
-    // Phibar layers and [-nrunav,+nrunav] Chi/Psi pixels around the pixel of
-    // consideration.
-    if (nrunav >= 1) {
-
-        // Loop over Chi pixels
-        for (int ichi = 0; ichi < nchi; ++ichi) {
-
-            // Compute running average window in Chi
-            int kchi_min = ichi - nrunav;
-            int kchi_max = ichi + nrunav;
-            if (kchi_min < 0) {
-                kchi_min = 0;
-            }
-            if (kchi_max >= nchi) {
-                kchi_max = nchi - 1;
-            }
-
-            // Loop over Psi pixels
-            for (int ipsi = 0; ipsi < npsi; ++ipsi) {
-
-                // Compute running average window in Psi
-                int kpsi_min = ipsi - nrunav;
-                int kpsi_max = ipsi + nrunav;
-                if (kpsi_min < 0) {
-                    kpsi_min = 0;
-                }
-                if (kpsi_max >= npsi) {
-                    kpsi_max = npsi - 1;
-                }
-
-                // Initialise sums
-                double sum_dre = 0.0;
-                double sum_drm = 0.0;
-                double sum_dri = 0.0;
-
-                // Compute running average
-                for (int kchi = kchi_min; kchi <= kchi_max; ++kchi) {
-                    for (int kpsi = kpsi_min; kpsi <= kpsi_max; ++kpsi) {
-                        int kpix = kchi + kpsi * nchi;
-                        for (int kphibar = 0; kphibar < nphibar; ++kphibar) {
-                            if (map_drg(kpix, kphibar) != 0.0) {
-                                sum_dre += map_dre(kpix, kphibar);
-                                sum_drm += map_drm(kpix, kphibar);
-                                sum_dri += map_dri(kpix, kphibar);
-                            }
-                        }
-                    }
-                }
-
-                // Renormalise DRB over all Phibar layers
-                if (sum_dri != 0.0) {
-                    int    ipix = ichi + ipsi * nchi;
-                    double norm = (sum_dre - sum_drm) / sum_dri;
-                    for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
-                        map_dri(ipix, iphibar) *= norm;
-                    }
-                }
-
-            } // endfor: looped over Phi
-
-        } // endfor: looped over Chi
-
-    } // endif: running averaging was requested
-
-    // Renormalise DRB locally to DRE-DRM
+    // Fit Phibar normalised DRG to DRE-DRM
     for (int ichi = 0; ichi < nchi; ++ichi) {
 
         // Compute running average window in Chi
