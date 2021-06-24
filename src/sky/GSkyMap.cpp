@@ -2022,11 +2022,25 @@ void GSkyMap::projection(const GSkyProjection& proj)
  ***************************************************************************/
 bool GSkyMap::contains(const GSkyDir& dir) const
 {
-    // Convert sky direction into sky pixel
-    GSkyPixel pixel = dir2pix(dir);
+    // Initialise containment
+    bool contains = false;
 
-    // Return location flag
-    return (contains(pixel));
+    // Convert sky direction into sky pixel
+    try {
+
+        // Convert sky direction into sky pixel
+        GSkyPixel pixel = dir2pix(dir);
+
+        // Check pixel containment
+        contains = this->contains(pixel);
+
+    }
+    catch (GException::invalid_argument) {
+        contains = false;
+    }
+
+    // Return containment flag
+    return contains;
 }
 
 
