@@ -455,16 +455,24 @@ void GCOMObservation::read(const GXmlElement& xml)
         std::string iaqname = gammalib::xml_get_attr(G_READ, xml, "IAQ", "value");
 
         // Expand file names
-        drename = gammalib::xml_file_expand(xml, drename);
-        drbname = gammalib::xml_file_expand(xml, drbname);
-        drgname = gammalib::xml_file_expand(xml, drgname);
-        drxname = gammalib::xml_file_expand(xml, drxname);
+        drename                      = gammalib::xml_file_expand(xml, drename);
+        drbname                      = gammalib::xml_file_expand(xml, drbname);
+        drgname                      = gammalib::xml_file_expand(xml, drgname);
+        drxname                      = gammalib::xml_file_expand(xml, drxname);
+        std::string iaqname_expanded = gammalib::xml_file_expand(xml, iaqname);
 
         // Load observation
         load(drename, drbname, drgname, drxname);
 
-        // Load IAQ
-        response(GCaldb("cgro", "comptel"), iaqname);
+        // Load IAQ by trying first the expanded name as a FITS file and
+        // otherwise the unexpanded name
+        GFilename filename_expanded(iaqname_expanded);
+        if (filename_expanded.is_fits()) {
+            response(GCaldb("cgro", "comptel"), iaqname_expanded);
+        }
+        else {
+            response(GCaldb("cgro", "comptel"), iaqname);
+        }
 
     } // endelse: binned observation
 
@@ -559,7 +567,7 @@ void GCOMObservation::write(GXmlElement& xml) const
 
         // Set IAQ parameter
         par = gammalib::xml_need_par(G_WRITE, xml, "IAQ");
-        par->attribute("value", m_response.rspname());
+        par->attribute("value", gammalib::xml_file_reduce(xml, m_response.rspname()));
 
     } // endif: observation was binned
 
@@ -1000,34 +1008,40 @@ void GCOMObservation::load_dre(const GFilename& drename)
  *            DRB data space incompatible with DRE data space.
  *
  * Load the background model from the primary image of the specified FITS
- * file.
+ * file. Since a DRB file is optional the method does nothing if the DRB
+ * filename is empty.
  ***************************************************************************/
 void GCOMObservation::load_drb(const GFilename& drbname)
 {
-    // Open FITS file
-    GFits fits(drbname);
+    // Continue only if filename is not empty
+    if (!drbname.is_empty()) {
 
-    // Get image
-    const GFitsImage& image = *fits.image("Primary");
+        // Open FITS file
+        GFits fits(drbname);
 
-    // Read background model
-    m_drb.read(image);
+        // Get image
+        const GFitsImage& image = *fits.image("Primary");
 
-    // Correct WCS projection (HEASARC data format kluge)
-    gammalib::com_wcs_mer2car(const_cast<GSkyMap&>(m_drb.map()));
+        // Read background model
+        m_drb.read(image);
 
-    // Close FITS file
-    fits.close();
+        // Correct WCS projection (HEASARC data format kluge)
+        gammalib::com_wcs_mer2car(const_cast<GSkyMap&>(m_drb.map()));
 
-    // Check map dimensions
-    if (!check_dri(m_drb)) {
-        std::string msg = "DRB data cube \""+drbname+"\" incompatible with "
-                          "DRE data cube \""+m_drename+"\".";
-        throw GException::invalid_value(G_LOAD_DRB, msg);
-    }
+        // Close FITS file
+        fits.close();
 
-    // Store DRB filename
-    m_drbname = drbname;
+        // Check map dimensions
+        if (!check_dri(m_drb)) {
+            std::string msg = "DRB data cube \""+drbname+"\" incompatible with "
+                              "DRE data cube \""+m_drename+"\".";
+            throw GException::invalid_value(G_LOAD_DRB, msg);
+        }
+
+        // Store DRB filename
+        m_drbname = drbname;
+
+    } // endif: DRB filename was empty
 
     // Return
     return;
