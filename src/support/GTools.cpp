@@ -1813,10 +1813,10 @@ void gammalib::xml_check_par(const std::string& origin,
  * @param[in] filename File name.
  * @return Expanded file name.
  *
- * Expands file name provided as XML attribute for loading. If the file name
- * is not empty and has no path it is assumed that the file is located in the
- * same directory as the XML file, and the XML file access path is prepended
- * to the file name.
+ * Expands file name provided as XML attribute for loading. The XML file
+ * access path will be prepended to the file name access path if the file
+ * name has not an absolute path and if the file name access path does not
+ * start with the XML file access path.
  ***************************************************************************/
 GFilename gammalib::xml_file_expand(const GXmlElement& xml,
                                     const std::string& filename)
@@ -1824,11 +1824,39 @@ GFilename gammalib::xml_file_expand(const GXmlElement& xml,
     // Set file name
     GFilename fname(filename);
 
-    // If the file name is not empty and has no path we assume that the file
-    // name is a relative file name with respect to the XML file access path
-    // and we therefore prepend the XML file access path to the file name
-    if (!fname.is_empty() && fname.path().length() == 0) {
-        fname = xml.filename().path() + fname;
+    // If the file name is not empty and is not an absolute path then we
+    // assume that the filename is a relative file name with respect to the
+    // XML file access path and we therefore prepend the XML file access path
+    // to the file name
+    if (!fname.is_empty()) {
+        size_t access_length = fname.path().length();
+        size_t xml_length    = xml.filename().path().length();
+
+        // If filename has no access path and the XML file has an access path
+        // then preprend the XML file access path
+        if (access_length == 0) {
+            if (xml_length > 0) {
+                fname = xml.filename().path() + fname;
+            }
+        }
+
+        // If filename assess path is not absolute then continue ...
+        else if (fname.path()[0] != '/') {
+
+            // If XML file access path is not contained in file name access
+            // path then prepend the XML file access path
+            if (access_length >= xml_length) {
+                if (fname.path().compare(0, xml_length, xml.filename().path()) != 0) {
+                    fname = xml.filename().path() + fname;
+                }
+            }
+
+            // If file name access pass is shorter than XML file access path
+            // then prepend the XML file access path
+            else {
+                fname = xml.filename().path() + fname;
+            }
+        }
     }
 
     // Return file name
@@ -1844,9 +1872,8 @@ GFilename gammalib::xml_file_expand(const GXmlElement& xml,
  * @return Reduced file name.
  *
  * Reduces file name provided for writing as XML attribute. If the file name
- * is not empty and has the same access path as the XML file it is assumed
- * that both files are located in the same directory, and the access path is
- * stripped from the file name.
+ * is not empty and its access path starts has the same access path as the
+ * XML file the XML file access path is stripped from the file name.
  ***************************************************************************/
 GFilename gammalib::xml_file_reduce(const GXmlElement& xml,
                                     const std::string& filename)
@@ -1854,11 +1881,25 @@ GFilename gammalib::xml_file_reduce(const GXmlElement& xml,
     // Set file name
     GFilename fname(filename);
 
-    // If the file name is not empty and has the same access path as the XML
-    // file it is assumed that both files are located in the same directory,
-    // and the access path is stripped from the file name.
-    if (!fname.is_empty() && fname.path() == xml.filename().path()) {
-        fname = fname.file();
+    // If the file name is not empty and the access path starts with the
+    // same characters as the XML file access path then we assume that the
+    // access path has been added and hence we strip it now
+    if (!fname.is_empty()) {
+        size_t access_length = fname.path().length();
+        size_t xml_length    = xml.filename().path().length();
+        if (xml_length > 0) {
+            if (access_length == xml_length) {
+                if (fname.path() == xml.filename().path()) {
+                    fname = fname.file();
+                }
+            }
+            else if (access_length > xml_length) {
+                if (fname.path().compare(0, xml_length, xml.filename().path()) == 0) {
+                    std::string relpath = fname.path().substr(xml_length, access_length-xml_length);
+                    fname               = GFilename(relpath + fname.file());
+                }
+            }
+        }
     }
 
     // Return file name
