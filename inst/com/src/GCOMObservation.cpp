@@ -1589,6 +1589,29 @@ void GCOMObservation::compute_drb_bgdlixa(const GCOMDri& drm,
 
     } // endfor: looped over Phibar
 
+    // Phibar normalise DRB
+    for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
+        double sum_dre = 0.0;
+        double sum_drm = 0.0;
+        double sum_drb = 0.0;
+        for (int ipix = 0; ipix < npix; ++ipix) {
+            sum_dre += map_dre(ipix, iphibar);
+            sum_drm += map_drm(ipix, iphibar);
+            sum_drb += map_drb(ipix, iphibar);
+        }
+        if (sum_drb > 0.0) {
+            double norm = (sum_dre - sum_drm) / sum_drb;
+            for (int ipix = 0; ipix < npix; ++ipix) {
+                map_drb(ipix, iphibar) *= norm;
+            }
+        }
+        else {
+            for (int ipix = 0; ipix < npix; ++ipix) {
+                map_drb(ipix, iphibar) = 0.0;
+            }
+        }
+    }
+
     // Return
     return;
 }
@@ -1769,6 +1792,29 @@ void GCOMObservation::compute_drb_bgdlixe(const GCOMDri& drm,
         } // endfor: looped over Psi pixels
 
     } // endfor: looped over Chi pixels
+
+    // Phibar normalise DRB
+    for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
+        double sum_dre = 0.0;
+        double sum_drm = 0.0;
+        double sum_drb = 0.0;
+        for (int ipix = 0; ipix < npix; ++ipix) {
+            sum_dre += map_dre(ipix, iphibar);
+            sum_drm += map_drm(ipix, iphibar);
+            sum_drb += map_drb(ipix, iphibar);
+        }
+        if (sum_drb > 0.0) {
+            double norm = (sum_dre - sum_drm) / sum_drb;
+            for (int ipix = 0; ipix < npix; ++ipix) {
+                map_drb(ipix, iphibar) *= norm;
+            }
+        }
+        else {
+            for (int ipix = 0; ipix < npix; ++ipix) {
+                map_drb(ipix, iphibar) = 0.0;
+            }
+        }
+    }
 
     // Return
     return;
