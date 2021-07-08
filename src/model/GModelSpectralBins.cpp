@@ -462,6 +462,9 @@ double GModelSpectralBins::eflux(const GEnergy& emin,
 
         } // endfor: looped over all spectral bins
 
+        // Convert from MeV/cm2/s to erg/cm2/s
+        eflux *= gammalib::MeV2erg;
+
     } // endif: integration range was valid
 
     // Return flux
