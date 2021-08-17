@@ -59,6 +59,9 @@ public:
     void                test_radial_ring(void);
     void                test_radial_gauss(void);
     void                test_radial_shell(void);
+    void                test_profile_dmburkert(void);
+    void                test_profile_dmeinasto(void);
+    void                test_profile_dmzhao(void);
     void                test_elliptical_disk(void);
     void                test_elliptical_gauss(void);
     void                test_spatial_composite(void);
@@ -145,6 +148,9 @@ private:
     std::string m_xml_model_radial_ring;
     std::string m_xml_model_radial_gauss;
     std::string m_xml_model_radial_shell;
+    std::string m_xml_model_profile_dmburkert;
+    std::string m_xml_model_profile_dmeinasto;
+    std::string m_xml_model_profile_dmzhao;
     std::string m_xml_model_elliptical_disk;
     std::string m_xml_model_elliptical_gauss;
     std::string m_xml_model_spatial_composite;

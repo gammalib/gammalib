@@ -1,0 +1,21 @@
+<?xml version="1.0" standalone="no"?>
+<source_library title="source library">
+  <source name="Cen A lobes" type="ExtendedSource">
+    <spectrum type="PowerLaw">
+      <parameter scale="1e-07" name="Prefactor"   min="1e-07" max="1000.0"    value="1.73" free="1"/>
+      <parameter scale="1.0"   name="Index"       min="-5.0"  max="+5.0"      value="-2.1" free="1"/>
+      <parameter scale="1.0"   name="PivotEnergy" min="10.0"  max="1000000.0" value="100.0" free="0"/>
+    </spectrum>
+    <spatialModel type="DMEinastoProfile">
+      <parameter name="RA"           scale="1.0" value="83.6331" min="-360"    max="360"   free="1"/>
+      <parameter name="DEC"          scale="1.0" value="22.0145" min="-90"     max="90"    free="1"/>
+      <parameter name="ScaleRadius"  scale="1.0" value="21.5"    min="0.0001"  max="1000"  free="0"/>
+      <parameter name="ScaleDensity" scale="1.0" value="0.2"     min="0.0001"  max="1000"  free="0"/>
+      <parameter name="HaloDistance" scale="1.0" value="7.94"    min="0.0001"  max="1000"  free="0"/>
+      <parameter name="Alpha"        scale="1.0" value="0.17"    min="0.0001"  max="1000"  free="0"/>
+      <parameter name="ThetaMin"     scale="1.0" value="1.0e-6"  min="1.0e-10" max="1000"  free="0"/>
+      <parameter name="ThetaMax"     scale="1.0" value="180.0"   min="0.0001"  max="1000"  free="0"/>
+      <parameter name="CoreRadius"   scale="1.0" value="0.5"     min="0.0001"  max="1000"  free="0"/>
+    </spatialModel>
+  </source>
+</source_library>

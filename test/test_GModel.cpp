@@ -109,6 +109,9 @@ void TestGModel::set(void)
     m_xml_model_radial_ring        = datadir + "/model_radial_ring.xml";
     m_xml_model_radial_gauss       = datadir + "/model_radial_gauss.xml";
     m_xml_model_radial_shell       = datadir + "/model_radial_shell.xml";
+    m_xml_model_profile_dmburkert  = datadir + "/model_profile_dmburkert.xml";
+    m_xml_model_profile_dmeinasto  = datadir + "/model_profile_dmeinasto.xml";
+    m_xml_model_profile_dmzhao     = datadir + "/model_profile_dmzhao.xml";
     m_xml_model_elliptical_disk    = datadir + "/model_elliptical_disk.xml";
     m_xml_model_elliptical_gauss   = datadir + "/model_elliptical_gauss.xml";
     m_xml_model_spatial_composite  = datadir + "/model_spatial_composite.xml";
@@ -154,6 +157,12 @@ void TestGModel::set(void)
            "Test GModelSpatialRadialGauss");
     append(static_cast<pfunction>(&TestGModel::test_radial_shell),
            "Test GModelSpatialRadialShell");
+    append(static_cast<pfunction>(&TestGModel::test_profile_dmburkert),
+           "Test GModelSpatialRadialProfileDMBurkert");
+    append(static_cast<pfunction>(&TestGModel::test_profile_dmeinasto),
+           "Test GModelSpatialRadialProfileDMEinasto");
+    append(static_cast<pfunction>(&TestGModel::test_profile_dmzhao),
+           "Test GModelSpatialRadialProfileDMZhao");
     append(static_cast<pfunction>(&TestGModel::test_elliptical_disk),
            "Test GModelSpatialEllipticalDisk");
     append(static_cast<pfunction>(&TestGModel::test_elliptical_gauss),
@@ -1459,6 +1468,88 @@ void TestGModel::test_radial_shell(void)
         test_value(model3[keyname].error(), 1.9);
         test_value(model3[keyname].gradient(), 0.8);
     }
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GModelSpatialRadialProfileDMBurkert class
+ ***************************************************************************/
+void TestGModel::test_profile_dmburkert(void)
+{
+    // Test void constructor
+    GModelSpatialRadialProfileDMBurkert model1;
+    test_value(model1.type(), "DMBurkertProfile");
+
+    // Test XML constructor
+    GXml         xml(m_xml_model_profile_dmburkert);
+    GXmlElement* element = xml.element(0)->element(0)->element("spatialModel", 0);
+    GModelSpatialRadialProfileDMBurkert model3(*element);
+    test_value(model3.size(),          8);
+    test_value(model3.type(),          "DMBurkertProfile");
+    test_value(model3.ra(),            83.6331);
+    test_value(model3.dec(),           22.0145);
+    test_value(model3.scale_radius(),  21.5);
+    test_value(model3.scale_density(), 0.2);
+    test_value(model3.halo_distance(), 7.94);
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GModelSpatialRadialProfileDMEinasto class
+ ***************************************************************************/
+void TestGModel::test_profile_dmeinasto(void)
+{
+    // Test void constructor
+    GModelSpatialRadialProfileDMEinasto model1;
+    test_value(model1.type(), "DMEinastoProfile");
+
+    // Test XML constructor
+    GXml         xml(m_xml_model_profile_dmeinasto);
+    GXmlElement* element = xml.element(0)->element(0)->element("spatialModel", 0);
+    GModelSpatialRadialProfileDMEinasto model3(*element);
+    test_value(model3.size(),          9);
+    test_value(model3.type(),          "DMEinastoProfile");
+    test_value(model3.ra(),            83.6331);
+    test_value(model3.dec(),           22.0145);
+    test_value(model3.scale_radius(),  21.5);
+    test_value(model3.scale_density(), 0.2);
+    test_value(model3.halo_distance(), 7.94);
+    test_value(model3.alpha(),         0.17);
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GModelSpatialRadialProfileDMZhao class
+ ***************************************************************************/
+void TestGModel::test_profile_dmzhao(void)
+{
+    // Test void constructor
+    GModelSpatialRadialProfileDMZhao model1;
+    test_value(model1.type(), "DMZhaoProfile");
+
+    // Test XML constructor
+    GXml         xml(m_xml_model_profile_dmzhao);
+    GXmlElement* element = xml.element(0)->element(0)->element("spatialModel", 0);
+    GModelSpatialRadialProfileDMZhao model3(*element);
+    test_value(model3.size(),          11);
+    test_value(model3.type(),          "DMZhaoProfile");
+    test_value(model3.ra(),            83.6331);
+    test_value(model3.dec(),           22.0145);
+    test_value(model3.scale_radius(),  21.5);
+    test_value(model3.scale_density(), 0.2);
+    test_value(model3.halo_distance(), 7.94);
+    test_value(model3.alpha(),         1.0);
+    test_value(model3.beta(),          3.0);
+    test_value(model3.gamma(),         1.0);
 
     // Exit test
     return;

@@ -486,6 +486,7 @@ void GModelSpatialRadialProfileDMBurkert::init_members(void)
 
     // Set parameter pointer(s)
     m_pars.push_back(&m_scale_radius);
+    m_pars.push_back(&m_scale_density);
     m_pars.push_back(&m_halo_distance);
     m_pars.push_back(&m_theta_max);
     m_pars.push_back(&m_theta_min);
