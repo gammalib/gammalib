@@ -111,6 +111,13 @@ private:
                                 const GObservation& obs,
                                 GMatrix*            gradients = NULL) const;
 
+    // Support methods
+    GVector irf_extended(const GModelSky&    model,
+                         const GObservation& obs,
+                         const GSkyDir&      model_dir,
+                         const double&       theta_max,
+                         GMatrix*            gradients = NULL) const;
+
     // Private data members
     GCaldb              m_caldb;             //!< Calibration database
     std::string         m_rspname;           //!< Response name
