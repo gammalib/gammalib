@@ -34,7 +34,8 @@ INCLUDES = -I$(top_srcdir)/include \
            -I$(top_srcdir)/inst/com/src
 
 # Define sources for this directory
-sources = src/GCOMTools.cpp \
+sources = src/com_helpers_response_vector.cpp \
+          src/GCOMTools.cpp \
           src/GCOMSupport.cpp \
           src/GCOMSelection.cpp \
           src/GCOMStatus.cpp \
@@ -128,4 +129,5 @@ libcom_la_LDFLAGS =
 EXTRA_DIST = README.md caldb pyext \
              include/GCOMLib.hpp \
              src/GCOMSupport.hpp \
+             src/com_helpers_response_vector.hpp \
              test/test_COM.hpp test/test_COM.py test/caldb test/data

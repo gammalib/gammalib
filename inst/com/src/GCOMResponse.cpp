@@ -34,6 +34,7 @@
 #include "GMath.hpp"
 #include "GVector.hpp"
 #include "GMatrix.hpp"
+#include "GIntegrals.hpp"
 #include "GFits.hpp"
 #include "GCaldb.hpp"
 #include "GEvent.hpp"
@@ -54,6 +55,8 @@
 #include "GCOMEventCube.hpp"
 #include "GCOMEventBin.hpp"
 #include "GCOMInstDir.hpp"
+#include "com_helpers_response_vector.hpp"
+
 
 /* __ Method name definitions ____________________________________________ */
 #define G_IRF           "GCOMResponse::irf(GEvent&, GPhoton&, GObservation&)"
@@ -77,6 +80,7 @@
 
 /* __ Coding definitions _________________________________________________ */
 #define G_USE_DRM_CUBE
+#define G_USE_INTEGRAL_IN_IRF_EXTENDED
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -1253,6 +1257,12 @@ GVector GCOMResponse::irf_extended(const GModelSky&    model,
                                    const double&       theta_max,
                                    GMatrix*            gradients) const
 {
+    // Set constants
+    //const double step_fraction = 0.1;
+    const double step_fraction = 0.05;
+    const int    iter_phigeo   =    5;
+    const int    iter_phi      =    5;
+
     // Extract COMPTEL observation
     const GCOMObservation* obs_ptr = dynamic_cast<const GCOMObservation*>(&obs);
     if (obs_ptr == NULL) {
@@ -1337,12 +1347,52 @@ GVector GCOMResponse::irf_extended(const GModelSky&    model,
         double phigeo_low  = (zeta > theta_max) ? zeta - theta_max : 0.0;
         double phigeo_up   = zeta + theta_max;
 
+        //
+        // Code option A: Use integral
+        // ===========================
+        #if defined(G_USE_INTEGRAL_IN_IRF_EXTENDED)
+        // Perform Phigeo angle integration if interval is valid
+        if (phigeo_up > phigeo_low) {
+
+            // Setup integration kernel
+            com_extended_kerns_phigeo integrands(m_iaq,
+                                                 model,
+                                                 irfs,
+                                                 bin->energy(),
+                                                 bin->time(),
+                                                 rot,
+                                                 drx,
+                                                 drg,
+                                                 phigeo_bin,
+                                                 m_phigeo_bins,
+                                                 nphibar,
+                                                 ipix,
+                                                 npix,
+                                                 iaq_norm,
+                                                 zeta,
+                                                 phi0,
+                                                 theta_max,
+                                                 iter_phi);
+
+            // Setup integrator
+            GIntegrals integral(&integrands);
+            integral.fixed_iter(iter_phigeo);
+
+            // Integrate over Phigeo
+            irfs = integral.romberg(phigeo_low, phigeo_up, iter_phigeo);
+
+        } // endif: Phigeo angle interval was valid
+
+        //
+        // Code option B: Perform numerical integration
+        // ============================================
+        #else
         // Setup Phigeo integration step-size and number of integration steps. By
         // default the integration step size is one tenth of the model diameter, but
         // not larger than the Phigeo binning of the IAQ. We also make sure that there
         // are at least two Phigeo integration steps.
         double phigeo_length = phigeo_up - phigeo_low;
-        double phigeo_step   = 0.1 * phigeo_length;
+        double phigeo_step   = step_fraction * phigeo_length;
         if (phigeo_step > phigeo_bin) {
             phigeo_step = phigeo_bin;
         }
@@ -1383,7 +1433,7 @@ GVector GCOMResponse::irf_extended(const GModelSky&    model,
             // the arclength, but larger than the Phigeo binning of the IAQ. We
             // also make sure that there are at least two integration steps.
             double azimuth_length = 2.0 * dphi * sin_phigeo;
-            double az_step        = 0.1 * azimuth_length;
+            double az_step        = step_fraction * azimuth_length;
             if (az_step > phigeo_bin) {
                 az_step = phigeo_bin;
             }
@@ -1486,6 +1536,7 @@ GVector GCOMResponse::irf_extended(const GModelSky&    model,
             } // endfor: looped over azimuth angle around locus of IAQ
 
         } // endfor: looped over Phigeo angles
+        #endif
 
     } // endfor: looped over Chi and Psi pixels
 
