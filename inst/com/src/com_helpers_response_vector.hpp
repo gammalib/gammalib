@@ -56,8 +56,7 @@ public:
                               const GEnergy&             srcEng,
                               const GTime&               srcTime,
                               const GMatrix&             rot,
-                              const GSkyMap&             drx,
-                              const double*              drg,
+                              const GSkyMap*             drx,
                               const double&              phigeo_bin_size,
                               const int&                 phigeo_bins,
                               const int&                 phibar_bins,
@@ -75,7 +74,6 @@ public:
                               m_srcTime(srcTime),
                               m_rot(rot),
                               m_drx(drx),
-                              m_drg(drg),
                               m_phigeo_bin_size(phigeo_bin_size),
                               m_phigeo_bins(phigeo_bins),
                               m_phibar_bins(phibar_bins),
@@ -98,8 +96,7 @@ protected:
     const GEnergy&             m_srcEng;          //!< Source energy
     const GTime&               m_srcTime;         //!< Source time
     const GMatrix&             m_rot;             //!< Rotation matrix
-    const GSkyMap&             m_drx;             //!< DRX
-    const double*              m_drg;             //!< DRG
+    const GSkyMap*             m_drx;             //!< DRX
     const double&              m_phigeo_bin_size; //!< Phigeo bin size
     const int&                 m_phigeo_bins;     //!< Number of phigeo bins
     const int&                 m_phibar_bins;     //!< Number of phibar bins
@@ -131,12 +128,8 @@ public:
                            const GEnergy&             srcEng,
                            const GTime&               srcTime,
                            const GMatrix&             rot,
-                           const GSkyMap&             drx,
-                           const double*              drg,
+                           const GSkyMap*             drx,
                            const GVector&             iaq,
-                           const double&              phigeo,
-                           const int&                 ipix,
-                           const int&                 npix,
                            const double&              sin_phigeo,
                            const double&              cos_phigeo) :
                            m_model(model),
@@ -145,11 +138,7 @@ public:
                            m_srcTime(srcTime),
                            m_rot(rot),
                            m_drx(drx),
-                           m_drg(drg),
                            m_iaq(iaq),
-                           m_phigeo(phigeo),
-                           m_ipix(ipix),
-                           m_npix(npix),
                            m_sin_phigeo(sin_phigeo),
                            m_cos_phigeo(cos_phigeo) { }
     int     size(void) const { return m_irfs.size(); }
@@ -160,12 +149,8 @@ protected:
     const GEnergy&   m_srcEng;      //!< Source energy
     const GTime&     m_srcTime;     //!< Source time
     const GMatrix&   m_rot;         //!< Rotation matrix
-    const GSkyMap&   m_drx;         //!< DRX
-    const double*    m_drg;         //!< DRG
+    const GSkyMap*   m_drx;         //!< DRX
     const GVector    m_iaq;         //!< Precomputed IAQ vector
-    const double&    m_phigeo;      //!< Phigeo
-    const int&       m_ipix;        //!< DRI pixel index
-    const int&       m_npix;        //!< Number of DRI pixels
     const double&    m_sin_phigeo;  //!< Sine of Phigeo
     const double&    m_cos_phigeo;  //!< Cosine of Phigeo
 };

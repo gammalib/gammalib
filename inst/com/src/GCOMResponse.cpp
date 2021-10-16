@@ -81,6 +81,7 @@
 /* __ Coding definitions _________________________________________________ */
 #define G_USE_DRM_CUBE
 #define G_USE_INTEGRAL_IN_IRF_EXTENDED
+//#define G_APPROXIMATE_DRX_IN_IRF_EXTENDED
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -993,9 +994,11 @@ GVector GCOMResponse::irf_radial(const GModelSky&    model,
     const GModelSpatialRadial* radial =
           static_cast<const GModelSpatialRadial*>(model.spatial());
 
-    // Get references to model direction and maximum model radius
+    // Get references to model direction and maximum model radius. Reduce
+    // the maximum model radius by a small amount to avoid rounding
+    // problems at the boundary of a sharp edged model.
     const GSkyDir& model_dir = radial->dir();
-    const double&  theta_max = radial->theta_max();
+    const double&  theta_max = radial->theta_max() - 1.0e-12;
 
     // Call support method
     GVector irfs = irf_extended(model, obs, model_dir, theta_max, gradients);
@@ -1306,13 +1309,20 @@ GVector GCOMResponse::irf_extended(const GModelSky&    model,
     // Initialise some variables
     double         phigeo_min    = m_phigeo_min      * gammalib::deg2rad;
     double         phigeo_bin    = m_phigeo_bin_size * gammalib::deg2rad;
-    const GSkyMap& drx           = obs_ptr->drx().map();
+    double         phigeo_max    = phigeo_min + phigeo_bin * m_phigeo_bins;
+    const GSkyMap* drx           = &(obs_ptr->drx().map());
     const double*  drg           = obs_ptr->drg().map().pixels();
     double         cos_theta_max = std::cos(theta_max);
 
     // Compute IAQ normalisation (1/s): DEADC / ONTIME (s)
     double iaq_norm = obs_ptr->deadc() /
                       (obs_ptr->ontime() * cube->dre().tof_correction());
+
+    // Code option: multiply DRX at model direction into IAQ normalisation
+    #if defined(G_APPROXIMATE_DRX_IN_IRF_EXTENDED)
+    iaq_norm *= (*drx)(model_dir);
+    drx       = NULL;
+    #endif
 
     // Loop over Chi and Psi
     for (int ipix = 0; ipix < npix; ++ipix) {
@@ -1344,8 +1354,14 @@ GVector GCOMResponse::irf_extended(const GModelSky&    model,
         double cos_zeta = std::cos(zeta);
 
         // Setup Phigeo integration range
-        double phigeo_low  = (zeta > theta_max) ? zeta - theta_max : 0.0;
-        double phigeo_up   = zeta + theta_max;
+        double phigeo_low = zeta - theta_max;
+        double phigeo_up  = zeta + theta_max;
+        if (phigeo_low < phigeo_min) {
+            phigeo_low = phigeo_min;
+        }
+        if (phigeo_up > phigeo_max) {
+            phigeo_up = phigeo_max;
+        }
 
         //
         // Code option A: Use integral
@@ -1354,15 +1370,17 @@ GVector GCOMResponse::irf_extended(const GModelSky&    model,
         // Perform Phigeo angle integration if interval is valid
         if (phigeo_up > phigeo_low) {
 
+            // Initialise IRF vector
+            GVector irf(nphibar);
+
             // Setup integration kernel
             com_extended_kerns_phigeo integrands(m_iaq,
                                                  model,
-                                                 irfs,
+                                                 irf,
                                                  bin->energy(),
                                                  bin->time(),
                                                  rot,
                                                  drx,
-                                                 drg,
                                                  phigeo_bin,
                                                  m_phigeo_bins,
                                                  nphibar,
@@ -1379,7 +1397,13 @@ GVector GCOMResponse::irf_extended(const GModelSky&    model,
             integral.fixed_iter(iter_phigeo);
 
             // Integrate over Phigeo
-            irfs = integral.romberg(phigeo_low, phigeo_up, iter_phigeo);
+            irf = integral.romberg(phigeo_low, phigeo_up, iter_phigeo);
+
+            // Add IRF to result
+            for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
+                int idri    = ipix + iphibar * npix;
+                irfs[idri] += irf[iphibar] * drg[idri];
+            }
 
         } // endif: Phigeo angle interval was valid
 

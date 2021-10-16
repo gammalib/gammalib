@@ -129,11 +129,7 @@ GVector com_extended_kerns_phigeo::eval(const double& phigeo)
                                                   m_srcTime,
                                                   m_rot,
                                                   m_drx,
-                                                  m_drg,
                                                   iaq,
-                                                  phigeo,
-                                                  m_ipix,
-                                                  m_npix,
                                                   sin_phigeo,
                                                   cos_phigeo);
 
@@ -163,6 +159,9 @@ GVector com_extended_kerns_phigeo::eval(const double& phigeo)
  ***************************************************************************/
 GVector com_extended_kerns_phi::eval(const double& phi)
 {
+    // Initialise kernel values
+    m_irfs = 0.0;
+
     // Compute sine and cosine of azimuth angle
     double sin_phi = std::sin(phi);
     double cos_phi = std::cos(phi);
@@ -173,24 +172,22 @@ GVector com_extended_kerns_phi::eval(const double& phi)
     GSkyDir skyDir;
     skyDir.celvector(dir);
 
-    // Get DRX value. If sky direction is not contained in DRX the returned
-    // value is zero.
-    double drx = m_drx(skyDir);
+    // Set photon
+    GPhoton photon(skyDir, m_srcEng, m_srcTime);
 
-    // Continue only if DRX is positive
-    if (drx > 0.0) {
+    // Get model sky intensity for photon (unit: sr^-1)
+    double intensity = m_model.spatial()->eval(photon);
 
-        // Set photon
-        GPhoton photon(skyDir, m_srcEng, m_srcTime);
+    // Continue only if intensity is positive
+    if (intensity > 0.0) {
 
-        // Get model sky intensity for photon (unit: sr^-1)
-        double intensity = m_model.spatial()->eval(photon);
+        // Multiply-in DRX value if pointer is valid
+        if (m_drx != NULL) {
+            intensity *= (*m_drx)(skyDir);
+        }
 
-        // Continue only if intensity is positive
+        // Continue only if intensity is still positive
         if (intensity > 0.0) {
-        
-            // Multiply intensity by DRX value (unit: cm^2 s sr^-1)
-            intensity *= drx;
 
             // Get number of Phibar layers
             int nphibar = m_iaq.size();
@@ -201,16 +198,11 @@ GVector com_extended_kerns_phi::eval(const double& phi)
                 // Continue only if IAQ value is positive
                 if (m_iaq[iphibar] > 0.0) {
 
-                    // Get DRI index
-                    int idri = m_ipix + iphibar * m_npix;
-
                     // Compute IRF value (unit: cm^2)
-                    double irf = m_iaq[iphibar] * m_drg[idri] * intensity;
+                    double irf = m_iaq[iphibar] * intensity;
 
-                    // Add IRF value if it is positive
-                    if (irf > 0.0) {
-                        m_irfs[idri] += irf;
-                    }
+                    // Set IRF value
+                    m_irfs[iphibar] = irf;
 
                 } // endif: IAQ value was valid
 
@@ -218,7 +210,7 @@ GVector com_extended_kerns_phi::eval(const double& phi)
 
         } // endif: intensity was valid
 
-    } // endif: sky direction contained in DRX
+    } // endif: intensity was valid
 
     // Return kernel values
     return m_irfs;
