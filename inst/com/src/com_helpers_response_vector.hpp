@@ -32,6 +32,7 @@
 #include "GTime.hpp"
 #include "GVector.hpp"
 #include "GMatrix.hpp"
+#include "GFunction.hpp"
 #include "GFunctions.hpp"
 #include "GModelSky.hpp"
 #include "GSkyMap.hpp"
@@ -121,36 +122,29 @@ protected:
  * This class provides the kernel for the azimuth angle integration of
  * extended sky models.
  ***************************************************************************/
-class com_extended_kerns_phi : public GFunctions {
+class com_extended_kerns_phi : public GFunction {
 public:
     com_extended_kerns_phi(const GModelSky&           model,
-                           GVector&                   irfs,
                            const GEnergy&             srcEng,
                            const GTime&               srcTime,
                            const GMatrix&             rot,
                            const GSkyMap*             drx,
-                           const GVector&             iaq,
                            const double&              sin_phigeo,
                            const double&              cos_phigeo) :
                            m_model(model),
-                           m_irfs(irfs),
                            m_srcEng(srcEng),
                            m_srcTime(srcTime),
                            m_rot(rot),
                            m_drx(drx),
-                           m_iaq(iaq),
                            m_sin_phigeo(sin_phigeo),
                            m_cos_phigeo(cos_phigeo) { }
-    int     size(void) const { return m_irfs.size(); }
-    GVector eval(const double& phi);
+    double eval(const double& phi);
 protected:
     const GModelSky& m_model;       //!< Sky model
-    GVector&         m_irfs;        //!< IRF vector to update
     const GEnergy&   m_srcEng;      //!< Source energy
     const GTime&     m_srcTime;     //!< Source time
     const GMatrix&   m_rot;         //!< Rotation matrix
     const GSkyMap*   m_drx;         //!< DRX
-    const GVector    m_iaq;         //!< Precomputed IAQ vector
     const double&    m_sin_phigeo;  //!< Sine of Phigeo
     const double&    m_cos_phigeo;  //!< Cosine of Phigeo
 };

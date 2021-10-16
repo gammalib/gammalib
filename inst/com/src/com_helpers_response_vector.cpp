@@ -31,6 +31,7 @@
 #include <cmath>
 #include "com_helpers_response_vector.hpp"
 #include "GCOMResponse.hpp"
+#include "GIntegral.hpp"
 #include "GIntegrals.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -58,6 +59,9 @@
  ***************************************************************************/
 GVector com_extended_kerns_phigeo::eval(const double& phigeo)
 {
+    // Initialise kernel values
+    m_irfs = 0.0;
+
     // Continue only if phigeo is positive
     if (phigeo > 0.0) {
 
@@ -90,11 +94,27 @@ GVector com_extended_kerns_phigeo::eval(const double& phigeo)
             // Continue only if Phigeo index is valid
             if (iphigeo < m_phigeo_bins) {
 
-                // Initialise IAQ vector to hold precomputation results
-                GVector iaq(m_phibar_bins);
+                // Setup kernel for azimuthal integration
+                com_extended_kerns_phi integrand(m_model,
+                                                 m_srcEng,
+                                                 m_srcTime,
+                                                 m_rot,
+                                                 m_drx,
+                                                 sin_phigeo,
+                                                 cos_phigeo);
 
-                // Loop over Phibar
+                // Setup integrator
+                GIntegral integral(&integrand);
+                integral.fixed_iter(m_iter);
+
+                // Integrate over azimuth angle
+                double irf = integral.romberg(phi_min, phi_max, m_iter) * sin_phigeo;
+
+                // Multiply result with IAQ for all Phibar layers
                 for (int iphibar = 0; iphibar < m_phibar_bins; ++iphibar) {
+
+                    // Initialise IAQ
+                    double iaq;
 
                     // Get IAQ index
                     int i = iphibar * m_phigeo_bins + iphigeo;
@@ -102,43 +122,25 @@ GVector com_extended_kerns_phigeo::eval(const double& phigeo)
                     // Get interpolated IAQ value
                     if (eps < 0.0) { // interpolate towards left
                         if (iphigeo > 0) {
-                            iaq[iphibar] = (1.0 + eps) * m_iaq[i] - eps * m_iaq[i-1];
+                            iaq = (1.0 + eps) * m_iaq[i] - eps * m_iaq[i-1];
                         }
                         else {
-                            iaq[iphibar] = (1.0 - eps) * m_iaq[i] + eps * m_iaq[i+1];
+                            iaq = (1.0 - eps) * m_iaq[i] + eps * m_iaq[i+1];
                         }
                     }
                     else {           // interpolate towards right
                         if (iphigeo < m_phigeo_bins-1) {
-                            iaq[iphibar] = (1.0 - eps) * m_iaq[i] + eps * m_iaq[i+1];
+                            iaq = (1.0 - eps) * m_iaq[i] + eps * m_iaq[i+1];
                         }
                         else {
-                            iaq[iphibar] = (1.0 + eps) * m_iaq[i] - eps * m_iaq[i-1];
+                            iaq = (1.0 + eps) * m_iaq[i] - eps * m_iaq[i-1];
                         }
                     }
 
-                    // Normalise IAQ value
-                    iaq[iphibar] *= m_iaq_norm;
+                    // Compute IRF
+                    m_irfs[iphibar] = irf * iaq * m_iaq_norm;
 
                 } // endfor: looped over Phibar
-
-                // Setup kernel for azimuthal integration
-                com_extended_kerns_phi integrands(m_model,
-                                                  m_irfs,
-                                                  m_srcEng,
-                                                  m_srcTime,
-                                                  m_rot,
-                                                  m_drx,
-                                                  iaq,
-                                                  sin_phigeo,
-                                                  cos_phigeo);
-
-                // Setup integrator
-                GIntegrals integral(&integrands);
-                integral.fixed_iter(m_iter);
-
-                // Integrate over azimuth
-                m_irfs = integral.romberg(phi_min, phi_max, m_iter) * sin_phigeo;
 
             } // endif: Phigeo bin was valid
 
@@ -157,11 +159,8 @@ GVector com_extended_kerns_phigeo::eval(const double& phigeo)
  * @param[in] phi Azimuth angle (radians).
  * @return Vector of azimuthally integrated model.
  ***************************************************************************/
-GVector com_extended_kerns_phi::eval(const double& phi)
+double com_extended_kerns_phi::eval(const double& phi)
 {
-    // Initialise kernel values
-    m_irfs = 0.0;
-
     // Compute sine and cosine of azimuth angle
     double sin_phi = std::sin(phi);
     double cos_phi = std::cos(phi);
@@ -186,32 +185,8 @@ GVector com_extended_kerns_phi::eval(const double& phi)
             intensity *= (*m_drx)(skyDir);
         }
 
-        // Continue only if intensity is still positive
-        if (intensity > 0.0) {
-
-            // Get number of Phibar layers
-            int nphibar = m_iaq.size();
-
-            // Loop over Phibar
-            for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
-
-                // Continue only if IAQ value is positive
-                if (m_iaq[iphibar] > 0.0) {
-
-                    // Compute IRF value (unit: cm^2)
-                    double irf = m_iaq[iphibar] * intensity;
-
-                    // Set IRF value
-                    m_irfs[iphibar] = irf;
-
-                } // endif: IAQ value was valid
-
-            } // endfor: looped over Phibar
-
-        } // endif: intensity was valid
-
     } // endif: intensity was valid
 
     // Return kernel values
-    return m_irfs;
+    return intensity;
 }
