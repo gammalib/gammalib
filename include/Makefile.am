@@ -136,6 +136,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GTime.hpp \
                      GTimes.hpp \
                      GTimeReference.hpp \
+                     GPolarization.hpp \
                      GCaldb.hpp \
                      GObservations.hpp \
                      GObservation.hpp \

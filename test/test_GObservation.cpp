@@ -1,7 +1,7 @@
 /***************************************************************************
  *              test_GObservation.cpp - Test observation module            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2020 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2021 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -67,7 +67,9 @@ void TestGObservation::set(void)
            "Test GEnergy class");
     append(static_cast<pfunction>(&TestGObservation::test_energies),
            "Test GEnergies class");
-    append(static_cast<pfunction>(&TestGObservation::test_ebounds),
+    append(static_cast<pfunction>(&TestGObservation::test_energy),
+           "Test GPolarization class");
+    append(static_cast<pfunction>(&TestGObservation::test_polarization),
            "Test GEbounds class");
     append(static_cast<pfunction>(&TestGObservation::test_phases),
            "Test GPhases class");
@@ -1405,6 +1407,26 @@ void TestGObservation::test_energies(void)
     energies.set(ebds2);
     test_value(energies.size(), 1, "GEbounds constructor (1 element)");
     test_value(energies[0].MeV(), 1.0, 1.0e-10, "GEbounds constructor (1 element)");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GPolarization class
+ ***************************************************************************/
+void TestGObservation::test_polarization(void)
+{
+    // Test void constructor
+    test_try("Void constructor");
+    try {
+        GPolarization polarization;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
 
     // Return
     return;

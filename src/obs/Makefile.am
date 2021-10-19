@@ -30,6 +30,7 @@ sources = GEnergies.cpp \
           GTimes.cpp \
           GTime.cpp \
           GTimeReference.cpp \
+          GPolarization.cpp \
           GCaldb.cpp \
           GObservations.cpp \
           GObservations_likelihood.cpp \

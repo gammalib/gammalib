@@ -176,6 +176,7 @@
 #include "GTime.hpp"
 #include "GTimes.hpp"
 #include "GTimeReference.hpp"
+#include "GPolarization.hpp"
 #include "GCaldb.hpp"
 #include "GObservations.hpp"
 #include "GObservation.hpp"

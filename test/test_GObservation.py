@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib observation module.
 #
-# Copyright (C) 2012-2020 Juergen Knoedlseder
+# Copyright (C) 2012-2021 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -330,6 +330,14 @@ class Test(gammalib.GPythonTestSuite):
         self.test_value(energies[:-7][1].MeV(), 2.0)
         self.test_value(energies[:-7][2].MeV(), 3.0)
 
+        # Return
+        return
+
+    # Test GPolarization class
+    def _test_polarization(self):
+        """
+        Test GPolarization class
+        """
         # Return
         return
 
@@ -762,6 +770,7 @@ class Test(gammalib.GPythonTestSuite):
         test_support.pickeling(self, gammalib.GTime())
         test_support.pickeling(self, gammalib.GTimes())
         test_support.pickeling(self, gammalib.GTimeReference())
+        #test_support.pickeling(self, gammalib.GPolarization())
 
         # Setup for tests
         dir     = gammalib.GSkyDir()
@@ -806,8 +815,9 @@ class Test(gammalib.GPythonTestSuite):
         # Append tests
         self.append(self._test_energy, 'Test GEnergy')
         self.append(self._test_energies, 'Test GEnergies')
-        self.append(self._test_ebounds, 'Test GEbounds')
         self.append(self._test_time, 'Test GTime')
+        self.append(self._test_polarization, 'Test GPolarization')
+        self.append(self._test_ebounds, 'Test GEbounds')
         self.append(self._test_energies_access, 'Test GEnergies energy access')
         self.append(self._test_times_access, 'Test GTimes time access')
         self.append(self._test_photons_access, 'Test GPhotons photon access')

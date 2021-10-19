@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       obs.i - Observation module                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -223,6 +223,7 @@
 %include "GTime.i"
 %include "GTimes.i"
 %include "GTimeReference.i"
+%include "GPolarization.i"
 %include "GEbounds.i"
 %include "GGti.i"
 %include "GCaldb.i"
