@@ -117,6 +117,7 @@ public:
     virtual double           npred_grad(const GModel&    model,
                                         const GModelPar& par) const;
     virtual void             remove_response_cache(const std::string& name);
+    virtual const double&    grad_step_size(void) const;
 
     // Implemented methods
     bool               has_events(void) const;
@@ -218,10 +219,11 @@ protected:
     };
 
     // Protected data area
-    std::string m_name;        //!< Observation name
-    std::string m_id;          //!< Observation identifier
-    std::string m_statistic;   //!< Optimizer statistic
-    GEvents*    m_events;      //!< Pointer to event container
+    std::string m_name;           //!< Observation name
+    std::string m_id;             //!< Observation identifier
+    std::string m_statistic;      //!< Optimizer statistic
+    GEvents*    m_events;         //!< Pointer to event container
+    double      m_grad_step_size; //!< Gradient step size
 
     // Stack of identifiers of parameters with gradients
     mutable std::vector<std::string> m_pars_with_gradients;
@@ -318,6 +320,18 @@ inline
 const std::string& GObservation::statistic(void) const
 {
     return (m_statistic);
+}
+
+
+/***********************************************************************//**
+ * @brief Return gradient step size
+ *
+ * @return Gradient step size.
+ ***************************************************************************/
+inline
+const double& GObservation::grad_step_size(void) const
+{
+    return (m_grad_step_size);
 }
 
 #endif /* GOBSERVATION_HPP */

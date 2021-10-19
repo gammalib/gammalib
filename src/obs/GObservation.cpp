@@ -875,12 +875,6 @@ double GObservation::npred(const GModel& model) const
  * a simple method as this method is likely used for spatial model parameters,
  * and the spatial model may eventually be noisy due to numerical integration
  * limits.
- *
- * The step size for the simple method has been fixed to 0.0002, which
- * corresponds to about 1 arcsec for parameters that are given in degrees.
- * The reasoning behind this value is that parameters that use numerical
- * gradients are typically angles, such as for example the position, and
- * we want to achieve arcsec precision with this method.
  ***************************************************************************/
 double GObservation::model_grad(const GModel&    model,
                                 const GModelPar& par,
@@ -901,10 +895,8 @@ double GObservation::model_grad(const GModel&    model,
         // Get actual parameter value
         double x = par.factor_value();
 
-        // Set fixed step size for computation of derivative.
-        // By default, the step size is fixed to 0.0002.
-        const double step_size = 0.0002; // ~1 arcsec
-        double       h         = step_size;
+        // Set step size for computation of derivative.
+        double h = m_grad_step_size;
 
         // Re-adjust the step-size h in case that the initial step size is
         // larger than the allowed parameter range 
@@ -965,12 +957,6 @@ double GObservation::model_grad(const GModel&    model,
  * a simple method as this method is likely used for spatial model parameters,
  * and the spatial model may eventually be noisy due to numerical integration
  * limits.
- *
- * The step size for the simple method has been fixed to 0.0002, which
- * corresponds to about 1 arcsec for parameters that are given in degrees.
- * The reasoning behind this value is that parameters that use numerical
- * gradients are typically angles, such as for example the position, and
- * we want to achieve arcsec precision with this method.
  ***************************************************************************/
 GVector GObservation::model_grad(const GModel&    model,
                                  const GModelPar& par) const
@@ -990,10 +976,8 @@ GVector GObservation::model_grad(const GModel&    model,
         // Get actual parameter value
         double x = par.factor_value();
 
-        // Set fixed step size for computation of derivative.
-        // By default, the step size is fixed to 0.0002.
-        const double step_size = 0.0002; // ~1 arcsec
-        double       h         = step_size;
+        // Set step size for computation of derivative.
+        double h = m_grad_step_size;
 
         // Re-adjust the step-size h in case that the initial step size is
         // larger than the allowed parameter range
@@ -1114,8 +1098,6 @@ GVector GObservation::model_grad(const GModel&    model,
  * a simple method as this method is likely used for spatial model parameters,
  * and the spatial model may eventually be noisy due to numerical integration
  * limits.
- *
- * The step size for the simple method has been fixed to 0.0002.
  ***************************************************************************/
 double GObservation::npred_grad(const GModel& model, const GModelPar& par) const
 {
@@ -1134,9 +1116,8 @@ double GObservation::npred_grad(const GModel& model, const GModelPar& par) const
         // Get actual parameter value
         double x = par.factor_value();
 
-        // Set fixed step size to 0.0002 for computation of derivative.
-        const double step_size = 0.0002;
-        double       h         = step_size;
+        // Set step size for computation of derivative.
+        double h = m_grad_step_size;
 
         // Re-adjust the step-size h in case that the initial step size is
         // larger than the allowed parameter range 
@@ -1285,14 +1266,21 @@ void GObservation::computed_gradient(const GModel& model, const GModelPar& par) 
 
 /***********************************************************************//**
  * @brief Initialise class members
+ *
+ * The step size for gradient computation is fixed by default to 0.0002
+ * degrees, which corresponds to about 1 arcsec for parameters that are
+ * given in degrees. The reasoning behind this value is that parameters that
+ * use numerical gradients are typically angles, such as for example the
+ * position, and we want to achieve arcsec precision with this method.
  ***************************************************************************/
 void GObservation::init_members(void)
 {
     // Initialise members
     m_name.clear();
     m_id.clear();
-    m_statistic = "cstat";
-    m_events    = NULL;
+    m_statistic      = "cstat";
+    m_events         = NULL;
+    m_grad_step_size = 0.0002;
 
     // Initialise stack of identifiers of parameters with gradients
     m_pars_with_gradients.clear();
@@ -1312,9 +1300,10 @@ void GObservation::init_members(void)
 void GObservation::copy_members(const GObservation& obs)
 {
     // Copy members
-    m_name      = obs.m_name;
-    m_id        = obs.m_id;
-    m_statistic = obs.m_statistic;
+    m_name           = obs.m_name;
+    m_id             = obs.m_id;
+    m_statistic      = obs.m_statistic;
+    m_grad_step_size = obs.m_grad_step_size;
 
     // Copy stack of identifiers of parameters with gradients
     m_pars_with_gradients = obs.m_pars_with_gradients;
