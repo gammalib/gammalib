@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-28 May 2021
+19 October 2021
 
 
 1. Introduction
@@ -44,6 +44,7 @@ The following methods have been added:
 - GResponse::irf_spatial(GModelSky&, GObservation&, GMatrix*)
 - GObservation::model(GModels&, GMatrixSparse*)
 - GObservation::model_grad(GModel&, GModelPar&)
+- GObservation::grad_step_size()
 - GMatrixBase::is_empty()
 - GModels::eval(GObservation&, GMatrixSparse*)
 - GModel::eval(GObservation&, GMatrixSparse*)
@@ -240,6 +241,9 @@ of functions (#3328).
 
 11. Observation module
 ----------------------
+Add numerical gradient step size as member of GObservation to allow instrument-
+specific step size values.
+
 The GResponse class now support the fitting of spectral lines which requires that
 energy dispersion is enabled in the computations (#3386).
 
