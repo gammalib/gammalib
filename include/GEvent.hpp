@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GEvent.hpp - Abstract event base class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,9 +30,15 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GBase.hpp"
-#include "GInstDir.hpp"
-#include "GEnergy.hpp"
-#include "GTime.hpp"
+//#include "GInstDir.hpp"
+//#include "GEnergy.hpp"
+//#include "GTime.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GInstDir;
+class GEnergy;
+class GTime;
+class GPolarization;
 
 
 /***********************************************************************//**
@@ -80,18 +86,19 @@ public:
     virtual GEvent& operator=(const GEvent& event);
 
     // Pure virtual methods
-    virtual void            clear(void) = 0;
-    virtual GEvent*         clone(void) const = 0;
-    virtual std::string     classname(void) const = 0;
-    virtual double          size(void) const = 0;
-    virtual const GInstDir& dir(void) const = 0;
-    virtual const GEnergy&  energy(void) const = 0;
-    virtual const GTime&    time(void) const = 0;
-    virtual double          counts(void) const = 0;
-    virtual double          error(void) const = 0;
-    virtual bool            is_atom(void) const = 0;
-    virtual bool            is_bin(void) const = 0;
-    virtual std::string     print(const GChatter& chatter = NORMAL) const = 0;
+    virtual void                 clear(void) = 0;
+    virtual GEvent*              clone(void) const = 0;
+    virtual std::string          classname(void) const = 0;
+    virtual double               size(void) const = 0;
+    virtual const GInstDir&      dir(void) const = 0;
+    virtual const GEnergy&       energy(void) const = 0;
+    virtual const GTime&         time(void) const = 0;
+    virtual const GPolarization& polarization(void) const = 0;
+    virtual double               counts(void) const = 0;
+    virtual double               error(void) const = 0;
+    virtual bool                 is_atom(void) const = 0;
+    virtual bool                 is_bin(void) const = 0;
+    virtual std::string          print(const GChatter& chatter = NORMAL) const = 0;
 
 protected:
     // Protected methods

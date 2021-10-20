@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATEventBin.hpp - Fermi/LAT event bin class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -61,17 +61,18 @@ public:
     virtual GLATEventBin& operator=(const GLATEventBin& bin);
 
     // Implemented pure virtual base class methods
-    virtual void               clear(void);
-    virtual GLATEventBin*      clone(void) const;
-    virtual std::string        classname(void) const;
-    virtual double             size(void) const;
-    virtual const GLATInstDir& dir(void) const;
-    virtual const GEnergy&     energy(void) const;
-    virtual const GTime&       time(void) const;
-    virtual double             counts(void) const;
-    virtual double             error(void) const;
-    virtual void               counts(const double& counts);
-    virtual std::string        print(const GChatter& chatter = NORMAL) const;
+    virtual void                 clear(void);
+    virtual GLATEventBin*        clone(void) const;
+    virtual std::string          classname(void) const;
+    virtual double               size(void) const;
+    virtual const GLATInstDir&   dir(void) const;
+    virtual const GEnergy&       energy(void) const;
+    virtual const GTime&         time(void) const;
+    virtual const GPolarization& polarization(void) const;
+    virtual double               counts(void) const;
+    virtual double               error(void) const;
+    virtual void                 counts(const double& counts);
+    virtual std::string          print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     const double&        solidangle(void) const;
@@ -89,17 +90,18 @@ protected:
     void free_members(void);
 
     // Protected members
-    GLATEventCube* m_cube;        //!< Event cube back pointer
-    int            m_index;       //!< Actual skymap index
-    int            m_ipix;        //!< Actual spatial index
-    int            m_ieng;        //!< Actual energy index
-    GEnergy*       m_energy;      //!< Pointer to bin energy
-    GLATInstDir*   m_dir;         //!< Pointer to bin direction
-    GTime*         m_time;        //!< Pointer to bin time
-    double*        m_counts;      //!< Pointer to number of counts
-    double*        m_solidangle;  //!< Pointer to solid angle of pixel (sr)
-    GEnergy*       m_ewidth;      //!< Pointer to energy width of bin
-    double*        m_ontime;      //!< Pointer to ontime of bin (seconds)
+    GLATEventCube* m_cube;         //!< Event cube back pointer
+    int            m_index;        //!< Actual skymap index
+    int            m_ipix;         //!< Actual spatial index
+    int            m_ieng;         //!< Actual energy index
+    GEnergy*       m_energy;       //!< Pointer to bin energy
+    GLATInstDir*   m_dir;          //!< Pointer to bin direction
+    GTime*         m_time;         //!< Pointer to bin time
+    GPolarization* m_polarization; //!< Pointer to bin polarization
+    double*        m_counts;       //!< Pointer to number of counts
+    double*        m_solidangle;   //!< Pointer to solid angle of pixel (sr)
+    GEnergy*       m_ewidth;       //!< Pointer to energy width of bin
+    double*        m_ontime;       //!< Pointer to ontime of bin (seconds)
 };
 
 

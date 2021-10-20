@@ -2000,7 +2000,7 @@ double GObservation::npred_spec_kern::eval(const double& x)
     #endif
 
     // Get function value
-    double value = m_model->npred(eng, *m_time, *m_parent);
+    double value = m_model->npred(eng, *m_time, GPolarization(), *m_parent);
 
     // Save value if needed
     #if defined(G_NAN_CHECK)

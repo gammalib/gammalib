@@ -463,6 +463,7 @@ double GCTAModelBackground::eval(const GEvent&       event,
  *
  * @param[in] energy Measured event energy.
  * @param[in] time Measured event time.
+ * @param[in] polarization Measured event polarization.
  * @param[in] obs Observation.
  * @return Spatially integrated background rate
  *         (events MeV\f$^{-1}\f$ s\f$^{-1}\f$)
@@ -471,9 +472,10 @@ double GCTAModelBackground::eval(const GEvent&       event,
  * energy and event time. The method returns a real rate, defined as the
  * number of counts per MeV and ontime.
  ***************************************************************************/
-double GCTAModelBackground::npred(const GEnergy&      energy,
-                                  const GTime&        time,
-                                  const GObservation& obs) const
+double GCTAModelBackground::npred(const GEnergy&       energy,
+                                  const GTime&         time,
+                                  const GPolarization& polarization,
+                                  const GObservation&  obs) const
 {
     // Get spatially integrated model component
     double npred = spatial()->npred(energy, time, obs);

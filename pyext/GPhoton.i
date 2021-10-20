@@ -1,7 +1,7 @@
 /***************************************************************************
  *                         GPhoton.i - Photon class                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -42,23 +42,28 @@ class GPhoton : public GBase {
 public:
     // Constructors and destructors
     GPhoton(void);
-    GPhoton(const GSkyDir& dir, const GEnergy& energy, const GTime& time,
-            const int& mc_id = -1);
+    GPhoton(const GSkyDir&       dir,
+            const GEnergy&       energy,
+            const GTime&         time,
+            const GPolarization& polarization,
+            const int&           mc_id = -1);
     GPhoton(const GPhoton& photon);
     virtual ~GPhoton(void);
  
     // Methods
-    void           clear(void);
-    GPhoton*       clone(void) const;
-    std::string    classname(void) const;
-    const GSkyDir& dir(void) const;
-    const GEnergy& energy(void) const;
-    const GTime&   time(void) const;
-    const int&     mc_id(void) const;
-    void           dir(const GSkyDir& dir);
-    void           energy(const GEnergy& energy);
-    void           time(const GTime& time);
-    void           mc_id(const int& mc_id);
+    void                 clear(void);
+    GPhoton*             clone(void) const;
+    std::string          classname(void) const;
+    const GSkyDir&       dir(void) const;
+    const GEnergy&       energy(void) const;
+    const GTime&         time(void) const;
+    const GPolarization& polarization(void) const;
+    const int&           mc_id(void) const;
+    void                 dir(const GSkyDir& dir);
+    void                 energy(const GEnergy& energy);
+    void                 time(const GTime& time);
+    void                 polarization(const GPolarization& polarization);
+    void                 mc_id(const int& mc_id);
 };
 
 
@@ -77,9 +82,9 @@ public:
     }
 %pythoncode {
     def __getstate__(self):
-        args = self.dir(), self.energy(), self.time(), self.mc_id()
-        return args
+        state = (self.dir(), self.energy(), self.time(), self.polarization(), self.mc_id())
+        return state
     def __setstate__(self, state):
-        self.__init__(state[0], state[1], state[2], state[3])
+        self.__init__(state[0], state[1], state[2], state[3], state[4])
 }
 };

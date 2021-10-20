@@ -472,9 +472,10 @@ void GXXXEventCube::init_members(void)
 {
     // Initialise members
     m_bin.clear();
-    m_time.clear();
-    m_ontime = 0.0;
     m_energy.clear();
+    m_time.clear();
+    m_polarization.clear();
+    m_ontime = 0.0;
     m_ewidth.clear();
 
     // Prepare event bin
@@ -500,10 +501,11 @@ void GXXXEventCube::copy_members(const GXXXEventCube& cube)
     // be initialised later. The event bin serves just as a container of
     // pointers, hence we do not want to copy over the pointers from the
     // original class.
-    m_time   = cube.m_time;
-    m_ontime = cube.m_ontime;
-    m_energy = cube.m_energy;
-    m_ewidth = cube.m_ewidth;
+    m_energy       = cube.m_energy;
+    m_time         = cube.m_time;
+    m_polarization = cube.m_polarization;
+    m_ontime       = cube.m_ontime;
+    m_ewidth       = cube.m_ewidth;
 
     // Prepare event bin
     init_bin();
@@ -535,10 +537,11 @@ void GXXXEventCube::init_bin(void)
 {
     // Prepare event bin
     m_bin.free_members();
-    m_bin.m_counts = NULL;      //!< Will be set by set_bin method
-    m_bin.m_dir    = &m_dir;    //!< Content will be set by set_bin method
-    m_bin.m_time   = &m_time;   //!< Fixed content
-    m_bin.m_energy = &m_energy; //!< Fixed content
+    m_bin.m_counts       = NULL;            //!< Will be set by set_bin method
+    m_bin.m_dir          = &m_dir;          //!< Content will be set by set_bin method
+    m_bin.m_time         = &m_time;         //!< Fixed content
+    m_bin.m_polarization = &m_polarization; //!< Fixed content
+    m_bin.m_energy       = &m_energy;       //!< Fixed content
 
     // Return
     return;

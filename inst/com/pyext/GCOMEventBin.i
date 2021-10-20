@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCOMEventBin.i  -  COMPTEL event bin class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -42,16 +42,17 @@ public:
     virtual ~GCOMEventBin(void);
 
     // Implemented pure virtual base class methods
-    virtual void               clear(void);
-    virtual GCOMEventBin*      clone(void) const;
-    virtual std::string        classname(void) const;
-    virtual double             size(void) const;
-    virtual const GCOMInstDir& dir(void) const;
-    virtual const GEnergy&     energy(void) const;
-    virtual const GTime&       time(void) const;
-    virtual double             counts(void) const;
-    virtual double             error(void) const;
-    virtual void               counts(const double& counts);
+    virtual void                 clear(void);
+    virtual GCOMEventBin*        clone(void) const;
+    virtual std::string          classname(void) const;
+    virtual double               size(void) const;
+    virtual const GCOMInstDir&   dir(void) const;
+    virtual const GEnergy&       energy(void) const;
+    virtual const GTime&         time(void) const;
+    virtual const GPolarization& polarization(void) const;
+    virtual double               counts(void) const;
+    virtual double               error(void) const;
+    virtual void                 counts(const double& counts);
 
     // Other methods
     const int&     index(void) const;
@@ -62,6 +63,7 @@ public:
     void           dir(const GCOMInstDir& dir);
     void           energy(const GEnergy& energy);
     void           time(const GTime& time);
+    void           polarization(const GPolarization& polarization);
     void           solidangle(const double& solidangle);
     void           ewidth(const GEnergy& ewidth);
     void           ontime(const double& ontime);
@@ -77,7 +79,7 @@ public:
     }
 %pythoncode {
     def __getstate__(self):
-        state = (self.index(), self.dir(), self.energy(), self.time(),
+        state = (self.index(), self.dir(), self.energy(), self.time(), self.polarization(),
                  self.counts(), self.solidangle(), self.ewidth(),
                  self.ontime())
         return state
@@ -87,9 +89,10 @@ public:
             self.dir(state[1])
             self.energy(state[2])
             self.time(state[3])
-            self.counts(state[4])
-            self.solidangle(state[5])
-            self.ewidth(state[6])
-            self.ontime(state[7])
+            self.polarization(state[4])
+            self.counts(state[5])
+            self.solidangle(state[6])
+            self.ewidth(state[7])
+            self.ontime(state[8])
 }
 };

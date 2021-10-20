@@ -1011,6 +1011,7 @@ void GModelSpatialDiffuseCube::write(GFits& fits) const
  * @param[in] region Sky region.
  * @param[in] srcEng Energy.
  * @param[in] srcTime Time.
+ * @param[in] srcPol Polarization.
  * @return Flux (adimensional or ph/cm2/s).
  *
  * Returns diffuse cube flux within a sky region. The flux is computed by
@@ -1039,9 +1040,10 @@ void GModelSpatialDiffuseCube::write(GFits& fits) const
  *
  * This method fetches the diffuse cube if it was not yet fetched before.
  ***************************************************************************/
-double GModelSpatialDiffuseCube::flux(const GSkyRegion& region,
-                                      const GEnergy&    srcEng,
-                                      const GTime&      srcTime) const
+double GModelSpatialDiffuseCube::flux(const GSkyRegion&    region,
+                                      const GEnergy&       srcEng,
+                                      const GTime&         srcTime,
+                                      const GPolarization& srcPol) const
 {
     // Fetch cube
     fetch_cube();

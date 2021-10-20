@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GModelSky.i - Sky model class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -65,9 +65,10 @@ public:
                              const bool& gradients = false) const;
     virtual GVector     eval(const GObservation& obs,
                              GMatrixSparse*      gradients = NULL) const;
-    virtual double      npred(const GEnergy& obsEng,
-                              const GTime& obsTime,
-                              const GObservation& obs) const;
+    virtual double      npred(const GEnergy&       obsEng,
+                              const GTime&         obsTime,
+                              const GPolarization& obsPol,
+                              const GObservation&  obs) const;
     virtual void        read(const GXmlElement& xml);
     virtual void        write(GXmlElement& xml) const;
 

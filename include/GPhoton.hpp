@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        GPhoton.hpp - Photon class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,6 +33,7 @@
 #include "GSkyDir.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
+#include "GPolarization.hpp"
 
 
 /***********************************************************************//**
@@ -53,8 +54,11 @@ class GPhoton : public GBase {
 public:
     // Constructors and destructors
     GPhoton(void);
-    GPhoton(const GSkyDir& dir, const GEnergy& energy, const GTime& time,
-            const int& mc_id = -1);
+    GPhoton(const GSkyDir&       dir,
+            const GEnergy&       energy,
+            const GTime&         time,
+            const GPolarization& polarization,
+            const int&           mc_id = -1);
     GPhoton(const GPhoton& photon);
     virtual ~GPhoton(void);
  
@@ -62,18 +66,20 @@ public:
     GPhoton& operator=(const GPhoton& photon);
 
     // Methods
-    void           clear(void);
-    GPhoton*       clone(void) const;
-    std::string    classname(void) const;
-    const GSkyDir& dir(void) const;
-    const GEnergy& energy(void) const;
-    const GTime&   time(void) const;
-    const int&     mc_id(void) const;
-    void           dir(const GSkyDir& dir);
-    void           energy(const GEnergy& energy);
-    void           time(const GTime& time);
-    void           mc_id(const int& mc_id);
-    std::string    print(const GChatter& chatter = NORMAL) const;
+    void                 clear(void);
+    GPhoton*             clone(void) const;
+    std::string          classname(void) const;
+    const GSkyDir&       dir(void) const;
+    const GEnergy&       energy(void) const;
+    const GTime&         time(void) const;
+    const GPolarization& polarization(void) const;
+    const int&           mc_id(void) const;
+    void                 dir(const GSkyDir& dir);
+    void                 energy(const GEnergy& energy);
+    void                 time(const GTime& time);
+    void                 polarization(const GPolarization& polarization);
+    void                 mc_id(const int& mc_id);
+    std::string          print(const GChatter& chatter = NORMAL) const;
   
 protected:
     // Protected methods
@@ -82,10 +88,11 @@ protected:
     void free_members(void);
 
     // Protected data members
-    GSkyDir m_dir;      //!< Photon arrival direction
-    GEnergy m_energy;   //!< Photon energy
-    GTime   m_time;     //!< Photon arrival time
-    int     m_mc_id;    //!< Monte Carlo simulation origin
+    GSkyDir       m_dir;           //!< Photon arrival direction
+    GEnergy       m_energy;        //!< Photon energy
+    GTime         m_time;          //!< Photon arrival time
+    GPolarization m_polarization;  //!< Polarization
+    int           m_mc_id;         //!< Monte Carlo simulation origin
 };
 
 
@@ -138,6 +145,18 @@ const GTime& GPhoton::time(void) const
 
 
 /***********************************************************************//**
+ * @brief Return photon polarization
+ *
+ * @return Polarization of photon.
+ ***************************************************************************/
+inline
+const GPolarization& GPhoton::polarization(void) const
+{
+    return m_polarization;
+}
+
+
+/***********************************************************************//**
  * @brief Return photon Monte-Carlo identifier
  *
  * @return Photon Monte-Carlo identifier.
@@ -184,6 +203,19 @@ inline
 void GPhoton::time(const GTime& time)
 {
     m_time = time;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set photon polarization
+ *
+ * @param[in] polarization Photon polarization.
+ ***************************************************************************/
+inline
+void GPhoton::polarization(const GPolarization& polarization)
+{
+    m_polarization = polarization;
     return;
 }
 

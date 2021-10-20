@@ -62,9 +62,10 @@ public:
     virtual void                      write(GXmlElement& xml) const;
 
     // Overloaded base class methods
-    virtual double flux(const GSkyRegion& region,
-                        const GEnergy&    srcEng  = GEnergy(),
-                        const GTime&      srcTime = GTime()) const;
+    virtual double flux(const GSkyRegion&    region,
+                        const GEnergy&       srcEng  = GEnergy(),
+                        const GTime&         srcTime = GTime(),
+                        const GPolarization& srcPol  = GPolarization()) const;
 
     // Other methods
     double  ra(void) const;

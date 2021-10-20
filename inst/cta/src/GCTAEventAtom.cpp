@@ -192,7 +192,7 @@ GCTAEventAtom* GCTAEventAtom::clone(void) const
 /***********************************************************************//**
  * @brief Print event information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing event information.
  ***************************************************************************/
 std::string GCTAEventAtom::print(const GChatter& chatter) const
@@ -228,8 +228,9 @@ void GCTAEventAtom::init_members(void)
 {
     // Initialise members
     m_dir.clear();
-    m_time.clear();
     m_energy.clear();
+    m_time.clear();
+    m_polarization.clear();
     m_index    = 0;
     m_event_id = 0;
     m_mc_id    = 0;
@@ -248,13 +249,14 @@ void GCTAEventAtom::init_members(void)
 void GCTAEventAtom::copy_members(const GCTAEventAtom& atom)
 {
     // Copy members
-    m_dir      = atom.m_dir;
-    m_time     = atom.m_time;
-    m_energy   = atom.m_energy;
-    m_index    = atom.m_index;
-    m_event_id = atom.m_event_id;
-    m_mc_id    = atom.m_mc_id;
-    m_phase    = atom.m_phase;
+    m_dir          = atom.m_dir;
+    m_energy       = atom.m_energy;
+    m_time         = atom.m_time;
+    m_polarization = atom.m_polarization;
+    m_index        = atom.m_index;
+    m_event_id     = atom.m_event_id;
+    m_mc_id        = atom.m_mc_id;
+    m_phase        = atom.m_phase;
 
     // Return
     return;

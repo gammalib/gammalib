@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
+#include "GPolarization.hpp"
 #include "GEventCube.hpp"
 #include "GSPIEventBin.hpp"
 
@@ -110,29 +111,30 @@ protected:
     void         set_bin(const int& index);
 
     // Protected members
-    GSPIEventBin             m_bin;        //!< Actual event bin
-    int                      m_num_pt;     //!< Number of pointings
-    int                      m_num_det;    //!< Number of detectors
-    int                      m_num_ebin;   //!< Number of energy bins
-    int                      m_num_sky;    //!< Number of sky models
-    int                      m_num_bgm;    //!< Number of background models
-    int                      m_gti_size;   //!< Size of GTI arrays
-    int                      m_dsp_size;   //!< Size of DSP arrays
-    int                      m_model_size; //!< Size of model arrays
-    double*                  m_ontime;     //!< Ontime array
-    double*                  m_livetime;   //!< Livetime array
-    double*                  m_counts;     //!< Counts array
-    double*                  m_stat_err;   //!< Statistical error array
-    double*                  m_models;     //!< Models array
-    double*                  m_size;       //!< Event bin size array
-    GSPIInstDir*             m_dir;        //!< Event direction array
-    GTime*                   m_time;       //!< Time array
-    GEnergy*                 m_energy;     //!< Energy array
-    GEnergy*                 m_ewidth;     //!< Energy bin width array
-    GSkyDir*                 m_spix;       //!< SPI X axis array
-    GSkyDir*                 m_spiz;       //!< SPI Z axis array
-    std::string*             m_ptid;       //!< Pointing identifiers
-    std::vector<std::string> m_modnames;   //!< Model names
+    GSPIEventBin             m_bin;          //!< Actual event bin
+    int                      m_num_pt;       //!< Number of pointings
+    int                      m_num_det;      //!< Number of detectors
+    int                      m_num_ebin;     //!< Number of energy bins
+    int                      m_num_sky;      //!< Number of sky models
+    int                      m_num_bgm;      //!< Number of background models
+    int                      m_gti_size;     //!< Size of GTI arrays
+    int                      m_dsp_size;     //!< Size of DSP arrays
+    int                      m_model_size;   //!< Size of model arrays
+    double*                  m_ontime;       //!< Ontime array
+    double*                  m_livetime;     //!< Livetime array
+    double*                  m_counts;       //!< Counts array
+    double*                  m_stat_err;     //!< Statistical error array
+    double*                  m_models;       //!< Models array
+    double*                  m_size;         //!< Event bin size array
+    GSPIInstDir*             m_dir;          //!< Event direction array
+    GTime*                   m_time;         //!< Time array
+    GPolarization            m_polarization; //!< Polarization
+    GEnergy*                 m_energy;       //!< Energy array
+    GEnergy*                 m_ewidth;       //!< Energy bin width array
+    GSkyDir*                 m_spix;         //!< SPI X axis array
+    GSkyDir*                 m_spiz;         //!< SPI Z axis array
+    std::string*             m_ptid;         //!< Pointing identifiers
+    std::vector<std::string> m_modnames;     //!< Model names
 };
 
 

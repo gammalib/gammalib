@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        GSource.cpp - Source class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -68,20 +68,23 @@ GSource::GSource(void)
  * @param[in] model Spatial model pointer.
  * @param[in] energy Energy.
  * @param[in] time Time.
+ * @param[in] polarization Polarization.
  ***************************************************************************/
-GSource::GSource(const std::string& name,
-                 GModelSpatial*     model,
-                 const GEnergy&     energy,
-                 const GTime&       time)
+GSource::GSource(const std::string&   name,
+                 GModelSpatial*       model,
+                 const GEnergy&       energy,
+                 const GTime&         time,
+                 const GPolarization& polarization)
 {
     // Initialise private members
     init_members();
 
     // Set members
-    m_name   = name;
-    m_model  = model;
-    m_energy = energy;
-    m_time   = time;
+    m_name         = name;
+    m_model        = model;
+    m_energy       = energy;
+    m_time         = time;
+    m_polarization = polarization;
 
     // Return
     return;
@@ -211,6 +214,7 @@ std::string GSource::print(const GChatter& chatter) const
         }
         result.append(", E="+m_energy.print(chatter));
         result.append(", MET="+m_time.print(chatter));
+        result.append(", Pol="+m_polarization.print(chatter));
         result.append(")");
 
     } // endif: chatter was not silent
@@ -236,6 +240,7 @@ void GSource::init_members(void)
     m_model = NULL;
     m_energy.clear();
     m_time.clear();
+    m_polarization.clear();
 
     // Return
     return;
@@ -250,10 +255,11 @@ void GSource::init_members(void)
 void GSource::copy_members(const GSource& src)
 {
     // Copy members
-    m_model  = src.m_model;
-    m_name   = src.m_name;
-    m_energy = src.m_energy;
-    m_time   = src.m_time;
+    m_model        = src.m_model;
+    m_name         = src.m_name;
+    m_energy       = src.m_energy;
+    m_time         = src.m_time;
+    m_polarization = src.m_polarization;
 
     // Return
     return;

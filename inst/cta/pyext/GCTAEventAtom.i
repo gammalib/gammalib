@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTAEventAtom.i - CTA event atom class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -43,15 +43,13 @@ public:
     virtual ~GCTAEventAtom(void);
 
     // Implemented pure virtual base class methods
-    void               clear(void);
-    GCTAEventAtom*     clone(void) const;
-    std::string        classname(void) const;
-    const GCTAInstDir& dir(void) const;
-    const GEnergy&     energy(void) const;
-    const GTime&       time(void) const;
-    void               dir(const GCTAInstDir& dir);
-    void               energy(const GEnergy& energy);
-    void               time(const GTime& time);
+    virtual void                 clear(void);
+    virtual GCTAEventAtom*       clone(void) const;
+    virtual std::string          classname(void) const;
+    virtual const GCTAInstDir&   dir(void) const;
+    virtual const GEnergy&       energy(void) const;
+    virtual const GTime&         time(void) const;
+    virtual const GPolarization& polarization(void) const;
 
     // Other methods
     const int&           index(void) const;
@@ -62,6 +60,10 @@ public:
     void                 event_id(const unsigned long& id);
     void                 mc_id(const int& id);
     void                 phase(const float& phase);
+    void                 dir(const GCTAInstDir& dir);
+    void                 energy(const GEnergy& energy);
+    void                 time(const GTime& time);
+    void                 polarization(const GPolarization& polarization);
 };
 
 

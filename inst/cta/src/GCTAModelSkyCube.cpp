@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GCTAModelSkyCube.cpp - CTA sky cube model class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2020 by Juergen Knoedlseder                              *
+ *  copyright (C) 2020-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -497,6 +497,7 @@ double GCTAModelSkyCube::eval(const GEvent&       event,
  *
  * @param[in] obsEng Measured event energy.
  * @param[in] obsTime Measured event time.
+ * @param[in] obsPol Measured event polarization.
  * @param[in] obs Observation.
  * @return Spatially integrated event rate
  *         (events MeV\f$^{-1}\f$ s\f$^{-1}\f$)
@@ -504,9 +505,10 @@ double GCTAModelSkyCube::eval(const GEvent&       event,
  * Spatially integrates the sky cube model for a given measured event energy
  * and event time.
  ***************************************************************************/
-double GCTAModelSkyCube::npred(const GEnergy&      obsEng,
-                               const GTime&        obsTime,
-                               const GObservation& obs) const
+double GCTAModelSkyCube::npred(const GEnergy&       obsEng,
+                               const GTime&         obsTime,
+                               const GPolarization& obsPol,
+                               const GObservation&  obs) const
 {
     // Initialise result
     double npred     = 0.0;

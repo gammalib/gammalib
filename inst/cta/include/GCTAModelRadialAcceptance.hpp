@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTAModelRadialAcceptance.hpp - Radial acceptance model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -72,11 +72,13 @@ public:
     virtual std::string                classname(void) const;
     virtual std::string                type(void) const;
     virtual bool                       is_constant(void) const;
-    virtual double                     eval(const GEvent& event,
+    virtual double                     eval(const GEvent&       event,
                                             const GObservation& obs,
-                                            const bool& gradients = false) const;
-    virtual double                     npred(const GEnergy& obsEng, const GTime& obsTime,
-                                             const GObservation& obs) const;
+                                            const bool&         gradients = false) const;
+    virtual double                     npred(const GEnergy&       obsEng,
+                                             const GTime&         obsTime,
+                                             const GPolarization& obsPol,
+                                             const GObservation&  obs) const;
     virtual GCTAEventList*             mc(const GObservation& obs, GRan& ran) const;
     virtual void                       read(const GXmlElement& xml);
     virtual void                       write(GXmlElement& xml) const;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        GPhoton.hpp - Photon class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -67,19 +67,24 @@ GPhoton::GPhoton(void)
  * @param[in] dir Sky direction.
  * @param[in] energy Energy.
  * @param[in] time Time.
+ * @param[in] polarization Polarization.
  * @param[in] mc_id Monte-Carlo identifier.
  ***************************************************************************/
-GPhoton::GPhoton(const GSkyDir& dir, const GEnergy& energy,
-                 const GTime& time, const int& mc_id)
+GPhoton::GPhoton(const GSkyDir&       dir,
+                 const GEnergy&       energy,
+                 const GTime&         time,
+                 const GPolarization& polarization,
+                 const int&           mc_id)
 { 
     // Initialise private members
     init_members();
 
     // Set members
-    m_dir    = dir;
-    m_energy = energy;
-    m_time   = time;
-    m_mc_id  = mc_id;
+    m_dir          = dir;
+    m_energy       = energy;
+    m_time         = time;
+    m_polarization = polarization;
+    m_mc_id        = mc_id;
 
     // Return
     return;
@@ -204,6 +209,7 @@ std::string GPhoton::print(const GChatter& chatter) const
         result.append(", Dec="+gammalib::str(m_dir.dec_deg()));
         result.append(", E="+m_energy.print());
         result.append(", MET="+m_time.print());
+        result.append(", Pol="+m_polarization.print());
         if (m_mc_id >= 0) {
             result.append(", MC_ID="+gammalib::str(m_mc_id));
         }
@@ -231,6 +237,7 @@ void GPhoton::init_members(void)
     m_dir.clear();
     m_energy.clear();
     m_time.clear();
+    m_polarization.clear();
     m_mc_id = -1;
   
     // Return
@@ -246,10 +253,11 @@ void GPhoton::init_members(void)
 void GPhoton::copy_members(const GPhoton& photon)
 {
     // Copy members
-    m_dir    = photon.m_dir;
-    m_energy = photon.m_energy;
-    m_time   = photon.m_time;
-    m_mc_id  = photon.m_mc_id;
+    m_dir          = photon.m_dir;
+    m_energy       = photon.m_energy;
+    m_time         = photon.m_time;
+    m_polarization = photon.m_polarization;
+    m_mc_id        = photon.m_mc_id;
     
     // Return
     return;

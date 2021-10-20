@@ -253,17 +253,19 @@ std::string GXXXEventBin::print(const GChatter& chatter) const
 void GXXXEventBin::init_members(void)
 {
     // Allocate members
-    m_alloc      = true;
-    m_index      = -1;   // Signals that event bin does not correspond to cube
-    m_dir        = new GXXXInstDir;
-    m_time       = new GTime;
-    m_energy     = new GEnergy;
-    m_counts     = new double;
+    m_alloc        = true;
+    m_index        = -1;   // Signals that event bin does not correspond to cube
+    m_dir          = new GXXXInstDir;
+    m_energy       = new GEnergy;
+    m_time         = new GTime;
+    m_polarization = new GPolarization;
+    m_counts       = new double;
 
     // Initialise members
     m_dir->clear();
-    m_time->clear();
     m_energy->clear();
+    m_time->clear();
+    m_polarization->clear();
     *m_counts = 0.0;
 
     // Return
@@ -282,10 +284,11 @@ void GXXXEventBin::copy_members(const GXXXEventBin& bin)
     free_members();
 
     // Copy members by cloning
-    m_dir    = new GXXXInstDir(*bin.m_dir);
-    m_time   = new GTime(*bin.m_time);
-    m_energy = new GEnergy(*bin.m_energy);
-    m_counts = new double(*bin.m_counts);
+    m_dir          = new GXXXInstDir(*bin.m_dir);
+    m_energy       = new GEnergy(*bin.m_energy);
+    m_time         = new GTime(*bin.m_time);
+    m_polarization = new GPolarization(*bin.m_polarization);
+    m_counts       = new double(*bin.m_counts);
 
     // Copy non-pointer members
     m_index = bin.m_index;
@@ -315,17 +318,19 @@ void GXXXEventBin::free_members(void)
 {
     // If memory was allocated then free members now
     if (m_alloc) {
-        if (m_dir    != NULL) delete m_dir;
-        if (m_time   != NULL) delete m_time;
-        if (m_energy != NULL) delete m_energy;
-        if (m_counts != NULL) delete m_counts;
+        if (m_dir          != NULL) delete m_dir;
+        if (m_energy       != NULL) delete m_energy;
+        if (m_time         != NULL) delete m_time;
+        if (m_polarization != NULL) delete m_polarization;
+        if (m_counts       != NULL) delete m_counts;
     }
 
     // Signal member pointers as free
-    m_dir    = NULL;
-    m_time   = NULL;
-    m_energy = NULL;
-    m_counts = NULL;
+    m_dir          = NULL;
+    m_energy       = NULL;
+    m_time         = NULL;
+    m_polarization = NULL;
+    m_counts       = NULL;
 
     // Signal memory de-allocation
     m_alloc = false;

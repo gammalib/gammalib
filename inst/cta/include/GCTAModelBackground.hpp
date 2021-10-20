@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GCTAModelBackground.hpp - Background model class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2018 by Juergen Knoedlseder                              *
+ *  copyright (C) 2018-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -77,9 +77,10 @@ public:
     virtual double               eval(const GEvent&       event,
                                       const GObservation& obs,
                                       const bool&         gradients = false) const;
-    virtual double               npred(const GEnergy&      energy,
-                                       const GTime&        time,
-                                       const GObservation& obs) const;
+    virtual double               npred(const GEnergy&       energy,
+                                       const GTime&         time,
+                                       const GPolarization& polarization,
+                                       const GObservation&  obs) const;
     virtual GCTAEventList*       mc(const GObservation& obs, GRan& ran) const;
     virtual void                 read(const GXmlElement& xml);
     virtual void                 write(GXmlElement& xml) const;

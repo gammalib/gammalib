@@ -29,9 +29,10 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GEventBin.hpp"
+#include "GXXXInstDir.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
-#include "GXXXInstDir.hpp"
+#include "GPolarization.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 
@@ -73,17 +74,18 @@ public:
     virtual GXXXEventBin& operator=(const GXXXEventBin& bin);
 
     // Implemented pure virtual base class methods
-    virtual void               clear(void);
-    virtual GXXXEventBin*      clone(void) const;
-    virtual std::string        classname(void) const;
-    virtual double             size(void) const;
-    virtual const GXXXInstDir& dir(void) const;
-    virtual const GEnergy&     energy(void) const;
-    virtual const GTime&       time(void) const;
-    virtual double             counts(void) const;
-    virtual double             error(void) const;
-    virtual void               counts(const double& counts);
-    virtual std::string        print(const GChatter& chatter = NORMAL) const;
+    virtual void                 clear(void);
+    virtual GXXXEventBin*        clone(void) const;
+    virtual std::string          classname(void) const;
+    virtual double               size(void) const;
+    virtual const GXXXInstDir&   dir(void) const;
+    virtual const GEnergy&       energy(void) const;
+    virtual const GTime&         time(void) const;
+    virtual const GPolarization& polarization(void) const;
+    virtual double               counts(void) const;
+    virtual double               error(void) const;
+    virtual void                 counts(const double& counts);
+    virtual std::string          print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     // TODO: Add any further methods that are needed
@@ -95,12 +97,13 @@ protected:
     void free_members(void);
 
     // Protected members
-    bool         m_alloc;  //!< Signals proper memory allocation
-    int          m_index;  //!< Dataspace index
-    double*      m_counts; //!< Pointer to number of counts
-    GXXXInstDir* m_dir;    //!< Pointer to bin direction
-    GTime*       m_time;   //!< Pointer to bin time
-    GEnergy*     m_energy; //!< Pointer to bin energy
+    bool           m_alloc;        //!< Signals proper memory allocation
+    int            m_index;        //!< Dataspace index
+    double*        m_counts;       //!< Pointer to number of counts
+    GXXXInstDir*   m_dir;          //!< Pointer to bin direction
+    GEnergy*       m_energy;       //!< Pointer to bin energy
+    GTime*         m_time;         //!< Pointer to bin time
+    GPolarization* m_polarization; //!< Pointer to bin polarization
 };
 
 
@@ -155,6 +158,20 @@ inline
 const GTime& GXXXEventBin::time(void) const
 {
     return (*m_time);
+}
+
+
+/***********************************************************************//**
+ * @brief Return polarization
+ *
+ * @return Polarization.
+ *
+ * Returns the polarization of the event bin.
+ ***************************************************************************/
+inline
+const GPolarization& GXXXEventBin::polarization(void) const
+{
+    return (*m_polarization);
 }
 
 

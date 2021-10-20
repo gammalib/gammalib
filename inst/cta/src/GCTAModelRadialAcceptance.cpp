@@ -474,6 +474,7 @@ double GCTAModelRadialAcceptance::eval(const GEvent&       event,
  *
  * @param[in] obsEng Measured event energy.
  * @param[in] obsTime Measured event time.
+ * @param[in] obsPol Measured event polarization.
  * @param[in] obs Observation.
  * @return Spatially integrated background rate
  *         (events MeV\f$^{-1}\f$ s\f$^{-1}\f$)
@@ -482,9 +483,10 @@ double GCTAModelRadialAcceptance::eval(const GEvent&       event,
  * event time. The method returns a real rate, defined as the number of
  * counts per MeV and ontime.
  ***************************************************************************/
-double GCTAModelRadialAcceptance::npred(const GEnergy&      obsEng,
-                                        const GTime&        obsTime,
-                                        const GObservation& obs) const
+double GCTAModelRadialAcceptance::npred(const GEnergy&       obsEng,
+                                        const GTime&         obsTime,
+                                        const GPolarization& obsPol,
+                                        const GObservation&  obs) const
 {
     // Initialise result
     double npred = 0.0;

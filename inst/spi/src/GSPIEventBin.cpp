@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GSPIEventBin.cpp - INTEGRAL/SPI event bin class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2020 by Juergen Knoedlseder                              *
+ *  copyright (C) 2020-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -34,6 +34,7 @@
 #include "GSPIEventBin.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
+#include "GPolarization.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_MODEL                                   "GSPIEventBin::model(int&)"
@@ -261,24 +262,26 @@ std::string GSPIEventBin::print(const GChatter& chatter) const
 void GSPIEventBin::init_members(void)
 {
     // Allocate members
-    m_alloc      = true;
-    m_index      = -1;  // Signals that event bin does not correspond to cube
-    m_ipt        = -1;  // Signals that event bin does not correspond to cube
-    m_idir       = -1;  // Signals that event bin does not correspond to cube
-    m_iebin      = -1;  // Signals that event bin does not correspond to cube
-    m_num_models =  0;  // No models in event bin
-    m_dir        = new GSPIInstDir;
-    m_time       = new GTime;
-    m_energy     = new GEnergy;
-    m_counts     = new double;
-    m_ontime     = new double;
-    m_livetime   = new double;
-    m_size       = new double;
-    m_models     = NULL;
+    m_alloc        = true;
+    m_index        = -1;  // Signals that event bin does not correspond to cube
+    m_ipt          = -1;  // Signals that event bin does not correspond to cube
+    m_idir         = -1;  // Signals that event bin does not correspond to cube
+    m_iebin        = -1;  // Signals that event bin does not correspond to cube
+    m_num_models   =  0;  // No models in event bin
+    m_dir          = new GSPIInstDir;
+    m_time         = new GTime;
+    m_polarization = new GPolarization;
+    m_energy       = new GEnergy;
+    m_counts       = new double;
+    m_ontime       = new double;
+    m_livetime     = new double;
+    m_size         = new double;
+    m_models       = NULL;
 
     // Initialise members
     m_dir->clear();
     m_time->clear();
+    m_polarization->clear();
     m_energy->clear();
     *m_counts   = 0.0;
     *m_ontime   = 0.0;
@@ -308,13 +311,14 @@ void GSPIEventBin::copy_members(const GSPIEventBin& bin)
     m_num_models = bin.m_num_models;
 
     // Copy members by cloning
-    m_dir      = new GSPIInstDir(*bin.m_dir);
-    m_time     = new GTime(*bin.m_time);
-    m_energy   = new GEnergy(*bin.m_energy);
-    m_counts   = new double(*bin.m_counts);
-    m_ontime   = new double(*bin.m_ontime);
-    m_livetime = new double(*bin.m_livetime);
-    m_size     = new double(*bin.m_size);
+    m_dir          = new GSPIInstDir(*bin.m_dir);
+    m_time         = new GTime(*bin.m_time);
+    m_polarization = new GPolarization(*bin.m_polarization);
+    m_energy       = new GEnergy(*bin.m_energy);
+    m_counts       = new double(*bin.m_counts);
+    m_ontime       = new double(*bin.m_ontime);
+    m_livetime     = new double(*bin.m_livetime);
+    m_size         = new double(*bin.m_size);
     
     // Copy models
     if (m_num_models > 0) {

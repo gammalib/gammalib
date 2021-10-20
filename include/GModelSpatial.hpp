@@ -105,9 +105,10 @@ public:
     virtual std::string    print(const GChatter& chatter = NORMAL) const = 0;
 
     // Virtual methods
-    virtual double flux(const GSkyRegion& region,
-                        const GEnergy&    srcEng  = GEnergy(),
-                        const GTime&      srcTime = GTime()) const;
+    virtual double flux(const GSkyRegion&    region,
+                        const GEnergy&       srcEng  = GEnergy(),
+                        const GTime&         srcTime = GTime(),
+                        const GPolarization& srcPol = GPolarization()) const;
 
     // Methods
     std::string       type(void) const;
@@ -134,6 +135,7 @@ protected:
                             const GSkyRegionCircle* reg,
                             const GEnergy&          srcEng,
                             const GTime&            srcTime,
+                            const GPolarization&    srcPol,
                             const double            distance,
                             const double            cosdist,
                             const double            sindist,
@@ -143,6 +145,7 @@ protected:
                             m_reg(reg),
                             m_srcEng(srcEng),
                             m_srcTime(srcTime),
+                            m_srcPol(srcPol),
                             m_dist(distance),
                             m_cosdist(cosdist),
                             m_sindist(sindist),
@@ -152,8 +155,9 @@ protected:
     public:
         const GModelSpatial*    m_model;     //!< Spatial model
         const GSkyRegionCircle* m_reg;       //!< Integration region
-        GEnergy                 m_srcEng;    //!< Photon energy
-        GTime                   m_srcTime;   //!< Photon time
+        const GEnergy&          m_srcEng;    //!< Photon energy
+        const GTime&            m_srcTime;   //!< Photon time
+        const GPolarization&    m_srcPol;    //!< Photon polarization
         double                  m_dist;      //!< Distance model-region (rad)
         double                  m_cosdist;   //!< Cos of distance model-region
         double                  m_sindist;   //!< Sin of distance model-region
@@ -168,19 +172,22 @@ protected:
                               const GSkyRegionCircle* reg,
                               const double&           rho,
                               const GEnergy&          srcEng,
-                              const GTime&            srcTime) :
+                              const GTime&            srcTime,
+                              const GPolarization&    srcPol) :
                               m_model(model),
                               m_reg(reg),
                               m_rho(rho),
                               m_srcEng(srcEng),
-                              m_srcTime(srcTime) { }
+                              m_srcTime(srcTime),
+                              m_srcPol(srcPol) { }
         double eval(const double& omega);
     public:
         const GModelSpatial*    m_model;   //!< Spatial model
         const GSkyRegionCircle* m_reg;     //!< Integration region
         double                  m_rho;     //!< Offset from center of the region
-        GEnergy                 m_srcEng;  //!< Photon energy
-        GTime                   m_srcTime; //!< Photon time
+        const GEnergy&          m_srcEng;  //!< Photon energy
+        const GTime&            m_srcTime; //!< Photon time
+        const GPolarization&    m_srcPol;  //!< Photon polarization
     };
 
     // Proteced members

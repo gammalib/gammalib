@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GSPIEventBin.i - INTEGRAL/SPI event bin class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2020 by Juergen Knoedlseder                              *
+ *  copyright (C) 2020-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -43,16 +43,17 @@ public:
     virtual ~GSPIEventBin(void);
 
     // Implemented pure virtual base class methods
-    virtual void               clear(void);
-    virtual GSPIEventBin*      clone(void) const;
-    virtual std::string        classname(void) const;
-    virtual double             size(void) const;
-    virtual const GSPIInstDir& dir(void) const;
-    virtual const GEnergy&     energy(void) const;
-    virtual const GTime&       time(void) const;
-    virtual double             counts(void) const;
-    virtual double             error(void) const;
-    virtual void               counts(const double& counts);
+    virtual void                 clear(void);
+    virtual GSPIEventBin*        clone(void) const;
+    virtual std::string          classname(void) const;
+    virtual double               size(void) const;
+    virtual const GSPIInstDir&   dir(void) const;
+    virtual const GEnergy&       energy(void) const;
+    virtual const GTime&         time(void) const;
+    virtual const GPolarization& polarization(void) const;
+    virtual double               counts(void) const;
+    virtual double               error(void) const;
+    virtual void                 counts(const double& counts);
 
     // Other methods
     const double& model(const int& index) const;

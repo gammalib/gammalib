@@ -615,6 +615,7 @@ GVector GModelSky::eval(const GObservation& obs,
  *
  * @param[in] obsEng Measured photon energy.
  * @param[in] obsTime Measured photon arrival time.
+ * @param[in] obsPol Measured photon polarization.
  * @param[in] obs Observation.
  * @return Spatially integrated sky model.
  *
@@ -645,9 +646,10 @@ GVector GModelSky::eval(const GObservation& obs,
  * The method calls the GResponse::nroi() method that does the relevant
  * integration.
  ***************************************************************************/
-double GModelSky::npred(const GEnergy&      obsEng,
-                        const GTime&        obsTime,
-                        const GObservation& obs) const
+double GModelSky::npred(const GEnergy&       obsEng,
+                        const GTime&         obsTime,
+                        const GPolarization& obsPol,
+                        const GObservation&  obs) const
 {
     // Initialise result
     double npred = 0.0;
@@ -656,7 +658,7 @@ double GModelSky::npred(const GEnergy&      obsEng,
     if (valid_model()) {
 
         // Compute Nroi
-        npred = obs.response()->nroi(*this, obsEng, obsTime, obs);
+        npred = obs.response()->nroi(*this, obsEng, obsTime, obsPol, obs);
 
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
@@ -666,6 +668,7 @@ double GModelSky::npred(const GEnergy&      obsEng,
             std::cout << " (npred=" << npred;
             std::cout << ", obsEng=" << obsEng;
             std::cout << ", obsTime=" << obsTime;
+            std::cout << ", obsPol=" << obsPol;
             std::cout << ")" << std::endl;
         }
         #endif

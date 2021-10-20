@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GLATEventCube.hpp - Fermi/LAT event cube class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -35,6 +35,7 @@
 #include "GLATEventBin.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
+#include "GPolarization.hpp"
 #include "GFits.hpp"
 #include "GFitsImage.hpp"
 #include "GFitsTable.hpp"
@@ -115,6 +116,7 @@ protected:
     GLATEventBin             m_bin;          //!< Actual energy bin
     GSkyMap                  m_map;          //!< Counts map stored as sky map
     GTime                    m_time;         //!< Event cube mean time
+    GPolarization            m_polarization; //!< Event cube mean polarization
     double                   m_ontime;       //!< Event cube ontime (sec)
     std::vector<GLATInstDir> m_dirs;         //!< Array of event directions
     std::vector<double>      m_solidangle;   //!< Array of solid angles (sr)

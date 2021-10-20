@@ -197,8 +197,9 @@ double GResponse::convolve(const GModelSky&    model,
     // Continue only if the model has a spatial component
     if (model.spatial() != NULL) {
 
-        // Get source time (no dispersion)
-        GTime srcTime = event.time();
+        // Get source time and polarization (no dispersion)
+        GTime         srcTime = event.time();
+        GPolarization srcPol  = event.polarization();
 
         // Case A: Integration
         if (use_edisp()) {
@@ -236,7 +237,7 @@ double GResponse::convolve(const GModelSky&    model,
                 if (etrue_max > etrue_min) {
 
                     // Setup integration function
-                    edisp_kerns integrand(this, &obs, &model, &event, srcTime, grad);
+                    edisp_kerns integrand(this, &obs, &model, &event, srcTime, srcPol, grad);
                     GIntegrals  integral(&integrand);
 
                     // Set number of iterations
@@ -301,7 +302,7 @@ double GResponse::convolve(const GModelSky&    model,
             GEnergy srcEng  = event.energy();
 
             // Evaluate probability
-            prob = eval_prob(model, event, srcEng, srcTime, obs, grad);
+            prob = eval_prob(model, event, srcEng, srcTime, GPolarization(), obs, grad);
 
         } // endelse: Case B
 
@@ -412,8 +413,9 @@ GVector GResponse::convolve(const GModelSky&    model,
                 // Get reference to event
                 const GEvent& event = *((*obs.events())[k]);
 
-                // Get source time (no dispersion)
-                GTime srcTime = event.time();
+                // Get source time and polarization (no dispersion)
+                GTime         srcTime = event.time();
+                GPolarization srcPol  = event.polarization();
 
                 // Retrieve true energy boundaries
                 GEbounds ebounds = this->ebounds(event.energy());
@@ -442,7 +444,7 @@ GVector GResponse::convolve(const GModelSky&    model,
                     if (etrue_max > etrue_min) {
 
                         // Setup integration function
-                        edisp_kerns integrand(this, &obs, &model, &event, srcTime, grad);
+                        edisp_kerns integrand(this, &obs, &model, &event, srcTime, srcPol, grad);
                         GIntegrals  integral(&integrand);
 
                         // Set number of iterations
@@ -858,7 +860,7 @@ double GResponse::irf_ptsrc(const GEvent&       event,
           static_cast<const GModelSpatialPointSource*>(source.model());
 
     // Setup photon
-    GPhoton photon(model->dir(), source.energy(), source.time());
+    GPhoton photon(model->dir(), source.energy(), source.time(), source.polarization());
 
     // Get IRF
     double irf = this->irf(event, photon, obs);
@@ -917,8 +919,9 @@ double GResponse::irf_radial(const GEvent&       event,
           static_cast<const GModelSpatialRadial*>(source.model());
 
     // Get source attributes
-    const GEnergy& srcEng  = source.energy();
-    const GTime&   srcTime = source.time();
+    const GEnergy&       srcEng  = source.energy();
+    const GTime&         srcTime = source.time();
+    const GPolarization& srcPol  = source.polarization();
 
     // Set radial integration range (radians)
     double theta_min = 0.0;
@@ -947,6 +950,7 @@ double GResponse::irf_radial(const GEvent&       event,
                                         &rot,
                                         &srcEng,
                                         &srcTime,
+                                        &srcPol,
                                         m_irf_radial_iter_phi);
 
         // Integrate over model's radial coordinate
@@ -1024,8 +1028,9 @@ double GResponse::irf_elliptical(const GEvent&       event,
           static_cast<const GModelSpatialElliptical*>(source.model());
 
     // Get source attributes
-    const GEnergy& srcEng  = source.energy();
-    const GTime&   srcTime = source.time();
+    const GEnergy&       srcEng  = source.energy();
+    const GTime&         srcTime = source.time();
+    const GPolarization& srcPol  = source.polarization();
 
     // Set radial integration range (radians)
     double theta_min = 0.0;
@@ -1054,6 +1059,7 @@ double GResponse::irf_elliptical(const GEvent&       event,
                                             &rot,
                                             &srcEng,
                                             &srcTime,
+                                            &srcPol,
                                             m_irf_elliptical_iter_phi);
 
         // Integrate over model's radial coordinate
@@ -1122,9 +1128,10 @@ double GResponse::irf_diffuse(const GEvent&       event,
     // Initialise IRF
     double irf = 0.0;
 
-    // Get source attributes
-    const GEnergy& srcEng  = source.energy();
-    const GTime&   srcTime = source.time();
+    // Get references to source attributes
+    const GEnergy&       srcEng  = source.energy();
+    const GTime&         srcTime = source.time();
+    const GPolarization& srcPol  = source.polarization();
 
     // If model is a diffuse map model then extract sky map
     const GModelSpatialDiffuseMap* map =
@@ -1149,7 +1156,7 @@ double GResponse::irf_diffuse(const GEvent&       event,
             GSkyDir srcDir = skymap.inx2dir(i);
 
             // Setup photon
-            GPhoton photon(srcDir, srcEng, srcTime);
+            GPhoton photon(srcDir, srcEng, srcTime, srcPol);
 
             // Add IRF multiplied by flux in map pixel. Since the map value
             // is per steradian we have to multiply with the solid angle of
@@ -1176,7 +1183,7 @@ double GResponse::irf_diffuse(const GEvent&       event,
                 GSkyDir srcDir = skymap.inx2dir(i);
 
                 // Setup photon
-                GPhoton photon(srcDir, srcEng, srcTime);
+                GPhoton photon(srcDir, srcEng, srcTime, srcPol);
 
                 // Get map value
                 double value = cube->eval(photon);
@@ -1216,7 +1223,7 @@ double GResponse::irf_diffuse(const GEvent&       event,
                 GSkyDir srcDir = skymap.inx2dir(i);
 
                 // Setup photon
-                GPhoton photon(srcDir, srcEng, srcTime);
+                GPhoton photon(srcDir, srcEng, srcTime, srcPol);
 
                 // Get model value
                 double value = model->eval(photon);
@@ -1270,7 +1277,8 @@ double GResponse::irf_composite(const GEvent&       event,
         GModelSpatial* spat = const_cast<GModelSpatial*>(model->component(i));
 
         // Create new GSource object
-        GSource src(source.name(), spat, source.energy(), source.time());
+        GSource src(source.name(), spat, source.energy(), source.time(),
+                    source.polarization());
 
         // Compute irf value
         irf += irf_spatial(event, src, obs) * model->scale(i);
@@ -1316,11 +1324,12 @@ GVector GResponse::irf_ptsrc(const GModelSky&    model,
         const GEvent& event = *((*obs.events())[k]);
 
         // Get source energy and time (no dispersion)
-        GEnergy srcEng  = event.energy();
-        GTime   srcTime = event.time();
+        GEnergy       srcEng  = event.energy();
+        GTime         srcTime = event.time();
+        GPolarization srcPol  = event.polarization();
 
         // Setup source
-        GSource source(model.name(), model.spatial(), srcEng, srcTime);
+        GSource source(model.name(), model.spatial(), srcEng, srcTime, srcPol);
 
         // Get IRF value for event
         irfs[k] = this->irf_ptsrc(event, source, obs);
@@ -1360,11 +1369,12 @@ GVector GResponse::irf_radial(const GModelSky&    model,
         const GEvent& event = *((*obs.events())[k]);
 
         // Get source energy and time (no dispersion)
-        GEnergy srcEng  = event.energy();
-        GTime   srcTime = event.time();
+        GEnergy       srcEng  = event.energy();
+        GTime         srcTime = event.time();
+        GPolarization srcPol  = event.polarization();
 
         // Setup source
-        GSource source(model.name(), model.spatial(), srcEng, srcTime);
+        GSource source(model.name(), model.spatial(), srcEng, srcTime, srcPol);
 
         // Get IRF value for event
         irfs[k] = this->irf_radial(event, source, obs);
@@ -1404,11 +1414,12 @@ GVector GResponse::irf_elliptical(const GModelSky&    model,
         const GEvent& event = *((*obs.events())[k]);
 
         // Get source energy and time (no dispersion)
-        GEnergy srcEng  = event.energy();
-        GTime   srcTime = event.time();
+        GEnergy       srcEng  = event.energy();
+        GTime         srcTime = event.time();
+        GPolarization srcPol  = event.polarization();
 
         // Setup source
-        GSource source(model.name(), model.spatial(), srcEng, srcTime);
+        GSource source(model.name(), model.spatial(), srcEng, srcTime, srcPol);
 
         // Get IRF value for event
         irfs[k] = this->irf_elliptical(event, source, obs);
@@ -1448,11 +1459,12 @@ GVector GResponse::irf_diffuse(const GModelSky&    model,
         const GEvent& event = *((*obs.events())[k]);
 
         // Get source energy and time (no dispersion)
-        GEnergy srcEng  = event.energy();
-        GTime   srcTime = event.time();
+        GEnergy       srcEng  = event.energy();
+        GTime         srcTime = event.time();
+        GPolarization srcPol  = event.polarization();
 
         // Setup source
-        GSource source(model.name(), model.spatial(), srcEng, srcTime);
+        GSource source(model.name(), model.spatial(), srcEng, srcTime, srcPol);
 
         // Get IRF value for event
         irfs[k] = this->irf_diffuse(event, source, obs);
@@ -1521,8 +1533,9 @@ GVector GResponse::irf_composite(const GModelSky&    model,
  * @param[in] event Event.
  * @param[in] srcEng Source energy.
  * @param[in] srcTime Source time.
+ * @param[in] srcPol Source polarization (not used).
  * @param[in] obs Observation.
- * @param[in] grad Should model gradients be computed? (default: true)
+ * @param[in] grad Should model gradients be computed?
  * @return Event probability.
  *
  * Computes the event probability
@@ -1533,12 +1546,13 @@ GVector GResponse::irf_composite(const GModelSky&    model,
  *
  * for a given true energy \f$E\f$ and time \f$t\f$.
  ***************************************************************************/
-double GResponse::eval_prob(const GModelSky&    model,
-                            const GEvent&       event,
-                            const GEnergy&      srcEng,
-                            const GTime&        srcTime,
-                            const GObservation& obs,
-                            const bool&         grad) const
+double GResponse::eval_prob(const GModelSky&     model,
+                            const GEvent&        event,
+                            const GEnergy&       srcEng,
+                            const GTime&         srcTime,
+                            const GPolarization& srcPol,
+                            const GObservation&  obs,
+                            const bool&          grad) const
 {
     // Initialise result
     double prob = 0.0;
@@ -1547,7 +1561,7 @@ double GResponse::eval_prob(const GModelSky&    model,
     if (model.spatial() != NULL) {
 
         // Set source
-        GSource source(model.name(), model.spatial(), srcEng, srcTime);
+        GSource source(model.name(), model.spatial(), srcEng, srcTime, srcPol);
 
         // Compute IRF value
         double irf = irf_spatial(event, source, obs);
@@ -1720,8 +1734,9 @@ GVector GResponse::eval_probs(const GModelSky&    model,
                 const GEvent& event = *((*obs.events())[k]);
 
                 // Get source energy and time
-                GEnergy srcEng  = event.energy();
-                GTime   srcTime = event.time();
+                GEnergy       srcEng  = event.energy();
+                GTime         srcTime = event.time();
+                GPolarization srcPol  = event.polarization();
 
                 // Evaluate spectral and temporal components
                 double spec = (model.spectral() != NULL)
@@ -1883,27 +1898,28 @@ int GResponse::size_edisp_vector(const GModelSky&    model,
  * @param[in] model Pointer to sky model.
  * @param[in] event Pointer to event.
  * @param[in] srcTime True time.
+ * @param[in] srcPol True polarization.
  * @param[in] grad Evaluate gradients?
  *
  * This method constructs the integration kernel needed for the energy
  * dispersion computation.
  ***************************************************************************/
-GResponse::edisp_kerns::edisp_kerns(const GResponse*    parent,
-                                    const GObservation* obs,
-                                    const GModelSky*    model,
-                                    const GEvent*       event,
-                                    const GTime&        srcTime,
-                                    const bool&         grad)
+GResponse::edisp_kerns::edisp_kerns(const GResponse*     parent,
+                                    const GObservation*  obs,
+                                    const GModelSky*     model,
+                                    const GEvent*        event,
+                                    const GTime&         srcTime,
+                                    const GPolarization& srcPol,
+                                    const bool&          grad) :
+                                    m_parent(parent),
+                                    m_obs(obs),
+                                    m_model(model),
+                                    m_event(event),
+                                    m_size(1),
+                                    m_srcTime(srcTime),
+                                    m_srcPol(srcPol),
+                                    m_grad(grad)
 {
-    // Set members
-    m_parent  = parent;
-    m_obs     = obs;
-    m_model   = model;
-    m_event   = event;
-    m_size    = 1;
-    m_srcTime = srcTime;
-    m_grad    = grad;
-
     // If gradients are requested then put pointers to all relevant parameter
     // in the parameter pointer vector
     m_pars.clear();
@@ -2023,7 +2039,7 @@ GVector GResponse::edisp_kerns::eval(const double& etrue)
 
     // Get function value
     kernels[index++] = m_parent->eval_prob(*m_model, *m_event,
-                                           srcEng, m_srcTime, *m_obs,
+                                           srcEng, m_srcTime, m_srcPol, *m_obs,
                                            m_grad);
 
     // If gradients are requested then extract them and put them into the
@@ -2083,7 +2099,8 @@ double GResponse::irf_radial_kern_theta::eval(const double& theta)
                                           m_rot,
                                           theta,
                                           m_srcEng,
-                                          m_srcTime);
+                                          m_srcTime,
+                                          m_srcPol);
 
             // Setup integration
             GIntegral integral(&integrand);
@@ -2125,7 +2142,7 @@ double GResponse::irf_radial_kern_phi::eval(const double& phi)
     GSkyDir dir(vector);
 
     // Setup photon
-    GPhoton photon(dir, *m_srcEng, *m_srcTime);
+    GPhoton photon(dir, *m_srcEng, *m_srcTime, *m_srcPol);
 
     // Evaluate IRF for photon
     double irf = m_rsp->irf(*m_event, photon, *m_obs);
@@ -2165,7 +2182,8 @@ double GResponse::irf_elliptical_kern_theta::eval(const double& theta)
                                           m_rot,
                                           theta,
                                           m_srcEng,
-                                          m_srcTime);
+                                          m_srcTime,
+                                          m_srcPol);
 
         // Setup integration
         GIntegral integral(&integrand);
@@ -2213,7 +2231,7 @@ double GResponse::irf_elliptical_kern_phi::eval(const double& phi)
         GSkyDir dir(vector);
 
         // Setup photon
-        GPhoton photon(dir, *m_srcEng, *m_srcTime);
+        GPhoton photon(dir, *m_srcEng, *m_srcTime, *m_srcPol);
 
         // Evaluate IRF for photon
         irf = m_rsp->irf(*m_event, photon, *m_obs) * model;

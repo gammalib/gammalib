@@ -58,9 +58,10 @@ public:
     virtual void           write(GXmlElement& xml) const = 0;
 
     // Virtual methods
-    virtual double flux(const GSkyRegion& region,
-                        const GEnergy&    srcEng  = GEnergy(),
-                        const GTime&      srcTime = GTime()) const;
+    virtual double flux(const GSkyRegion&    region,
+                        const GEnergy&       srcEng  = GEnergy(),
+                        const GTime&         srcTime = GTime(),
+                        const GPolarization& srcPol = GPolarization()) const;
 
     // Methods
     std::string       type(void) const;

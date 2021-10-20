@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GCOMEventAtom.hpp - COMPTEL event atom class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Juergen Knoedlseder                              *
+ *  copyright (C) 2017-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,6 +31,7 @@
 #include <iostream>
 #include "GEnergy.hpp"
 #include "GTime.hpp"
+#include "GPolarization.hpp"
 #include "GEventAtom.hpp"
 #include "GCOMInstDir.hpp"
 
@@ -54,19 +55,21 @@ public:
     GCOMEventAtom& operator=(const GCOMEventAtom& atom);
 
     // Implemented pure virtual base class methods
-    void               clear(void);
-    GCOMEventAtom*     clone(void) const;
-    std::string        classname(void) const;
-    const GCOMInstDir& dir(void) const;
-    const GEnergy&     energy(void) const;
-    const GTime&       time(void) const;
-    std::string        print(const GChatter& chatter = NORMAL) const;
+    virtual void                 clear(void);
+    virtual GCOMEventAtom*       clone(void) const;
+    virtual std::string          classname(void) const;
+    virtual const GCOMInstDir&   dir(void) const;
+    virtual const GEnergy&       energy(void) const;
+    virtual const GTime&         time(void) const;
+    virtual const GPolarization& polarization(void) const;
+    virtual std::string          print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     void         dir(const GCOMInstDir& dir);
     void         energy(const GEnergy& energy);
     void         time(const GTime& time);
     void         time(const int& tjd, const int& tics);
+    void         polarization(const GPolarization& polarizations);
     void         phibar(const float& phibar);
     const float& phibar(void) const;
     void         phi(const float& phi);
@@ -97,20 +100,21 @@ protected:
     void free_members(void);
 
     // Protected members
-    GCOMInstDir m_dir;    //!< Event direction
-    GEnergy     m_energy; //!< Event energy
-    GTime       m_time;   //!< Event time
-    float       m_e1;     //!< D1 energy deposit (MeV)
-    float       m_e2;     //!< D2 energy deposit (MeV)
-    float       m_phibar; //!< Compton scatter angle (deg)
-    float       m_theta;  //!< Zenith angle of scatter direction (deg)
-    float       m_phi;    //!< Azimuth angle of scatter direction (deg)
-    float       m_eha;    //!< Earth horizon angle (deg)
-    float       m_psd;    //!< PSD value (channel)
-    float       m_tof;    //!< Time of flight value (channel)
-    int         m_modcom; //!< Mini telescope number
-    int         m_reflag; //!< Rejection flag
-    int         m_veto;   //!< Veto flag
+    GCOMInstDir   m_dir;          //!< Event direction
+    GEnergy       m_energy;       //!< Event energy
+    GTime         m_time;         //!< Event time
+    GPolarization m_polarization; //!< Event polarization
+    float         m_e1;           //!< D1 energy deposit (MeV)
+    float         m_e2;           //!< D2 energy deposit (MeV)
+    float         m_phibar;       //!< Compton scatter angle (deg)
+    float         m_theta;        //!< Zenith angle of scatter direction (deg)
+    float         m_phi;          //!< Azimuth angle of scatter direction (deg)
+    float         m_eha;          //!< Earth horizon angle (deg)
+    float         m_psd;          //!< PSD value (channel)
+    float         m_tof;          //!< Time of flight value (channel)
+    int           m_modcom;       //!< Mini telescope number
+    int           m_reflag;       //!< Rejection flag
+    int           m_veto;         //!< Veto flag
 };
 
 
@@ -199,6 +203,20 @@ const GTime& GCOMEventAtom::time(void) const
 
 
 /***********************************************************************//**
+ * @brief Return event polarization
+ *
+ * @return Event polarization.
+ *
+ * Returns the event polarization.
+ ***************************************************************************/
+inline
+const GPolarization& GCOMEventAtom::polarization(void) const
+{
+    return m_polarization;
+}
+
+
+/***********************************************************************//**
  * @brief Set event time
  *
  * @param[in] time Event time.
@@ -209,6 +227,21 @@ inline
 void GCOMEventAtom::time(const GTime& time)
 {
     m_time = time;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set event polarization
+ *
+ * @param[in] polarization Event polarization.
+ *
+ * Sets the event polarization.
+ ***************************************************************************/
+inline
+void GCOMEventAtom::polarization(const GPolarization& polarization)
+{
+    m_polarization = polarization;
     return;
 }
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GCTAResponseCube.cpp - CTA cube analysis response function class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -395,6 +395,7 @@ double GCTAResponseCube::irf(const GEvent&       event,
  * @param[in] model Sky model.
  * @param[in] obsEng Observed photon energy.
  * @param[in] obsTime Observed photon arrival time.
+ * @param[in] obsPol Observed photon polarization.
  * @param[in] obs Observation.
  * @return 0.0
  *
@@ -419,10 +420,11 @@ double GCTAResponseCube::irf(const GEvent&       event,
  *
  * @todo Implement method (is maybe not really needed)
  ***************************************************************************/
-double GCTAResponseCube::nroi(const GModelSky&    model,
-                              const GEnergy&      obsEng,
-                              const GTime&        obsTime,
-                              const GObservation& obs) const
+double GCTAResponseCube::nroi(const GModelSky&     model,
+                              const GEnergy&       obsEng,
+                              const GTime&         obsTime,
+                              const GPolarization& obsPol,
+                              const GObservation&  obs) const
 {
     // Method is not implemented
     std::string msg = "Spatial integration of sky model over the data space "

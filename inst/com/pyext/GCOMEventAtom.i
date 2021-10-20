@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCOMEventAtom.i - COMPTEL event atom class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -43,18 +43,20 @@ public:
     virtual ~GCOMEventAtom(void);
 
     // Implemented pure virtual base class methods
-    void               clear(void);
-    GCOMEventAtom*     clone(void) const;
-    std::string        classname(void) const;
-    const GCOMInstDir& dir(void) const;
-    const GEnergy&     energy(void) const;
-    const GTime&       time(void) const;
+    virtual void                 clear(void);
+    virtual GCOMEventAtom*       clone(void) const;
+    virtual std::string          classname(void) const;
+    virtual const GCOMInstDir&   dir(void) const;
+    virtual const GEnergy&       energy(void) const;
+    virtual const GTime&         time(void) const;
+    virtual const GPolarization& polarization(void) const;
 
     // Other methods
     void         dir(const GCOMInstDir& dir);
     void         energy(const GEnergy& energy);
     void         time(const GTime& time);
     void         time(const int& tjd, const int& tics);
+    void         polarization(const GPolarization& polarizations);
     void         phibar(const float& phibar);
     const float& phibar(void) const;
     void         phi(const float& phi);
@@ -89,7 +91,7 @@ public:
     }
 %pythoncode {
     def __getstate__(self):
-        state = (self.dir(), self.energy(), self.time(),
+        state = (self.dir(), self.energy(), self.time(), self.polarization(),
                  self.e1(), self.e2(), self.phibar(), self.theta(),
                  self.phi(), self.eha(), self.psd(), self.tof(),
                  self.modcom(), self.reflag(), self.veto())
@@ -99,16 +101,17 @@ public:
         self.dir(state[0])
         self.energy(state[1])
         self.time(state[2])
-        self.e1(state[3])
-        self.e2(state[4])
-        self.phibar(state[5])
-        self.theta(state[6])
-        self.phi(state[7])
-        self.eha(state[8])
-        self.psd(state[9])
-        self.tof(state[10])
-        self.modcom(state[11])
-        self.reflag(state[12])
-        self.veto(state[13])
+        self.polarization(state[3])
+        self.e1(state[4])
+        self.e2(state[5])
+        self.phibar(state[6])
+        self.theta(state[7])
+        self.phi(state[8])
+        self.eha(state[9])
+        self.psd(state[10])
+        self.tof(state[11])
+        self.modcom(state[12])
+        self.reflag(state[13])
+        self.veto(state[14])
 }
 };

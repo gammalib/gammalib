@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GMWLDatum.hpp - Multi-wavelength spectral point class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,6 +31,7 @@
 #include "GEventBin.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
+#include "GPolarization.hpp"
 #include "GMWLInstDir.hpp"
 
 
@@ -59,17 +60,18 @@ public:
     virtual GMWLDatum& operator=(const GMWLDatum& datum);
 
     // Implemented pure virtual base class methods
-    virtual void               clear(void);
-    virtual GMWLDatum*         clone(void) const;
-    virtual std::string        classname(void) const;
-    virtual double             size(void) const;
-    virtual const GMWLInstDir& dir(void) const;
-    virtual const GEnergy&     energy(void) const;
-    virtual const GTime&       time(void) const;
-    virtual double             counts(void) const;
-    virtual double             error(void) const;
-    virtual void               counts(const double& flux);
-    virtual std::string        print(const GChatter& chatter = NORMAL) const;
+    virtual void                 clear(void);
+    virtual GMWLDatum*           clone(void) const;
+    virtual std::string          classname(void) const;
+    virtual double               size(void) const;
+    virtual const GMWLInstDir&   dir(void) const;
+    virtual const GEnergy&       energy(void) const;
+    virtual const GTime&         time(void) const;
+    virtual const GPolarization& polarization(void) const;
+    virtual double               counts(void) const;
+    virtual double               error(void) const;
+    virtual void                 counts(const double& flux);
+    virtual std::string          print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     const double&  flux(void) const;
@@ -87,12 +89,13 @@ protected:
     void free_members(void);
 
     // Protected members
-    GMWLInstDir m_dir;       //!< Instrument direction of spectral point (not used)
-    GTime       m_time;      //!< Time of spectral point (not used)
-    GEnergy     m_eng;       //!< Energy of spectral point
-    GEnergy     m_eng_err;   //!< Uncertainty in energy
-    double      m_flux;      //!< Flux of spectral point (ph/cm2/s/MeV)
-    double      m_flux_err;  //!< Uncertainty in flux (ph/cm2/s/MeV)
+    GMWLInstDir   m_dir;          //!< Instrument direction of spectral point (not used)
+    GEnergy       m_eng;          //!< Energy of spectral point
+    GTime         m_time;         //!< Time of spectral point (not used)
+    GPolarization m_polarization; //!< Polarization of spectral point (not used)
+    GEnergy       m_eng_err;      //!< Uncertainty in energy
+    double        m_flux;         //!< Flux of spectral point (ph/cm2/s/MeV)
+    double        m_flux_err;     //!< Uncertainty in flux (ph/cm2/s/MeV)
 
 };
 
@@ -154,6 +157,18 @@ inline
 const GTime& GMWLDatum::time(void) const
 {
     return m_time;
+}
+
+
+/***********************************************************************//**
+ * @brief Return polarization of spectral bin
+ *
+ * @return Polarization of spectral bin.
+ ***************************************************************************/
+inline
+const GPolarization& GMWLDatum::polarization(void) const
+{
+    return m_polarization;
 }
 
 

@@ -249,16 +249,18 @@ double GXXXResponse::irf(const GEvent&       event,
  * @param[in] model Sky model.
  * @param[in] obsEng Observed photon energy.
  * @param[in] obsTime Observed photon arrival time.
+ * @param[in] obsPol Observed photon polarization.
  * @param[in] obs Observation.
  * @return 0.0
  *
  * @exception GException::feature_not_implemented
  *            Method is not implemented.
  ***************************************************************************/
-double GXXXResponse::nroi(const GModelSky&    model,
-                          const GEnergy&      obsEng,
-                          const GTime&        obsTime,
-                          const GObservation& obs) const
+double GXXXResponse::nroi(const GModelSky&     model,
+                          const GEnergy&       obsEng,
+                          const GTime&         obsTime,
+                          const GPolarization& obsPol,
+                          const GObservation&  obs) const
 {
     // Method is not implemented
     std::string msg = "Spatial integration of sky model over the data space "

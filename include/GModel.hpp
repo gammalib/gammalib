@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GModel.hpp - Abstract virtual model base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,13 +33,14 @@
 #include "GBase.hpp"
 #include "GModelPar.hpp"
 #include "GModelAssociations.hpp"
-#include "GXmlElement.hpp"
-#include "GEnergy.hpp"
-#include "GTime.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GVector;
 class GMatrixSparse;
+class GXmlElement;
+class GEnergy;
+class GTime;
+class GPolarization;
 class GEvent;
 class GObservation;
 
@@ -124,8 +125,10 @@ public:
                              const bool& gradients = false) const = 0;
     virtual GVector     eval(const GObservation& obs,
                              GMatrixSparse* gradients = NULL) const = 0;
-    virtual double      npred(const GEnergy& obsEng, const GTime& obsTime,
-                              const GObservation& obs) const = 0;
+    virtual double      npred(const GEnergy&       obsEng,
+                              const GTime&         obsTime,
+                              const GPolarization& obsPol,
+                              const GObservation&  obs) const = 0;
     virtual void        read(const GXmlElement& xml) = 0;
     virtual void        write(GXmlElement& xml) const = 0;
     virtual std::string print(const GChatter& chatter = NORMAL) const = 0;

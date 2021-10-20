@@ -51,10 +51,11 @@ public:
     virtual double        irf(const GEvent&       event,
                               const GPhoton&      photon,
                               const GObservation& obs) const;
-    virtual double        nroi(const GModelSky&    model,
-                               const GEnergy&      obsEng,
-                               const GTime&        obsTime,
-                               const GObservation& obs) const;
+    virtual double        nroi(const GModelSky&     model,
+                               const GEnergy&       obsEng,
+                               const GTime&         obsTime,
+                               const GPolarization& obsPol,
+                               const GObservation&  obs) const;
     virtual GEbounds      ebounds(const GEnergy& obsEnergy) const;
 
     // Other Methods

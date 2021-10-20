@@ -45,6 +45,7 @@ class GPhoton;
 class GSource;
 class GSkyDir;
 class GEnergy;
+class GPolarization;
 class GEbounds;
 class GObservation;
 class GModelPar;
@@ -94,10 +95,11 @@ public:
     virtual double      irf(const GEvent&       event,
                             const GPhoton&      photon,
                             const GObservation& obs) const = 0;
-    virtual double      nroi(const GModelSky&    model,
-                             const GEnergy&      obsEng,
-                             const GTime&        obsTime,
-                             const GObservation& obs) const = 0;
+    virtual double      nroi(const GModelSky&     model,
+                             const GEnergy&       obsEng,
+                             const GTime&         obsTime,
+                             const GPolarization& obsPol,
+                             const GObservation&  obs) const = 0;
     virtual GEbounds    ebounds(const GEnergy& obsEng) const = 0;
     virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
 
@@ -122,12 +124,13 @@ protected:
     void     init_members(void);
     void     copy_members(const GResponse& rsp);
     void     free_members(void);
-    double   eval_prob(const GModelSky&    model,
-                       const GEvent&       event,
-                       const GEnergy&      srcEng,
-                       const GTime&        srcTime,
-                       const GObservation& obs,
-                       const bool&         grad) const;
+    double   eval_prob(const GModelSky&     model,
+                       const GEvent&        event,
+                       const GEnergy&       srcEng,
+                       const GTime&         srcTime,
+                       const GPolarization& srcPol,
+                       const GObservation&  obs,
+                       const bool&          grad) const;
     GVector  eval_probs(const GModelSky&    model,
                         const GObservation& obs,
                         GMatrixSparse*      gradients = NULL) const;
@@ -171,12 +174,13 @@ protected:
     // Protected classes
     class edisp_kerns : public GFunctions {
     public:
-        edisp_kerns(const GResponse*    parent,
-                    const GObservation* obs,
-                    const GModelSky*    model,
-                    const GEvent*       event,
-                    const GTime&        srcTime,
-                    const bool&         grad);
+        edisp_kerns(const GResponse*     parent,
+                    const GObservation*  obs,
+                    const GModelSky*     model,
+                    const GEvent*        event,
+                    const GTime&         srcTime,
+                    const GPolarization& srcPol,
+                    const bool&          grad);
         int     size(void) const { return m_size; }
         GVector eval(const double& etrue);
     protected:
@@ -186,7 +190,8 @@ protected:
         const GEvent*           m_event;   //!< Event
         int                     m_size;    //!< Array of values and gradients
         std::vector<GModelPar*> m_pars;    //!< Parameter pointers
-        GTime                   m_srcTime; //!< True arrival time
+        const GTime&            m_srcTime; //!< True arrival time
+        const GPolarization&    m_srcPol;  //!< True photon polarization
         bool                    m_grad;    //!< Gradient flag
     };
     class irf_radial_kern_theta : public GFunction {
@@ -198,6 +203,7 @@ protected:
                               const GMatrix*             rot,
                               const GEnergy*             srcEng,
                               const GTime*               srcTime,
+                              const GPolarization*       srcPol,
                               int                        iter_phi) :
                               m_rsp(rsp),
                               m_event(event),
@@ -206,6 +212,7 @@ protected:
                               m_rot(rot),
                               m_srcEng(srcEng),
                               m_srcTime(srcTime),
+                              m_srcPol(srcPol),
                               m_iter_phi(iter_phi) { }
         double eval(const double& phi);
     protected:
@@ -216,17 +223,19 @@ protected:
         const GMatrix*             m_rot;       //!< Rotation matrix
         const GEnergy*             m_srcEng;    //!< True photon energy
         const GTime*               m_srcTime;   //!< Arrival time
+        const GPolarization*       m_srcPol;    //!< Photon polarization
         int                        m_iter_phi;  //!< Iterations in phi
     };
     class irf_radial_kern_phi : public GFunction {
     public:
-        irf_radial_kern_phi(const GResponse*    rsp,
-                            const GEvent*       event,
-                            const GObservation* obs,
-                            const GMatrix*      rot,
-                            const double&       theta,
-                            const GEnergy*      srcEng,
-                            const GTime*        srcTime) :
+        irf_radial_kern_phi(const GResponse*     rsp,
+                            const GEvent*        event,
+                            const GObservation*  obs,
+                            const GMatrix*       rot,
+                            const double&        theta,
+                            const GEnergy*       srcEng,
+                            const GTime*         srcTime,
+                            const GPolarization* srcPol) :
                             m_rsp(rsp),
                             m_event(event),
                             m_obs(obs),
@@ -234,17 +243,19 @@ protected:
                             m_sin_theta(std::sin(theta)),
                             m_cos_theta(std::cos(theta)),
                             m_srcEng(srcEng),
-                            m_srcTime(srcTime) { }
+                            m_srcTime(srcTime),
+                            m_srcPol(srcPol) { }
         double eval(const double& phi);
     protected:
-        const GResponse*    m_rsp;       //!< Response
-        const GEvent*       m_event;     //!< Event
-        const GObservation* m_obs;       //!< Observation
-        const GMatrix*      m_rot;       //!< Rotation matrix
-        double              m_sin_theta; //!< sin(theta)
-        double              m_cos_theta; //!< cos(theta)
-        const GEnergy*      m_srcEng;    //!< True photon energy
-        const GTime*        m_srcTime;   //!< Arrival time
+        const GResponse*     m_rsp;       //!< Response
+        const GEvent*        m_event;     //!< Event
+        const GObservation*  m_obs;       //!< Observation
+        const GMatrix*       m_rot;       //!< Rotation matrix
+        double               m_sin_theta; //!< sin(theta)
+        double               m_cos_theta; //!< cos(theta)
+        const GEnergy*       m_srcEng;    //!< True photon energy
+        const GTime*         m_srcTime;   //!< Arrival time
+        const GPolarization* m_srcPol;    //!< Photon polarization
     };
     class irf_elliptical_kern_theta : public GFunction {
     public:
@@ -255,6 +266,7 @@ protected:
                                   const GMatrix*                 rot,
                                   const GEnergy*                 srcEng,
                                   const GTime*                   srcTime,
+                                  const GPolarization*           srcPol,
                                   int                            iter_phi) :
                                   m_rsp(rsp),
                                   m_event(event),
@@ -263,6 +275,7 @@ protected:
                                   m_rot(rot),
                                   m_srcEng(srcEng),
                                   m_srcTime(srcTime),
+                                  m_srcPol(srcPol),
                                   m_iter_phi(iter_phi) { }
         double eval(const double& phi);
     protected:
@@ -273,6 +286,7 @@ protected:
         const GMatrix*                 m_rot;       //!< Rotation matrix
         const GEnergy*                 m_srcEng;    //!< True photon energy
         const GTime*                   m_srcTime;   //!< Arrival time
+        const GPolarization*           m_srcPol;    //!< Photon polarization
         int                            m_iter_phi;  //!< Iterations in phi
     };
     class irf_elliptical_kern_phi : public GFunction {
@@ -284,7 +298,8 @@ protected:
                                 const GMatrix*                 rot,
                                 const double&                  theta,
                                 const GEnergy*                 srcEng,
-                                const GTime*                   srcTime) :
+                                const GTime*                   srcTime,
+                                const GPolarization*           srcPol) :
                                 m_rsp(rsp),
                                 m_event(event),
                                 m_obs(obs),
@@ -294,7 +309,8 @@ protected:
                                 m_sin_theta(std::sin(theta)),
                                 m_cos_theta(std::cos(theta)),
                                 m_srcEng(srcEng),
-                                m_srcTime(srcTime) { }
+                                m_srcTime(srcTime),
+                                m_srcPol(srcPol) { }
         double eval(const double& phi);
     protected:
         const GResponse*               m_rsp;       //!< Response
@@ -307,6 +323,7 @@ protected:
         double                         m_cos_theta; //!< cos(theta)
         const GEnergy*                 m_srcEng;    //!< True photon energy
         const GTime*                   m_srcTime;   //!< Arrival time
+        const GPolarization*           m_srcPol;    //!< Photon polarization
     };
 
     // Protected members

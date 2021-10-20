@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTAEventBin.hpp - CTA event bin class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,6 +32,7 @@
 #include "GEventBin.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
+#include "GPolarization.hpp"
 #include "GCTAInstDir.hpp"
 
 
@@ -64,17 +65,18 @@ public:
     virtual GCTAEventBin& operator=(const GCTAEventBin& bin);
 
     // Implemented pure virtual base class methods
-    virtual void               clear(void);
-    virtual GCTAEventBin*      clone(void) const;
-    virtual std::string        classname(void) const;
-    virtual double             size(void) const;
-    virtual const GCTAInstDir& dir(void) const;
-    virtual const GEnergy&     energy(void) const;
-    virtual const GTime&       time(void) const;
-    virtual double             counts(void) const;
-    virtual double             error(void) const;
-    virtual void               counts(const double& counts);
-    virtual std::string        print(const GChatter& chatter = NORMAL) const;
+    virtual void                 clear(void);
+    virtual GCTAEventBin*        clone(void) const;
+    virtual std::string          classname(void) const;
+    virtual double               size(void) const;
+    virtual const GCTAInstDir&   dir(void) const;
+    virtual const GEnergy&       energy(void) const;
+    virtual const GTime&         time(void) const;
+    virtual const GPolarization& polarization(void) const;
+    virtual double               counts(void) const;
+    virtual double               error(void) const;
+    virtual void                 counts(const double& counts);
+    virtual std::string          print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     const int&     ipix(void) const;
@@ -88,6 +90,7 @@ public:
     void           dir(const GCTAInstDir& dir);
     void           energy(const GEnergy& energy);
     void           time(const GTime& time);
+    void           polarization(const GPolarization& polarization);
     void           ipix(const int& ipix);
     void           ieng(const int& ieng);
     void           solidangle(const double& solidangle);
@@ -102,17 +105,18 @@ protected:
     void free_members(void);
 
     // Protected members
-    bool         m_alloc;       //!< Signals proper memory allocation
-    int          m_ipix;        //!< Index in spatial map
-    int          m_ieng;        //!< Index of energy layer
-    GCTAInstDir* m_dir;         //!< Pointer to bin direction
-    GTime*       m_time;        //!< Pointer to bin time
-    GEnergy*     m_energy;      //!< Pointer to bin energy
-    GEnergy*     m_ewidth;      //!< Pointer to energy width of bin
-    double*      m_counts;      //!< Pointer to number of counts
-    double*      m_solidangle;  //!< Pointer to solid angle of pixel (sr)
-    double*      m_ontime;      //!< Pointer to ontime of bin (seconds)
-    double*      m_weight;      //!< Pointer to weight of bin
+    bool           m_alloc;        //!< Signals proper memory allocation
+    int            m_ipix;         //!< Index in spatial map
+    int            m_ieng;         //!< Index of energy layer
+    GCTAInstDir*   m_dir;          //!< Pointer to bin direction
+    GTime*         m_time;         //!< Pointer to bin time
+    GPolarization* m_polarization; //!< Pointer to bin polarization
+    GEnergy*       m_energy;       //!< Pointer to bin energy
+    GEnergy*       m_ewidth;       //!< Pointer to energy width of bin
+    double*        m_counts;       //!< Pointer to number of counts
+    double*        m_solidangle;   //!< Pointer to solid angle of pixel (sr)
+    double*        m_ontime;       //!< Pointer to ontime of bin (seconds)
+    double*        m_weight;       //!< Pointer to weight of bin
 };
 
 

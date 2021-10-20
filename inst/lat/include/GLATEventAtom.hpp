@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATEventAtom.hpp - Fermi/LAT event atom class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,6 +32,7 @@
 #include "GEventAtom.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
+#include "GPolarization.hpp"
 #include "GLATInstDir.hpp"
 
 
@@ -55,13 +56,14 @@ public:
     GLATEventAtom& operator=(const GLATEventAtom& atom);
 
     // Implemented pure virtual base class methods
-    void               clear(void);
-    GLATEventAtom*     clone(void) const;
-    std::string        classname(void) const;
-    const GLATInstDir& dir(void) const;
-    const GEnergy&     energy(void) const;
-    const GTime&       time(void) const;
-    std::string        print(const GChatter& chatter = NORMAL) const;
+    virtual void                 clear(void);
+    virtual GLATEventAtom*       clone(void) const;
+    virtual std::string          classname(void) const;
+    virtual const GLATInstDir&   dir(void) const;
+    virtual const GEnergy&       energy(void) const;
+    virtual const GTime&         time(void) const;
+    virtual const GPolarization& polarization(void) const;
+    virtual std::string          print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods
@@ -70,22 +72,23 @@ protected:
     void free_members(void);
 
     // Protected members
-    GLATInstDir m_dir;                 //!< Event direction
-    GEnergy     m_energy;              //!< Event energy
-    GTime       m_time;                //!< Event time
-    float       m_theta;               //!< Zenith angle in instrument system
-    float       m_phi;                 //!< Azimuth angle in instrument system
-    float       m_zenith_angle;        //!< Zenith angle in Earth system
-    float       m_earth_azimuth_angle; //!< Azimuth angle in Earth system
-    long        m_event_id;            //!< ID number of original event
-    long        m_run_id;              //!< Run number of original event
-    short       m_recon_version;       //!< Version of event reconstruction software
-    short       m_calib_version[3];    //!< Version of calibration tables for ACD, CAL
-    short       m_event_class;         //!< Event class: 0, 1, 2, ...
-    short       m_conversion_type;     //!< Type of conversion: 0=Front, 1=Back
-    double      m_livetime;            //!< Accumulated livetime since mission start
-    double*     m_difrsp;              //!< Diffuse response components
-    int         m_num_difrsp;          //!< Number of diffuse model components
+    GLATInstDir   m_dir;                 //!< Event direction
+    GEnergy       m_energy;              //!< Event energy
+    GTime         m_time;                //!< Event time
+    GPolarization m_polarization;        //!< Event polarization
+    float         m_theta;               //!< Zenith angle in instrument system
+    float         m_phi;                 //!< Azimuth angle in instrument system
+    float         m_zenith_angle;        //!< Zenith angle in Earth system
+    float         m_earth_azimuth_angle; //!< Azimuth angle in Earth system
+    long          m_event_id;            //!< ID number of original event
+    long          m_run_id;              //!< Run number of original event
+    short         m_recon_version;       //!< Version of event reconstruction software
+    short         m_calib_version[3];    //!< Version of calibration tables for ACD, CAL
+    short         m_event_class;         //!< Event class: 0, 1, 2, ...
+    short         m_conversion_type;     //!< Type of conversion: 0=Front, 1=Back
+    double        m_livetime;            //!< Accumulated livetime since mission start
+    double*       m_difrsp;              //!< Diffuse response components
+    int           m_num_difrsp;          //!< Number of diffuse model components
 };
 
 
@@ -140,6 +143,20 @@ inline
 const GTime& GLATEventAtom::time(void) const
 {
     return m_time;
+}
+
+
+/***********************************************************************//**
+ * @brief Return event polarization
+ *
+ * @return Event polarization.
+ *
+ * Returns the event polarization.
+ ***************************************************************************/
+inline
+const GPolarization& GLATEventAtom::polarization(void) const
+{
+    return m_polarization;
 }
 
 #endif /* GLATEVENTATOM_HPP */

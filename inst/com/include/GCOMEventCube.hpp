@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCOMEventCube.hpp - COMPTEL event bin container class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2017 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,6 +32,7 @@
 #include <vector>
 #include "GEnergy.hpp"
 #include "GTime.hpp"
+#include "GPolarization.hpp"
 #include "GSkyDir.hpp"
 #include "GEventCube.hpp"
 #include "GCOMEventBin.hpp"
@@ -98,17 +99,18 @@ protected:
     void         set_bin(const int& index);
 
     // Protected members
-    GCOMEventBin         m_bin;        //!< Actual event bin
-    GCOMInstDir          m_dir;        //!< Actual event direction
-    GCOMDri              m_dri;        //!< DRI cube
-    GTime                m_time;       //!< Event cube mean time
-    double               m_ontime;     //!< Event cube ontime (sec)
-    GEnergy              m_energy;     //!< Event cube mean energy
-    GEnergy              m_ewidth;     //!< Event cube energy bin width
-    int                  m_npix;       //!< Number of DRI pixels
-    std::vector<GSkyDir> m_dirs;       //!< Array of event scatter directions
-    std::vector<double>  m_solidangle; //!< Array of solid angles (sr)
-    std::vector<double>  m_phibar;     //!< Array of event scatter angles
+    GCOMEventBin         m_bin;          //!< Actual event bin
+    GCOMInstDir          m_dir;          //!< Actual event direction
+    GCOMDri              m_dri;          //!< DRI cube
+    GTime                m_time;         //!< Event cube mean time
+    GPolarization        m_polarization; //!< Event cube mean polarization
+    double               m_ontime;       //!< Event cube ontime (sec)
+    GEnergy              m_energy;       //!< Event cube mean energy
+    GEnergy              m_ewidth;       //!< Event cube energy bin width
+    int                  m_npix;         //!< Number of DRI pixels
+    std::vector<GSkyDir> m_dirs;         //!< Array of event scatter directions
+    std::vector<double>  m_solidangle;   //!< Array of solid angles (sr)
+    std::vector<double>  m_phibar;       //!< Array of event scatter angles
 };
 
 

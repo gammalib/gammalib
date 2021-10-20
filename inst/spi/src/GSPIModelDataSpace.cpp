@@ -390,16 +390,19 @@ double GSPIModelDataSpace::eval(const GEvent&       event,
  *
  * @param[in] obsEng Measured event energy.
  * @param[in] obsTime Measured event time.
+ * @param[in] obsPol Measured event polarization.
  * @param[in] obs Observation.
+ * @return 0.0
  *
  * Spatially integrates the data model for a given measured event energy and
  * event time.
  *
  * @todo Implement method.
  ***************************************************************************/
-double GSPIModelDataSpace::npred(const GEnergy&      obsEng,
-                                 const GTime&        obsTime,
-                                 const GObservation& obs) const
+double GSPIModelDataSpace::npred(const GEnergy&       obsEng,
+                                 const GTime&         obsTime,
+                                 const GPolarization& obsPol,
+                                 const GObservation&  obs) const
 {
     // Initialise result
     double npred = 0.0;

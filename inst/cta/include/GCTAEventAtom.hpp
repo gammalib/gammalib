@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTAEventAtom.hpp - CTA event atom class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,6 +32,7 @@
 #include "GEventAtom.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
+#include "GPolarization.hpp"
 #include "GCTAInstDir.hpp"
 
 
@@ -59,16 +60,14 @@ public:
     GCTAEventAtom& operator=(const GCTAEventAtom& atom);
 
     // Implemented pure virtual base class methods
-    void               clear(void);
-    GCTAEventAtom*     clone(void) const;
-    std::string        classname(void) const;
-    const GCTAInstDir& dir(void) const;
-    const GEnergy&     energy(void) const;
-    const GTime&       time(void) const;
-    void               dir(const GCTAInstDir& dir);
-    void               energy(const GEnergy& energy);
-    void               time(const GTime& time);
-    std::string        print(const GChatter& chatter = NORMAL) const;
+    virtual void                 clear(void);
+    virtual GCTAEventAtom*       clone(void) const;
+    virtual std::string          classname(void) const;
+    virtual const GCTAInstDir&   dir(void) const;
+    virtual const GEnergy&       energy(void) const;
+    virtual const GTime&         time(void) const;
+    virtual const GPolarization& polarization(void) const;
+    virtual std::string          print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     const int&           index(void) const;
@@ -79,6 +78,10 @@ public:
     void                 event_id(const unsigned long& id);
     void                 mc_id(const int& id);
     void                 phase(const float& phase);
+    void                 dir(const GCTAInstDir& dir);
+    void                 energy(const GEnergy& energy);
+    void                 time(const GTime& time);
+    void                 polarization(const GPolarization& polarization);
 
 protected:
     // Protected methods
@@ -91,6 +94,7 @@ protected:
     GCTAInstDir   m_dir;            //!< Event direction
     GEnergy       m_energy;         //!< Event energy
     GTime         m_time;           //!< Event time
+    GPolarization m_polarization;   //!< Event polarization
     unsigned long m_event_id;       //!< Event identifier
     int           m_mc_id;          //!< Monte Carlo identifier
     float         m_phase;          //!< Optional phase
@@ -146,6 +150,18 @@ const GTime& GCTAEventAtom::time(void) const
 
 
 /***********************************************************************//**
+ * @brief Return polarization
+ *
+ * @return Polarization.
+ ***************************************************************************/
+inline
+const GPolarization& GCTAEventAtom::polarization(void) const
+{
+    return (m_polarization);
+}
+
+
+/***********************************************************************//**
  * @brief Set instrument direction
  *
  * @param[in] dir Instrument direction.
@@ -180,6 +196,19 @@ inline
 void GCTAEventAtom::time(const GTime& time)
 {
     m_time = time;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set polarization
+ *
+ * @param[in] polarization Polarization.
+ ***************************************************************************/
+inline
+void GCTAEventAtom::polarization(const GPolarization& polarization)
+{
+    m_polarization = polarization;
     return;
 }
 

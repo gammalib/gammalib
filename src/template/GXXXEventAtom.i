@@ -43,12 +43,13 @@ public:
     virtual ~GXXXEventAtom(void);
 
     // Implemented pure virtual base class methods
-    void               clear(void);
-    GXXXEventAtom*     clone(void) const;
-    std::string        classname(void) const;
-    const GXXXInstDir& dir(void) const;
-    const GEnergy&     energy(void) const;
-    const GTime&       time(void) const;
+    virtual void                 clear(void);
+    virtual GXXXEventAtom*       clone(void) const;
+    virtual std::string          classname(void) const;
+    virtual const GXXXInstDir&   dir(void) const;
+    virtual const GEnergy&       energy(void) const;
+    virtual const GTime&         time(void) const;
+    virtual const GPolarization& polarization(void) const;
 };
 
 

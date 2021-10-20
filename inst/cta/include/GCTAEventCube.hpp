@@ -119,17 +119,18 @@ protected:
     void         set_bin(const int& index);
 
     // Protected members
-    GSkyMap                  m_map;        //!< Counts cube stored as sky map
-    GSkyMap                  m_weights;    //!< Cube weights stored as sky map
-    GCTAEventBin             m_bin;        //!< Actual event bin
-    GTime                    m_time;       //!< Event cube mean time
-    GCTAPointing             m_pnt;        //!< Event cube pointing
-    bool                     m_has_pnt;    //!< Event cube has pointing
-    std::vector<GCTAInstDir> m_dirs;       //!< Array of event directions
-    std::vector<double>      m_solidangle; //!< Array of solid angles (sr)
-    std::vector<GEnergy>     m_energies;   //!< Array of log mean energies
-    std::vector<GEnergy>     m_ewidth;     //!< Array of energy bin widths
-    double                   m_ontime;     //!< Event cube ontime (sec)
+    GSkyMap                  m_map;          //!< Counts cube stored as sky map
+    GSkyMap                  m_weights;      //!< Cube weights stored as sky map
+    GCTAEventBin             m_bin;          //!< Actual event bin
+    GTime                    m_time;         //!< Event cube mean time
+    GPolarization            m_polarization; //!< Event cube mean polarization
+    GCTAPointing             m_pnt;          //!< Event cube pointing
+    bool                     m_has_pnt;      //!< Event cube has pointing
+    std::vector<GCTAInstDir> m_dirs;         //!< Array of event directions
+    std::vector<double>      m_solidangle;   //!< Array of solid angles (sr)
+    std::vector<GEnergy>     m_energies;     //!< Array of log mean energies
+    std::vector<GEnergy>     m_ewidth;       //!< Array of energy bin widths
+    double                   m_ontime;       //!< Event cube ontime (sec)
 };
 
 

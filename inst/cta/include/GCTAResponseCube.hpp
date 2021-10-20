@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GCTAResponseCube.hpp - CTA cube analysis response function class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -95,10 +95,11 @@ public:
     virtual double            irf(const GEvent&       event,
                                   const GPhoton&      photon,
                                   const GObservation& obs) const;
-    virtual double            nroi(const GModelSky&    model,
-                                   const GEnergy&      obsEng,
-                                   const GTime&        obsTime,
-                                   const GObservation& obs) const;
+    virtual double            nroi(const GModelSky&     model,
+                                   const GEnergy&       obsEng,
+                                   const GTime&         obsTime,
+                                   const GPolarization& obsPol,
+                                   const GObservation&  obs) const;
     virtual GEbounds          ebounds(const GEnergy& obsEng) const;
     virtual void              read(const GXmlElement& xml);
     virtual void              write(GXmlElement& xml) const;

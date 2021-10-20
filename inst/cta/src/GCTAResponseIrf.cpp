@@ -409,6 +409,7 @@ double GCTAResponseIrf::irf(const GEvent&       event,
  * @param[in] model Sky model.
  * @param[in] obsEng Observed photon energy.
  * @param[in] obsTime Observed photon arrival time.
+ * @param[in] obsPol Observed photon polarization.
  * @param[in] obs Observation.
  * @return Event probability.
  *
@@ -431,10 +432,11 @@ double GCTAResponseIrf::irf(const GEvent&       event,
  * for a given sky model \f$S(p,E,t)\f$ and response function
  * \f$R(p',E',t'|p,E,t)\f$ over the Region of Interest (ROI).
  ***************************************************************************/
-double GCTAResponseIrf::nroi(const GModelSky&    model,
-                             const GEnergy&      obsEng,
-                             const GTime&        obsTime,
-                             const GObservation& obs) const
+double GCTAResponseIrf::nroi(const GModelSky&     model,
+                             const GEnergy&       obsEng,
+                             const GTime&         obsTime,
+                             const GPolarization& obsPol,
+                             const GObservation&  obs) const
 {
     // Set number of iterations for Romberg integration.
     static const int iter = 6;
@@ -2273,7 +2275,7 @@ double GCTAResponseIrf::irf_ptsrc(const GEvent&       event,
           static_cast<const GModelSpatialPointSource*>(source.model());
 
     // Set Photon
-    GPhoton photon(src->dir(), source.energy(), source.time());
+    GPhoton photon(src->dir(), source.energy(), source.time(), source.polarization());
 
     // Compute IRF
     double irf = this->irf(event, photon, obs);
@@ -2928,7 +2930,7 @@ double GCTAResponseIrf::nroi_ptsrc(const GModelSky&    model,
           static_cast<const GModelSpatialPointSource*>(model.spatial());
 
     // Set Photon
-    GPhoton photon(src->dir(), srcEng, srcTime);
+    GPhoton photon(src->dir(), srcEng, srcTime, GPolarization());
 
     // Compute Nroi
     double nroi = nirf(photon, obsEng, obsTime, obs);

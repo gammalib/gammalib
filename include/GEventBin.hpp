@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GEventBin.hpp - Abstract event bin base class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2014 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2021 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -76,17 +76,18 @@ public:
     virtual GEventBin& operator=(const GEventBin& bin);
 
     // Pure virtual methods
-    virtual void            clear(void) = 0;
-    virtual GEvent*         clone(void) const = 0;
-    virtual std::string     classname(void) const = 0;
-    virtual double          size(void) const = 0;
-    virtual const GInstDir& dir(void) const = 0;
-    virtual const GEnergy&  energy(void) const = 0;
-    virtual const GTime&    time(void) const = 0;
-    virtual double          counts(void) const = 0;
-    virtual double          error(void) const = 0;
-    virtual void            counts(const double& counts) = 0;
-    virtual std::string     print(const GChatter& chatter = NORMAL) const = 0;
+    virtual void                 clear(void) = 0;
+    virtual GEvent*              clone(void) const = 0;
+    virtual std::string          classname(void) const = 0;
+    virtual double               size(void) const = 0;
+    virtual const GInstDir&      dir(void) const = 0;
+    virtual const GEnergy&       energy(void) const = 0;
+    virtual const GTime&         time(void) const = 0;
+    virtual const GPolarization& polarization(void) const = 0;
+    virtual double               counts(void) const = 0;
+    virtual double               error(void) const = 0;
+    virtual void                 counts(const double& counts) = 0;
+    virtual std::string          print(const GChatter& chatter = NORMAL) const = 0;
 
     // Other methods
     bool is_atom(void) const;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GMWLDatum.i - Multi-wavelength spectral point class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -47,16 +47,17 @@ public:
     virtual ~GMWLDatum(void);
 
     // Implemented pure virtual base class methods
-    virtual void               clear(void);
-    virtual GMWLDatum*         clone(void) const;
-    virtual std::string        classname(void) const;
-    virtual double             size(void) const;
-    virtual const GInstDir&    dir(void) const;
-    virtual const GEnergy&     energy(void) const;
-    virtual const GTime&       time(void) const;
-    virtual double             counts(void) const;
-    virtual double             error(void) const;
-    virtual void               counts(const double& flux);
+    virtual void                 clear(void);
+    virtual GMWLDatum*           clone(void) const;
+    virtual std::string          classname(void) const;
+    virtual double               size(void) const;
+    virtual const GMWLInstDir&   dir(void) const;
+    virtual const GEnergy&       energy(void) const;
+    virtual const GTime&         time(void) const;
+    virtual const GPolarization& polarization(void) const;
+    virtual double               counts(void) const;
+    virtual double               error(void) const;
+    virtual void                 counts(const double& flux);
 
     // Other methods
     const double&  flux(void) const;

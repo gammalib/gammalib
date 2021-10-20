@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTAResponse.i - CTA response abstract base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -50,10 +50,11 @@ public:
     virtual double        irf(const GEvent&       event,
                               const GPhoton&      photon,
                               const GObservation& obs) const = 0;
-    virtual double        nroi(const GModelSky&    model,
-                               const GEnergy&      obsEng,
-                               const GTime&        obsTime,
-                               const GObservation& obs) const = 0;
+    virtual double        nroi(const GModelSky&     model,
+                               const GEnergy&       obsEng,
+                               const GTime&         obsTime,
+                               const GPolarization& obsPol,
+                               const GObservation&  obs) const = 0;
     virtual GEbounds      ebounds(const GEnergy& obsEng) const = 0;
     virtual void          read(const GXmlElement& xml) = 0;
     virtual void          write(GXmlElement& xml) const = 0;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GCTAEventBin.i - CTA event bin class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -46,16 +46,17 @@ public:
     virtual ~GCTAEventBin(void);
 
     // Implemented pure virtual base class methods
-    virtual void               clear(void);
-    virtual GCTAEventBin*      clone(void) const;
-    virtual std::string        classname(void) const;
-    virtual double             size(void) const;
-    virtual const GCTAInstDir& dir(void) const;
-    virtual const GEnergy&     energy(void) const;
-    virtual const GTime&       time(void) const;
-    virtual double             counts(void) const;
-    virtual double             error(void) const;
-    virtual void               counts(const double& counts);
+    virtual void                 clear(void);
+    virtual GCTAEventBin*        clone(void) const;
+    virtual std::string          classname(void) const;
+    virtual double               size(void) const;
+    virtual const GCTAInstDir&   dir(void) const;
+    virtual const GEnergy&       energy(void) const;
+    virtual const GTime&         time(void) const;
+    virtual const GPolarization& polarization(void) const;
+    virtual double               counts(void) const;
+    virtual double               error(void) const;
+    virtual void                 counts(const double& counts);
 
     // Other methods
     const int&     ipix(void) const;
@@ -69,6 +70,7 @@ public:
     void           dir(const GCTAInstDir& dir);
     void           energy(const GEnergy& energy);
     void           time(const GTime& time);
+    void           polarization(const GPolarization& polarization);
     void           ipix(const int& ipix);
     void           ieng(const int& ieng);
     void           solidangle(const double& solidangle);

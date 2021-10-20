@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-19 October 2021
+20 October 2021
 
 
 1. Introduction
@@ -14,6 +14,7 @@ made since the last release of GammaLib.
 The following classes have been added:
 - GFunctions
 - GIntegrals
+- GPolarization
 - GResponseVectorCache
 - GSkyDirs
 - GSkyRegionRect
@@ -40,6 +41,11 @@ The following methods have been added:
 - GApplication::stamp(GFits&)
 - GApplication::stamp(GFilename&)
 - GFitsTableCol::tscale()
+- GPhoton::polarization()
+- GSource::polarization()
+- GEvent::polarization()
+- GEventAtom::polarization()
+- GEventBin::polarization()
 - GResponse::convolve(GModelSky&, GObservation&, GMatrixSparse*)
 - GResponse::irf_spatial(GModelSky&, GObservation&, GMatrix*)
 - GObservation::model(GModels&, GMatrixSparse*)
@@ -95,6 +101,8 @@ The following methods have been added:
 - GPhases::contains()
 - GCTAEventBin::emin()
 - GCTAEventBin::emax()
+- GCTAEventAtom::polarization()
+- GCTAEventBin::polarization()
 - GCOMObservation::GCOMObservation(GCOMDri&, GCOMDri&, GCOMDri&, GCOMDri&)
 - GCOMObservation::drename()
 - GCOMObservation::drbname()
@@ -108,6 +116,14 @@ The following methods have been added:
 - GCOMDri::num_skipped_superpackets()
 - GCOMSelection::phase_curve()
 - GCOMSelection::phases()
+- GCOMEventAtom::polarization()
+- GCOMEventBin::polarization()
+- GLATEventAtom::polarization()
+- GLATEventBin::polarization()
+- GMWLEventAtom::polarization()
+- GMWLEventBin::polarization()
+- GSPIEventAtom::polarization()
+- GSPIEventBin::polarization()
 - gammalib::tmpnam()
 - gammalib::compare()
 - gammalib::xml_check_parnum()
@@ -125,9 +141,53 @@ The following methods have been renamed:
 - none
 
 The arguments for the following methods have been changed:
-- GModelSpatial::flux(GSkyRegion&, GEnergy&, GTime&) was
+- GPhoton::GPhoton(GSkyDir&, GEnergy&, GTime&, GPolarization&, int&) was
+  GPhoton::GPhoton(GSkyDir&, GEnergy&, GTime&, int&)
+- GSource::GSource(std::string&, GModelSpatial*, GEnergy&, GTime&, GPolarization&) was
+  GSource::GSource(std::string&, GModelSpatial*, GEnergy&, GTime&)
+- GModel::npred(GEnergy&, GTime&, GPolarization&, GObservation&) was
+  GModel::npred(GEnergy&, GTime&, GObservation&)
+- GModelSky::npred(GEnergy&, GTime&, GPolarization&, GObservation&) was
+  GModelSky::npred(GEnergy&, GTime&, GObservation&)
+- GModelSpatial::flux(GSkyRegion&, GEnergy&, GTime&, GPolarization&) was
   GModelSpatial::flux(GSkyRegion*, GEnergy&, GTime&)
+- GModelSpatialPointSource::flux(GSkyRegion&, GEnergy&, GTime&, GPolarization&) was
+  GModelSpatialPointSource::flux(GSkyRegion*, GEnergy&, GTime&)
+- GModelSpatialDiffuseCube::flux(GSkyRegion&, GEnergy&, GTime&, GPolarization&) was
+  GModelSpatialDiffuseCube::flux(GSkyRegion*, GEnergy&, GTime&)
+- GModelData::npred(GEnergy&, GTime&, GPolarization&, GObservation&) was
+  GModelData::npred(GEnergy&, GTime&, GObservation&)
+- GCTAModelBackground::npred(GEnergy&, GTime&, GPolarization&, GObservation&) was
+  GCTAModelBackground::npred(GEnergy&, GTime&, GObservation&)
+- GCTAModelCubeBackground::npred(GEnergy&, GTime&, GPolarization&, GObservation&) was
+  GCTAModelCubeBackground::npred(GEnergy&, GTime&, GObservation&)
+- GCTAModelIrfBackground::npred(GEnergy&, GTime&, GPolarization&, GObservation&) was
+  GCTAModelIrfBackground::npred(GEnergy&, GTime&, GObservation&)
+- GCTAModelAeffBackground::npred(GEnergy&, GTime&, GPolarization&, GObservation&) was
+  GCTAModelAeffBackground::npred(GEnergy&, GTime&, GObservation&)
+- GCTAModelAeffBackground::npred(GEnergy&, GTime&, GPolarization&, GObservation&) was
+  GCTAModelAeffBackground::npred(GEnergy&, GTime&, GObservation&)
+- GCTAModelRadialAcceptance::npred(GEnergy&, GTime&, GPolarization&, GObservation&) was
+  GCTAModelRadialAcceptance::npred(GEnergy&, GTime&, GObservation&)
+- GCTAModelSkyCube::npred(GEnergy&, GTime&, GPolarization&, GObservation&) was
+  GCTAModelSkyCube::npred(GEnergy&, GTime&, GObservation&)
+- GResponse::nroi(GModelSky&, GEnergy&, GTime&, GPolarization&, GObservation&) was
+  GResponse::nroi(GModelSky&, GEnergy&, GTime&, GObservation&)
+- GMWLResponse::nroi(GModelSky&, GEnergy&, GTime&, GPolarization&, GObservation&) was
+  GMWLResponse::nroi(GModelSky&, GEnergy&, GTime&, GObservation&)
+- GCTAResponse::nroi(GModelSky&, GEnergy&, GTime&, GPolarization&, GObservation&) was
+  GCTAResponse::nroi(GModelSky&, GEnergy&, GTime&, GObservation&)
+- GLATResponse::nroi(GModelSky&, GEnergy&, GTime&, GPolarization&, GObservation&) was
+  GLATResponse::nroi(GModelSky&, GEnergy&, GTime&, GObservation&)
+- GCOMResponse::nroi(GModelSky&, GEnergy&, GTime&, GPolarization&, GObservation&) was
+  GCOMResponse::nroi(GModelSky&, GEnergy&, GTime&, GObservation&)
 - GCOMObservation::drm(GSkyModel&) was GCOMObservation::drm(GSource&)
+- GCOMModelDRBFitting::npred(GEnergy&, GTime&, GPolarization&, GObservation&) was
+  GCOMModelDRBFitting::npred(GEnergy&, GTime&, GObservation&)
+- GSPIResponse::nroi(GModelSky&, GEnergy&, GTime&, GPolarization&, GObservation&) was
+  GSPIResponse::nroi(GModelSky&, GEnergy&, GTime&, GObservation&)
+- GSPIModelDataSpace::npred(GEnergy&, GTime&, GPolarization&, GObservation&) was
+  GSPIModelDataSpace::npred(GEnergy&, GTime&, GObservation&)
 
 The return value of the following methods has been changed:
 - GCOMObservation::drb() now returns reference to GCOMDri

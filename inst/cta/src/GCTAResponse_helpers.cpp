@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCTAResponse_helpers.cpp - CTA response helper classes          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -649,7 +649,7 @@ double cta_nroi_radial_kern_omega::eval(const double& omega)
     srcDir.celvector(cel);
 
     // Set Photon
-    GPhoton photon(srcDir, m_srcEng, m_srcTime);
+    GPhoton photon(srcDir, m_srcEng, m_srcTime, GPolarization());
 
     // Compute point source Nroi for this sky direction
     double nroi = m_rsp->nirf(photon, m_obsEng, m_obsTime, *m_obs);
@@ -1231,7 +1231,7 @@ double cta_nroi_elliptical_kern_omega::eval(const double& omega)
         srcDir.celvector(cel);
 
         // Set Photon
-        GPhoton photon(srcDir, m_srcEng, m_srcTime);
+        GPhoton photon(srcDir, m_srcEng, m_srcTime, GPolarization());
 
         // Compute Nroi for this sky direction
         nroi = m_rsp->nirf(photon, m_obsEng, m_obsTime, *m_obs) * model;
@@ -1581,7 +1581,7 @@ double cta_nroi_diffuse_kern_phi::eval(const double& phi)
     srcDir.celvector(cel);
 
     // Set Photon
-    GPhoton photon(srcDir, m_srcEng, m_srcTime);
+    GPhoton photon(srcDir, m_srcEng, m_srcTime, GPolarization());
 
     // Get sky intensity for this photon
     double intensity = m_model->eval(photon);
@@ -2324,7 +2324,7 @@ double cta_psf_diffuse_kern_phi::eval(const double& phi)
     srcDir.celvector(cel);
 
     // Set photon
-    GPhoton photon(srcDir, m_srcEng, m_srcTime);
+    GPhoton photon(srcDir, m_srcEng, m_srcTime, GPolarization());
 
     // Compute map value for this sky direction
     double value = m_model->eval(photon); 

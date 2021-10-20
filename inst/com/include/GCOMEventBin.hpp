@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCOMEventBin.hpp - COMPTEL event bin class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,6 +31,7 @@
 #include "GEventBin.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
+#include "GPolarization.hpp"
 #include "GCOMInstDir.hpp"
 
 
@@ -61,17 +62,18 @@ public:
     virtual GCOMEventBin& operator=(const GCOMEventBin& bin);
 
     // Implemented pure virtual base class methods
-    virtual void               clear(void);
-    virtual GCOMEventBin*      clone(void) const;
-    virtual std::string        classname(void) const;
-    virtual double             size(void) const;
-    virtual const GCOMInstDir& dir(void) const;
-    virtual const GEnergy&     energy(void) const;
-    virtual const GTime&       time(void) const;
-    virtual double             counts(void) const;
-    virtual double             error(void) const;
-    virtual void               counts(const double& counts);
-    virtual std::string        print(const GChatter& chatter = NORMAL) const;
+    virtual void                 clear(void);
+    virtual GCOMEventBin*        clone(void) const;
+    virtual std::string          classname(void) const;
+    virtual double               size(void) const;
+    virtual const GCOMInstDir&   dir(void) const;
+    virtual const GEnergy&       energy(void) const;
+    virtual const GTime&         time(void) const;
+    virtual const GPolarization& polarization(void) const;
+    virtual double               counts(void) const;
+    virtual double               error(void) const;
+    virtual void                 counts(const double& counts);
+    virtual std::string          print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     const int&     index(void) const;
@@ -82,6 +84,7 @@ public:
     void           dir(const GCOMInstDir& dir);
     void           energy(const GEnergy& energy);
     void           time(const GTime& time);
+    void           polarization(const GPolarization& polarization);
     void           solidangle(const double& solidangle);
     void           ewidth(const GEnergy& ewidth);
     void           ontime(const double& ontime);
@@ -93,15 +96,16 @@ protected:
     void free_members(void);
 
     // Protected members
-    bool         m_alloc;       //!< Signals proper memory allocation
-    int          m_index;       //!< Dataspace index
-    GCOMInstDir* m_dir;         //!< Pointer to bin direction
-    GTime*       m_time;        //!< Pointer to bin time
-    GEnergy*     m_energy;      //!< Pointer to bin energy
-    GEnergy*     m_ewidth;      //!< Pointer to energy width of bin
-    double*      m_counts;      //!< Pointer to number of counts
-    double*      m_solidangle;  //!< Pointer to solid angle of pixel (sr)
-    double*      m_ontime;      //!< Pointer to ontime of bin (seconds)
+    bool           m_alloc;        //!< Signals proper memory allocation
+    int            m_index;        //!< Dataspace index
+    GCOMInstDir*   m_dir;          //!< Pointer to bin direction
+    GTime*         m_time;         //!< Pointer to bin time
+    GPolarization* m_polarization; //!< Pointer to bin polarization
+    GEnergy*       m_energy;       //!< Pointer to bin energy
+    GEnergy*       m_ewidth;       //!< Pointer to energy width of bin
+    double*        m_counts;       //!< Pointer to number of counts
+    double*        m_solidangle;   //!< Pointer to solid angle of pixel (sr)
+    double*        m_ontime;       //!< Pointer to ontime of bin (seconds)
 };
 
 

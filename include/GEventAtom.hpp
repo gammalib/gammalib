@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GEventAtom.hpp - Abstract event atom base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2014 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2021 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -74,16 +74,17 @@ public:
     virtual GEventAtom& operator=(const GEventAtom& atom);
 
     // Pure virtual methods
-    virtual void            clear(void) = 0;
-    virtual GEvent*         clone(void) const = 0;
-    virtual std::string     classname(void) const = 0;
-    virtual double          size(void) const;
-    virtual const GInstDir& dir(void) const = 0;
-    virtual const GEnergy&  energy(void) const = 0;
-    virtual const GTime&    time(void) const = 0;
-    virtual double          counts(void) const;
-    virtual double          error(void) const;
-    virtual std::string     print(const GChatter& chatter = NORMAL) const = 0;
+    virtual void                 clear(void) = 0;
+    virtual GEvent*              clone(void) const = 0;
+    virtual std::string          classname(void) const = 0;
+    virtual double               size(void) const;
+    virtual const GInstDir&      dir(void) const = 0;
+    virtual const GEnergy&       energy(void) const = 0;
+    virtual const GTime&         time(void) const = 0;
+    virtual const GPolarization& polarization(void) const = 0;
+    virtual double               counts(void) const;
+    virtual double               error(void) const;
+    virtual std::string          print(const GChatter& chatter = NORMAL) const = 0;
 
     // Other methods
     bool is_atom(void) const;

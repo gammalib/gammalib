@@ -207,8 +207,9 @@ void GXXXEventAtom::init_members(void)
 {
     // Initialise members
     m_dir.clear();
-    m_time.clear();
     m_energy.clear();
+    m_time.clear();
+    m_polarization.clear();
 
     // Return
     return;
@@ -223,9 +224,10 @@ void GXXXEventAtom::init_members(void)
 void GXXXEventAtom::copy_members(const GXXXEventAtom& atom)
 {
     // Copy members
-    m_dir    = atom.m_dir;
-    m_time   = atom.m_time;
-    m_energy = atom.m_energy;
+    m_dir          = atom.m_dir;
+    m_energy       = atom.m_energy;
+    m_time         = atom.m_time;
+    m_polarization = atom.m_polarization;
 
     // Return
     return;

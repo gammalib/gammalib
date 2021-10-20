@@ -450,15 +450,17 @@ void GModelSpatialPointSource::write(GXmlElement& xml) const
  * @param[in] region Sky region.
  * @param[in] srcEng Energy.
  * @param[in] srcTime Time.
+ * @param[in] srcPol Polarization.
  * @return Flux (adimensional or ph/cm2/s).
  *
  * Returns point source flux within a sky region. If the point source is
  * contained within the sky region the flux will be 1, otherwise the flux
  * will be 0.
  ***************************************************************************/
-double GModelSpatialPointSource::flux(const GSkyRegion& region,
-                                      const GEnergy&    srcEng,
-                                      const GTime&      srcTime) const
+double GModelSpatialPointSource::flux(const GSkyRegion&    region,
+                                      const GEnergy&       srcEng,
+                                      const GTime&         srcTime,
+                                      const GPolarization& srcPol) const
 {
     // Initialise flux
     double flux = 0.0;

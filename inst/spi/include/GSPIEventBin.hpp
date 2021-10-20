@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GSPIEventBin.hpp - INTEGRAL/SPI event bin class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2020 by Juergen Knoedlseder                              *
+ *  copyright (C) 2020-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,8 +32,9 @@
 #include "GSPIInstDir.hpp"
 
 /* __ Forward declarations _______________________________________________ */
-class GTime;
 class GEnergy;
+class GTime;
+class GPolarization;
 class GSPIEventCube;
 
 /* __ Constants __________________________________________________________ */
@@ -74,17 +75,18 @@ public:
     virtual GSPIEventBin& operator=(const GSPIEventBin& bin);
 
     // Implemented pure virtual base class methods
-    virtual void               clear(void);
-    virtual GSPIEventBin*      clone(void) const;
-    virtual std::string        classname(void) const;
-    virtual double             size(void) const;
-    virtual const GSPIInstDir& dir(void) const;
-    virtual const GEnergy&     energy(void) const;
-    virtual const GTime&       time(void) const;
-    virtual double             counts(void) const;
-    virtual double             error(void) const;
-    virtual void               counts(const double& counts);
-    virtual std::string        print(const GChatter& chatter = NORMAL) const;
+    virtual void                 clear(void);
+    virtual GSPIEventBin*        clone(void) const;
+    virtual std::string          classname(void) const;
+    virtual double               size(void) const;
+    virtual const GSPIInstDir&   dir(void) const;
+    virtual const GEnergy&       energy(void) const;
+    virtual const GTime&         time(void) const;
+    virtual const GPolarization& polarization(void) const;
+    virtual double               counts(void) const;
+    virtual double               error(void) const;
+    virtual void                 counts(const double& counts);
+    virtual std::string          print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     const double& model(const int& index) const;
@@ -102,20 +104,21 @@ protected:
     void free_members(void);
 
     // Protected members
-    bool         m_alloc;      //!< Signals proper memory allocation
-    int          m_index;      //!< Dataspace index
-    int          m_ipt;        //!< Pointing index
-    int          m_idir;       //!< Direction index
-    int          m_iebin;      //!< Energy bin index
-    int          m_num_models; //!< Number of models in bin
-    GSPIInstDir* m_dir;        //!< Pointer to direction of bin
-    GTime*       m_time;       //!< Pointer to time of bin
-    GEnergy*     m_energy;     //!< Pointer to energy of bin
-    double*      m_counts;     //!< Pointer to number of counts
-    double*      m_ontime;     //!< Pointer to ontime of bin
-    double*      m_livetime;   //!< Pointer to livetime of bin
-    double*      m_size;       //!< Pointer to size of bin
-    double*      m_models;     //!< Pointer to models of bin
+    bool           m_alloc;        //!< Signals proper memory allocation
+    int            m_index;        //!< Dataspace index
+    int            m_ipt;          //!< Pointing index
+    int            m_idir;         //!< Direction index
+    int            m_iebin;        //!< Energy bin index
+    int            m_num_models;   //!< Number of models in bin
+    GSPIInstDir*   m_dir;          //!< Pointer to direction of bin
+    GTime*         m_time;         //!< Pointer to time of bin
+    GPolarization* m_polarization; //!< Pointer to polarization of bin
+    GEnergy*       m_energy;       //!< Pointer to energy of bin
+    double*        m_counts;       //!< Pointer to number of counts
+    double*        m_ontime;       //!< Pointer to ontime of bin
+    double*        m_livetime;     //!< Pointer to livetime of bin
+    double*        m_size;         //!< Pointer to size of bin
+    double*        m_models;       //!< Pointer to models of bin
 };
 
 
@@ -170,6 +173,20 @@ inline
 const GTime& GSPIEventBin::time(void) const
 {
     return (*m_time);
+}
+
+
+/***********************************************************************//**
+ * @brief Return polarization
+ *
+ * @return Polarization.
+ *
+ * Returns the polarization of the event bin.
+ ***************************************************************************/
+inline
+const GPolarization& GSPIEventBin::polarization(void) const
+{
+    return (*m_polarization);
 }
 
 

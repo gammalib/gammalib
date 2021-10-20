@@ -232,6 +232,7 @@ void GCOMEventAtom::init_members(void)
     m_dir.clear();
     m_energy.clear();
     m_time.clear();
+    m_polarization.clear();
     m_e1     = 0.0;
     m_e2     = 0.0;
     m_phibar = 0.0;
@@ -257,20 +258,21 @@ void GCOMEventAtom::init_members(void)
 void GCOMEventAtom::copy_members(const GCOMEventAtom& atom)
 {
     // Copy members
-    m_dir    = atom.m_dir;
-    m_energy = atom.m_energy;
-    m_time   = atom.m_time;
-    m_e1     = atom.m_e1;
-    m_e2     = atom.m_e2;
-    m_phibar = atom.m_phibar;
-    m_theta  = atom.m_theta;
-    m_phi    = atom.m_phi;
-    m_eha    = atom.m_eha;
-    m_psd    = atom.m_psd;
-    m_tof    = atom.m_tof;
-    m_modcom = atom.m_modcom;
-    m_reflag = atom.m_reflag;
-    m_veto   = atom.m_veto;
+    m_dir          = atom.m_dir;
+    m_energy       = atom.m_energy;
+    m_time         = atom.m_time;
+    m_polarization = atom.m_polarization;
+    m_e1           = atom.m_e1;
+    m_e2           = atom.m_e2;
+    m_phibar       = atom.m_phibar;
+    m_theta        = atom.m_theta;
+    m_phi          = atom.m_phi;
+    m_eha          = atom.m_eha;
+    m_psd          = atom.m_psd;
+    m_tof          = atom.m_tof;
+    m_modcom       = atom.m_modcom;
+    m_reflag       = atom.m_reflag;
+    m_veto         = atom.m_veto;
 
     // Return
     return;

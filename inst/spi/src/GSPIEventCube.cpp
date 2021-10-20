@@ -845,6 +845,7 @@ void GSPIEventCube::init_members(void)
     m_size       = NULL;
     m_dir        = NULL;
     m_time       = NULL;
+    m_polarization.clear();
     m_energy     = NULL;
     m_ewidth     = NULL;
     m_spix       = NULL;
@@ -874,15 +875,16 @@ void GSPIEventCube::copy_members(const GSPIEventCube& cube)
     // be initialised later. The event bin serves just as a container of
     // pointers, hence we do not want to copy over the pointers from the
     // original class.
-    m_num_pt     = cube.m_num_pt;
-    m_num_det    = cube.m_num_det;
-    m_num_ebin   = cube.m_num_ebin;
-    m_num_sky    = cube.m_num_sky;
-    m_num_bgm    = cube.m_num_bgm;
-    m_gti_size   = cube.m_gti_size;
-    m_dsp_size   = cube.m_dsp_size;
-    m_model_size = cube.m_model_size;
-    m_modnames   = cube.m_modnames;
+    m_num_pt       = cube.m_num_pt;
+    m_num_det      = cube.m_num_det;
+    m_num_ebin     = cube.m_num_ebin;
+    m_num_sky      = cube.m_num_sky;
+    m_num_bgm      = cube.m_num_bgm;
+    m_gti_size     = cube.m_gti_size;
+    m_dsp_size     = cube.m_dsp_size;
+    m_model_size   = cube.m_model_size;
+    m_polarization = cube.m_polarization;
+    m_modnames     = cube.m_modnames;
 
     // Copy data
     if (m_num_ebin > 0) {
@@ -1460,19 +1462,20 @@ void GSPIEventCube::init_bin(void)
 {
     // Prepare event bin
     m_bin.free_members();
-    m_bin.m_index      = 0;     //!< Set by set_bin method
-    m_bin.m_ipt        = 0;     //!< Set by set_bin method
-    m_bin.m_idir       = 0;     //!< Set by set_bin method
-    m_bin.m_iebin      = 0;     //!< Set by set_bin method
-    m_bin.m_num_models = m_num_sky + m_num_bgm;
-    m_bin.m_dir        = NULL;  //!< Set by set_bin method
-    m_bin.m_time       = NULL;  //!< Set by set_bin method
-    m_bin.m_energy     = NULL;  //!< Set by set_bin method
-    m_bin.m_counts     = NULL;  //!< Set by set_bin method
-    m_bin.m_ontime     = NULL;  //!< Set by set_bin method
-    m_bin.m_livetime   = NULL;  //!< Set by set_bin method
-    m_bin.m_size       = NULL;  //!< Set by set_bin method
-    m_bin.m_models     = NULL;  //!< Set by set_bin method
+    m_bin.m_index        = 0;                //!< Set by set_bin method
+    m_bin.m_ipt          = 0;                //!< Set by set_bin method
+    m_bin.m_idir         = 0;                //!< Set by set_bin method
+    m_bin.m_iebin        = 0;                //!< Set by set_bin method
+    m_bin.m_num_models   = m_num_sky + m_num_bgm;
+    m_bin.m_dir          = NULL;             //!< Set by set_bin method
+    m_bin.m_time         = NULL;             //!< Set by set_bin method
+    m_bin.m_polarization = &m_polarization;  //!< Fixed value
+    m_bin.m_energy       = NULL;             //!< Set by set_bin method
+    m_bin.m_counts       = NULL;             //!< Set by set_bin method
+    m_bin.m_ontime       = NULL;             //!< Set by set_bin method
+    m_bin.m_livetime     = NULL;             //!< Set by set_bin method
+    m_bin.m_size         = NULL;             //!< Set by set_bin method
+    m_bin.m_models       = NULL;             //!< Set by set_bin method
 
     // Return
     return;

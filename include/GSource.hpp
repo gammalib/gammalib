@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        GSource.hpp - Source class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,6 +33,7 @@
 #include "GModelSpatial.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
+#include "GPolarization.hpp"
 
 
 /***********************************************************************//**
@@ -55,8 +56,11 @@ class GSource : public GBase {
 public:
     // Constructors and destructors
     GSource(void);
-    GSource(const std::string& name, GModelSpatial* model,
-            const GEnergy& energy, const GTime& time);
+    GSource(const std::string&   name,
+            GModelSpatial*       model,
+            const GEnergy&       energy,
+            const GTime&         time,
+            const GPolarization& polarization);
     GSource(const GSource& src);
     virtual ~GSource(void);
 
@@ -71,10 +75,12 @@ public:
     const GModelSpatial* model(void) const;
     const GEnergy&       energy(void) const;
     const GTime&         time(void) const;
+    const GPolarization& polarization(void) const;
     void                 name(const std::string& name);
     void                 model(GModelSpatial* model);
     void                 energy(const GEnergy& energy);
     void                 time(const GTime& time);
+    void                 polarization(const GPolarization& polarization);
     std::string          print(const GChatter& chatter = NORMAL) const;
 
 protected:
@@ -84,10 +90,11 @@ protected:
     void free_members(void);
 
     // Protected data members
-    std::string    m_name;     //!< Source name
-    GModelSpatial* m_model;    //!< Spatial model
-    GEnergy        m_energy;   //!< Photon energy
-    GTime          m_time;     //!< Photon arrival time
+    std::string    m_name;         //!< Source name
+    GModelSpatial* m_model;        //!< Spatial model
+    GEnergy        m_energy;       //!< Photon energy
+    GTime          m_time;         //!< Photon arrival time
+    GPolarization  m_polarization; //!< Photon polarization
 };
 
 
@@ -160,6 +167,20 @@ const GTime& GSource::time(void) const
 
 
 /***********************************************************************//**
+ * @brief Return photon polarization
+ *
+ * @return Photon polarization.
+ *
+ * Returns the photon polarization.
+ ***************************************************************************/
+inline
+const GPolarization& GSource::polarization(void) const
+{
+    return m_polarization;
+}
+
+
+/***********************************************************************//**
  * @brief Set model name
  *
  * @param[in] name Model name.
@@ -215,6 +236,21 @@ inline
 void GSource::time(const GTime& time)
 {
     m_time = time;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set photon polarization
+ *
+ * @param[in] polarization Photon polarization.
+ *
+ * Sets the photon polarization.
+ ***************************************************************************/
+inline
+void GSource::polarization(const GPolarization& polarization)
+{
+    m_polarization = polarization;
     return;
 }
 

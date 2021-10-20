@@ -92,9 +92,10 @@ public:
     virtual std::string               print(const GChatter& chatter = NORMAL) const;
 
     // Overloaded base class methods
-    virtual double flux(const GSkyRegion& region,
-                        const GEnergy&    srcEng  = GEnergy(),
-                        const GTime&      srcTime = GTime()) const;
+    virtual double flux(const GSkyRegion&    region,
+                        const GEnergy&       srcEng  = GEnergy(),
+                        const GTime&         srcTime = GTime(),
+                        const GPolarization& srcPol = GPolarization()) const;
 
     // Other methods
     double                     value(void) const;

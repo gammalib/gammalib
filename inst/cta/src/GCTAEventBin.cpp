@@ -38,6 +38,7 @@
 #define G_DIR_GET                                       "GCTAEventBin::dir()"
 #define G_ENERGY                                     "GCTAEventBin::energy()"
 #define G_TIME                                         "GCTAEventBin::time()"
+#define G_POLARIZATION                         "GCTAEventBin::polarization()"
 #define G_COUNTS_GET                                 "GCTAEventBin::counts()"
 #define G_SOLIDANGLE                             "GCTAEventBin::solidangle()"
 #define G_EWIDTH                                     "GCTAEventBin::ewidth()"
@@ -46,6 +47,7 @@
 #define G_DIR_SET                           "GCTAEventBin::dir(GCTAInstDir&)"
 #define G_ENERGY_SET                         "GCTAEventBin::energy(GEnergy&)"
 #define G_TIME_SET                               "GCTAEventBin::time(GTime&)"
+#define G_POLARIZATION_SET       "GCTAEventBin::polarization(GPolarization&)"
 #define G_COUNTS_SET                          "GCTAEventBin::counts(double&)"
 #define G_SOLIDANGLE_SET                  "GCTAEventBin::solidangle(double&)"
 #define G_EWIDTH_SET                         "GCTAEventBin::ewidth(GEnergy&)"
@@ -272,6 +274,30 @@ const GTime& GCTAEventBin::time(void) const
 
     // Return time
     return *m_time;
+}
+
+
+/***********************************************************************//**
+ * @brief Return polarization of event bin
+ *
+ * @return Polarization of event bin
+ *
+ * @exception GException::invalid_value
+ *            Invalid polarization pointer encountered.
+ *
+ * Returns reference to the polarization of the event bin.
+ ***************************************************************************/
+const GPolarization& GCTAEventBin::polarization(void) const
+{
+    // Throw an exception if time pointer is not valid
+    if (m_polarization == NULL) {
+        std::string msg = "Invalid polarization pointer encountered. Please "
+                          "set up the event bin correctly.";
+        throw GException::invalid_value(G_POLARIZATION, msg);
+    }
+
+    // Return polarization
+    return *m_polarization;
 }
 
 
@@ -531,6 +557,32 @@ void GCTAEventBin::time(const GTime& time)
 
 
 /***********************************************************************//**
+ * @brief Set polarization of event bin
+ *
+ * @param[in] polarization Polarization of event bin
+ *
+ * @exception GException::invalid_value
+ *            No memory available to hold polarization.
+ *
+ * Sets the time of the event bin.
+ ***************************************************************************/
+void GCTAEventBin::polarization(const GPolarization& polarization)
+{
+    // Throw an exception if no memory has been allocated
+    if (m_polarization == NULL) {
+        std::string msg = "No memory available to hold polarization.";
+        throw GException::invalid_value(G_POLARIZATION_SET, msg);
+    }
+
+    // Set polarization
+    *m_polarization = polarization;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Set number of counts in event bin
  *
  * @param[in] counts Number of counts.
@@ -701,22 +753,24 @@ std::string GCTAEventBin::print(const GChatter& chatter) const
 void GCTAEventBin::init_members(void)
 {
     // Initialise members
-    m_alloc      = true;
-    m_ipix       = -1;   //!< Not part of an event cube
-    m_ieng       = -1;   //!< Not part of an event cube
-    m_dir        = new GCTAInstDir;
-    m_time       = new GTime;
-    m_energy     = new GEnergy;
-    m_ewidth     = new GEnergy;
-    m_counts     = new double;
-    m_solidangle = new double;
-    m_ontime     = new double;
-    m_weight     = new double;
+    m_alloc        = true;
+    m_ipix         = -1;   //!< Not part of an event cube
+    m_ieng         = -1;   //!< Not part of an event cube
+    m_dir          = new GCTAInstDir;
+    m_energy       = new GEnergy;
+    m_time         = new GTime;
+    m_polarization = new GPolarization;
+    m_ewidth       = new GEnergy;
+    m_counts       = new double;
+    m_solidangle   = new double;
+    m_ontime       = new double;
+    m_weight       = new double;
 
     // Initialise members
     m_dir->clear();
-    m_time->clear();
     m_energy->clear();
+    m_time->clear();
+    m_polarization->clear();
     m_ewidth->clear();
     *m_counts     = 0.0;
     *m_solidangle = 0.0;
@@ -739,14 +793,15 @@ void GCTAEventBin::copy_members(const GCTAEventBin& bin)
     free_members();
 
     // Copy members by cloning
-    m_dir        = new GCTAInstDir(*bin.m_dir);
-    m_time       = new GTime(*bin.m_time);
-    m_energy     = new GEnergy(*bin.m_energy);
-    m_ewidth     = new GEnergy(*bin.m_ewidth);
-    m_counts     = new double(*bin.m_counts);
-    m_solidangle = new double(*bin.m_solidangle);
-    m_ontime     = new double(*bin.m_ontime);
-    m_weight     = new double(*bin.m_weight);
+    m_dir          = new GCTAInstDir(*bin.m_dir);
+    m_energy       = new GEnergy(*bin.m_energy);
+    m_time         = new GTime(*bin.m_time);
+    m_polarization = new GPolarization(*bin.m_polarization);
+    m_ewidth       = new GEnergy(*bin.m_ewidth);
+    m_counts       = new double(*bin.m_counts);
+    m_solidangle   = new double(*bin.m_solidangle);
+    m_ontime       = new double(*bin.m_ontime);
+    m_weight       = new double(*bin.m_weight);
 
     // Copy non-pointer members
     m_ipix = bin.m_ipix;

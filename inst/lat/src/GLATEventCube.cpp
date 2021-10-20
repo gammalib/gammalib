@@ -699,6 +699,7 @@ void GLATEventCube::init_members(void)
     m_bin.clear();
     m_map.clear();
     m_time.clear();
+    m_polarization.clear();
     m_srcmap.clear();
     m_srcmap_names.clear();
     m_enodes.clear();
@@ -724,6 +725,7 @@ void GLATEventCube::copy_members(const GLATEventCube& cube)
     m_bin          = cube.m_bin;
     m_map          = cube.m_map;
     m_time         = cube.m_time;
+    m_polarization = cube.m_polarization;
     m_ontime       = cube.m_ontime;
     m_enodes       = cube.m_enodes;
     m_dirs         = cube.m_dirs;
@@ -1083,14 +1085,15 @@ void GLATEventCube::set_bin(const int& index)
     m_bin.m_ieng  = index / npix();
 
     // Set pointers
-    m_bin.m_cube       = this;
-    m_bin.m_counts     = const_cast<double*>(&(m_map.pixels()[index]));
-    m_bin.m_energy     = &(m_energies[m_bin.m_ieng]);
-    m_bin.m_time       = &m_time;
-    m_bin.m_dir        = &(m_dirs[m_bin.m_ipix]);
-    m_bin.m_solidangle = &(m_solidangle[m_bin.m_ipix]);
-    m_bin.m_ewidth     = &(m_ewidth[m_bin.m_ieng]);
-    m_bin.m_ontime     = &m_ontime;
+    m_bin.m_cube         = this;
+    m_bin.m_counts       = const_cast<double*>(&(m_map.pixels()[index]));
+    m_bin.m_energy       = &(m_energies[m_bin.m_ieng]);
+    m_bin.m_time         = &m_time;
+    m_bin.m_polarization = &m_polarization;
+    m_bin.m_dir          = &(m_dirs[m_bin.m_ipix]);
+    m_bin.m_solidangle   = &(m_solidangle[m_bin.m_ipix]);
+    m_bin.m_ewidth       = &(m_ewidth[m_bin.m_ieng]);
+    m_bin.m_ontime       = &m_ontime;
 
     // Return
     return;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                         GSource.i - Source class                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,8 +38,11 @@ class GSource : public GBase {
 public:
     // Constructors and destructors
     GSource(void);
-    GSource(const std::string& name, GModelSpatial* model,
-            const GEnergy& energy, const GTime& time);
+    GSource(const std::string&   name,
+            GModelSpatial*       model,
+            const GEnergy&       energy,
+            const GTime&         time,
+            const GPolarization& polarization);
     GSource(const GSource& src);
     virtual ~GSource(void);
 
@@ -51,10 +54,12 @@ public:
     const GModelSpatial* model(void) const;
     const GEnergy&       energy(void) const;
     const GTime&         time(void) const;
+    const GPolarization& polarization(void) const;
     void                 name(const std::string& name);
     void                 model(GModelSpatial* model);
     void                 energy(const GEnergy& energy);
     void                 time(const GTime& time);
+    void                 polarization(const GPolarization& polarization);
 };
 
 
@@ -67,7 +72,7 @@ public:
     }
 %pythoncode {
     def __getstate__(self):
-        state = (self.name(), self.model(), self.energy(), self.time())
+        state = (self.name(), self.model(), self.energy(), self.time(), self.polarization())
         return state
     def __setstate__(self, state):
         self.__init__()
@@ -77,5 +82,6 @@ public:
             self.model(self.__model)
         self.energy(state[2])
         self.time(state[3])
+        self.polarization(state[4])
 }
 };

@@ -519,6 +519,7 @@ void GCOMEventCube::init_members(void)
     m_dir.clear();
     m_dri.clear();
     m_time.clear();
+    m_polarization.clear();
     m_ontime = 0.0;
     m_energy.clear();
     m_ewidth.clear();
@@ -550,16 +551,17 @@ void GCOMEventCube::copy_members(const GCOMEventCube& cube)
     // be initialised later. The event bin serves just as a container of
     // pointers, hence we do not want to copy over the pointers from the
     // original class.
-    m_dir        = cube.m_dir;
-    m_dri        = cube.m_dri;
-    m_time       = cube.m_time;
-    m_ontime     = cube.m_ontime;
-    m_energy     = cube.m_energy;
-    m_ewidth     = cube.m_ewidth;
-    m_npix       = cube.m_npix;
-    m_dirs       = cube.m_dirs;
-    m_solidangle = cube.m_solidangle;
-    m_phibar     = cube.m_phibar;
+    m_dir          = cube.m_dir;
+    m_dri          = cube.m_dri;
+    m_time         = cube.m_time;
+    m_polarization = cube.m_polarization;
+    m_ontime       = cube.m_ontime;
+    m_energy       = cube.m_energy;
+    m_ewidth       = cube.m_ewidth;
+    m_npix         = cube.m_npix;
+    m_dirs         = cube.m_dirs;
+    m_solidangle   = cube.m_solidangle;
+    m_phibar       = cube.m_phibar;
 
     // Prepare event bin
     init_bin();
@@ -757,13 +759,14 @@ void GCOMEventCube::init_bin(void)
 {
     // Prepare event bin
     m_bin.free_members();
-    m_bin.m_counts     = NULL;      //!< Will be set by set_bin method
-    m_bin.m_dir        = &m_dir;    //!< Content will be set by set_bin method
-    m_bin.m_solidangle = NULL;      //!< Will be set by set_bin method
-    m_bin.m_time       = &m_time;   //!< Fixed content
-    m_bin.m_ontime     = &m_ontime; //!< Fixed content
-    m_bin.m_energy     = &m_energy; //!< Fixed content
-    m_bin.m_ewidth     = &m_ewidth; //!< Fixed content
+    m_bin.m_counts       = NULL;      //!< Will be set by set_bin method
+    m_bin.m_dir          = &m_dir;    //!< Content will be set by set_bin method
+    m_bin.m_solidangle   = NULL;      //!< Will be set by set_bin method
+    m_bin.m_time         = &m_time;   //!< Fixed content
+    m_bin.m_polarization = &m_polarization;   //!< Fixed content
+    m_bin.m_ontime       = &m_ontime; //!< Fixed content
+    m_bin.m_energy       = &m_energy; //!< Fixed content
+    m_bin.m_ewidth       = &m_ewidth; //!< Fixed content
 
     // Return
     return;

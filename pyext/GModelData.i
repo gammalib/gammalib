@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GModelData.i - Abstract virtual data model class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -49,11 +49,13 @@ public:
     virtual std::string classname(void) const = 0;
     virtual std::string type(void) const = 0;
     virtual bool        is_constant(void) const = 0;
-    virtual double      eval(const GEvent& event,
+    virtual double      eval(const GEvent&       event,
                              const GObservation& obs,
-                             const bool& gradients = false) const = 0;
-    virtual double      npred(const GEnergy& obsEng, const GTime& obsTime,
-                              const GObservation& obs) const = 0;
+                             const bool&         gradients = false) const = 0;
+    virtual double      npred(const GEnergy&       obsEng,
+                              const GTime&         obsTime,
+                              const GPolarization& obsPol,
+                              const GObservation&  obs) const = 0;
     virtual GEvents*    mc(const GObservation& obs, GRan& ran) const = 0;
     virtual void        read(const GXmlElement& xml) = 0;
     virtual void        write(GXmlElement& xml) const = 0;

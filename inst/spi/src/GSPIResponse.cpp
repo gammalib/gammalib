@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GSPIResponse.cpp - INTEGRAL/SPI response class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2020 by Juergen Knoedlseder                              *
+ *  copyright (C) 2020-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -407,16 +407,18 @@ double GSPIResponse::irf_value(const GSkyDir&      srcDir,
  * @param[in] model Sky model.
  * @param[in] obsEng Observed photon energy.
  * @param[in] obsTime Observed photon arrival time.
+ * @param[in] obsPol Observed photon polarization.
  * @param[in] obs Observation.
  * @return 0.0
  *
  * @exception GException::feature_not_implemented
  *            Method is not implemented.
  ***************************************************************************/
-double GSPIResponse::nroi(const GModelSky&    model,
-                          const GEnergy&      obsEng,
-                          const GTime&        obsTime,
-                          const GObservation& obs) const
+double GSPIResponse::nroi(const GModelSky&     model,
+                          const GEnergy&       obsEng,
+                          const GTime&         obsTime,
+                          const GPolarization& obsPol,
+                          const GObservation&  obs) const
 {
     // Method is not implemented
     std::string msg = "Spatial integration of sky model over the data space "

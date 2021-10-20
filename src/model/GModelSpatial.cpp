@@ -323,6 +323,7 @@ void GModelSpatial::autoscale(void)
  * @param[in] region Sky region.
  * @param[in] srcEng Energy.
  * @param[in] srcTime Time.
+ * @param[in] srcPol Polarization.
  * @return Flux (adimensional or ph/cm2/s).
  *
  * @exception GException::feature_not_implemented
@@ -341,9 +342,10 @@ void GModelSpatial::autoscale(void)
  * \f$\omega\f$ is the position angle with respect to the connecting line
  * between the region centre and the direction on the sky.
  ***************************************************************************/
-double GModelSpatial::flux(const GSkyRegion& region,
-                           const GEnergy&    srcEng,
-                           const GTime&      srcTime) const
+double GModelSpatial::flux(const GSkyRegion&    region,
+                           const GEnergy&       srcEng,
+                           const GTime&         srcTime,
+                           const GPolarization& srcPol) const
 {
     // Initialise flux
     double flux = 0.0;
@@ -398,6 +400,7 @@ double GModelSpatial::flux(const GSkyRegion& region,
                                                      reg_circle,
                                                      srcEng,
                                                      srcTime,
+                                                     srcPol,
                                                      distance,
                                                      cosdist,
                                                      sindist,
@@ -525,7 +528,8 @@ double GModelSpatial::circle_int_kern_rho::eval(const double& rho)
                                                            m_reg,
                                                            rho_kludge,
                                                            m_srcEng,
-                                                           m_srcTime);
+                                                           m_srcTime,
+                                                           m_srcPol);
 
             // Setup integrator
             GIntegral integral(&integrand);
@@ -570,7 +574,7 @@ double GModelSpatial::circle_int_kern_omega::eval(const double& omega)
     dir.rotate(omega, m_rho);
 
     // Set photon for this sky direction
-    GPhoton photon = GPhoton(dir, m_srcEng, m_srcTime);
+    GPhoton photon = GPhoton(dir, m_srcEng, m_srcTime, m_srcPol);
 
     // Evaluate model for this sky direction
     double flux = m_model->eval(photon);

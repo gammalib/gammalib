@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCOMEventBin.cpp - COMPTEL event bin class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -37,6 +37,7 @@
 #define G_DIR_GET                                       "GCOMEventBin::dir()"
 #define G_ENERGY_GET                                 "GCOMEventBin::energy()"
 #define G_TIME_GET                                     "GCOMEventBin::time()"
+#define G_POLARIZATION_GET                     "GCOMEventBin::polarization()"
 #define G_COUNTS_GET                                 "GCOMEventBin::counts()"
 #define G_SOLIDANGLE_GET                         "GCOMEventBin::solidangle()"
 #define G_EWIDTH_GET                                 "GCOMEventBin::ewidth()"
@@ -44,6 +45,7 @@
 #define G_DIR_SET                           "GCOMEventBin::dir(GCOMInstDir&)"
 #define G_ENERGY_SET                         "GCOMEventBin::energy(GEnergy&)"
 #define G_TIME_SET                               "GCOMEventBin::time(GTime&)"
+#define G_POLARIZATION_SET       "GCOMEventBin::polarization(GPolarization&)"
 #define G_COUNTS_SET                          "GCOMEventBin::counts(double&)"
 #define G_SOLIDANGLE_SET                  "GCOMEventBin::solidangle(double&)"
 #define G_EWIDTH_SET                         "GCOMEventBin::ewidth(GEnergy&)"
@@ -262,13 +264,36 @@ const GEnergy& GCOMEventBin::energy(void) const
 const GTime& GCOMEventBin::time(void) const
 {
     // Throw an exception if time pointer is not valid
-    if (m_energy == NULL) {
+    if (m_time == NULL) {
         std::string msg = "No valid time found in event bin";
         throw GException::invalid_value(G_TIME_GET, msg);
     }
 
     // Return time
     return *m_time;
+}
+
+
+/***********************************************************************//**
+ * @brief Return polarization of event bin
+ *
+ * @return Polarization of event bin
+ *
+ * @exception GException::invalid_value
+ *            Invalid polarization pointer.
+ *
+ * Returns reference to the polarization of the event bin.
+ ***************************************************************************/
+const GPolarization& GCOMEventBin::polarization(void) const
+{
+    // Throw an exception if polarization pointer is not valid
+    if (m_polarization == NULL) {
+        std::string msg = "No valid polarization found in event bin";
+        throw GException::invalid_value(G_POLARIZATION_GET, msg);
+    }
+
+    // Return polarization
+    return *m_polarization;
 }
 
 
@@ -445,7 +470,7 @@ void GCOMEventBin::energy(const GEnergy& energy)
  * @param[in] time Time of event bin
  *
  * @exception GException::invalid_value
- *            No memory available to hold instrument direction.
+ *            No memory available to hold time.
  *
  * Sets the time of the event bin.
  ***************************************************************************/
@@ -459,6 +484,32 @@ void GCOMEventBin::time(const GTime& time)
 
     // Set time
     *m_time = time;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set polarization of event bin
+ *
+ * @param[in] polarization Polarization of event bin
+ *
+ * @exception GException::invalid_value
+ *            No memory available to hold polarization.
+ *
+ * Sets the polarization of the event bin.
+ ***************************************************************************/
+void GCOMEventBin::polarization(const GPolarization& polarization)
+{
+    // Throw an exception if no memory has been allocated
+    if (m_polarization == NULL) {
+        std::string msg = "No memory available to hold polarization.";
+        throw GException::invalid_value(G_POLARIZATION_SET, msg);
+    }
+
+    // Set polarization
+    *m_polarization = polarization;
 
     // Return
     return;
@@ -610,19 +661,21 @@ std::string GCOMEventBin::print(const GChatter& chatter) const
 void GCOMEventBin::init_members(void)
 {
     // Allocate members
-    m_alloc      = true;
-    m_index      = -1;   // Signals that event bin does not correspond to cube
-    m_dir        = new GCOMInstDir;
-    m_time       = new GTime;
-    m_energy     = new GEnergy;
-    m_ewidth     = new GEnergy;
-    m_counts     = new double;
-    m_solidangle = new double;
-    m_ontime     = new double;
+    m_alloc        = true;
+    m_index        = -1;   // Signals that event bin does not correspond to cube
+    m_dir          = new GCOMInstDir;
+    m_time         = new GTime;
+    m_polarization = new GPolarization;
+    m_energy       = new GEnergy;
+    m_ewidth       = new GEnergy;
+    m_counts       = new double;
+    m_solidangle   = new double;
+    m_ontime       = new double;
 
     // Initialise members
     m_dir->clear();
     m_time->clear();
+    m_polarization->clear();
     m_energy->clear();
     m_ewidth->clear();
     *m_counts     = 0.0;
@@ -645,13 +698,14 @@ void GCOMEventBin::copy_members(const GCOMEventBin& bin)
     free_members();
 
     // Copy members by cloning
-    m_dir        = new GCOMInstDir(*bin.m_dir);
-    m_time       = new GTime(*bin.m_time);
-    m_energy     = new GEnergy(*bin.m_energy);
-    m_ewidth     = new GEnergy(*bin.m_ewidth);
-    m_counts     = new double(*bin.m_counts);
-    m_solidangle = new double(*bin.m_solidangle);
-    m_ontime     = new double(*bin.m_ontime);
+    m_dir          = new GCOMInstDir(*bin.m_dir);
+    m_time         = new GTime(*bin.m_time);
+    m_polarization = new GPolarization(*bin.m_polarization);
+    m_energy       = new GEnergy(*bin.m_energy);
+    m_ewidth       = new GEnergy(*bin.m_ewidth);
+    m_counts       = new double(*bin.m_counts);
+    m_solidangle   = new double(*bin.m_solidangle);
+    m_ontime       = new double(*bin.m_ontime);
 
     // Copy non-pointer members
     m_index = bin.m_index;

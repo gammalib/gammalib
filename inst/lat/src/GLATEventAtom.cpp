@@ -203,8 +203,9 @@ void GLATEventAtom::init_members(void)
 {
     // Initialise members
     m_dir.clear();
-    m_time.clear();
     m_energy.clear();
+    m_time.clear();
+    m_polarization.clear();
     m_theta               = 0.0;
     m_phi                 = 0.0;
     m_zenith_angle        = 0.0;
@@ -235,8 +236,9 @@ void GLATEventAtom::copy_members(const GLATEventAtom& atom)
 {
     // Copy members
     m_dir                 = atom.m_dir;
-    m_time                = atom.m_time;
     m_energy              = atom.m_energy;
+    m_time                = atom.m_time;
+    m_polarization        = atom.m_polarization;
     m_theta               = atom.m_theta;
     m_phi                 = atom.m_phi;
     m_zenith_angle        = atom.m_zenith_angle;

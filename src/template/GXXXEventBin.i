@@ -43,16 +43,17 @@ public:
     virtual ~GXXXEventBin(void);
 
     // Implemented pure virtual base class methods
-    virtual void               clear(void);
-    virtual GXXXEventBin*      clone(void) const;
-    virtual std::string        classname(void) const;
-    virtual double             size(void) const;
-    virtual const GXXXInstDir& dir(void) const;
-    virtual const GEnergy&     energy(void) const;
-    virtual const GTime&       time(void) const;
-    virtual double             counts(void) const;
-    virtual double             error(void) const;
-    virtual void               counts(const double& counts);
+    virtual void                 clear(void);
+    virtual GXXXEventBin*        clone(void) const;
+    virtual std::string          classname(void) const;
+    virtual double               size(void) const;
+    virtual const GXXXInstDir&   dir(void) const;
+    virtual const GEnergy&       energy(void) const;
+    virtual const GTime&         time(void) const;
+    virutal const GPolarization& polarization(void) const;
+    virtual double               counts(void) const;
+    virtual double               error(void) const;
+    virtual void                 counts(const double& counts);
 
     // Other methods
     // TODO: Copy methods from GXXXEventBin.hpp file

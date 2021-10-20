@@ -1532,8 +1532,9 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs,
         // Get CTA IRF response
         const GCTAResponseIrf& rsp = gammalib::cta_rsp_irf(G_COMPUTE_ARF, obs);
 
-        // Set dummy time
-        const GTime time;
+        // Set dummy time and polarization
+        const GTime         time;
+        const GPolarization polarization;
 
         // Save original energy dispersion application status
         bool save_edisp = rsp.apply_edisp();
@@ -1548,7 +1549,7 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs,
             GEnergy energy = etrue.elogmean(i);
 
             // Set source
-            GSource source("", const_cast<GModelSpatial*>(&spatial), energy, time);
+            GSource source("", const_cast<GModelSpatial*>(&spatial), energy, time, polarization);
 
             // Initialize effective area for this bin
             m_arf[i] = 0.0;

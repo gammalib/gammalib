@@ -30,9 +30,10 @@
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
 #include "GEventAtom.hpp"
+#include "GXXXInstDir.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
-#include "GXXXInstDir.hpp"
+#include "GPolarization.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 
@@ -56,13 +57,14 @@ public:
     GXXXEventAtom& operator=(const GXXXEventAtom& atom);
 
     // Implemented pure virtual base class methods
-    void               clear(void);
-    GXXXEventAtom*     clone(void) const;
-    std::string        classname(void) const;
-    const GXXXInstDir& dir(void) const;
-    const GEnergy&     energy(void) const;
-    const GTime&       time(void) const;
-    std::string        print(const GChatter& chatter = NORMAL) const;
+    virtual void                 clear(void);
+    virtual GXXXEventAtom*       clone(void) const;
+    virtual std::string          classname(void) const;
+    virtual const GXXXInstDir&   dir(void) const;
+    virtual const GEnergy&       energy(void) const;
+    virtual const GTime&         time(void) const;
+    virtual const GPolarization& polarization(void) const;
+    virtual std::string          print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods
@@ -71,9 +73,10 @@ protected:
     void free_members(void);
 
     // Protected members
-    GXXXInstDir m_dir;    //!< Event direction
-    GEnergy     m_energy; //!< Event energy
-    GTime       m_time;   //!< Event time
+    GXXXInstDir   m_dir;          //!< Event direction
+    GEnergy       m_energy;       //!< Event energy
+    GTime         m_time;         //!< Event time
+    GPolarization m_polarization; //!< Event polarization
 };
 
 
@@ -131,6 +134,20 @@ inline
 const GTime& GXXXEventAtom::time(void) const
 {
     return m_time;
+}
+
+
+/***********************************************************************//**
+ * @brief Return event polarization
+ *
+ * @return Event polarization.
+ *
+ * Returns the event polarization.
+ ***************************************************************************/
+inline
+const GPolarization& GXXXEventAtom::polarization(void) const
+{
+    return m_polarization;
 }
 
 #endif /* GXXXEVENTATOM_HPP */

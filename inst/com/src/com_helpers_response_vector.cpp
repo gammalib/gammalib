@@ -172,7 +172,7 @@ double com_extended_kerns_phi::eval(const double& phi)
     skyDir.celvector(dir);
 
     // Set photon
-    GPhoton photon(skyDir, m_srcEng, m_srcTime);
+    GPhoton photon(skyDir, m_srcEng, m_srcTime, GPolarization());
 
     // Get model sky intensity for photon (unit: sr^-1)
     double intensity = m_model.spatial()->eval(photon);

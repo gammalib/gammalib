@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GMWLDatum.cpp - Multi-wavelength spectral point class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -265,8 +265,9 @@ void GMWLDatum::init_members(void)
 {
     // Initialise members
     m_dir.clear();
-    m_time.clear();
     m_eng.clear();
+    m_time.clear();
+    m_polarization.clear();
     m_eng_err.clear();
     m_flux     = 0.0;
     m_flux_err = 0.0;
@@ -284,12 +285,13 @@ void GMWLDatum::init_members(void)
 void GMWLDatum::copy_members(const GMWLDatum& datum)
 {
     // Copy members
-    m_dir      = datum.m_dir;
-    m_time     = datum.m_time;
-    m_eng      = datum.m_eng;
-    m_eng_err  = datum.m_eng_err;
-    m_flux     = datum.m_flux;
-    m_flux_err = datum.m_flux_err;
+    m_dir          = datum.m_dir;
+    m_eng          = datum.m_eng;
+    m_time         = datum.m_time;
+    m_polarization = datum.m_polarization;
+    m_eng_err      = datum.m_eng_err;
+    m_flux         = datum.m_flux;
+    m_flux_err     = datum.m_flux_err;
 
     // Return
     return;

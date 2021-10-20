@@ -38,6 +38,7 @@
 #define G_DIR                                           "GLATEventBin::dir()"
 #define G_ENERGY                                     "GLATEventBin::energy()"
 #define G_TIME                                         "GLATEventBin::time()"
+#define G_POLARIZATION                         "GLATEventBin::polarization()"
 #define G_COUNTS_GET                                 "GLATEventBin::counts()"
 #define G_COUNTS_SET                          "GLATEventBin::counts(double&)"
 #define G_SOLIDANGLE                             "GLATEventBin::solidangle()"
@@ -269,6 +270,30 @@ const GTime& GLATEventBin::time(void) const
 
 
 /***********************************************************************//**
+ * @brief Return polarization of event bin
+ *
+ * @return Polarization of event bin.
+ *
+ * @exception GException::invalid_value
+ *            Invalid polarization pointer encountered.
+ *
+ * Returns reference to the polarization of the event bin.
+ ***************************************************************************/
+const GPolarization& GLATEventBin::polarization(void) const
+{
+    // Throw an exception if polarization pointer is not valid
+    if (m_polarization == NULL) {
+        std::string msg = "Invalid polarization pointer encountered. Please "
+                          "set up the event bin correctly.";
+        throw GException::invalid_value(G_POLARIZATION, msg);
+    }
+
+    // Return polarization
+    return *m_polarization;
+}
+
+
+/***********************************************************************//**
  * @brief Return number of counts in event bin
  *
  * @return Number of counts in event bin.
@@ -450,17 +475,18 @@ std::string GLATEventBin::print(const GChatter& chatter) const
 void GLATEventBin::init_members(void)
 {
     // Initialise members
-    m_cube       = NULL;
-    m_index      = -1;
-    m_ipix       = -1;
-    m_ieng       = -1;
-    m_energy     = NULL;
-    m_dir        = NULL;
-    m_time       = NULL;
-    m_counts     = NULL;
-    m_solidangle = NULL;
-    m_ewidth     = NULL;
-    m_ontime     = NULL;
+    m_cube         = NULL;
+    m_index        = -1;
+    m_ipix         = -1;
+    m_ieng         = -1;
+    m_energy       = NULL;
+    m_dir          = NULL;
+    m_time         = NULL;
+    m_polarization = NULL;
+    m_counts       = NULL;
+    m_solidangle   = NULL;
+    m_ewidth       = NULL;
+    m_ontime       = NULL;
 
     // Return
     return;
@@ -475,17 +501,18 @@ void GLATEventBin::init_members(void)
 void GLATEventBin::copy_members(const GLATEventBin& bin)
 {
     // Copy members
-    m_cube       = bin.m_cube;
-    m_index      = bin.m_index;
-    m_ipix       = bin.m_ipix;
-    m_ieng       = bin.m_ieng;
-    m_energy     = bin.m_energy;
-    m_dir        = bin.m_dir;
-    m_time       = bin.m_time;
-    m_counts     = bin.m_counts;
-    m_solidangle = bin.m_solidangle;
-    m_ewidth     = bin.m_ewidth;
-    m_ontime     = bin.m_ontime;
+    m_cube         = bin.m_cube;
+    m_index        = bin.m_index;
+    m_ipix         = bin.m_ipix;
+    m_ieng         = bin.m_ieng;
+    m_energy       = bin.m_energy;
+    m_dir          = bin.m_dir;
+    m_time         = bin.m_time;
+    m_polarization = bin.m_polarization;
+    m_counts       = bin.m_counts;
+    m_solidangle   = bin.m_solidangle;
+    m_ewidth       = bin.m_ewidth;
+    m_ontime       = bin.m_ontime;
 
     // Return
     return;

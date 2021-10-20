@@ -37,6 +37,7 @@
 #include "GSkyMap.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
+#include "GPolarization.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GFilename;
@@ -97,12 +98,13 @@ protected:
     void         set_bin(const int& index);
 
     // Protected members
-    GXXXEventBin m_bin;        //!< Actual event bin
-    GXXXInstDir  m_dir;        //!< Actual event direction
-    GTime        m_time;       //!< Event cube mean time
-    double       m_ontime;     //!< Event cube ontime (sec)
-    GEnergy      m_energy;     //!< Event cube mean energy
-    GEnergy      m_ewidth;     //!< Event cube energy bin width
+    GXXXEventBin  m_bin;          //!< Actual event bin
+    GXXXInstDir   m_dir;          //!< Actual event direction
+    GTime         m_time;         //!< Event cube mean time
+    GPolarization m_polarization; //!< Event cube mean polarization
+    double        m_ontime;       //!< Event cube ontime (sec)
+    GEnergy       m_energy;       //!< Event cube mean energy
+    GEnergy       m_ewidth;       //!< Event cube energy bin width
 };
 
 
