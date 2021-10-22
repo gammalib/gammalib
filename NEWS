@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-19 October 2021
+22 October 2021
 
 
 1. Introduction
@@ -166,6 +166,8 @@ None
 
 7. FITS I/O Interface
 ---------------------
+The extension name check is now case insensitive in GFits::extno().
+
 Added GFitsTableCol::tscale() methods and a m_tscale member to the class that
 contains the optional TSCALn keyword value (m_tscale=1 in case that no scaling
 keyword is found). Upon loading of a column with m_tscale!=1 the FITS scaling

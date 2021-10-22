@@ -1,8 +1,9 @@
-2021-10-19
+2021-10-22
 
         * Version 2.0.0 released
         ========================
 
+        Make extension name check case insensitive in GFits::extno()
         Add numerical gradient step size member to GObservation
         Add stamp() methods to GApplication (#3662)
         Add ASCL shield to "About" page (#3630)

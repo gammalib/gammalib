@@ -984,14 +984,19 @@ void GFits::extend(const GFits& fits)
  * Returns the extension number for a specified extension name @p extname. If
  * the extension name if "PRIMARY" an extension number of 0 is returned.
  * If the extension is not found, -1 is returned.
+ *
+ * @p extname is case in-sensitive.
  ***************************************************************************/
 int GFits::extno(const std::string& extname) const
 {
     // Initialise extension number
     int extno = -1;
 
+    // Get extname in upper case
+    std::string uextname = gammalib::toupper(extname);
+
     // Return primary HDU if requested ...
-    if (gammalib::toupper(extname) == "PRIMARY") {
+    if (uextname == "PRIMARY") {
         if (size() > 0) {
             extno = 0;
         }
@@ -1000,7 +1005,7 @@ int GFits::extno(const std::string& extname) const
     // ... otherwise search for specified extension
     else {
         for (int i = 0; i < size(); ++i) {
-            if (m_hdu[i]->extname() == extname) {
+            if (gammalib::toupper(m_hdu[i]->extname()) == uextname) {
                 extno = i;
                 break;
             }
