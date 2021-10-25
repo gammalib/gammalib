@@ -1271,6 +1271,15 @@ void GCOMObservation::compute_drb_phinor(const GCOMDri& drm)
         }
     }
 
+    // Make sure that DRB is non-negative
+    for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
+        for (int ipix = 0; ipix < npix; ++ipix) {
+            if (map_drb(ipix, iphibar) < 0.0) {
+                map_drb(ipix, iphibar) = 0.0;
+            }
+        }
+    }
+
     // Return
     return;
 }
@@ -1617,6 +1626,15 @@ void GCOMObservation::compute_drb_bgdlixa(const GCOMDri& drm,
         }
     }
 
+    // Make sure that DRB is non-negative
+    for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
+        for (int ipix = 0; ipix < npix; ++ipix) {
+            if (map_drb(ipix, iphibar) < 0.0) {
+                map_drb(ipix, iphibar) = 0.0;
+            }
+        }
+    }
+
     // Return
     return;
 }
@@ -1816,6 +1834,15 @@ void GCOMObservation::compute_drb_bgdlixe(const GCOMDri& drm,
         }
         else {
             for (int ipix = 0; ipix < npix; ++ipix) {
+                map_drb(ipix, iphibar) = 0.0;
+            }
+        }
+    }
+
+    // Make sure that DRB is non-negative
+    for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
+        for (int ipix = 0; ipix < npix; ++ipix) {
+            if (map_drb(ipix, iphibar) < 0.0) {
                 map_drb(ipix, iphibar) = 0.0;
             }
         }
