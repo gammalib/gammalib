@@ -868,11 +868,6 @@ std::string GCOMObservation::print(const GChatter& chatter) const
  ***************************************************************************/
 void GCOMObservation::init_members(void)
 {
-    // Initialise gradient step size to 0.005 degrees since the angular
-    // resolution of COMPTEL is much worse than the default step size
-    // value of 0.0002.
-    m_grad_step_size = 0.005;
-
     // Initialise members
     m_instrument = "COM";
     m_response.clear();
