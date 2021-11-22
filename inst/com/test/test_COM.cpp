@@ -663,8 +663,8 @@ void TestGCOM::test_binned_optimizer(void)
     obs.models(com_model);
 
     // Perform LM optimization
-    double fit_results[] = {83.423469, 0.1573617,
-                            21.593580, 0.1439531,
+    double fit_results[] = {83.422241, 0.1573088,
+                            21.592306, 0.1438797,
                             0.001680, 8.31055e-05,
                             -2.05, 0,
                             1, 0,
@@ -688,7 +688,7 @@ void TestGCOM::test_binned_optimizer(void)
                             17, 0,
                             64.894538, 0.466807,
                             19, 0,
-                            60.738527, 0.458565,
+                            60.738462, 0.458565,
                             21, 0,
                             57.585653, 0.451466,
                             23, 0,
