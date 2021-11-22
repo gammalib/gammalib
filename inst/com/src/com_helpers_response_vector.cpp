@@ -52,147 +52,6 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Kernel for radial integration of extended model
- *
- * @param[in] phigeo Phigeo angle (radians).
- * @return Azimuthally integrated extended model.
- ***************************************************************************/
-GVector com_extended_kerns_phigeo::eval(const double& phigeo)
-{
-    // Initialise kernel values
-    m_irfs = 0.0;
-
-    // Continue only if phigeo is positive
-    if (phigeo > 0.0) {
-
-        // Compute half length of the arc (in radians) from a circle with
-        // radius phigeo that intersects with the model, defined as a
-        // circle with maximum radius m_theta_max
-        double dphi = 0.5 * gammalib::roi_arclength(phigeo,
-                                                    m_zeta,
-                                                    m_cos_zeta,
-                                                    m_sin_zeta,
-                                                    m_theta_max,
-                                                    m_cos_theta_max);
-
-        // Continue only if arc length is positive
-        if (dphi > 0.0) {
-
-            // Compute sine and cosine of Phigeo
-            double sin_phigeo = std::sin(phigeo);
-            double cos_phigeo = std::cos(phigeo);
-
-            // Compute phi integration range
-            double phi_min = m_phi0 - dphi;
-            double phi_max = m_phi0 + dphi;
-
-            // Precompute interpolated IAQ vector for Phigeo angle
-            double phirat  = phigeo / m_phigeo_bin_size; // 0.5 at bin centre
-            int    iphigeo = int(phirat);                // index into which Phigeo falls
-            double eps     = phirat - iphigeo - 0.5;     // 0.0 at bin centre [-0.5, 0.5[
-
-            // Continue only if Phigeo index is valid
-            if (iphigeo < m_phigeo_bins) {
-
-                // Setup kernel for azimuthal integration
-                com_extended_kerns_phi integrand(m_model,
-                                                 m_srcEng,
-                                                 m_srcTime,
-                                                 m_rot,
-                                                 m_drx,
-                                                 sin_phigeo,
-                                                 cos_phigeo);
-
-                // Setup integrator
-                GIntegral integral(&integrand);
-                integral.fixed_iter(m_iter);
-
-                // Integrate over azimuth angle
-                double irf = integral.romberg(phi_min, phi_max, m_iter) * sin_phigeo;
-
-                // Multiply result with IAQ for all Phibar layers
-                for (int iphibar = 0; iphibar < m_phibar_bins; ++iphibar) {
-
-                    // Initialise IAQ
-                    double iaq;
-
-                    // Get IAQ index
-                    int i = iphibar * m_phigeo_bins + iphigeo;
-
-                    // Get interpolated IAQ value
-                    if (eps < 0.0) { // interpolate towards left
-                        if (iphigeo > 0) {
-                            iaq = (1.0 + eps) * m_iaq[i] - eps * m_iaq[i-1];
-                        }
-                        else {
-                            iaq = (1.0 - eps) * m_iaq[i] + eps * m_iaq[i+1];
-                        }
-                    }
-                    else {           // interpolate towards right
-                        if (iphigeo < m_phigeo_bins-1) {
-                            iaq = (1.0 - eps) * m_iaq[i] + eps * m_iaq[i+1];
-                        }
-                        else {
-                            iaq = (1.0 + eps) * m_iaq[i] - eps * m_iaq[i-1];
-                        }
-                    }
-
-                    // Compute IRF
-                    m_irfs[iphibar] = irf * iaq * m_iaq_norm;
-
-                } // endfor: looped over Phibar
-
-            } // endif: Phigeo bin was valid
-
-        } // endif: arc length was positive
-
-    } // endif: phigeo was positive
-
-    // Return kernel values
-    return m_irfs;
-}
-
-
-/***********************************************************************//**
- * @brief Kernel for azimuthal integration of extended model
- *
- * @param[in] phi Azimuth angle (radians).
- * @return Vector of azimuthally integrated model.
- ***************************************************************************/
-double com_extended_kerns_phi::eval(const double& phi)
-{
-    // Compute sine and cosine of azimuth angle
-    double sin_phi = std::sin(phi);
-    double cos_phi = std::cos(phi);
-
-    // Get sky direction
-    GVector native(-cos_phi*m_sin_phigeo, sin_phi*m_sin_phigeo, m_cos_phigeo);
-    GVector dir = m_rot * native;
-    GSkyDir skyDir;
-    skyDir.celvector(dir);
-
-    // Set photon
-    GPhoton photon(skyDir, m_srcEng, m_srcTime);
-
-    // Get model sky intensity for photon (unit: sr^-1)
-    double intensity = m_model.spatial()->eval(photon);
-
-    // Continue only if intensity is positive
-    if (intensity > 0.0) {
-
-        // Multiply-in DRX value if pointer is valid
-        if (m_drx != NULL) {
-            intensity *= (*m_drx)(skyDir);
-        }
-
-    } // endif: intensity was valid
-
-    // Return kernel values
-    return intensity;
-}
-
-
-/***********************************************************************//**
  * @brief Kernel for radial integration of radial models
  *
  * @param[in] rho Rho angle (radians).
@@ -320,12 +179,12 @@ GVector com_radial_kerns_omega::eval(const double& omega)
     return m_irfs;
 }
 /***********************************************************************//**
- * @brief Kernel for radial integration of extended model
+ * @brief Kernel for radial integration of elliptical models
  *
  * @param[in] rho Rho angle (radians).
- * @return Azimuthally integrated extended model.
+ * @return Azimuthally integrated elliptical model.
  ***************************************************************************/
-GVector com_extended_kerns_rho::eval(const double& rho)
+GVector com_elliptical_kerns_rho::eval(const double& rho)
 {
     // Initialise kernel values
     m_irfs = 0.0;
@@ -338,17 +197,17 @@ GVector com_extended_kerns_rho::eval(const double& rho)
         double cos_rho = std::cos(rho);
 
         // Setup azimuthal integration kernel
-        com_extended_kerns_omega integrands(m_iaq,
-                                            m_model,
-                                            m_irfs,
-                                            m_bin,
-                                            m_rot,
-                                            m_drx,
-                                            m_phigeo_bin_size,
-                                            m_phigeo_bins,
-                                            m_phibar_bins,
-                                            sin_rho,
-                                            cos_rho);
+        com_elliptical_kerns_omega integrands(m_iaq,
+                                              m_model,
+                                              m_irfs,
+                                              m_bin,
+                                              m_rot,
+                                              m_drx,
+                                              m_phigeo_bin_size,
+                                              m_phigeo_bins,
+                                              m_phibar_bins,
+                                              sin_rho,
+                                              cos_rho);
 
         // Setup integrator
         GIntegrals integral(&integrands);
@@ -365,12 +224,12 @@ GVector com_extended_kerns_rho::eval(const double& rho)
 
 
 /***********************************************************************//**
- * @brief Kernel for azimuthal integration of extended model
+ * @brief Kernel for azimuthal integration of elliptical models
  *
  * @param[in] omega Omega angle (radians).
- * @return Kernel value for extended model.
+ * @return Kernel value for elliptical model.
  ***************************************************************************/
-GVector com_extended_kerns_omega::eval(const double& omega)
+GVector com_elliptical_kerns_omega::eval(const double& omega)
 {
     // Initialise kernel values
     m_irfs = 0.0;

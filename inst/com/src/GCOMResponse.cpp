@@ -73,16 +73,10 @@
                                                   " GObservation&, GMatrix*)"
 #define G_IRF_DIFFUSE "GCOMResponse::irf_diffuse(GModelSky&, GObservation&, "\
                                                                   "GMatrix*)"
-#define G_IRF_EXTENDED              "GCOMResponse::irf_extended(GModelSky&, "\
-                                "GObservation&, GSkyDir&, double&, GMatrix*)"
 
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-#define G_USE_DRM_CUBE
-#define G_USE_MODEL_INTEGRAL_IN_IRF_EXTENDED
-#define G_USE_INTEGRAL_IN_IRF_EXTENDED
-//#define G_APPROXIMATE_DRX_IN_IRF_EXTENDED
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -991,6 +985,42 @@ GVector GCOMResponse::irf_radial(const GModelSky&    model,
                                  const GObservation& obs,
                                  GMatrix*            gradients) const
 {
+    // Set constants
+    static const int iter_rho   = 5;
+    static const int iter_omega = 5;
+
+    // Extract COMPTEL observation
+    const GCOMObservation* obs_ptr = dynamic_cast<const GCOMObservation*>(&obs);
+    if (obs_ptr == NULL) {
+        std::string cls = std::string(typeid(&obs).name());
+        std::string msg = "Observation of type \""+cls+"\" is not a COMPTEL "
+                          "observations. Please specify a COMPTEL observation "
+                          "as argument.";
+        throw GException::invalid_argument(G_IRF_RADIAL, msg);
+    }
+
+    // Extract COMPTEL event cube
+    const GCOMEventCube* cube = dynamic_cast<const GCOMEventCube*>(obs_ptr->events());
+    if (cube == NULL) {
+        std::string msg = "Observation \""+obs.name()+"\" ("+obs.id()+") does "
+                          "not contain a COMPTEL event cube. Please specify "
+                          "a COMPTEL observation containing and event cube.";
+        throw GException::invalid_argument(G_IRF_RADIAL, msg);
+    }
+
+    // Throw an exception if COMPTEL response is not set or if
+    if (m_iaq.empty()) {
+        std::string msg = "COMPTEL response is empty. Please initialise the "
+                          "response with an \"IAQ\".";
+        throw GException::invalid_value(G_IRF_RADIAL, msg);
+    }
+    else if (m_phigeo_bin_size == 0.0) {
+        std::string msg = "COMPTEL response has a zero Phigeo bin size. "
+                          "Please initialise the response with a valid "
+                          "\"IAQ\".";
+        throw GException::invalid_value(G_IRF_RADIAL, msg);
+    }
+
     // Get pointer to radial model
     const GModelSpatialRadial* radial =
           static_cast<const GModelSpatialRadial*>(model.spatial());
@@ -1001,8 +1031,91 @@ GVector GCOMResponse::irf_radial(const GModelSky&    model,
     const GSkyDir& model_dir = radial->dir();
     const double&  theta_max = radial->theta_max() - 1.0e-12;
 
-    // Call support method
-    GVector irfs = irf_extended(model, obs, model_dir, theta_max, gradients);
+    // Get number of Chi/Psi pixels, Phibar layers and event bins
+    int npix    = cube->naxis(0) * cube->naxis(1);
+    int nphibar = cube->naxis(2);
+    int nevents = cube->size();
+
+    // Initialise result
+    GVector irfs(nevents);
+
+    // Initialise some variables
+    double         phigeo_min = m_phigeo_min      * gammalib::deg2rad;
+    double         phigeo_bin = m_phigeo_bin_size * gammalib::deg2rad;
+    double         phigeo_max = phigeo_min + phigeo_bin * m_phigeo_bins;
+    const GSkyMap& drx        = obs_ptr->drx().map();
+    const double*  drg        = obs_ptr->drg().map().pixels();
+
+    // Compute IAQ normalisation (1/s): DEADC / ONTIME (s)
+    double iaq_norm = obs_ptr->deadc() / (obs_ptr->ontime() * cube->dre().tof_correction());
+
+    // Setup rotation matrix for conversion towards sky coordinates
+    GMatrix ry;
+    GMatrix rz;
+    ry.eulery(model_dir.dec_deg() - 90.0);
+    rz.eulerz(-model_dir.ra_deg());
+    GMatrix rot = (ry * rz).transpose();
+
+    // Loop over Chi and Psi
+    for (int ipix = 0; ipix < npix; ++ipix) {
+
+        // Get pointer to event bin
+        const GCOMEventBin* bin = (*cube)[ipix];
+
+        // Get reference to instrument direction
+        const GCOMInstDir& obsDir = bin->dir();
+
+        // Get reference to Phigeo sky direction
+        const GSkyDir& phigeoDir = obsDir.dir();
+
+        // Compute angle between model centre and Phigeo sky direction (radians)
+        // and position angle of model with respect to Phigeo sky direction (radians)
+        double zeta = phigeoDir.dist(model_dir);
+
+        // Set radial model zenith angle range
+        double rho_min = (zeta > phigeo_max) ? zeta - phigeo_max : 0.0;
+        double rho_max = zeta + phigeo_max;
+        if (rho_min > theta_max) {
+            rho_min = theta_max;
+        }
+        if (rho_max > theta_max) {
+            rho_max = theta_max;
+        }
+
+        // Perform model zenith angle integration if interval is valid
+        if (rho_max > rho_min) {
+
+            // Initialise IRF vector
+            GVector irf(nphibar);
+
+            // Setup integration kernel
+            com_radial_kerns_rho integrands(m_iaq,
+                                            *radial,
+                                            irf,
+                                            bin,
+                                            rot,
+                                            drx,
+                                            phigeo_bin,
+                                            m_phigeo_bins,
+                                            nphibar,
+                                            iter_omega);
+
+            // Setup integrator
+            GIntegrals integral(&integrands);
+            integral.fixed_iter(iter_rho);
+
+            // Integrate over Phigeo
+            irf = integral.romberg(rho_min, rho_max, iter_rho);
+
+            // Add IRF to result
+            for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
+                int idri   = ipix + iphibar * npix;
+                irfs[idri] = irf[iphibar] * drg[idri] * iaq_norm;
+            }
+
+        } // endif: Phigeo angle interval was valid
+
+    } // endfor: looped over Chi and Psi pixels
 
     // Return IRF vector
     return irfs;
@@ -1025,6 +1138,42 @@ GVector GCOMResponse::irf_elliptical(const GModelSky&    model,
                                      const GObservation& obs,
                                      GMatrix*            gradients) const
 {
+    // Set constants
+    static const int iter_rho   = 5;
+    static const int iter_omega = 5;
+
+    // Extract COMPTEL observation
+    const GCOMObservation* obs_ptr = dynamic_cast<const GCOMObservation*>(&obs);
+    if (obs_ptr == NULL) {
+        std::string cls = std::string(typeid(&obs).name());
+        std::string msg = "Observation of type \""+cls+"\" is not a COMPTEL "
+                          "observations. Please specify a COMPTEL observation "
+                          "as argument.";
+        throw GException::invalid_argument(G_IRF_ELLIPTICAL, msg);
+    }
+
+    // Extract COMPTEL event cube
+    const GCOMEventCube* cube = dynamic_cast<const GCOMEventCube*>(obs_ptr->events());
+    if (cube == NULL) {
+        std::string msg = "Observation \""+obs.name()+"\" ("+obs.id()+") does "
+                          "not contain a COMPTEL event cube. Please specify "
+                          "a COMPTEL observation containing and event cube.";
+        throw GException::invalid_argument(G_IRF_ELLIPTICAL, msg);
+    }
+
+    // Throw an exception if COMPTEL response is not set or if
+    if (m_iaq.empty()) {
+        std::string msg = "COMPTEL response is empty. Please initialise the "
+                          "response with an \"IAQ\".";
+        throw GException::invalid_value(G_IRF_ELLIPTICAL, msg);
+    }
+    else if (m_phigeo_bin_size == 0.0) {
+        std::string msg = "COMPTEL response has a zero Phigeo bin size. "
+                          "Please initialise the response with a valid "
+                          "\"IAQ\".";
+        throw GException::invalid_value(G_IRF_ELLIPTICAL, msg);
+    }
+
     // Get pointer to elliptical model
     const GModelSpatialElliptical* elliptical =
           static_cast<const GModelSpatialElliptical*>(model.spatial());
@@ -1033,10 +1182,93 @@ GVector GCOMResponse::irf_elliptical(const GModelSky&    model,
     const GSkyDir& model_dir = elliptical->dir();
     const double&  theta_max = elliptical->theta_max();
 
-    // Call support method
-    GVector irfs = irf_extended(model, obs, model_dir, theta_max, gradients);
+    // Get number of Chi/Psi pixels, Phibar layers and event bins
+    int npix    = cube->naxis(0) * cube->naxis(1);
+    int nphibar = cube->naxis(2);
+    int nevents = cube->size();
 
-    // Return IRF value
+    // Initialise result
+    GVector irfs(nevents);
+
+    // Initialise some variables
+    double         phigeo_min = m_phigeo_min      * gammalib::deg2rad;
+    double         phigeo_bin = m_phigeo_bin_size * gammalib::deg2rad;
+    double         phigeo_max = phigeo_min + phigeo_bin * m_phigeo_bins;
+    const GSkyMap& drx        = obs_ptr->drx().map();
+    const double*  drg        = obs_ptr->drg().map().pixels();
+
+    // Compute IAQ normalisation (1/s): DEADC / ONTIME (s)
+    double iaq_norm = obs_ptr->deadc() / (obs_ptr->ontime() * cube->dre().tof_correction());
+
+    // Setup rotation matrix for conversion towards sky coordinates
+    GMatrix ry;
+    GMatrix rz;
+    ry.eulery(model_dir.dec_deg() - 90.0);
+    rz.eulerz(-model_dir.ra_deg());
+    GMatrix rot = (ry * rz).transpose();
+
+    // Loop over Chi and Psi
+    for (int ipix = 0; ipix < npix; ++ipix) {
+
+        // Get pointer to event bin
+        const GCOMEventBin* bin = (*cube)[ipix];
+
+        // Get reference to instrument direction
+        const GCOMInstDir& obsDir = bin->dir();
+
+        // Get reference to Phigeo sky direction
+        const GSkyDir& phigeoDir = obsDir.dir();
+
+        // Compute angle between model centre and Phigeo sky direction (radians)
+        // and position angle of model with respect to Phigeo sky direction (radians)
+        double zeta = phigeoDir.dist(model_dir);
+
+        // Set radial model zenith angle range
+        double rho_min = (zeta > phigeo_max) ? zeta - phigeo_max : 0.0;
+        double rho_max = zeta + phigeo_max;
+        if (rho_min > theta_max) {
+            rho_min = theta_max;
+        }
+        if (rho_max > theta_max) {
+            rho_max = theta_max;
+        }
+
+        // Perform model zenith angle integration if interval is valid
+        if (rho_max > rho_min) {
+
+            // Initialise IRF vector
+            GVector irf(nphibar);
+
+            // Setup integration kernel
+            com_elliptical_kerns_rho integrands(m_iaq,
+                                                model,
+                                                irf,
+                                                bin,
+                                                rot,
+                                                drx,
+                                                phigeo_bin,
+                                                m_phigeo_bins,
+                                                nphibar,
+                                                iter_omega);
+
+            // Setup integrator
+            GIntegrals integral(&integrands);
+            integral.fixed_iter(iter_rho);
+
+            // Integrate over Phigeo
+            irf = integral.romberg(rho_min, rho_max, iter_rho);
+
+            // Add IRF to result
+            for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
+                int idri   = ipix + iphibar * npix;
+                irfs[idri] = irf[iphibar] * drg[idri] * iaq_norm;
+            }
+
+        } // endif: Phigeo angle interval was valid
+
+    } // endfor: looped over Chi and Psi pixels
+
+    // Return IRF vector
     return irfs;
 }
 
@@ -1223,481 +1455,3 @@ GVector GCOMResponse::irf_diffuse(const GModelSky&    model,
     // Return IRF vector
     return irfs;
 }
-
-
-/***********************************************************************//**
- * @brief Return instrument response to extended source
- *
- * @param[in] model Sky model.
- * @param[in] obs Observation.
- * @param[in] model_dir Centre direction of extended model.
- * @param[in] theta_max Maximum theta angle (radians).
- * @param[out] gradients Gradients matrix.
- * @return Instrument response to radial source  for all events in
- *         observation (\f$cm^2\f$).
- *
- * Returns the instrument response to an extended source for all events in
- * the observations.
- *
- * The computation is done by integrating the extended model for each pixel
- * in Chi and Psi over a circular region centred on the Chi/Psi pixel with
- * a radius equal to the maximum Phigeo value. The integration is done in
- * a spherical system, spanned by Phigeo and azimuth angle. Only coordiates
- * are considered that plausibly overlap with the extended model. The
- * integration is done by numerical summation. The integration step is by
- * default set to 1/10 of the model size, with the constraint that it never
- * becomes larger than the IAQ Phigeo binsize. This should allow to capture
- * all extended models with sufficient precision in an acceptable amount of
- * computing time.
- *
- * @p gradients is an optional matrix where the number of rows corresponds
- * to the number of events in the observation and the number of columns
- * corresponds to the number of spatial model parameters. Since no gradients
- * are computed in this method the content of @p gradients if not altered.
- ***************************************************************************/
-#if defined(G_USE_MODEL_INTEGRAL_IN_IRF_EXTENDED)
-GVector GCOMResponse::irf_extended(const GModelSky&    model,
-                                   const GObservation& obs,
-                                   const GSkyDir&      model_dir,
-                                   const double&       theta_max,
-                                   GMatrix*            gradients) const
-{
-    // Set constants
-    static const int iter_rho   = 5;
-    static const int iter_omega = 5;
-
-    // Extract COMPTEL observation
-    const GCOMObservation* obs_ptr = dynamic_cast<const GCOMObservation*>(&obs);
-    if (obs_ptr == NULL) {
-        std::string cls = std::string(typeid(&obs).name());
-        std::string msg = "Observation of type \""+cls+"\" is not a COMPTEL "
-                          "observations. Please specify a COMPTEL observation "
-                          "as argument.";
-        throw GException::invalid_argument(G_IRF_EXTENDED, msg);
-    }
-
-    // Extract COMPTEL event cube
-    const GCOMEventCube* cube = dynamic_cast<const GCOMEventCube*>(obs_ptr->events());
-    if (cube == NULL) {
-        std::string msg = "Observation \""+obs.name()+"\" ("+obs.id()+") does "
-                          "not contain a COMPTEL event cube. Please specify "
-                          "a COMPTEL observation containing and event cube.";
-        throw GException::invalid_argument(G_IRF_EXTENDED, msg);
-    }
-
-    // Throw an exception if COMPTEL response is not set or if
-    if (m_iaq.empty()) {
-        std::string msg = "COMPTEL response is empty. Please initialise the "
-                          "response with an \"IAQ\".";
-        throw GException::invalid_value(G_IRF_EXTENDED, msg);
-    }
-    else if (m_phigeo_bin_size == 0.0) {
-        std::string msg = "COMPTEL response has a zero Phigeo bin size. "
-                          "Please initialise the response with a valid "
-                          "\"IAQ\".";
-        throw GException::invalid_value(G_IRF_EXTENDED, msg);
-    }
-
-    // Get number of Chi/Psi pixels, Phibar layers and event bins
-    int npix    = cube->naxis(0) * cube->naxis(1);
-    int nphibar = cube->naxis(2);
-    int nevents = cube->size();
-
-    // Initialise result
-    GVector irfs(nevents);
-
-    // Initialise some variables
-    double         phigeo_min = m_phigeo_min      * gammalib::deg2rad;
-    double         phigeo_bin = m_phigeo_bin_size * gammalib::deg2rad;
-    double         phigeo_max = phigeo_min + phigeo_bin * m_phigeo_bins;
-    const GSkyMap& drx        = obs_ptr->drx().map();
-    const double*  drg        = obs_ptr->drg().map().pixels();
-
-    // Compute IAQ normalisation (1/s): DEADC / ONTIME (s)
-    double iaq_norm = obs_ptr->deadc() / (obs_ptr->ontime() * cube->dre().tof_correction());
-
-    // Setup rotation matrix for conversion towards sky coordinates
-    GMatrix ry;
-    GMatrix rz;
-    ry.eulery(model_dir.dec_deg() - 90.0);
-    rz.eulerz(-model_dir.ra_deg());
-    GMatrix rot = (ry * rz).transpose();
-
-    // Loop over Chi and Psi
-    for (int ipix = 0; ipix < npix; ++ipix) {
-
-        // Get pointer to event bin
-        const GCOMEventBin* bin = (*cube)[ipix];
-
-        // Get reference to instrument direction
-        const GCOMInstDir& obsDir = bin->dir();
-
-        // Get reference to Phigeo sky direction
-        const GSkyDir& phigeoDir = obsDir.dir();
-
-        // Compute angle between model centre and Phigeo sky direction (radians)
-        // and position angle of model with respect to Phigeo sky direction (radians)
-        double zeta = phigeoDir.dist(model_dir);
-
-        // Set radial model zenith angle range
-        double rho_min = (zeta > phigeo_max) ? zeta - phigeo_max : 0.0;
-        double rho_max = zeta + phigeo_max;
-        if (rho_min > theta_max) {
-            rho_min = theta_max;
-        }
-        if (rho_max > theta_max) {
-            rho_max = theta_max;
-        }
-
-        // Perform model zenith angle integration if interval is valid
-        if (rho_max > rho_min) {
-
-            // Initialise IRF vector
-            GVector irf(nphibar);
-
-            // Setup integration kernel
-            com_extended_kerns_rho integrands(m_iaq,
-                                              model,
-                                              irf,
-                                              bin,
-                                              rot,
-                                              drx,
-                                              phigeo_bin,
-                                              m_phigeo_bins,
-                                              nphibar,
-                                              iter_omega);
-
-            // Setup integrator
-            GIntegrals integral(&integrands);
-            integral.fixed_iter(iter_rho);
-
-            // Integrate over Phigeo
-            irf = integral.romberg(rho_min, rho_max, iter_rho);
-
-            // Add IRF to result
-            for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
-                int idri   = ipix + iphibar * npix;
-                irfs[idri] = irf[iphibar] * drg[idri] * iaq_norm;
-            }
-
-        } // endif: Phigeo angle interval was valid
-
-    } // endfor: looped over Chi and Psi pixels
-
-    // Return IRF vector
-    return irfs;
-}
-#else
-GVector GCOMResponse::irf_extended(const GModelSky&    model,
-                                   const GObservation& obs,
-                                   const GSkyDir&      model_dir,
-                                   const double&       theta_max,
-                                   GMatrix*            gradients) const
-{
-    // Set constants
-    //const double step_fraction = 0.1;
-    const double step_fraction = 0.05;
-    const int    iter_phigeo   =    5;
-    const int    iter_phi      =    5;
-
-    // Extract COMPTEL observation
-    const GCOMObservation* obs_ptr = dynamic_cast<const GCOMObservation*>(&obs);
-    if (obs_ptr == NULL) {
-        std::string cls = std::string(typeid(&obs).name());
-        std::string msg = "Observation of type \""+cls+"\" is not a COMPTEL "
-                          "observations. Please specify a COMPTEL observation "
-                          "as argument.";
-        throw GException::invalid_argument(G_IRF_EXTENDED, msg);
-    }
-
-    // Extract COMPTEL event cube
-    const GCOMEventCube* cube = dynamic_cast<const GCOMEventCube*>(obs_ptr->events());
-    if (cube == NULL) {
-        std::string msg = "Observation \""+obs.name()+"\" ("+obs.id()+") does "
-                          "not contain a COMPTEL event cube. Please specify "
-                          "a COMPTEL observation containing and event cube.";
-        throw GException::invalid_argument(G_IRF_EXTENDED, msg);
-    }
-
-    // Throw an exception if COMPTEL response is not set or if
-    if (m_iaq.empty()) {
-        std::string msg = "COMPTEL response is empty. Please initialise the "
-                          "response with an \"IAQ\".";
-        throw GException::invalid_value(G_IRF_EXTENDED, msg);
-    }
-    else if (m_phigeo_bin_size == 0.0) {
-        std::string msg = "COMPTEL response has a zero Phigeo bin size. "
-                          "Please initialise the response with a valid "
-                          "\"IAQ\".";
-        throw GException::invalid_value(G_IRF_EXTENDED, msg);
-    }
-
-    // Get number of Chi/Psi pixels, Phibar layers and event bins
-    int npix    = cube->naxis(0) * cube->naxis(1);
-    int nphibar = cube->naxis(2);
-    int nevents = cube->size();
-
-    // Initialise result
-    GVector irfs(nevents);
-
-    // Initialise some variables
-    double         phigeo_min    = m_phigeo_min      * gammalib::deg2rad;
-    double         phigeo_bin    = m_phigeo_bin_size * gammalib::deg2rad;
-    double         phigeo_max    = phigeo_min + phigeo_bin * m_phigeo_bins;
-    const GSkyMap* drx           = &(obs_ptr->drx().map());
-    const double*  drg           = obs_ptr->drg().map().pixels();
-    double         cos_theta_max = std::cos(theta_max);
-
-    // Compute IAQ normalisation (1/s): DEADC / ONTIME (s)
-    double iaq_norm = obs_ptr->deadc() /
-                      (obs_ptr->ontime() * cube->dre().tof_correction());
-
-    // Code option: multiply DRX at model direction into IAQ normalisation
-    #if defined(G_APPROXIMATE_DRX_IN_IRF_EXTENDED)
-    iaq_norm *= (*drx)(model_dir);
-    drx       = NULL;
-    #endif
-
-    // Loop over Chi and Psi
-    for (int ipix = 0; ipix < npix; ++ipix) {
-
-        // Get pointer to event bin
-        const GCOMEventBin* bin = (*cube)[ipix];
-
-        // Get reference to instrument direction
-        const GCOMInstDir& obsDir = bin->dir();
-
-        // Get reference to Phigeo sky direction
-        const GSkyDir& phigeoDir = obsDir.dir();
-
-        // Compute angle between model centre and Phigeo sky direction (radians)
-        // and position angle of model with respect to Phigeo sky direction (radians)
-        double zeta = phigeoDir.dist(model_dir);
-        double phi0 = phigeoDir.posang(model_dir);
-
-        // Setup rotation matrix for faster conversion towards sky coordinates
-        GMatrix ry;
-        GMatrix rz;
-        ry.eulery(phigeoDir.dec_deg() - 90.0);
-        rz.eulerz(-phigeoDir.ra_deg());
-        GMatrix rot = (ry * rz).transpose();
-
-        // Setup azimuth angle range computation
-        double sin_zeta = std::sin(zeta);
-        double cos_zeta = std::cos(zeta);
-
-        // Setup Phigeo integration range
-        double phigeo_low = zeta - theta_max;
-        double phigeo_up  = zeta + theta_max;
-        if (phigeo_low < phigeo_min) {
-            phigeo_low = phigeo_min;
-        }
-        if (phigeo_up > phigeo_max) {
-            phigeo_up = phigeo_max;
-        }
-
-        //
-        // Code option A: Use integral
-        // ===========================
-        #if defined(G_USE_INTEGRAL_IN_IRF_EXTENDED)
-        // Perform Phigeo angle integration if interval is valid
-        if (phigeo_up > phigeo_low) {
-
-            // Initialise IRF vector
-            GVector irf(nphibar);
-
-            // Setup integration kernel
-            com_extended_kerns_phigeo integrands(m_iaq,
-                                                 model,
-                                                 irf,
-                                                 bin->energy(),
-                                                 bin->time(),
-                                                 rot,
-                                                 drx,
-                                                 phigeo_bin,
-                                                 m_phigeo_bins,
-                                                 nphibar,
-                                                 ipix,
-                                                 npix,
-                                                 iaq_norm,
-                                                 zeta,
-                                                 phi0,
-                                                 theta_max,
-                                                 iter_phi);
-
-            // Setup integrator
-            GIntegrals integral(&integrands);
-            integral.fixed_iter(iter_phigeo);
-
-            // Integrate over Phigeo
-            irf = integral.romberg(phigeo_low, phigeo_up, iter_phigeo);
-
-            // Add IRF to result
-            for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
-                int idri    = ipix + iphibar * npix;
-                irfs[idri] += irf[iphibar] * drg[idri];
-            }
-
-        } // endif: Phigeo angle interval was valid
-
-        //
-        // Code option B: Perform numerical integration
-        // ============================================
-        #else
-        // Setup Phigeo integration step-size and number of integration steps. By
-        // default the integration step size is one tenth of the model diameter, but
-        // not larger than the Phigeo binning of the IAQ. We also make sure that there
-        // are at least two Phigeo integration steps.
-        double phigeo_length = phigeo_up - phigeo_low;
-        double phigeo_step   = step_fraction * phigeo_length;
-        if (phigeo_step > phigeo_bin) {
-            phigeo_step = phigeo_bin;
-        }
-        int nphigeo = int(phigeo_length/phigeo_step + 0.5);
-        if (nphigeo < 2) {
-            nphigeo = 2;
-        }
-        phigeo_step = phigeo_length / double(nphigeo);
-
-        // Compute solid-angle for selected Phigeo integration step size
-        double omega0 = 2.0 * std::sin(0.5 * phigeo_step);
-
-        // Integrate over Phigeo
-        double phigeo = phigeo_low;
-        for (int iphigeo = 0; iphigeo <= nphigeo; ++iphigeo, phigeo += phigeo_step) {
-
-            // Compute half length of the arc (in radians) from a circle with
-            // radius phigeo that intersects with the model, defined as a circle
-            // with maximum radius m_theta_max
-            double dphi = 0.5 * gammalib::roi_arclength(phigeo,
-                                                        zeta,
-                                                        cos_zeta,
-                                                        sin_zeta,
-                                                        theta_max,
-                                                        cos_theta_max);
-
-            // If arc length is not positive then skip this Phigeo value
-            if (dphi <= 0.0) {
-                continue;
-            }
-
-            // Compute sine and cosine of Phigeo
-            double sin_phigeo = std::sin(phigeo);
-            double cos_phigeo = std::cos(phigeo);
-
-            // Determine number of azimuthal integration steps and step size
-            // in radians. By default the integration step size is one tenth of
-            // the arclength, but larger than the Phigeo binning of the IAQ. We
-            // also make sure that there are at least two integration steps.
-            double azimuth_length = 2.0 * dphi * sin_phigeo;
-            double az_step        = step_fraction * azimuth_length;
-            if (az_step > phigeo_bin) {
-                az_step = phigeo_bin;
-            }
-            int naz = int(azimuth_length/az_step + 0.5);
-            if (naz < 2) {
-                naz = 2;
-            }
-            az_step = 2.0 * dphi / double(naz);
-
-            // Computes solid angle of integration bin multiplied by Jaccobian
-            double omega = omega0 * az_step * sin_phigeo;
-
-            // Loop over azimuth angle
-            double az = phi0 - dphi;
-            for (int iaz = 0; iaz <= naz; ++iaz, az += az_step) {
-
-                // Get sky direction
-                double sin_az = std::sin(az);
-                double cos_az = std::cos(az);
-                GVector native(-cos_az*sin_phigeo, sin_az*sin_phigeo, cos_phigeo);
-                GVector dir = rot * native;
-                GSkyDir skyDir;
-                skyDir.celvector(dir);
-
-                // Fall through if sky direction is not contained in DRX
-                if (!drx.contains(skyDir)) {
-                    continue;
-                }
-
-                // Set photon
-                GPhoton photon(skyDir, bin->energy(), bin->time());
-
-                // Get model sky intensity for photon (unit: sr^-1)
-                double intensity = model.spatial()->eval(photon);
-
-                // Fall through if intensity is zero
-                if (intensity == 0.0) {
-                    continue;
-                }
-
-                // Multiply intensity by DRX value (unit: cm^2 s sr^-1)
-                intensity *= drx(skyDir);
-
-                // Multiply intensity by solid angle (unit: cm^2 s)
-                intensity *= omega;
-
-                // Extract IAQ value by linear inter/extrapolation in Phigeo
-                double phirat   = phigeo / phigeo_bin;     // 0.5 at bin centre
-                int    i_phigeo = int(phirat);             // index into which Phigeo falls
-                double eps      = phirat - i_phigeo - 0.5; // 0.0 at bin centre [-0.5, 0.5[
-                double iaq      = 0.0;
-
-                // Continue only if Phigeo index is valid
-                if (i_phigeo < m_phigeo_bins) {
-
-                    // Loop over Phibar
-                    for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
-
-                        // Get IAQ index
-                        int i = iphibar * m_phigeo_bins + i_phigeo;
-
-                        // Get interpolated IAQ value
-                        if (eps < 0.0) { // interpolate towards left
-                            if (i_phigeo > 0) {
-                                iaq = (1.0 + eps) * m_iaq[i] - eps * m_iaq[i-1];
-                            }
-                            else {
-                                iaq = (1.0 - eps) * m_iaq[i] + eps * m_iaq[i+1];
-                            }
-                        }
-                        else {           // interpolate towards right
-                            if (i_phigeo < m_phigeo_bins-1) {
-                                iaq = (1.0 - eps) * m_iaq[i] + eps * m_iaq[i+1];
-                            }
-                            else {
-                                iaq = (1.0 + eps) * m_iaq[i] - eps * m_iaq[i-1];
-                            }
-                        }
-
-                        // Fall through if IAQ is not positive
-                        if (iaq <= 0.0) {
-                            continue;
-                        }
-
-                        // Get DRI index
-                        int idri = ipix + iphibar * npix;
-
-                        // Compute IRF value (unit: cm^2)
-                        double irf = iaq * drg[idri] * iaq_norm * intensity;
-
-                        // Add IRF value if it is positive
-                        if (irf > 0.0) {
-                            irfs[idri] += irf;
-                        }
-
-                    } // endfor: looped over Phibar
-
-                } // endif: Phigeo bin was valid
-
-            } // endfor: looped over azimuth angle around locus of IAQ
-
-        } // endfor: looped over Phigeo angles
-        #endif
-
-    } // endfor: looped over Chi and Psi pixels
-
-    // Return IRF vector
-    return irfs;
-}
-#endif
