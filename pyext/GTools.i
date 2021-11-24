@@ -34,6 +34,9 @@ namespace gammalib {
     const double erg2MeV    =  624150.96;
     const double pc2cm      =  3.08568025e18;
     const double sec_in_day = 86400.0;
+    const double sec2day    = 1.0 / sec_in_day;
+    const double tai2tt     = 32.184;
+    const double mec2       = 0.5109989461;
 }
 
 /* __ Prototypes ________________________________________________________ */
