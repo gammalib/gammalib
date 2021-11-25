@@ -39,6 +39,7 @@
 #define G_AT                                              "GVector::at(int&)"
 #define G_CROSS                                   "cross(GVector&, GVector&)"
 #define G_SCALAR                              "operator*(GVector&, GVector&)"
+#define G_ANGLE                                   "angle(GVector&, GVector&)"
 
 
 /*==========================================================================
@@ -950,6 +951,53 @@ double sum(const GVector& vector)
 
     // Returns sum
     return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Computes angle between vectors
+ *
+ * @param[in] a Vector.
+ * @param[in] b Vector.
+ * @return Angle between vector @p a and @p b in radians.
+ *
+ * @exception GException::invalid_argument
+ *            Mismatch between vector size.
+ *
+ * Returns the angle \f$\alpha\f$ between vector @p a and @p b in radians.
+ * The computation is done using
+ *
+ * \f[
+ * \alpha = \arccos{\frac{\vec{a} \cdot \vec{b}}{|\vec{a}||\vec{b}|}}
+ * \f]
+ ***************************************************************************/
+double angle(const GVector& a, const GVector& b)
+{
+    // Verify that vectors have same size
+    if (a.m_num != b.m_num) {
+        std::string msg = "Size "+gammalib::str(a.m_num)+" of first vector "
+                          "differs from size "+gammalib::str(b.m_num)+" of "
+                          "second vector. Please specify vectors of identical "
+                          "size.";
+        throw GException::invalid_argument(G_ANGLE, msg);
+    }
+
+    // Compute angle
+    double angle = 0.0;
+    double denom = norm(a) * norm(b);
+    if (denom != 0.0) {
+        double arg = (a * b) / denom;
+        if (arg < -1.0) {
+            arg = -1.0;
+        }
+        if (arg > 1.0) {
+            arg = 1.0;
+        }
+        angle = std::acos(arg);
+    }
+
+    // Return angle
+    return angle;
 }
 
 

@@ -1,8 +1,9 @@
-2021-10-22
+2021-11-25
 
         * Version 2.0.0 released
         ========================
 
+        Add angle(GVector&,GVector&) friend function (#3908)
         Make extension name check case insensitive in GFits::extno()
         Add numerical gradient step size member to GObservation
         Add stamp() methods to GApplication (#3662)

@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-22 October 2021
+25 November 2021
 
 
 1. Introduction
@@ -46,6 +46,7 @@ The following methods have been added:
 - GObservation::model_grad(GModel&, GModelPar&)
 - GObservation::grad_step_size()
 - GMatrixBase::is_empty()
+- angle(GVector&, GVector&)
 - GModels::eval(GObservation&, GMatrixSparse*)
 - GModel::eval(GObservation&, GMatrixSparse*)
 - GModel::associations()
@@ -179,6 +180,9 @@ removed since it won't have any effect anymore (#3553).
 
 8. Linear algebra module
 ------------------------
+The friend function angle(GVector&,GVector&) was added that computes the angle
+between two vectors (#3908).
+
 Fixed some issues with matrix methods that did not work on empty matrices. The
 GMatrixBase::is_empty() method was added to check whether a matrix is empty
 or not (#3541).

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                         GVector.hpp - Vector class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -52,6 +52,7 @@ class GVector : public GBase {
     friend double  min(const GVector& vector);
     friend double  max(const GVector& vector);
     friend double  sum(const GVector& vector);
+    friend double  angle(const GVector& a, const GVector& b);
     friend GVector perm(const GVector& vector, const int *p);
     friend GVector iperm(const GVector& vector, const int *p);
     friend GVector acos(const GVector& vector);
@@ -87,7 +88,6 @@ public:
     double&       operator[](const int& index);
     const double& operator[](const int& index) const;
 
-
     // Vector operators
     bool     operator==(const GVector& vector) const;
     bool     operator!=(const GVector& vector) const;
@@ -114,14 +114,12 @@ public:
     GVector       slice(const int& start, const int& stop) const;
     std::string   print(const GChatter& chatter = NORMAL) const;
 
-
 private:
     // Private methods
     void init_members(void);
     void alloc_members(void);
     void copy_members(const GVector& vector);
     void free_members(void);
-
 
     // Private data area
     int     m_num;    //!< Number of elements in vector

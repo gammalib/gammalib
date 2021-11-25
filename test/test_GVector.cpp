@@ -496,6 +496,14 @@ void TestGVector::arithmetics(void){
         test_value(test[i], std::tanh(m_test[i]));
     }
 
+    // angle(GVector,GVector)
+    GVector tangle1(1.0, 0.0, 0.0);
+    GVector tangle2(0.0, 1.0, 0.0);
+    GVector tangle3(1.0, 1.0, 0.0);
+    test_value(angle(tangle1,tangle1), 0.0, "Test angle() for parallel vectors");
+    test_value(angle(tangle1,tangle2), gammalib::pihalf, "Test angle() for perpendicular vectors");
+    test_value(angle(tangle1,tangle3), 0.5*gammalib::pihalf, "Test angle() for 45 deg vectors");
+
     // Incompatible size GVector + GVector
     test_try("Incompatible size GVector + GVector:");
     try {
@@ -522,7 +530,7 @@ void TestGVector::arithmetics(void){
         test_try_failure(e);
     }
 
-    //cross(a,b) (using vectors with different dimension)
+    // cross(a,b) (using vectors with different dimension)
     test_try("cross(a,b) (using vectors with different dimension)");
     try {
         cross(m_test,m_bigger);
@@ -535,7 +543,7 @@ void TestGVector::arithmetics(void){
         test_try_failure(e);
     }
 
-    //cross(a,b) (using 3-dim vectors)
+    // cross(a,b) (using 3-dim vectors)
     test_try("cross(a,b) (using 3-dim vectors)");
     try {
         GVector test_cross_a(3);
@@ -543,7 +551,7 @@ void TestGVector::arithmetics(void){
         test_cross_a[0] = 1.0;
         test_cross_b[1] = 1.0;
 
-        //Test if cross == (0,0,1)
+        // Test if cross == (0,0,1)
         test_assert(cross(test_cross_a, test_cross_b)[0] == 0 &&
                     cross(test_cross_a, test_cross_b)[1] == 0 &&
                     cross(test_cross_a, test_cross_b)[2] == 1,
@@ -554,6 +562,22 @@ void TestGVector::arithmetics(void){
     catch (std::exception &e) {
         test_try_failure(e);
     }
+
+    // angle(a,b) (using vectors with different dimension)
+    test_try("angle(a,b) (using vectors with different dimension)");
+    try {
+        angle(m_test,m_bigger);
+        test_try_failure();
+    }
+    catch (GException::invalid_argument &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Return
+    return;
 }
 
 

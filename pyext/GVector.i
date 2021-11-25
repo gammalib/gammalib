@@ -147,6 +147,9 @@ public:
     double sum() {
         return sum(*self);
     }
+    double angle(const GVector &a) {
+        return angle(*self, a);
+    }
     GVector acos() {
         return acos(*self);
     }
