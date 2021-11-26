@@ -1317,7 +1317,7 @@ void GCOMDri::write_attributes(GFitsHDU* hdu) const
     hdu->card("VISDAY", visday, "[TJD] Data validity interval start day");
     hdu->card("VISTIM", vistim, "[tics] Data validity interval start time");
     hdu->card("VIEDAY", vieday, "[TJD] Data validity interval end day");
-    hdu->card("VIETIM", vietim, "[tics] Data validity interval start time");
+    hdu->card("VIETIM", vietim, "[tics] Data validity interval end time");
 
     // If there are energy boundaries then write them
     if (m_ebounds.size() > 0) {
