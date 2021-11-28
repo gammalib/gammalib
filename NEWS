@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-25 November 2021
+28 November 2021
 
 
 1. Introduction
@@ -22,6 +22,7 @@ The following classes have been added:
 - GModelSpectralBins
 - GCTAModelSkyCube
 - GCTABackground2D
+- GCOMModelDRM
 
 The following classes have been removed:
 - GCTAExceptionHandler
@@ -378,7 +379,9 @@ spatial model gradients (#3203).
 
 22. COMPTEL interface
 ---------------------
-Add phase selection to GCOMSelection and GCOMDri (#3564).
+Added GCOMModelDRM class to enable fitting of DRM data cubes to the data (#3910).
+
+Added phase selection to GCOMSelection and GCOMDri (#3564).
 
 Store DRB, DRG and DRX as instances of GCOMDri instead of GSkyMap in GCOMObservation
 (#3560).

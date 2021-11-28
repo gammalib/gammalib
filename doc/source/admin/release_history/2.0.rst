@@ -1,6 +1,6 @@
 .. _2.0:
 
-GammaLib 2.0 release (28 May 2021)
+GammaLib 2.0 release (28 November 2021)
 ==================================
 
 Overview
@@ -11,6 +11,7 @@ GammaLib 2.0 is a major release that adds significant functionality.
 In particular, this release provides:
 
 * vectorised response computation
+* full support of all spatial models for COMPTEL
 * ...
 
 
@@ -35,6 +36,10 @@ Bug fixes
 Improvements
 ------------
 
+* [`3908 <https://cta-redmine.irap.omp.eu/issues/3908>`_] -
+  Add ``angle(GVector&,GVector&)`` friend function
+* Make extension name check case insensitive in ``GFits::extno()``
+* Add numerical gradient step size member to ``GObservation``
 * [`3662 <https://cta-redmine.irap.omp.eu/issues/3662>`_] -
   Add ``stamp()`` methods to ``GApplication``
 * [`3630 <https://cta-redmine.irap.omp.eu/issues/3630>`_] -
@@ -83,6 +88,8 @@ Improvements
 New features
 ------------
 
+* [`3910 <https://cta-redmine.irap.omp.eu/issues/3910>`_] -
+  Add ``GCOMModelDRM`` class
 * [`3606 <https://cta-redmine.irap.omp.eu/issues/3606>`_] -
   Add ``GModelSpectralBins`` class
 * [`3527 <https://cta-redmine.irap.omp.eu/issues/3527>`_] -

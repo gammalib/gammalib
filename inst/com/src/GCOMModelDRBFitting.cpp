@@ -44,6 +44,8 @@ const GModelRegistry      g_com_drb_fitting_registry(&g_com_drb_fitting_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_EVAL     "GCOMModelDRBFitting::eval(GEvent&, GObservation&, bool&)"
+#define G_NRED  "GCOMModelDRBFitting::npred(GEnergy&, GTime&, GObservation&)"
+#define G_MC                  "GCOMModelDRBFitting::mc(GObservation&, GRan&)"
 #define G_READ                      "GCOMModelDRBFitting::read(GXmlElement&)"
 #define G_WRITE                    "GCOMModelDRBFitting::write(GXmlElement&)"
 
@@ -52,7 +54,6 @@ const GModelRegistry      g_com_drb_fitting_registry(&g_com_drb_fitting_seed);
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-//#define G_DUMP_MC                                  //!< Dump MC information
 
 
 /*==========================================================================
@@ -374,6 +375,10 @@ double GCOMModelDRBFitting::eval(const GEvent&       event,
  * @param[in] obsEng Measured event energy.
  * @param[in] obsTime Measured event time.
  * @param[in] obs Observation.
+ * @return Spatially integrated data model.
+ *
+ * @exception GException::feature_not_implemented
+ *            Method is not implemented.
  *
  * Spatially integrates the data model for a given measured event energy and
  * event time.
@@ -387,6 +392,10 @@ double GCOMModelDRBFitting::npred(const GEnergy&      obsEng,
     // Initialise result
     double npred = 0.0;
 
+    // Method is not implemented
+    std::string msg = "Spatial integration of data model is not implemented.";
+    throw GException::feature_not_implemented(G_NRED, msg);
+
     // Return
     return npred;
 }
@@ -397,6 +406,10 @@ double GCOMModelDRBFitting::npred(const GEnergy&      obsEng,
  *
  * @param[in] obs Observation.
  * @param[in] ran Random number generator.
+ * @return COMPTEL event cube.
+ *
+ * @exception GException::feature_not_implemented
+ *            Method is not implemented.
  *
  * Draws a sample of events from the COMPTEL DRB fitting model using a Monte
  * Carlo simulation.
@@ -408,6 +421,10 @@ GCOMEventCube* GCOMModelDRBFitting::mc(const GObservation& obs,
 {
     // Initialise new event cube
     GCOMEventCube* cube = new GCOMEventCube;
+
+    // Method is not implemented
+    std::string msg = "Monte Carlo simulation of data model is not implemented.";
+    throw GException::feature_not_implemented(G_MC, msg);
 
     // Return
     return cube;
