@@ -1399,8 +1399,10 @@ double GObservation::likelihood_poisson_unbinned(const GModels& models,
     // Iterate over all events
     for (int i = 0; i < nevents; ++i) {
 
-        // Get event pointer
-        const GEvent* event = (*events())[i];
+        // Skip events that should not be used
+        if (!use_event_for_likelihood(i)) {
+            continue;
+        }
 
         // Get model value
         double model = model_vector[i];
@@ -1532,6 +1534,11 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
 
     // Iterate over all bins
     for (int i = 0; i < nevents; ++i) {
+
+        // Skip events that should not be used
+        if (!use_event_for_likelihood(i)) {
+            continue;
+        }
 
         // Update number of bins
         #if defined(G_OPT_DEBUG)
@@ -1735,6 +1742,11 @@ double GObservation::likelihood_gaussian_binned(const GModels& models,
     // Iterate over all bins
     for (int i = 0; i < nevents; ++i) {
 
+        // Skip events that should not be used
+        if (!use_event_for_likelihood(i)) {
+            continue;
+        }
+
         // Get event pointer
         const GEventBin* bin =
             (*(static_cast<GEventCube*>(const_cast<GEvents*>(events()))))[i];
@@ -1821,6 +1833,23 @@ double GObservation::likelihood_gaussian_binned(const GModels& models,
 
     // Return
     return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Check whether bin should be used for likelihood analysis
+ *
+ * @param[in] index Event index.
+ * @return True.
+ *
+ * This is a dummy virtual method that allows implementation of a hook for
+ * event selection in the likelihood computation. The dummy method always
+ * returns true.
+ ***************************************************************************/
+bool GObservation::use_event_for_likelihood(const int& index) const
+{
+    // Return true
+    return true;
 }
 
 

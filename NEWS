@@ -248,6 +248,8 @@ of functions (#3328).
 
 11. Observation module
 ----------------------
+Add likelihood fit event selection hook (#3912).
+
 Add numerical gradient step size as member of GObservation to allow instrument-
 specific step size values.
 

@@ -36,6 +36,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`3912 <https://cta-redmine.irap.omp.eu/issues/3912>`_] -
+  Add likelihood fit event selection hook
 * [`3908 <https://cta-redmine.irap.omp.eu/issues/3908>`_] -
   Add ``angle(GVector&,GVector&)`` friend function
 * Make extension name check case insensitive in ``GFits::extno()``

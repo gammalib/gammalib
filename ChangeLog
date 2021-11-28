@@ -3,6 +3,7 @@
         * Version 2.0.0 released
         ========================
 
+        Add likelihood fit event selection hook (#3912)
         Add GCOMModelDRM class (#3910)
         Add angle(GVector&,GVector&) friend function (#3908)
         Make extension name check case insensitive in GFits::extno()
