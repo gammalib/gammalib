@@ -474,6 +474,14 @@ void GCOMObservation::read(const GXmlElement& xml)
             response(GCaldb("cgro", "comptel"), iaqname);
         }
 
+        // Get optional Phibar layer attributes
+        if (xml.has_attribute("phi_first")) {
+            m_phi_first = gammalib::toint(xml.attribute("phi_first"));
+        }
+        if (xml.has_attribute("phi_last")) {
+            m_phi_last = gammalib::toint(xml.attribute("phi_last"));
+        }
+
     } // endelse: binned observation
 
     // Return
@@ -568,6 +576,16 @@ void GCOMObservation::write(GXmlElement& xml) const
         // Set IAQ parameter
         par = gammalib::xml_need_par(G_WRITE, xml, "IAQ");
         par->attribute("value", gammalib::xml_file_reduce(xml, m_response.rspname()));
+
+        // If there is a first Phibar layer selection then write it into XML file
+        if (m_phi_first != -1) {
+            xml.attribute("phi_first", gammalib::str(m_phi_first));
+        }
+
+        // If there is a last Phibar layer selection then write it into XML file
+        if (m_phi_last != -1) {
+            xml.attribute("phi_last", gammalib::str(m_phi_last));
+        }
 
     } // endif: observation was binned
 
@@ -816,6 +834,16 @@ std::string GCOMObservation::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Deadtime correction"));
         result.append(gammalib::str(m_deadc));
 
+        // Append Phibar selection
+        int phi_first = (m_phi_first != -1) ? m_phi_first : 0;
+        int phi_last  = (m_phi_last  != -1) ? m_phi_last  : m_drg.map().nmaps();
+        if ((m_phi_first != -1) || (m_phi_last  != -1)) {
+            result.append("\n"+gammalib::parformat("Likelihood Phibar range"));
+            result.append(gammalib::str(phi_first));
+            result.append(" - ");
+            result.append(gammalib::str(phi_last));
+        }
+
         // Append response (if available)
         if (response()->rspname().length() > 0) {
             result.append("\n"+response()->print(gammalib::reduce(chatter)));
@@ -884,7 +912,9 @@ void GCOMObservation::init_members(void)
     m_drb.clear();
     m_drg.clear();
     m_drx.clear();
-    m_ewidth   = 0.0;
+    m_ewidth    = 0.0;
+    m_phi_first = -1;
+    m_phi_last  = -1;
 
     // Initialise members for unbinned observation
     m_evpname.clear();
@@ -922,6 +952,8 @@ void GCOMObservation::copy_members(const GCOMObservation& obs)
     m_drg        = obs.m_drg;
     m_drx        = obs.m_drx;
     m_ewidth     = obs.m_ewidth;
+    m_phi_first  = obs.m_phi_first;
+    m_phi_last   = obs.m_phi_last;
 
     // Copy members for unbinned observation
     m_evpname  = obs.m_evpname;
@@ -1952,4 +1984,36 @@ void GCOMObservation::get_bgdlixa_phibar_indices(const int& iphibar,
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Check whether bin should be used for likelihood analysis
+ *
+ * @param[in] index Event index.
+ * @return True if event with specified @p index shold be used.
+ *
+ * Implements the Phibar event selection.
+ ***************************************************************************/
+bool GCOMObservation::use_event_for_likelihood(const int& index) const
+{
+    // Initialise usage flag
+    bool use = true;
+
+    // Compute Phibar layer
+    int iphi = index / m_drg.map().npix();
+
+    // Test first Phibar layer selection
+    if ((m_phi_first != -1) && (iphi < m_phi_first)) {
+        use = false;
+    }
+    else {
+        // Test last Phibar layer selection
+        if ((m_phi_last != -1) && (iphi > m_phi_last)) {
+            use = false;
+        }
+    }
+
+    // Return true
+    return true;
 }

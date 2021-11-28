@@ -151,6 +151,7 @@ protected:
                                               GVector*       gradients,
                                               GMatrixSparse* curvature,
                                               double*        npred) const;
+    virtual bool   use_event_for_likelihood(const int& index) const;
 
     // Model gradient kernel classes
     class model_func : public GFunction {

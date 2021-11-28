@@ -127,10 +127,14 @@ public:
     const GFilename& drbname(void) const;
     const GFilename& drgname(void) const;
     const GFilename& drxname(void) const;
+    const int&       phi_first(void) const;
+    const int&       phi_last(void) const;
     void             drename(const GFilename& drename);
     void             drbname(const GFilename& drbname);
     void             drgname(const GFilename& drgname);
     void             drxname(const GFilename& drxname);
+    void             phi_first(const int& phi_first);
+    void             phi_last(const int& phi_last);
     void             compute_drb(const std::string& method,
                                  const GCOMDri&     drm,
                                  const int&         nrunav = 3,
@@ -170,6 +174,9 @@ protected:
                                        int*       iex2,
                                        int*       isel2) const;
 
+    // Overwritten virtual methods
+    virtual bool use_event_for_likelihood(const int& index) const;
+
     // Protected members
     std::string            m_instrument; //!< Instrument name
     GCOMResponse           m_response;   //!< Response functions
@@ -187,6 +194,8 @@ protected:
     GCOMDri                m_drg;        //!< Geometry factors
     GCOMDri                m_drx;        //!< Exposure map
     double                 m_ewidth;     //!< Energy width (MeV)
+    int                    m_phi_first;  //!< First Phibar layer to use for likelihood
+    int                    m_phi_last;   //!< Last Phibar layer to use for likelihood
 
     // Protected members for unbinned observation
     GFilename              m_evpname;    //!< EVP filename
@@ -472,7 +481,7 @@ bool GCOMObservation::is_binned(void) const
 /***********************************************************************//**
  * @brief Return DRE filename
  *
- * @return DRE filename
+ * @return DRE filename.
  ***************************************************************************/
 inline
 const GFilename& GCOMObservation::drename(void) const
@@ -485,7 +494,7 @@ const GFilename& GCOMObservation::drename(void) const
 /***********************************************************************//**
  * @brief Return DRB filename
  *
- * @return DRB filename
+ * @return DRB filename.
  ***************************************************************************/
 inline
 const GFilename& GCOMObservation::drbname(void) const
@@ -498,7 +507,7 @@ const GFilename& GCOMObservation::drbname(void) const
 /***********************************************************************//**
  * @brief Return DRG filename
  *
- * @return DRG filename
+ * @return DRG filename.
  ***************************************************************************/
 inline
 const GFilename& GCOMObservation::drgname(void) const
@@ -511,7 +520,7 @@ const GFilename& GCOMObservation::drgname(void) const
 /***********************************************************************//**
  * @brief Return DRX filename
  *
- * @return DRX filename
+ * @return DRX filename.
  ***************************************************************************/
 inline
 const GFilename& GCOMObservation::drxname(void) const
@@ -522,9 +531,35 @@ const GFilename& GCOMObservation::drxname(void) const
 
 
 /***********************************************************************//**
+ * @brief Return index of first Phibar layer to be used for likelihood fitting
+ *
+ * @return Index of first Phibar layer.
+ ***************************************************************************/
+inline
+const int& GCOMObservation::phi_first(void) const
+{
+    // Return index of first Phibar layer
+    return (m_phi_first);
+}
+
+
+/***********************************************************************//**
+ * @brief Return index of last Phibar layer to be used for likelihood fitting
+ *
+ * @return Index of last Phibar layer.
+ ***************************************************************************/
+inline
+const int& GCOMObservation::phi_last(void) const
+{
+    // Return index of last Phibar layer
+    return (m_phi_last);
+}
+
+
+/***********************************************************************//**
  * @brief Set DRE filename
  *
- * @param[in] drename DRE filename
+ * @param[in] drename DRE filename.
  ***************************************************************************/
 inline
 void GCOMObservation::drename(const GFilename& drename)
@@ -537,7 +572,7 @@ void GCOMObservation::drename(const GFilename& drename)
 /***********************************************************************//**
  * @brief Set DRB filename
  *
- * @param[in] drbname DRB filename
+ * @param[in] drbname DRB filename.
  ***************************************************************************/
 inline
 void GCOMObservation::drbname(const GFilename& drbname)
@@ -550,7 +585,7 @@ void GCOMObservation::drbname(const GFilename& drbname)
 /***********************************************************************//**
  * @brief Set DRG filename
  *
- * @param[in] drgname DRG filename
+ * @param[in] drgname DRG filename.
  ***************************************************************************/
 inline
 void GCOMObservation::drgname(const GFilename& drgname)
@@ -563,12 +598,38 @@ void GCOMObservation::drgname(const GFilename& drgname)
 /***********************************************************************//**
  * @brief Set DRX filename
  *
- * @param[in] drxname DRX filename
+ * @param[in] drxname DRX filename.
  ***************************************************************************/
 inline
 void GCOMObservation::drxname(const GFilename& drxname)
 {
     m_drxname = drxname;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set index of first Phibar layer to be used for likelihood fitting
+ *
+ * @param[in] phi_first Index of first Phibar layer.
+ ***************************************************************************/
+inline
+void GCOMObservation::phi_first(const int& phi_first)
+{
+    m_phi_first = phi_first;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set index of last Phibar layer to be used for likelihood fitting
+ *
+ * @param[in] phi_last Index of last Phibar layer.
+ ***************************************************************************/
+inline
+void GCOMObservation::phi_last(const int& phi_last)
+{
+    m_phi_last = phi_last;
     return;
 }
 

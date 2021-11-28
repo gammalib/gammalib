@@ -95,10 +95,14 @@ public:
     const GFilename& drbname(void) const;
     const GFilename& drgname(void) const;
     const GFilename& drxname(void) const;
+    const int&       phi_first(void) const;
+    const int&       phi_last(void) const;
     void             drename(const GFilename& drename);
     void             drbname(const GFilename& drbname);
     void             drgname(const GFilename& drgname);
     void             drxname(const GFilename& drxname);
+    void             phi_first(const int& phi_first);
+    void             phi_last(const int& phi_last);
     void             compute_drb(const std::string& method,
                                  const GCOMDri&     drm,
                                  const int&         nrunav = 3,
