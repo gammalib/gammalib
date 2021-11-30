@@ -361,7 +361,7 @@ double GModelSpectralLogParabola::eval(const GEnergy& srcEng,
         double g_curvature = (m_curvature.is_free())
                              ? value * m_curvature.scale() * m_last_log_e_norm *
                              m_last_log_e_norm : 0.0;
-        double g_pivot = (m_pivot.is_free())
+        double g_pivot = (m_pivot.is_free() && m_pivot.factor_value() != 0.0)
                          ? -value * (m_last_exponent + m_curvature.value() *
                          m_last_log_e_norm) / m_pivot.factor_value() : 0.0;
 

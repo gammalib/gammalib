@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-28 November 2021
+30 November 2021
 
 
 1. Introduction
@@ -197,6 +197,10 @@ Implemented GMatrixSparse::row() and GMatrixSparse::add_to_row() methods.
 
 9. Model module
 ---------------
+Gradients for spectral model parameters are now also computed for all models in
+case that the factor values are negative. This provides now error bars for photon
+and energy flux power laws that are allowed to take negative flux values.
+
 Added GModelSpectralFunc spectral model constructor that enables creating a file
 function from an arbitrary spectral model (#3626).
 

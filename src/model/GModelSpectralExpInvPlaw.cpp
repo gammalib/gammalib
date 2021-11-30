@@ -388,7 +388,7 @@ double GModelSpectralExpInvPlaw::eval(const GEnergy& srcEng,
         double g_lambda = (m_lambda.is_free())
                           ? -value * m_lambda.scale() * m_last_energy.MeV()
                           : 0.0;
-        double g_pivot  = (m_pivot.is_free())
+        double g_pivot  = (m_pivot.is_free() && m_pivot.factor_value() != 0.0)
                           ? -value * m_last_index / m_pivot.factor_value()
                           : 0.0;
 

@@ -352,7 +352,7 @@ double GModelSpectralPlawEnergyFlux::eval(const GEnergy& srcEng,
     if (gradients) {
 
         // Compute partial derivatives of the parameter values
-        double g_eflux = (m_eflux.is_free() && m_eflux.factor_value() > 0.0)
+        double g_eflux = (m_eflux.is_free() && m_eflux.factor_value() != 0.0)
                          ? g_eflux = value / m_eflux.factor_value()
                          : 0.0;
         double g_index = (m_index.is_free())

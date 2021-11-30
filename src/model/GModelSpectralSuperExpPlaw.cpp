@@ -374,11 +374,11 @@ double GModelSpectralSuperExpPlaw::eval(const GEnergy& srcEng,
         double g_index1 = (m_index1.is_free())
                           ? value * m_index1.scale() * std::log(m_last_e_norm)
                           : 0.0;
-        double g_ecut  = (m_ecut.is_free())
+        double g_ecut  = (m_ecut.is_free() && m_ecut.factor_value() != 0.0)
                          ? value * m_last_index2 * m_last_exponent /
                            m_ecut.factor_value()
                          : 0.0;
-        double g_pivot = (m_pivot.is_free())
+        double g_pivot = (m_pivot.is_free() && m_pivot.factor_value() != 0.0)
                          ? -value * m_last_index1 / m_pivot.factor_value()
                          : 0.0;
         double g_index2 = (m_index2.is_free())

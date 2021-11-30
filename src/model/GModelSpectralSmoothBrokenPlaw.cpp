@@ -409,7 +409,7 @@ double GModelSpectralSmoothBrokenPlaw::eval(const GEnergy& srcEng,
                 : 0.0;
 
         // Compute pivot and break energy value gradients
-        double g_pivot = (m_pivot.is_free())
+        double g_pivot = (m_pivot.is_free() && m_pivot.factor_value() != 0.0)
                 ? -value * m_last_index1 / m_pivot.factor_value()
                 : 0.0;
         double g_break = (m_breakenergy.is_free())

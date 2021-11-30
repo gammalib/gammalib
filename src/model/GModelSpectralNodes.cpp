@@ -308,13 +308,13 @@ double GModelSpectralNodes::eval(const GEnergy& srcEng,
         }
 
         // Gradient for left node
-        if (m_values[inx_left].is_free()) {
+        if (m_values[inx_left].is_free() && m_values[inx_left].factor_value() != 0.0) {
             double grad = value * wgt_left / m_values[inx_left].factor_value();
             m_values[inx_left].factor_gradient(grad);
         }
 
         // Gradient for right node
-        if (m_values[inx_right].is_free()) {
+        if (m_values[inx_right].is_free() && m_values[inx_right].factor_value() != 0.0) {
             double grad = value * wgt_right / m_values[inx_right].factor_value();
             m_values[inx_right].factor_gradient(grad);
         }

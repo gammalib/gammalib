@@ -360,7 +360,7 @@ double GModelSpectralPlawPhotonFlux::eval(const GEnergy& srcEng,
     if (gradients) {
 
         // Compute partial derivatives of the parameter values
-        double g_flux = (m_flux.is_free() && m_flux.factor_value() > 0.0)
+        double g_flux = (m_flux.is_free() && m_flux.factor_value() != 0.0)
                         ? value / m_flux.factor_value()
                         : 0.0;
         double g_index = (m_index.is_free())

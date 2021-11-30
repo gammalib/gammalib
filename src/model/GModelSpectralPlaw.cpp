@@ -331,7 +331,7 @@ double GModelSpectralPlaw::eval(const GEnergy& srcEng,
                          ? m_norm.scale() * m_last_power : 0.0;
         double g_index = (m_index.is_free())
                          ? value * m_index.scale() * m_last_log_e_norm : 0.0;
-        double g_pivot = (m_pivot.is_free())
+        double g_pivot = (m_pivot.is_free() && m_pivot.factor_value() != 0.0)
                          ? -value * m_last_index / m_pivot.factor_value() : 0.0;
 
         // Set gradients

@@ -1,8 +1,9 @@
-2021-11-28
+2021-11-30
 
         * Version 2.0.0 released
         ========================
 
+        Compute spectral model gradients for negative factor values
         Add likelihood fit event selection hook (#3912)
         Add GCOMModelDRM class (#3910)
         Add angle(GVector&,GVector&) friend function (#3908)

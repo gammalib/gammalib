@@ -367,7 +367,7 @@ double GModelSpectralBrokenPlaw::eval(const GEnergy& srcEng,
             double g_index = (m_index1.is_free())
                              ? value * m_index1.scale() * m_last_log_e_norm
                              : 0.0;
-            double g_break = (m_breakenergy.is_free())
+            double g_break = (m_breakenergy.is_free() && m_breakenergy.factor_value() != 0.0)
                              ? -value * m_last_index1 / m_breakenergy.factor_value()
                              : 0.0;
             m_index1.factor_gradient(g_index);
@@ -378,7 +378,7 @@ double GModelSpectralBrokenPlaw::eval(const GEnergy& srcEng,
             double g_index = (m_index2.is_free())
                              ? value * m_index2.scale() * m_last_log_e_norm
                              : 0.0;
-            double g_break = (m_breakenergy.is_free())
+            double g_break = (m_breakenergy.is_free() && m_breakenergy.factor_value() != 0.0)
                              ? -value * m_last_index2 / m_breakenergy.factor_value()
                              : 0.0;
             m_index1.factor_gradient(0.0);
