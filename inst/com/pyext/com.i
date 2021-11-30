@@ -114,6 +114,7 @@
 %include "GCOMInstChar.i"
 %include "GCOMIaq.i"
 %include "GCOMModelDRBFitting.i"
+%include "GCOMModelDRBPhibarBins.i"
 %include "GCOMModelDRM.i"
 %include "GCOMTim.i"
 %include "GCOMOad.i"

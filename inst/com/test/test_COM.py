@@ -60,6 +60,7 @@ class Test(gammalib.GPythonTestSuite):
         #test_support.pickeling(self, gammalib.GCOMInstChars())
         test_support.pickeling(self, gammalib.GCOMInstDir())
         test_support.pickeling(self, gammalib.GCOMModelDRBFitting())
+        test_support.pickeling(self, gammalib.GCOMModelDRBPhibarBins())
         test_support.pickeling(self, gammalib.GCOMModelDRM())
         test_support.pickeling(self, gammalib.GCOMOad())
         test_support.pickeling(self, gammalib.GCOMOads())

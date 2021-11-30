@@ -56,6 +56,7 @@ sources = src/com_helpers_response_vector.cpp \
           src/GCOMIaq.cpp \
           src/GCOMObservation.cpp \
           src/GCOMModelDRBFitting.cpp \
+          src/GCOMModelDRBPhibarBins.cpp \
           src/GCOMModelDRM.cpp
 
 # Define headers to be installed
@@ -79,6 +80,7 @@ pkginclude_HEADERS = include/GCOMTools.hpp \
                      include/GCOMIaq.hpp \
                      include/GCOMObservation.hpp \
                      include/GCOMModelDRBFitting.hpp \
+                     include/GCOMModelDRBPhibarBins.hpp \
                      include/GCOMModelDRM.hpp \
                      include/GCOMLib.hpp
 

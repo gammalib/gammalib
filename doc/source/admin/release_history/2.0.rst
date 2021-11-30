@@ -37,6 +37,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`3913 <https://cta-redmine.irap.omp.eu/issues/3913>`_] -
+  Add ``GCOMModelDRBPhibarBins`` class
 * [`3912 <https://cta-redmine.irap.omp.eu/issues/3912>`_] -
   Add likelihood fit event selection hook
 * [`3908 <https://cta-redmine.irap.omp.eu/issues/3908>`_] -
