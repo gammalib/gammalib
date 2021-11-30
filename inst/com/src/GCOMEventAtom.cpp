@@ -238,8 +238,10 @@ void GCOMEventAtom::init_members(void)
     m_theta  = 0.0;
     m_phi    = 0.0;
     m_eha    = 0.0;
-    m_psd    = 0;
-    m_tof    = 0;
+    m_psd    = 0.0;
+    m_tof    = 0.0;
+    m_x_d2   = 0.0;
+    m_y_d2   = 0.0;
     m_modcom = 0;
     m_reflag = 0;
     m_veto   = 0;
@@ -268,6 +270,8 @@ void GCOMEventAtom::copy_members(const GCOMEventAtom& atom)
     m_eha    = atom.m_eha;
     m_psd    = atom.m_psd;
     m_tof    = atom.m_tof;
+    m_x_d2   = atom.m_x_d2;
+    m_y_d2   = atom.m_y_d2;
     m_modcom = atom.m_modcom;
     m_reflag = atom.m_reflag;
     m_veto   = atom.m_veto;

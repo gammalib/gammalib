@@ -105,6 +105,8 @@ The following methods have been added:
 - GCOMObservation::drxname()
 - GCOMObservation::response(GCOMResponse&)
 - GCOMObservation::compute_drb()
+- GCOMEventAtom::x_d2()
+- GCOMEventAtom::y_d2()
 - GCOMDri::tof_correction()
 - GCOMDri::num_superpackets()
 - GCOMDri::num_used_superpackets()
@@ -386,6 +388,10 @@ spatial model gradients (#3203).
 
 22. COMPTEL interface
 ---------------------
+Added GCOMEventAtom::x_d2() and GCOMEventAtom::y_d2() methods to set and retrieve
+D2 module X and Y positions. The information is now also read from an EVP file
+in the GCOMEventList::read_events() method (#3917).
+
 Added GCOMModelDRBPhibarBins class to enable fitting of the Phibar layers of a DRB
 model without interpolation (#3913).
 

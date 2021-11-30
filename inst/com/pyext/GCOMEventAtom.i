@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCOMEventAtom.i - COMPTEL event atom class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -71,6 +71,10 @@ public:
     const float& psd(void) const;
     void         tof(const float& tof);
     const float& tof(void) const;
+    void         x_d2(const float& x_d2);
+    const float& x_d2(void) const;
+    void         y_d2(const float& y_d2);
+    const float& y_d2(void) const;
     void         modcom(const int& modcom);
     const int&   modcom(void) const;
     void         reflag(const int& reflag);
@@ -92,7 +96,7 @@ public:
         state = (self.dir(), self.energy(), self.time(),
                  self.e1(), self.e2(), self.phibar(), self.theta(),
                  self.phi(), self.eha(), self.psd(), self.tof(),
-                 self.modcom(), self.reflag(), self.veto())
+                 self.x_d2(), self.y_d2(), self.modcom(), self.reflag(), self.veto())
         return state
     def __setstate__(self, state):
         self.__init__()
@@ -107,8 +111,10 @@ public:
         self.eha(state[8])
         self.psd(state[9])
         self.tof(state[10])
-        self.modcom(state[11])
-        self.reflag(state[12])
-        self.veto(state[13])
+        self.x_d2(state[11])
+        self.y_d2(state[12])
+        self.modcom(state[13])
+        self.reflag(state[14])
+        self.veto(state[15])
 }
 };

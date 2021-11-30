@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GCOMEventAtom.hpp - COMPTEL event atom class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Juergen Knoedlseder                              *
+ *  copyright (C) 2017-2021 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -83,6 +83,10 @@ public:
     const float& psd(void) const;
     void         tof(const float& tof);
     const float& tof(void) const;
+    void         x_d2(const float& x_d2);
+    const float& x_d2(void) const;
+    void         y_d2(const float& y_d2);
+    const float& y_d2(void) const;
     void         modcom(const int& modcom);
     const int&   modcom(void) const;
     void         reflag(const int& reflag);
@@ -108,6 +112,8 @@ protected:
     float       m_eha;    //!< Earth horizon angle (deg)
     float       m_psd;    //!< PSD value (channel)
     float       m_tof;    //!< Time of flight value (channel)
+    float       m_x_d2;   //!< D2 model X position (mm)
+    float       m_y_d2;   //!< D2 model X position (mm)
     int         m_modcom; //!< Mini telescope number
     int         m_reflag; //!< Rejection flag
     int         m_veto;   //!< Veto flag
@@ -394,14 +400,6 @@ const float& GCOMEventAtom::e2(void) const
  *
  * Sets PSD value.
  ***************************************************************************/
-/*
-inline
-void GCOMEventAtom::psd(const int& psd)
-{
-    m_psd = psd;
-    return;
-}
-*/
 inline
 void GCOMEventAtom::psd(const float& psd)
 {
@@ -417,13 +415,6 @@ void GCOMEventAtom::psd(const float& psd)
  * Returns the Pulse Shape Discriminator (PSD) channel value of the event.
  * The PSD value is used for the distinction between gammas and neutrons.
  ***************************************************************************/
-/*
-inline
-const int& GCOMEventAtom::psd(void) const
-{
-    return m_psd;
-}
-*/
 inline
 const float& GCOMEventAtom::psd(void) const
 {
@@ -437,14 +428,6 @@ const float& GCOMEventAtom::psd(void) const
  *
  * Sets TOF value.
  ***************************************************************************/
-/*
-inline
-void GCOMEventAtom::tof(const int& tof)
-{
-    m_tof = tof;
-    return;
-}
-*/
 inline
 void GCOMEventAtom::tof(const float& tof)
 {
@@ -462,17 +445,68 @@ void GCOMEventAtom::tof(const float& tof)
  * value is used for the distinction between forward and backward scattering
  * events.
  ***************************************************************************/
-/*
-inline
-const int& GCOMEventAtom::tof(void) const
-{
-    return m_tof;
-}
-*/
 inline
 const float& GCOMEventAtom::tof(void) const
 {
     return m_tof;
+}
+
+
+/***********************************************************************//**
+ * @brief Set D2 module X value
+ *
+ * @param[in] x_d2 D2 module X value (mm).
+ *
+ * Sets D2 module X value.
+ ***************************************************************************/
+inline
+void GCOMEventAtom::x_d2(const float& x_d2)
+{
+    m_x_d2 = x_d2;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return D2 module X value
+ *
+ * @return D2 module X value (mm).
+ *
+ * Returns the D2 module X value of the event.
+ ***************************************************************************/
+inline
+const float& GCOMEventAtom::x_d2(void) const
+{
+    return m_x_d2;
+}
+
+
+/***********************************************************************//**
+ * @brief Set D2 module Y value
+ *
+ * @param[in] x_d2 D2 module Y value (mm).
+ *
+ * Sets D2 module Y value.
+ ***************************************************************************/
+inline
+void GCOMEventAtom::y_d2(const float& y_d2)
+{
+    m_y_d2 = y_d2;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return D2 module Y value
+ *
+ * @return D2 module Y value (mm).
+ *
+ * Returns the D2 module Y value of the event.
+ ***************************************************************************/
+inline
+const float& GCOMEventAtom::y_d2(void) const
+{
+    return m_y_d2;
 }
 
 

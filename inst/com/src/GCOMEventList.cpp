@@ -582,6 +582,8 @@ void GCOMEventList::read_events(const GFitsTable& table)
         const GFitsTableCol* ptr_eha        = table["EARTH_HORIZON"]; // rad
         const GFitsTableCol* ptr_e1         = table["E_D1"];          // keV
         const GFitsTableCol* ptr_e2         = table["E_D2"];          // keV
+        const GFitsTableCol* ptr_x2         = table["X_D2"];          // mm
+        const GFitsTableCol* ptr_y2         = table["Y_D2"];          // mm
         const GFitsTableCol* ptr_psd        = table["PSD"];           // channel
         const GFitsTableCol* ptr_tof        = table["TOF"];           // channel
         const GFitsTableCol* ptr_modcom     = table["MODCOM"];        // id
@@ -618,6 +620,10 @@ void GCOMEventList::read_events(const GFitsTable& table)
 
             // Set phibar value (deg)
             double phibar = ptr_phibar->real(i) * gammalib::rad2deg;
+
+            // Set X and Y values of D2 interaction
+            double x_d2 = double(ptr_x2->integer(i))*0.03125;
+            double y_d2 = double(ptr_y2->integer(i))*0.03125;
 
             // Set PSD and TOF values. Note that the values are read unscaled,
             // hence we need to divide explicitly by the 1/TSCAL factor. This
@@ -657,6 +663,8 @@ void GCOMEventList::read_events(const GFitsTable& table)
             event.eha(ptr_eha->real(i) * gammalib::rad2deg);          // rad -> deg
             event.e1(ptr_e1->real(i) * 1.0e-3);                       // keV -> MeV
             event.e2(ptr_e2->real(i) * 1.0e-3);                       // keV -> MeV
+            event.x_d2(x_d2);
+            event.y_d2(y_d2);
             event.psd(psd);
             event.tof(tof);
             event.modcom(ptr_modcom->integer(i));
