@@ -1991,7 +1991,7 @@ void GCOMObservation::get_bgdlixa_phibar_indices(const int& iphibar,
  * @brief Check whether bin should be used for likelihood analysis
  *
  * @param[in] index Event index.
- * @return True if event with specified @p index shold be used.
+ * @return True if event with specified @p index should be used.
  *
  * Implements the Phibar event selection.
  ***************************************************************************/
@@ -2014,6 +2014,6 @@ bool GCOMObservation::use_event_for_likelihood(const int& index) const
         }
     }
 
-    // Return true
-    return true;
+    // Return usage flag
+    return use;
 }

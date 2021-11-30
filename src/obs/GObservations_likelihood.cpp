@@ -55,9 +55,9 @@
 //#define G_USE_HESSIAN
 
 /* __ Debug definitions __________________________________________________ */
-//#define G_EVAL_TIMING     //!< Perform optimizer timing (0=no, 1=yes)
-//#define G_EVAL_DEBUG      //!< Perform optimizer debugging (0=no, 1=yes)
-//#define G_HESSIAN         //!< Debug Hessian computation
+//#define G_EVAL_TIMING                      //!< Perform optimizer timing
+//#define G_EVAL_DEBUG                       //!< Perform optimizer debugging
+//#define G_HESSIAN                          //!< Debug Hessian computation
 
 /* __ Prototypes _________________________________________________________ */
 
