@@ -38,9 +38,12 @@ class GSkyMap;
 
 /* __ Prototypes _________________________________________________________ */
 namespace gammalib {
-    void   com_wcs_mer2car(GSkyMap& map);
-    double com_energy1(const double& energy, const double& phigeo);
-    double com_energy2(const double& energy, const double& phigeo);
+    void          com_wcs_mer2car(GSkyMap& map);
+    double        com_energy1(const double& energy, const double& phigeo);
+    double        com_energy2(const double& energy, const double& phigeo);
+    const double& com_exd2x(const int& id2);
+    const double& com_exd2y(const int& id2);
+    const double& com_exd2r(const int& id2);
 }
 
 #endif /* GCOMSUPPORT_HPP */
