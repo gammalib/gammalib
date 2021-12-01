@@ -29,10 +29,13 @@
 #include <config.h>
 #endif
 #include "GFitsHDU.hpp"
+#include "GCOMTools.hpp"
+#include "GCOMStatus.hpp"
 #include "GCOMSelection.hpp"
 #include "GCOMEventAtom.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_FPMTFLAG                            "GCOMSelection::fpmtflag(int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -183,6 +186,9 @@ void GCOMSelection::init_statistics(void) const
     m_num_vetoflag_max    = 0;
     m_num_no_scatter      = 0;
     m_num_invalid_modcom  = 0;
+    m_num_d1module_off    = 0;
+    m_num_d2module_off    = 0;
+    m_num_fpmt            = 0;
 
     // Return
     return;
@@ -194,9 +200,16 @@ void GCOMSelection::init_statistics(void) const
  *
  * @param[in] event Event.
  * @return True if event should be used, false otherwise.
+ *
+ * Checks if an event should be used for DRE binning.
+ *
+ * @todo Implement handling of D2 modules with failed PMTs.
  ***************************************************************************/
 bool GCOMSelection::use_event(const GCOMEventAtom& event) const
 {
+    // Initialise D1 & D2 module status
+    static const GCOMStatus status;
+
     // Initialise usage flag
     bool use = true;
 
@@ -277,6 +290,54 @@ bool GCOMSelection::use_event(const GCOMEventAtom& event) const
         use = false;
     }
 
+    // If event should be used then handle now the module status and
+    // decide whether it should be rejected
+    if (use) {
+
+        // Extract module IDs from MODCOM
+        int id2 = (event.modcom()-1)/7 + 1;      // [1-14]
+        int id1 =  event.modcom() - (id2-1) * 7; // [1-7]
+
+        // Get event TJD
+        int tjd = gammalib::com_tjd(event.time());
+
+        // Set D1 and D2 status
+        int d1status = status.d1status(tjd, id1);
+        int d2status = status.d2status(tjd, id2);
+
+        // Exclude event if the corresponding modules are signalled
+        // as off
+        if (d1status != 1) {
+            m_num_d1module_off++;
+            use = false;
+        }
+        else if (d2status < 1) {
+            m_num_d2module_off++;
+            use = false;
+        }
+
+        // Handle D2 modules with failed PMTs based on value of
+        // failure flag
+        else if (d2status > 1) {
+        
+            // If failure flag = 0 then reject event
+            if (m_fpmtflag == 0) {
+                m_num_fpmt++;
+                use = false;
+            }
+            
+            // ... otherwise if failure flag = 2 then reject event
+            // if it's close to the failed PMT
+            else if (m_fpmtflag == 2) {
+                //TODO: implement handling of failed PMTs
+                //m_num_fpmt++;
+                //use = false;
+            }
+            
+        } // endif: handled D2 modules with failed PMTs
+
+    } // endif: handled module status
+
     // Update acceptance and rejection statistics
     if (use) {
         m_num_events_used++;
@@ -287,6 +348,36 @@ bool GCOMSelection::use_event(const GCOMEventAtom& event) const
 
     // Return usage flag
     return use;
+}
+
+
+/***********************************************************************//**
+ * @brief Set failed PMT flag for D2 modules
+ *
+ * @param[in] fpmtflag Failed PMT flag for D2 modules.
+ *
+ * Set the failed PMT flag for D2 modules. The following values can be
+ * set:
+ * - 0: excluded D2 modules with failed PMTs
+ * - 1: include D2 modules with failed PMTs
+ * - 2: include D2 modules with failed PMTs by excluding zone around failed
+ *      PMTs
+ ***************************************************************************/
+void GCOMSelection::fpmtflag(const int& fpmtflag)
+{
+    // Check validify of values
+    if (fpmtflag < 0 || fpmtflag > 2) {
+        std::string msg = "Invalid value "+gammalib::str(fpmtflag)+
+                          " specified for failed PMT flag for D2 modules. "
+                          "Please specify 0, 1 or 2.";
+        throw GException::invalid_argument(G_FPMTFLAG, msg);
+    }
+
+    // Set flag
+    m_fpmtflag = fpmtflag;
+
+    // Return
+    return;
 }
 
 
@@ -340,6 +431,11 @@ void GCOMSelection::read(const GFitsHDU& hdu)
         m_vetoflag_max = hdu.integer("VFLMAX");
     }
 
+    // Read D2 PMT failure handling flag
+    if (hdu.has_card("D2FPMT")) {
+        m_fpmtflag = hdu.integer("D2FPMT");
+    }
+
     // Read selection statistics
     if (hdu.has_card("NEVCHK")) {
         m_num_events_checked = hdu.integer("NEVCHK");
@@ -381,8 +477,14 @@ void GCOMSelection::read(const GFitsHDU& hdu)
     if (hdu.has_card("NNOSCT")) {
         m_num_no_scatter = hdu.integer("NNOSCT");
     }
-    if (hdu.has_card("NINVMT")) {
-        m_num_invalid_modcom = hdu.integer("NINVMT");
+    if (hdu.has_card("ND1OFF")) {
+        m_num_d1module_off = hdu.integer("ND1OFF");
+    }
+    if (hdu.has_card("ND2OFF")) {
+        m_num_d2module_off = hdu.integer("ND2OFF");
+    }
+    if (hdu.has_card("ND2FPM")) {
+        m_num_fpmt = hdu.integer("ND2FPM");
     }
 
     // Return
@@ -425,6 +527,9 @@ void GCOMSelection::write(GFitsHDU& hdu) const
     hdu.card("VFLMIN",  m_vetoflag_min, "Veto flag minimum");
     hdu.card("VFLMAX",  m_vetoflag_max, "Veto flag maximum");
 
+    // Write D2 PMT failure handling flag
+    hdu.card("D2FPMT",  m_fpmtflag, "D2 PMT failure handling");
+
     // Write selection statistics
     hdu.card("NEVCHK",  m_num_events_checked,  "Number of checked events");
     hdu.card("NEVUSE",  m_num_events_used,     "Number of used events");
@@ -445,6 +550,9 @@ void GCOMSelection::write(GFitsHDU& hdu) const
     hdu.card("NVFLHI",  m_num_vetoflag_max,    "Number of events > VFLMAX");
     hdu.card("NNOSCT",  m_num_no_scatter,      "Number of events w/o scatter angle");
     hdu.card("NINVMT",  m_num_invalid_modcom,  "Number of events with invalid minitelescope");
+    hdu.card("ND1OFF",  m_num_d1module_off,    "Number of events with D1 module off");
+    hdu.card("ND2OFF",  m_num_d2module_off,    "Number of events with D2 module off");
+    hdu.card("ND2FPM",  m_num_fpmt,            "Number of events excluded due to failed PMTs");
 
     // Return
     return;
@@ -525,6 +633,19 @@ std::string GCOMSelection::print(const GChatter& chatter) const
         result.append(gammalib::str(m_vetoflag_max)+"] < ");
         result.append(gammalib::str(m_num_vetoflag_max));
 
+        // Append D1 module off
+        result.append("\n"+gammalib::parformat("D1 modules off"));
+        result.append(gammalib::str(m_num_d1module_off));
+
+        // Append D2 module off
+        result.append("\n"+gammalib::parformat("D2 modules off"));
+        result.append(gammalib::str(m_num_d2module_off));
+
+        // Append D2 PMT failure handling statistics
+        result.append("\n"+gammalib::parformat("D2 PMT failure"));
+        result.append(gammalib::str(m_num_fpmt)+" [");
+        result.append(gammalib::str(m_fpmtflag)+"]");
+
         // Append other statistics
         result.append("\n"+gammalib::parformat("No scatter angle"));
         result.append(gammalib::str(m_num_no_scatter));
@@ -570,6 +691,7 @@ void GCOMSelection::init_members(void)
     m_reflag_max   =  1000;  //!< Maximum rejection flag
     m_vetoflag_min =     0;  //!< Minimum veto flag
     m_vetoflag_max =     0;  //!< Maximum veto flag
+    m_fpmtflag     =     0;  //!< D2 PMT failure flag
     m_phase_curve.clear();
     m_phases.clear();
 
@@ -603,6 +725,7 @@ void GCOMSelection::copy_members(const GCOMSelection& select)
     m_reflag_max   = select.m_reflag_max;
     m_vetoflag_min = select.m_vetoflag_min;
     m_vetoflag_max = select.m_vetoflag_max;
+    m_fpmtflag     = select.m_fpmtflag;
     m_phase_curve  = select.m_phase_curve;
     m_phases       = select.m_phases;
 
@@ -626,6 +749,9 @@ void GCOMSelection::copy_members(const GCOMSelection& select)
     m_num_vetoflag_max    = select.m_num_vetoflag_max;
     m_num_no_scatter      = select.m_num_no_scatter;
     m_num_invalid_modcom  = select.m_num_invalid_modcom;
+    m_num_d1module_off    = select.m_num_d1module_off;
+    m_num_d2module_off    = select.m_num_d2module_off;
+    m_num_fpmt            = select.m_num_fpmt;
 
     // Return
     return;

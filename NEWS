@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-30 November 2021
+1 December 2021
 
 
 1. Introduction
@@ -113,6 +113,7 @@ The following methods have been added:
 - GCOMDri::num_skipped_superpackets()
 - GCOMSelection::phase_curve()
 - GCOMSelection::phases()
+- GCOMSelection::fpmtflag()
 - gammalib::tmpnam()
 - gammalib::compare()
 - gammalib::xml_check_parnum()
@@ -388,6 +389,11 @@ spatial model gradients (#3203).
 
 22. COMPTEL interface
 ---------------------
+Added GCOMSelection::fpmtflag() methods to select the method how D2 modules with
+failed PMTs will be handled. If the flag is set to 0, D2 modules with failed PMTs
+will be discarded, if set to 1 modules with failed PMT will be included, and if set
+to 2 events around failed PMTs will be excluded (#3917).
+
 Added GCOMEventAtom::x_d2() and GCOMEventAtom::y_d2() methods to set and retrieve
 D2 module X and Y positions. The information is now also read from an EVP file
 in the GCOMEventList::read_events() method (#3917).

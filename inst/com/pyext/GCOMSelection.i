@@ -78,6 +78,8 @@ public:
     void                            vetoflag_min(const int& vetoflag_min);
     const int&                      vetoflag_max(void) const;
     void                            vetoflag_max(const int& vetoflag_max);
+    const int&                      fpmtflag(void) const;
+    void                            fpmtflag(const int& fpmtflag);
     const GModelTemporalPhaseCurve& phase_curve(void) const;
     void                            phase_curve(const GModelTemporalPhaseCurve& phase_curve);
     const GPhases&                  phases(void) const;

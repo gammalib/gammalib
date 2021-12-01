@@ -95,6 +95,8 @@ public:
     void                            vetoflag_min(const int& vetoflag_min);
     const int&                      vetoflag_max(void) const;
     void                            vetoflag_max(const int& vetoflag_max);
+    const int&                      fpmtflag(void) const;
+    void                            fpmtflag(const int& fpmtflag);
     const GModelTemporalPhaseCurve& phase_curve(void) const;
     void                            phase_curve(const GModelTemporalPhaseCurve& phase_curve);
     const GPhases&                  phases(void) const;
@@ -123,6 +125,9 @@ protected:
     int                      m_reflag_max;   //!< Maximum rejection flag
     int                      m_vetoflag_min; //!< Minimum veto flag
     int                      m_vetoflag_max; //!< Maximum veto flag
+    int                      m_fpmtflag;     //!< D2 PMT failures
+                                             //!< (0: exclude modules, 1: include modules,
+                                             //!<  2: use FPM information)
     GModelTemporalPhaseCurve m_phase_curve;  //!< Phase curve for phase selection
     GPhases                  m_phases;       //!< Phases for phase selection
 
@@ -146,6 +151,9 @@ protected:
     mutable int m_num_vetoflag_max;    //!< Number of events above veto flag threshold
     mutable int m_num_no_scatter;      //!< Number of events without scatter angle
     mutable int m_num_invalid_modcom;  //!< Number of events with invalid minitelescopes
+    mutable int m_num_d1module_off;    //!< Number of events excluded since D1 module off
+    mutable int m_num_d2module_off;    //!< Number of events excluded since D2 module off
+    mutable int m_num_fpmt;            //!< Number of events excluded due to failed PMT
 };
 
 
@@ -508,6 +516,25 @@ void GCOMSelection::vetoflag_max(const int& vetoflag_max)
 {
     m_vetoflag_max = vetoflag_max;
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return failed PMT flag for D2 modules
+ *
+ * @return Failed PMT flag for D2 modules.
+ *
+ * Returns the failed PMT flag for D2 modules. The following values can be
+ * returned:
+ * - 0: excluded D2 modules with failed PMTs
+ * - 1: include D2 modules with failed PMTs
+ * - 2: include D2 modules with failed PMTs by excluding zone around failed
+ *      PMTs
+ ***************************************************************************/
+inline
+const int& GCOMSelection::fpmtflag(void) const
+{
+    return (m_fpmtflag);
 }
 
 

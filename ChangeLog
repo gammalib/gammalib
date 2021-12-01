@@ -1,8 +1,9 @@
-2021-11-30
+2021-12-01
 
         * Version 2.0.0 released
         ========================
 
+        Add GCOMSelection::fpmtflag() method (#3917)
         Add GCOMModelDRBPhibarBins class (#3913)
         Compute spectral model gradients for negative factor values
         Add likelihood fit event selection hook (#3912)
