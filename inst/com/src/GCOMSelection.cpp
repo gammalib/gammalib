@@ -37,6 +37,10 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_FPMTFLAG                            "GCOMSelection::fpmtflag(int&)"
+#define G_USE_D1_GET                            "GCOMSelection::use_d1(int&)"
+#define G_USE_D1_SET                     "GCOMSelection::use_d1(int&, bool&)"
+#define G_USE_D2_GET                            "GCOMSelection::use_d2(int&)"
+#define G_USE_D2_SET                     "GCOMSelection::use_d2(int&, bool&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -190,6 +194,12 @@ void GCOMSelection::init_statistics(void) const
     m_num_d1module_off    = 0;
     m_num_d2module_off    = 0;
     m_num_fpmt            = 0;
+    for (int i = 0; i < 7; ++i) {
+        m_num_d1[i] = 0;
+    }
+    for (int i = 0; i < 14; ++i) {
+        m_num_d2[i] = 0;
+    }
 
     // Return
     return;
@@ -304,9 +314,19 @@ bool GCOMSelection::use_event(const GCOMEventAtom& event) const
         int d1status = status.d1status(tjd, id1);
         int d2status = status.d2status(tjd, id2);
 
+        // Exclude event if the coresponding modules should not be used
+        if (!m_use_d1[id1-1]) {
+            m_num_d1module_off++;
+            use = false;
+        }
+        else if (!m_use_d2[id2-1]) {
+            m_num_d2module_off++;
+            use = false;
+        }
+
         // Exclude event if the corresponding modules are signalled
         // as off
-        if (d1status != 1) {
+        else if (d1status != 1) {
             m_num_d1module_off++;
             use = false;
         }
@@ -319,16 +339,18 @@ bool GCOMSelection::use_event(const GCOMEventAtom& event) const
         // failure flag
         else if (d2status > 1) {
 
-            // If failure flag = 0 then reject event
+            // If failure flag = 0 then reject event and signal that the
+            // module was off
             if (m_fpmtflag == 0) {
-                m_num_fpmt++;
+                m_num_d2module_off++;
                 use = false;
             }
 
             // ... otherwise if failure flag = 2 and the module has a
             // valid exclusion circle then reject event if it is
             // within the exclusion circle; if the module has no
-            // exclusion region then reject the entire module.
+            // exclusion region then reject the entire module and
+            // signal that it was off.
             else if (m_fpmtflag == 2) {
                 double r = gammalib::com_exd2r(id2);
                 if (r >= 0.1) {
@@ -342,7 +364,7 @@ bool GCOMSelection::use_event(const GCOMEventAtom& event) const
                     }
                 }
                 else {
-                    m_num_fpmt++;
+                    m_num_d2module_off++;
                     use = false;
                 }
             }
@@ -353,7 +375,16 @@ bool GCOMSelection::use_event(const GCOMEventAtom& event) const
 
     // Update acceptance and rejection statistics
     if (use) {
+
+        // Extract module IDs from MODCOM
+        int id2 = (event.modcom()-1)/7 + 1;      // [1-14]
+        int id1 =  event.modcom() - (id2-1) * 7; // [1-7]
+
+        // Update statistics
         m_num_events_used++;
+        m_num_d1[id1-1]++;
+        m_num_d2[id2-1]++;
+
     }
     else {
         m_num_events_rejected++;
@@ -395,6 +426,96 @@ void GCOMSelection::fpmtflag(const int& fpmtflag)
 
 
 /***********************************************************************//**
+ * @brief Return D1 module usage flag
+ *
+ * @param[in] id1 D1 module identifier [0,...,6].
+ * @return True if D1 module @p id1 should be used.
+ ***************************************************************************/
+const bool& GCOMSelection::use_d1(const int& id1) const
+{
+    // Check module validity range
+    if (id1 < 0 or id1 > 6) {
+        std::string msg = "Invalid D1 module identifier "+gammalib::str(id1)+
+                          " specified. The D1 module identifier needs to be "
+                          "comprised within 0 and 6.";
+        throw GException::invalid_argument(G_USE_D1_GET, msg);
+    }
+
+    // Return usage flag
+    return (m_use_d1[id1]);
+}
+
+
+/***********************************************************************//**
+ * @brief Set D1 module usage flag
+ *
+ * @param[in] id1 D1 module identifier [0,...,6].
+ * @param[in] use D1 module usage.
+ ***************************************************************************/
+void GCOMSelection::use_d1(const int& id1, const bool& use)
+{
+    // Check module validity range
+    if (id1 < 0 or id1 > 6) {
+        std::string msg = "Invalid D1 module identifier "+gammalib::str(id1)+
+                          " specified. The D1 module identifier needs to be "
+                          "comprised within 0 and 6.";
+        throw GException::invalid_argument(G_USE_D1_SET, msg);
+    }
+
+    // Set usage flag
+    m_use_d1[id1] = use;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return D2 module usage flag
+ *
+ * @param[in] id2 D2 module identifier [0,...,13].
+ * @return True if D2 module @p id2 should be used.
+ ***************************************************************************/
+const bool& GCOMSelection::use_d2(const int& id2) const
+{
+    // Check module validity range
+    if (id2 < 0 or id2 > 13) {
+        std::string msg = "Invalid D2 module identifier "+gammalib::str(id2)+
+                          " specified. The D2 module identifier needs to be "
+                          "comprised within 0 and 13.";
+        throw GException::invalid_argument(G_USE_D2_GET, msg);
+    }
+
+    // Return usage flag
+    return (m_use_d2[id2]);
+}
+
+
+/***********************************************************************//**
+ * @brief Set D2 module usage flag
+ *
+ * @param[in] id2 D2 module identifier [0,...,13].
+ * @param[in] use D2 module usage.
+ ***************************************************************************/
+void GCOMSelection::use_d2(const int& id2, const bool& use)
+{
+    // Check module validity range
+    if (id2 < 0 or id2 > 13) {
+        std::string msg = "Invalid D2 module identifier "+gammalib::str(id2)+
+                          " specified. The D2 module identifier needs to be "
+                          "comprised within 0 and 13.";
+        throw GException::invalid_argument(G_USE_D2_SET, msg);
+    }
+
+    // Set usage flag
+    m_use_d2[id2] = use;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Read selection set from FITS HDU keywords
  *
  * @param[in] hdu FITS HDU.
@@ -425,7 +546,6 @@ void GCOMSelection::read(const GFitsHDU& hdu)
         m_psd_max = hdu.real("PSDMAX");
     }
 
-
     // Read Earth horizon angle - Phibar selection
     if (hdu.has_card("ZETMIN") && hdu.has_card("ZETMAX")) {
         m_zeta_min = hdu.real("ZETMIN");
@@ -447,6 +567,26 @@ void GCOMSelection::read(const GFitsHDU& hdu)
     // Read D2 PMT failure handling flag
     if (hdu.has_card("D2FPMT")) {
         m_fpmtflag = hdu.integer("D2FPMT");
+    }
+
+    // Read D1 module usage flag
+    if (hdu.has_card("D1USE")) {
+        std::string use = gammalib::strip_whitespace(hdu.string("D1USE"));
+        if (use.length() == 7) {
+            for (int i = 0; i < 7; ++i) {
+                m_use_d1[i] = (use[i] == '1');
+            }
+        }
+    }
+
+    // Read D2 module usage flag
+    if (hdu.has_card("D2USE")) {
+        std::string use = gammalib::strip_whitespace(hdu.string("D2USE"));
+        if (use.length() == 14) {
+            for (int i = 0; i < 14; ++i) {
+                m_use_d2[i] = (use[i] == '1');
+            }
+        }
     }
 
     // Read selection statistics
@@ -489,6 +629,18 @@ void GCOMSelection::read(const GFitsHDU& hdu)
     }
     if (hdu.has_card("NNOSCT")) {
         m_num_no_scatter = hdu.integer("NNOSCT");
+    }
+    for (int i = 0; i < 7; ++i) {
+        std::string key = "ND1-"+gammalib::str(i+1,"%2.2d");
+        if (hdu.has_card(key)) {
+             m_num_d1[i] = hdu.integer(key);
+        }
+    }
+    for (int i = 0; i < 14; ++i) {
+        std::string key = "ND2-"+gammalib::str(i+1,"%2.2d");
+        if (hdu.has_card(key)) {
+             m_num_d2[i] = hdu.integer(key);
+        }
     }
     if (hdu.has_card("ND1OFF")) {
         m_num_d1module_off = hdu.integer("ND1OFF");
@@ -543,6 +695,24 @@ void GCOMSelection::write(GFitsHDU& hdu) const
     // Write D2 PMT failure handling flag
     hdu.card("D2FPMT",  m_fpmtflag, "D2 PMT failure handling");
 
+    // Write D1 module usage
+    std::string d1use = "0000000";
+    for (int i = 0; i < 7; ++i) {
+        if (m_use_d1[i]) {
+            d1use[i] = '1';
+        }
+    }
+    hdu.card("D1USE", d1use, "D1 module usage");
+
+    // Write D2 module usage
+    std::string d2use = "00000000000000";
+    for (int i = 0; i < 14; ++i) {
+        if (m_use_d2[i]) {
+            d2use[i] = '1';
+        }
+    }
+    hdu.card("D2USE", d2use, "D2 module usage");
+
     // Write selection statistics
     hdu.card("NEVCHK",  m_num_events_checked,  "Number of checked events");
     hdu.card("NEVUSE",  m_num_events_used,     "Number of used events");
@@ -563,6 +733,16 @@ void GCOMSelection::write(GFitsHDU& hdu) const
     hdu.card("NVFLHI",  m_num_vetoflag_max,    "Number of events > VFLMAX");
     hdu.card("NNOSCT",  m_num_no_scatter,      "Number of events w/o scatter angle");
     hdu.card("NINVMT",  m_num_invalid_modcom,  "Number of events with invalid minitelescope");
+    for (int i = 0; i < 7; ++i) {
+        std::string key = "ND1-"+gammalib::str(i+1,"%2.2d");
+        std::string com = "Number of events in D1 module "+gammalib::str(i+1);
+        hdu.card(key, m_num_d1[i], com);
+    }
+    for (int i = 0; i < 14; ++i) {
+        std::string key = "ND2-"+gammalib::str(i+1,"%2.2d");
+        std::string com = "Number of events in D2 module "+gammalib::str(i+1);
+        hdu.card(key, m_num_d2[i], com);
+    }
     hdu.card("ND1OFF",  m_num_d1module_off,    "Number of events with D1 module off");
     hdu.card("ND2OFF",  m_num_d2module_off,    "Number of events with D2 module off");
     hdu.card("ND2FPM",  m_num_fpmt,            "Number of events excluded due to failed PMTs");
@@ -646,6 +826,30 @@ std::string GCOMSelection::print(const GChatter& chatter) const
         result.append(gammalib::str(m_vetoflag_max)+"] < ");
         result.append(gammalib::str(m_num_vetoflag_max));
 
+        // Append D1 module usage
+        for (int i = 0; i < 7; ++i) {
+            result.append("\n"+gammalib::parformat("D1 module "+gammalib::str(i+1)));
+            result.append(gammalib::str(m_num_d1[i]));
+            if (m_use_d1[i]) {
+                result.append(" [use]");
+            }
+            else {
+                result.append(" [don't use]");
+            }
+        }
+
+        // Append D2 module usage
+        for (int i = 0; i < 14; ++i) {
+            result.append("\n"+gammalib::parformat("D2 module "+gammalib::str(i+1)));
+            result.append(gammalib::str(m_num_d2[i]));
+            if (m_use_d2[i]) {
+                result.append(" [use]");
+            }
+            else {
+                result.append(" [don't use]");
+            }
+        }
+
         // Append D1 module off
         result.append("\n"+gammalib::parformat("D1 modules off"));
         result.append(gammalib::str(m_num_d1module_off));
@@ -707,6 +911,12 @@ void GCOMSelection::init_members(void)
     m_fpmtflag     =     0;  //!< D2 PMT failure flag
     m_phase_curve.clear();
     m_phases.clear();
+    for (int i = 0; i < 7; ++i) {
+        m_use_d1[i] = true;
+    }
+    for (int i = 0; i < 14; ++i) {
+        m_use_d2[i] = true;
+    }
 
     // Initialise statistics
     init_statistics();
@@ -741,6 +951,12 @@ void GCOMSelection::copy_members(const GCOMSelection& select)
     m_fpmtflag     = select.m_fpmtflag;
     m_phase_curve  = select.m_phase_curve;
     m_phases       = select.m_phases;
+    for (int i = 0; i < 7; ++i) {
+        m_use_d1[i] = select.m_use_d1[i];
+    }
+    for (int i = 0; i < 14; ++i) {
+        m_use_d2[i] = select.m_use_d2[i];
+    }
 
     // Copy statistics
     m_num_events_checked  = select.m_num_events_checked;
@@ -765,6 +981,14 @@ void GCOMSelection::copy_members(const GCOMSelection& select)
     m_num_d1module_off    = select.m_num_d1module_off;
     m_num_d2module_off    = select.m_num_d2module_off;
     m_num_fpmt            = select.m_num_fpmt;
+
+    // Copy module usage
+    for (int i = 0; i < 7; ++i) {
+        m_num_d1[i] = select.m_num_d1[i];
+    }
+    for (int i = 0; i < 14; ++i) {
+        m_num_d2[i] = select.m_num_d2[i];
+    }
 
     // Return
     return;

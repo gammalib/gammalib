@@ -1,7 +1,7 @@
 .. _2.0:
 
-GammaLib 2.0 release (30 November 2021)
-=======================================
+GammaLib 2.0 release (2 December 2021)
+======================================
 
 Overview
 --------
@@ -37,6 +37,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`3917 <https://cta-redmine.irap.omp.eu/issues/3913>`_] -
+  Add ``GCOMSelection::fpmtflag()``, ``GCOMSelection::use_d1()`` and ``GCOMSelection::use_d2()`` methods
 * [`3913 <https://cta-redmine.irap.omp.eu/issues/3913>`_] -
   Add ``GCOMModelDRBPhibarBins`` class
 * [`3912 <https://cta-redmine.irap.omp.eu/issues/3912>`_] -

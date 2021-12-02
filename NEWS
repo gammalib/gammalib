@@ -114,6 +114,8 @@ The following methods have been added:
 - GCOMSelection::phase_curve()
 - GCOMSelection::phases()
 - GCOMSelection::fpmtflag()
+- GCOMSelection::use_d1()
+- GCOMSelection::use_d2()
 - gammalib::tmpnam()
 - gammalib::compare()
 - gammalib::xml_check_parnum()
@@ -389,6 +391,11 @@ spatial model gradients (#3203).
 
 22. COMPTEL interface
 ---------------------
+Added GCOMSelection::use_d1() and GCOMSelection::use_d2() methods to control the usage
+of D1 and D2 modules. The control logic was implemented in GCOMDri and header keywords
+with per module information are now written into the DRE FITS files. A D1 and D2
+module usage string is also written into DRE and DRG files (#3917).
+
 Added GCOMSelection::fpmtflag() methods to select the method how D2 modules with
 failed PMTs will be handled. If the flag is set to 0, D2 modules with failed PMTs
 will be discarded, if set to 1 modules with failed PMT will be included, and if set

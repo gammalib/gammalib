@@ -1309,12 +1309,33 @@ void GCOMDri::write_attributes(GFitsHDU* hdu) const
     }
 
     // If there was an event seletion then write selection set. Otherwise write
-    // handling of D2 PMT failures.
+    // handling D1 and D2 module usage and handling mode of D2 PMT failures.
     if (m_has_selection) {
         m_selection.write(*hdu);
     }
     else {
+
+        // Write D2 PMT failure handling flag
         hdu->card("D2FPMT", m_selection.fpmtflag(), "D2 PMT failure handling");
+
+        // Write D1 module usage
+        std::string d1use = "0000000";
+        for (int i = 0; i < 7; ++i) {
+            if (m_selection.use_d1(i)) {
+                d1use[i] = '1';
+            }
+        }
+        hdu->card("D1USE", d1use, "D1 module usage");
+
+        // Write D2 module usage
+        std::string d2use = "00000000000000";
+        for (int i = 0; i < 14; ++i) {
+            if (m_selection.use_d2(i)) {
+                d2use[i] = '1';
+            }
+        }
+        hdu->card("D2USE", d2use, "D2 module usage");
+
     }
 
     // If there was a valid Earth horizon cut then write it
@@ -1406,6 +1427,11 @@ double GCOMDri::compute_geometry(const int&           tjd,
 
         // Loop over all D2 modules
         for (int id2 = 0; id2 < 14; ++id2) {
+
+            // Skip if coresponding modules should not be used
+            if (!select.use_d1(id1) || !select.use_d2(id2)) {
+                continue;
+            }
 
             // Get D2 module status
             int d2status = status.d2status(tjd, id2+1);

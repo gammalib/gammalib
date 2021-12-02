@@ -80,6 +80,10 @@ public:
     void                            vetoflag_max(const int& vetoflag_max);
     const int&                      fpmtflag(void) const;
     void                            fpmtflag(const int& fpmtflag);
+    const bool&                     use_d1(const int& id1) const;
+    void                            use_d1(const int& id1, const bool& use);
+    const bool&                     use_d2(const int& id2) const;
+    void                            use_d2(const int& id2, const bool& use);
     const GModelTemporalPhaseCurve& phase_curve(void) const;
     void                            phase_curve(const GModelTemporalPhaseCurve& phase_curve);
     const GPhases&                  phases(void) const;

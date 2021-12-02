@@ -97,6 +97,10 @@ public:
     void                            vetoflag_max(const int& vetoflag_max);
     const int&                      fpmtflag(void) const;
     void                            fpmtflag(const int& fpmtflag);
+    const bool&                     use_d1(const int& id1) const;
+    void                            use_d1(const int& id1, const bool& use);
+    const bool&                     use_d2(const int& id2) const;
+    void                            use_d2(const int& id2, const bool& use);
     const GModelTemporalPhaseCurve& phase_curve(void) const;
     void                            phase_curve(const GModelTemporalPhaseCurve& phase_curve);
     const GPhases&                  phases(void) const;
@@ -128,6 +132,8 @@ protected:
     int                      m_fpmtflag;     //!< D2 PMT failures
                                              //!< (0: exclude modules, 1: include modules,
                                              //!<  2: use FPM information)
+    bool                     m_use_d1[7];    //!< D1 module usage
+    bool                     m_use_d2[14];   //!< D2 module usage
     GModelTemporalPhaseCurve m_phase_curve;  //!< Phase curve for phase selection
     GPhases                  m_phases;       //!< Phases for phase selection
 
@@ -154,6 +160,8 @@ protected:
     mutable int m_num_d1module_off;    //!< Number of events excluded since D1 module off
     mutable int m_num_d2module_off;    //!< Number of events excluded since D2 module off
     mutable int m_num_fpmt;            //!< Number of events excluded due to failed PMT
+    mutable int m_num_d1[7];           //!< Number of events per D1 module
+    mutable int m_num_d2[14];          //!< Number of events per D2 module
 };
 
 
