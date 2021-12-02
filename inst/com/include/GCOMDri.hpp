@@ -135,9 +135,15 @@ protected:
                            const GCOMSelection& select);
     void   read_attributes(const GFitsHDU* hdu);
     void   write_attributes(GFitsHDU* hdu) const;
-    double compute_geometry(const int& tjd, const double&     theta,
-                                            const double&     phi,
-                                            const GCOMStatus& status) const;
+    double compute_geometry(const int& tjd, const double&        theta,
+                                            const double&        phi,
+                                            const GCOMSelection& select,
+                                            const GCOMStatus&    status) const;
+    double compute_surface(const double& x1, const double& y1, const double& r1,
+                           const double& x2, const double& y2, const double& r2) const;
+    double compute_overlap(const double& x1, const double& y1, const double& r1,
+                           const double& x2, const double& y2, const double& r2,
+                           const double& x3, const double& y3, const double& r3) const;
     void   compute_tof_correction(void);
 
     // Protected members

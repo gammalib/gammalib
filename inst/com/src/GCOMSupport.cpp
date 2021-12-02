@@ -136,64 +136,64 @@ double gammalib::com_energy2(const double& energy, const double& phigeo)
 /***********************************************************************//**
  * @brief Return D2 module exclusion region X position
  *
- * @param[in] id2 Module identifier [0,...,13].
+ * @param[in] id2 Module identifier [1,...,14].
  * @return Exclusion region X position (cm).
  *
  * Returns the D2 module exclusion region X position for a given module.
  * The method does not check the validity of the module identifier.
  *
- * The values have been implemented from the MPE-FPM-7 file.
+ * The values have been implemented from the MPE-FPM-4 file.
  ***************************************************************************/
 const double& gammalib::com_exd2x(const int& id2)
 {
     // Set D2 module exclusion region X positions
-    static const double exd2x[] = {  0.0,    0.0,    0.0,   0.0,   0.0,   0.0,   0.0,
-                                     0.0,    0.0,    0.0, -51.7,   0.0,   9.0, -34.7};
+    static const double exd2x[] = {0.0, 0.0, 0.0,   0.0, 0.0, 0.0,   0.0,
+                                   0.0, 0.0, 0.0, -51.7, 0.0, 9.0, -34.7};
 
     // Return value
-    return exd2x[id2];
+    return exd2x[id2-1];
 }
 
 
 /***********************************************************************//**
  * @brief Return D2 module exclusion region Y position
  *
- * @param[in] id2 Module identifier [0,...,13].
+ * @param[in] id2 Module identifier [1,...,14].
  * @return Exclusion region Y position (cm).
  *
  * Returns the D2 module exclusion region Y position for a given module.
  * The method does not check the validity of the module identifier.
  *
- * The values have been implemented from the MPE-FPM-7 file.
+ * The values have been implemented from the MPE-FPM-4 file.
  ***************************************************************************/
 const double& gammalib::com_exd2y(const int& id2)
 {
     // Set D2 module exclusion region Y positions
-    static const double exd2y[] = {  0.0,-41.254,    0.0,   0.0,   0.0,   0.0,   0.0,
-                                     0.0,    0.0,    0.0,   8.7,   0.0, +41.2, +49.0};
+    static const double exd2y[] = {0.0, 0.0, 0.0, 0.0, 0.0,   0.0,   0.0,
+                                   0.0, 0.0, 0.0, 8.7, 0.0, +41.2, +49.0};
 
     // Return value
-    return exd2y[id2];
+    return exd2y[id2-1];
 }
 
 
 /***********************************************************************//**
  * @brief Return D2 module exclusion region radius
  *
- * @param[in] id2 Module identifier [0,...,13].
+ * @param[in] id2 Module identifier [1,...,14].
  * @return Exclusion region radius (cm).
  *
  * Returns the D2 module exclusion region radius for a given module.
  * The method does not check the validity of the module identifier.
  *
- * The values have been implemented from the MPE-FPM-7 file.
+ * The values have been implemented from the MPE-FPM-4 file.
  ***************************************************************************/
 const double& gammalib::com_exd2r(const int& id2)
 {
     // Set D2 module exclusion region radii
-    static const double exd2r[] = {  0.0, 14.085,    0.0,   0.0,   0.0,   0.0,   0.0,
-                                     0.0,    0.0,    0.0,   9.0,   0.0,   9.0,   9.0};
+    static const double exd2r[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                   0.0, 0.0, 0.0, 9.0, 0.0, 9.0, 9.0};
 
     // Return value
-    return exd2r[id2];
+    return exd2r[id2-1];
 }

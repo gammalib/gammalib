@@ -44,6 +44,7 @@
 #include "GCOMOads.hpp"
 #include "GCOMTim.hpp"
 #include "GCOMStatus.hpp"
+#include "GCOMSupport.hpp"
 #include "GCOMObservation.hpp"
 #include "GCOMEventList.hpp"
 #include "GCOMSelection.hpp"
@@ -285,9 +286,6 @@ void GCOMDri::compute_dre(const GCOMObservation& obs,
     // Initialise event counter
     int i_evt = 0;
 
-    // Initialise D1 & D2 module status
-    GCOMStatus status;
-
     // Initialise superpacket statistics
     init_statistics();
 
@@ -316,8 +314,6 @@ void GCOMDri::compute_dre(const GCOMObservation& obs,
     int num_outside_dre      = 0;
     int num_event_before_dre = 0;
     int num_event_after_dre  = 0;
-    int num_d1module_off     = 0;
-    int num_d2module_off     = 0;
     int num_processed        = 0;
 
     // Set all DRE bins to zero
@@ -393,21 +389,6 @@ void GCOMDri::compute_dre(const GCOMObservation& obs,
 
             // Apply event selection
             if (!m_selection.use_event(*event)) {
-                continue;
-            }
-
-            // Extract module IDs from MODCOM
-            int id2 = (event->modcom()-1)/7 + 1;      // [1-14]
-            int id1 =  event->modcom() - (id2-1) * 7; // [1-7]
-
-            // Check module status. Skip all events where module is
-            // signalled as not on.
-            if (status.d1status(oad.tjd(), id1) != 1) {
-                num_d1module_off++;
-                continue;
-            }
-            if (status.d2status(oad.tjd(), id2) != 1) {
-                num_d2module_off++;
                 continue;
             }
 
@@ -490,8 +471,6 @@ void GCOMDri::compute_dre(const GCOMObservation& obs,
     std::cout << "Events outside superpacket ...: " << num_event_outside_sp << std::endl;
     std::cout << "Events before DRE GTI ........: " << num_event_before_dre << std::endl;
     std::cout << "Events after DRE GTI .........: " << num_event_after_dre << std::endl;
-    std::cout << "Events with D1 module off ....: " << num_d1module_off << std::endl;
-    std::cout << "Events with D2 module off ....: " << num_d2module_off << std::endl;
     std::cout << "Energy too low ...............: " << num_energy_too_low << std::endl;
     std::cout << "Energy too high ..............: " << num_energy_too_high << std::endl;
     std::cout << "Phibar too low ...............: " << num_phibar_too_low << std::endl;
@@ -531,6 +510,10 @@ void GCOMDri::compute_drg(const GCOMObservation& obs,
     // Initialise superpacket statistics
     init_statistics();
 
+    // Store selection set so that handling of failed PMT flag is correctly
+    // written into the FITS header
+    m_selection = select;
+
     // Set all DRG bins to zero
     init_cube();
 
@@ -567,7 +550,7 @@ void GCOMDri::compute_drg(const GCOMObservation& obs,
             double phi   = oad.phi(sky);
 
             // Compute geometric factor summed over all D1, D2
-            double geometry = compute_geometry(oad.tjd(), theta, phi, status);
+            double geometry = compute_geometry(oad.tjd(), theta, phi, select, status);
 
             // Compute Earth horizon angle as the distance between the Earth
             // centre in COMPTEL coordinates and the (Chi, Psi) pixel in
@@ -1325,9 +1308,13 @@ void GCOMDri::write_attributes(GFitsHDU* hdu) const
         hdu->card("E_MAX", m_ebounds.emax().MeV(), "[MeV] Upper bound of energy range");
     }
 
-    // If there was an event seletion then write selection set
+    // If there was an event seletion then write selection set. Otherwise write
+    // handling of D2 PMT failures.
     if (m_has_selection) {
         m_selection.write(*hdu);
+    }
+    else {
+        hdu->card("D2FPMT", m_selection.fpmtflag(), "D2 PMT failure handling");
     }
 
     // If there was a valid Earth horizon cut then write it
@@ -1356,16 +1343,18 @@ void GCOMDri::write_attributes(GFitsHDU* hdu) const
  * @param[in] tjd TJD for module status
  * @param[in] theta Zenith angle in COMPTEL coordinates (deg).
  * @param[in] phi Azimuth angle in COMPTEL coordinates (deg).
+ * @param[in] select Selection set.
  * @param[in] status D1 and D2 module status
  * @return Geometry factor.
  *
  * Computes the DRG geometry factor as function of zenith and azimuth angles
  * given in the COMPTEL coordinate system.
  ***************************************************************************/
-double GCOMDri::compute_geometry(const int&        tjd,
-                                 const double&     theta,
-                                 const double&     phi,
-                                 const GCOMStatus& status) const
+double GCOMDri::compute_geometry(const int&           tjd,
+                                 const double&        theta,
+                                 const double&        phi,
+                                 const GCOMSelection& select,
+                                 const GCOMStatus&    status) const
 {
     // Set D1 module positions (from COM-RP-MPE-M10-123, Issue 1, Page 3-3)
     const double xd1[] = {0.0,-42.3,-26.0,26.0, 42.3,26.0,-26.0};
@@ -1418,8 +1407,12 @@ double GCOMDri::compute_geometry(const int&        tjd,
         // Loop over all D2 modules
         for (int id2 = 0; id2 < 14; ++id2) {
 
-            // Skip D2 module if it's off
-            if (status.d2status(tjd, id2+1) != 1) {
+            // Get D2 module status
+            int d2status = status.d2status(tjd, id2+1);
+
+            // Skip D2 module if it's off or if module has failed PMT and
+            // should be excluded
+            if ((d2status < 1) || ((d2status > 1) && (select.fpmtflag() == 0))) {
                 continue;
             }
 
@@ -1435,10 +1428,30 @@ double GCOMDri::compute_geometry(const int&        tjd,
                 continue;
             }
 
+            // If D2 modules has failed PMT, the failed PMT zone should be
+            // excluded and the module has an exclusion radius then compute
+            // now the overlap of the failure zone; if the module has no
+            // exclusion radius then exclude the entire module.
+            double overlap = 0.0;
+            if ((d2status > 1) && (select.fpmtflag() == 2)) {
+                double r = gammalib::com_exd2r(id2+1);
+                if (r >= 0.1) {
+                    overlap = compute_overlap(xd1_prj,  yd1_prj,  r1,
+                                              xd2[id2], yd2[id2], r2,
+                                              gammalib::com_exd2x(id2+1),
+                                              gammalib::com_exd2y(id2+1),
+                                              r);
+                }
+                else {
+                    continue;
+                }
+            } // endif: handled D2 modules with failed PMTs
+
             // If there is total overlap (within 0.1 cm) then add 1 to the
             // geometry factor
-            else if (d <= r2 - r1 + 0.1) {
-                geometry += 1.0;
+            if (d <= r2 - r1 + 0.1) {
+                double gmt = (1.0 > overlap) ? 1.0 - overlap : 0.0;
+                geometry  += gmt;
             }
 
             // ... otherwise if there is a partial overlap then compute the
@@ -1460,8 +1473,13 @@ double GCOMDri::compute_geometry(const int&        tjd,
                 double beta2 = std::acos(cbeta2);
 
                 // Projection
-                geometry += (r1sq * (beta1 - sbeta1 * cbeta1) +
-                             r2sq * (beta2 - sbeta2 * cbeta2)) * norm_geo;
+                double gmt = (r1sq * (beta1 - sbeta1 * cbeta1) +
+                              r2sq * (beta2 - sbeta2 * cbeta2)) * norm_geo -
+                             overlap;
+                if (gmt < 0.0) {
+                    gmt = 0.0;
+                }
+                geometry += gmt;
 
             } // endelse: there was partial overlap
 
@@ -1475,6 +1493,207 @@ double GCOMDri::compute_geometry(const int&        tjd,
 
     // Return geometry factor
     return geometry;
+}
+
+
+/***********************************************************************//**
+ * @brief Compute surface of overlap between two circles
+ *
+ * @param[in] x1 X position of D2 module (cm).
+ * @param[in] y1 Y position of D2 module (cm).
+ * @param[in] r1 Radius D2 module (cm).
+ * @param[in] x2 X position of dead PMT (cm).
+ * @param[in] y2 Y position of dead PMT (cm).
+ * @param[in] r2 Radius of dead PMT (cm).
+ * @return Surface of overlap (cm^2)
+ *
+ * Computes the surface of overlap in cm^2 between two circles, composed of
+ * D2 module and failed PMT exclusion circle.
+ *
+ * The method is a reimplementation of the COMPASS SKYDRS17.COM2 function.
+ ***************************************************************************/
+double GCOMDri::compute_surface(const double& x1, const double& y1, const double& r1,
+                                const double& x2, const double& y2, const double& r2) const
+{
+    // Initialise surface
+    double surface = 0.0;
+
+    // Compute distance between center of D2 and failed PMT exclusion circle
+    double dx  = x1 - x2;
+    double dy  = y1 - y2;
+    double dsq = dx * dx + dy * dy;
+    double d   = std::sqrt(dsq);
+
+    // If failed PMT exclusion circle is fully comprised within D2 then use
+    // failed PMT exclusion circle surface as overlap
+    if (r1 > (d+r2)) {
+        surface = gammalib::pi * r2 * r2;
+    }
+
+    // ... otherwise, if D2 module is fully comprised in failed PMT exclusion
+    // circle then use D2 module surface as overlap. This case is only relevant
+    // if the failed PMTs exclusion circle is larger than the D2 modules.
+    else if (r2 > (d+r1)) {
+        surface = gammalib::pi * r1 * r1;
+    }
+
+    // ... otherwise if D2 module and failed PMT exclusion circle overlap then
+    // compute the area of overlap
+    else if (d < (r1+r2)) {
+
+        // Cosine beta
+        double d2     = 2.0 * d;
+        double r1sq   = r1 * r1;
+        double r2sq   = r2 * r2;
+        double cbeta1 = (r1sq - r2sq + dsq) / (d2 * r1);
+        double cbeta2 = (r2sq - r1sq + dsq) / (d2 * r2);
+
+        // Sin beta
+        double sbeta1 = std::sqrt(1.0 - cbeta1 * cbeta1);
+        double sbeta2 = std::sqrt(1.0 - cbeta2 * cbeta2);
+
+        // Beta
+        double beta1 = std::acos(cbeta1);
+        double beta2 = std::acos(cbeta2);
+
+        // Compute surface
+        surface = (r1sq * (beta1 - sbeta1 * cbeta1) +
+                   r2sq * (beta2 - sbeta2 * cbeta2));
+
+    }
+
+    // Return
+    return surface;
+}
+
+
+/***********************************************************************//**
+ * @brief Compute overlap between three circles
+ *
+ * @param[in] x1 X position of D1 projection (cm).
+ * @param[in] y1 Y position of D1 projection (cm).
+ * @param[in] r1 Radius D1 module (cm).
+ * @param[in] x2 X position of D2 module (cm).
+ * @param[in] y2 Y position of D2 module (cm).
+ * @param[in] r2 Radius D2 module (cm).
+ * @param[in] x3 X position of dead PMT (cm).
+ * @param[in] y3 Y position of dead PMT (cm).
+ * @param[in] r3 Radius of dead PMT (cm).
+ * @return Fractional overlap [0.0,...,1.0]
+ *
+ * Compute overlap between three circles, composed of projected D1 module,
+ * D2 module and failed PMT exclusion circle.
+ *
+ * The method is a reimplementation of the COMPASS SKYDRS17.OVERLP function.
+ ***************************************************************************/
+double GCOMDri::compute_overlap(const double& x1, const double& y1, const double& r1,
+                                const double& x2, const double& y2, const double& r2,
+                                const double& x3, const double& y3, const double& r3) const
+{
+    // Initialise constants
+    const  int    steps = 25;
+    const  int    size  = steps*steps;
+    static double o23_x[size];
+    static double o23_y[size];
+    static double last_x2 = 1.0e25;
+    static double last_y2 = 1.0e25;
+    static double last_x3 = 1.0e25;
+    static double last_y3 = 1.0e25;
+    static int    no23    = 0;
+
+    // Initialise overlap
+    double overlap = 0.0;
+
+    // Create single-pass loop so that method has a single exit point
+    do {
+
+        // If there is no overlap between D1 module projection and D2 module
+        // then return zero overlap
+        double dx12 = x1 - x2;
+        double dy12 = y1 - y2;
+        double d12  = std::sqrt(dx12*dx12 + dy12*dy12);
+        if (d12 > (r1+r2)) {
+            continue;
+        }
+
+        // If there is no overlap between D1 module and failed PMT exclusion
+        // circle then return zero overlap
+        double dx13 = x1 - x3;
+        double dy13 = y1 - y3;
+        double d13  = std::sqrt(dx13*dx13 + dy13*dy13);
+        if (d13 > (r1+r3)) {
+            continue;
+        }
+
+        // If PMT exclusion circle is contained within D1 module projection
+        // then the overlap is the overlap between D2 module and PMT
+        // exclusion circle
+        if (d13+r3 < r1) {
+            overlap = compute_surface(x2, y2, r2, x3, y3, r3);
+            continue;
+        }
+
+        // Start integration over the smallest circle which is the PMT
+        // exclusion circle. Since the D2 module circle and the PMT
+        // exclusion circle do not change position too often, their overlap
+        // will be kept in a table. Then only the changing position of the
+        // D1 projection needs to be taken care of in the seperate calls
+        // to the routine.
+        double step   = 2.0 * r3 / double(steps-3);
+        double stepsq = step * step;
+        double r1sq   = r1 * r1;
+        if ((last_x2 != x2) or (last_y2 != y2) or (last_x3 != x3) or (last_y3 != y3)) {
+
+            // Store positions
+            last_x2 = x2;
+            last_y2 = y2;
+            last_x3 = x3;
+            last_y3 = y3;
+
+            // Compute arrays o23_x and o23_y which hold all (x,y) positions
+            // that overlap with the D2 module and the PMT exclusion circle
+            double r2sq = r2 * r2;
+            double r3sq = r3 * r3;
+            no23        = 0;
+            double yy   = y3 - r3 - step;
+            for (int i = 0; i < steps; ++i, yy += step) {
+                double xx = x3 - r3 - step;
+                for (int j = 0; j < steps; ++j, xx += step) {
+                    double dx3 = xx - x3;
+                    double dy3 = yy - y3;
+                    if (dx3*dx3 + dy3*dy3 < r3sq) {
+                        double dx2 = xx - x2;
+                        double dy2 = yy - y2;
+                        if (dx2*dx2 + dy2*dy2 < r2sq) {
+                            o23_x[no23] = xx;
+                            o23_y[no23] = yy;
+                            no23++;
+                        }
+                    }
+                }
+            }
+
+        } // endif: update required
+        
+        // Now compute overlap by checking all (x,y) positions that overlap
+        // with the D2 module and the PMT exclusion circle
+        for (int i = 0; i < no23; ++i) {
+            double dx1 = o23_x[i] - x1;
+            double dy1 = o23_y[i] - y1;
+            if (dx1*dx1 + dy1*dy1 < r1sq) {
+                overlap += stepsq;
+            }
+        }
+
+    } while(false);
+
+    // Finally divide by the D1 module area to get the fractional overlap
+    if (overlap > 0.0) {
+        overlap /= (gammalib::pi * r1sq);
+    }
+
+    // Return
+    return overlap;
 }
 
 

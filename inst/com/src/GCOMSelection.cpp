@@ -30,6 +30,7 @@
 #endif
 #include "GFitsHDU.hpp"
 #include "GCOMTools.hpp"
+#include "GCOMSupport.hpp"
 #include "GCOMStatus.hpp"
 #include "GCOMSelection.hpp"
 #include "GCOMEventAtom.hpp"
@@ -202,8 +203,6 @@ void GCOMSelection::init_statistics(void) const
  * @return True if event should be used, false otherwise.
  *
  * Checks if an event should be used for DRE binning.
- *
- * @todo Implement handling of D2 modules with failed PMTs.
  ***************************************************************************/
 bool GCOMSelection::use_event(const GCOMEventAtom& event) const
 {
@@ -319,21 +318,35 @@ bool GCOMSelection::use_event(const GCOMEventAtom& event) const
         // Handle D2 modules with failed PMTs based on value of
         // failure flag
         else if (d2status > 1) {
-        
+
             // If failure flag = 0 then reject event
             if (m_fpmtflag == 0) {
                 m_num_fpmt++;
                 use = false;
             }
-            
-            // ... otherwise if failure flag = 2 then reject event
-            // if it's close to the failed PMT
+
+            // ... otherwise if failure flag = 2 and the module has a
+            // valid exclusion circle then reject event if it is
+            // within the exclusion circle; if the module has no
+            // exclusion region then reject the entire module.
             else if (m_fpmtflag == 2) {
-                //TODO: implement handling of failed PMTs
-                //m_num_fpmt++;
-                //use = false;
+                double r = gammalib::com_exd2r(id2);
+                if (r >= 0.1) {
+                    double dx  = gammalib::com_exd2x(id2) - 0.1 * event.x_d2();
+                    double dy  = gammalib::com_exd2y(id2) - 0.1 * event.y_d2();
+                    double dsq = dx*dx + dy*dy;
+                    double rsq = r*r;
+                    if (dsq <= rsq) {
+                        m_num_fpmt++;
+                        use = false;
+                    }
+                }
+                else {
+                    m_num_fpmt++;
+                    use = false;
+                }
             }
-            
+
         } // endif: handled D2 modules with failed PMTs
 
     } // endif: handled module status
