@@ -1,6 +1,6 @@
 .. _2.0:
 
-GammaLib 2.0 release (2 December 2021)
+GammaLib 2.0 release (3 December 2021)
 ======================================
 
 Overview
@@ -130,6 +130,7 @@ New features
 Clean up
 --------
 
+* Remove ``GCOMSelection::zeta_min()`` and ``GCOMSelection::zeta_max()`` methods
 * [`3560 <https://cta-redmine.irap.omp.eu/issues/3560>`_] -
   Store DRB, DRG and DRX as instances of ``GCOMDri`` instead of ``GSkyMap`` in ``GCOMObservation``
 * [`2973 <https://cta-redmine.irap.omp.eu/issues/2973>`_] -

@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-1 December 2021
+3 December 2021
 
 
 1. Introduction
@@ -128,6 +128,8 @@ The following methods have been removed:
 - GFitsTableCol::scale()
 - GCOMObservation::drm(GModelSky&)
 - GCOMResponse::irf_spatial()
+- GCOMSelection::zeta_min()
+- GCOMSelection::zeta_max()
 
 The following methods have been renamed:
 - none
@@ -391,6 +393,11 @@ spatial model gradients (#3203).
 
 22. COMPTEL interface
 ---------------------
+Removed GCOMSelection::zeta_min() and GCOMSelection::zeta_max() since event-wise
+zeta selection is actually not used and the zeta cut is applied using the minimum
+value of the corresponding Phibar layer. Having this additional selection was always
+a source of confusion.
+
 Added GCOMSelection::use_d1() and GCOMSelection::use_d2() methods to control the usage
 of D1 and D2 modules. The control logic was implemented in GCOMDri and header keywords
 with per module information are now written into the DRE FITS files. A D1 and D2

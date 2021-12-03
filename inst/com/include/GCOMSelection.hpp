@@ -83,10 +83,6 @@ public:
     void                            psd_min(const int& psd_min);
     const int&                      psd_max(void) const;
     void                            psd_max(const int& psd_max);
-    const double&                   zeta_min(void) const;
-    void                            zeta_min(const double& zeta_min);
-    const double&                   zeta_max(void) const;
-    void                            zeta_max(const double& zeta_max);
     const int&                      reflag_min(void) const;
     void                            reflag_min(const int& reflag_min);
     const int&                      reflag_max(void) const;
@@ -123,8 +119,6 @@ protected:
     int                      m_tof_max;      //!< Maximum TOF window
     int                      m_psd_min;      //!< Minimum PSD window
     int                      m_psd_max;      //!< Maximum PSD window
-    double                   m_zeta_min;     //!< Minimum Earth horizon angle - Phibar window
-    double                   m_zeta_max;     //!< Maximum Earth horizon angle - Phibar window
     int                      m_reflag_min;   //!< Minimum rejection flag
     int                      m_reflag_max;   //!< Maximum rejection flag
     int                      m_vetoflag_min; //!< Minimum veto flag
@@ -149,8 +143,6 @@ protected:
     mutable int m_num_tof_max;         //!< Number of events above TOF threshold
     mutable int m_num_psd_min;         //!< Number of events below PSD threshold
     mutable int m_num_psd_max;         //!< Number of events above PSD threshold
-    mutable int m_num_zeta_min;        //!< Number of events below Zeta threshold
-    mutable int m_num_zeta_max;        //!< Number of events above Zeta threshold
     mutable int m_num_reflag_min;      //!< Number of events below rejection flag threshold
     mutable int m_num_reflag_max;      //!< Number of events above rejection flag threshold
     mutable int m_num_vetoflag_min;    //!< Number of events below veto flag threshold
@@ -373,56 +365,6 @@ inline
 void GCOMSelection::psd_max(const int& psd_max)
 {
     m_psd_max = psd_max;
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Return minimum of Earth horizon selection window
- *
- * @return Minimum of Earth horizon selection window.
- ***************************************************************************/
-inline
-const double& GCOMSelection::zeta_min(void) const
-{
-    return (m_zeta_min);
-}
-
-
-/***********************************************************************//**
- * @brief Set minimum of Earth horizon selection window
- *
- * @param[in] zeta_min Minimum of Earth horizon selection window.
- ***************************************************************************/
-inline
-void GCOMSelection::zeta_min(const double& zeta_min)
-{
-    m_zeta_min = zeta_min;
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Return maximum of Earth horizon selection window
- *
- * @return Maximum of Earth horizon selection window.
- ***************************************************************************/
-inline
-const double& GCOMSelection::zeta_max(void) const
-{
-    return (m_zeta_max);
-}
-
-
-/***********************************************************************//**
- * @brief Set maximum of Earth horizon selection window
- *
- * @param[in] zeta_max Maximum of Earth horizon selection window.
- ***************************************************************************/
-inline
-void GCOMSelection::zeta_max(const double& zeta_max)
-{
-    m_zeta_max = zeta_max;
     return;
 }
 

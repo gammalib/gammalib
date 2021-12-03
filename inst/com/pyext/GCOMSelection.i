@@ -66,10 +66,6 @@ public:
     void                            psd_min(const int& psd_min);
     const int&                      psd_max(void) const;
     void                            psd_max(const int& psd_max);
-    const double&                   zeta_min(void) const;
-    void                            zeta_min(const double& zeta_min);
-    const double&                   zeta_max(void) const;
-    void                            zeta_max(const double& zeta_max);
     const int&                      reflag_min(void) const;
     void                            reflag_min(const int& reflag_min);
     const int&                      reflag_max(void) const;

@@ -183,8 +183,6 @@ void GCOMSelection::init_statistics(void) const
     m_num_tof_max         = 0;
     m_num_psd_min         = 0;
     m_num_psd_max         = 0;
-    m_num_zeta_min        = 0;
-    m_num_zeta_max        = 0;
     m_num_reflag_min      = 0;
     m_num_reflag_max      = 0;
     m_num_vetoflag_min    = 0;
@@ -224,9 +222,6 @@ bool GCOMSelection::use_event(const GCOMEventAtom& event) const
 
     // Increment number of checked events
     m_num_events_checked++;
-
-    // Compute zeta for event
-    double zeta = event.eha() - event.phibar();
 
     // Check for bad minitelescopes
     if (event.modcom() < 1 || event.modcom() > 98) {
@@ -272,14 +267,6 @@ bool GCOMSelection::use_event(const GCOMEventAtom& event) const
     }
     else if (event.psd() > m_psd_max) {
         m_num_psd_max++;
-        use = false;
-    }
-    else if (zeta < m_zeta_min) {
-        m_num_zeta_min++;
-        use = false;
-    }
-    else if (zeta > m_zeta_max) {
-        m_num_zeta_max++;
         use = false;
     }
     else if (event.reflag() < m_reflag_min) {
@@ -546,12 +533,6 @@ void GCOMSelection::read(const GFitsHDU& hdu)
         m_psd_max = hdu.real("PSDMAX");
     }
 
-    // Read Earth horizon angle - Phibar selection
-    if (hdu.has_card("ZETMIN") && hdu.has_card("ZETMAX")) {
-        m_zeta_min = hdu.real("ZETMIN");
-        m_zeta_max = hdu.real("ZETMAX");
-    }
-
     // Read rejection flag selection
     if (hdu.has_card("RFLMIN") && hdu.has_card("RFLMAX")) {
         m_reflag_min = hdu.integer("RFLMIN");
@@ -615,10 +596,6 @@ void GCOMSelection::read(const GFitsHDU& hdu)
         m_num_psd_min = hdu.integer("NPSDLO");
         m_num_psd_max = hdu.integer("NPSDHI");
     }
-    if (hdu.has_card("NZETLO") && hdu.has_card("NZETHI")) {
-        m_num_zeta_min = hdu.integer("NZETLO");
-        m_num_zeta_max = hdu.integer("NZETHI");
-    }
     if (hdu.has_card("NRFLLO") && hdu.has_card("NRFLHI")) {
         m_num_reflag_min = hdu.integer("NRFLLO");
         m_num_reflag_max = hdu.integer("NRFLHI");
@@ -680,10 +657,6 @@ void GCOMSelection::write(GFitsHDU& hdu) const
     hdu.card("PSDMIN",  m_psd_min, "PSD selection minimum");
     hdu.card("PSDMAX",  m_psd_max, "PSD selection maximum");
 
-    // Write Earth horizon angle - Phibar selection
-    hdu.card("ZETMIN",  m_zeta_min, "[deg] Earth horizon angle - Phibar minimum");
-    hdu.card("ZETMAX",  m_zeta_max, "[deg] Earth horizon angle - Phibar maximum");
-
     // Write rejection flag selection
     hdu.card("RFLMIN",  m_reflag_min, "Rejection flag minimum");
     hdu.card("RFLMAX",  m_reflag_max, "Rejection flag maximum");
@@ -725,8 +698,6 @@ void GCOMSelection::write(GFitsHDU& hdu) const
     hdu.card("NTOFHI",  m_num_tof_max,         "Number of events > TOFMIN");
     hdu.card("NPSDLO",  m_num_psd_min,         "Number of events < PSDMIN");
     hdu.card("NPSDHI",  m_num_psd_max,         "Number of events > PSDMAX");
-    hdu.card("NZETLO",  m_num_zeta_min,        "Number of events < ZETMIN");
-    hdu.card("NZETHI",  m_num_zeta_max,        "Number of events > ZETMAX");
     hdu.card("NRFLLO",  m_num_reflag_min,      "Number of events < RFLMIN");
     hdu.card("NRFLHI",  m_num_reflag_max,      "Number of events > RFLMAX");
     hdu.card("NVFLLO",  m_num_vetoflag_min,    "Number of events < VFLMIN");
@@ -804,13 +775,6 @@ std::string GCOMSelection::print(const GChatter& chatter) const
         result.append(gammalib::str(m_psd_min)+" - ");
         result.append(gammalib::str(m_psd_max)+"] < ");
         result.append(gammalib::str(m_num_psd_max));
-
-        // Append zeta angle selection statistics
-        result.append("\n"+gammalib::parformat("Zeta angle selection"));
-        result.append(gammalib::str(m_num_zeta_min)+" < [");
-        result.append(gammalib::str(m_zeta_min)+" - ");
-        result.append(gammalib::str(m_zeta_max)+" deg] < ");
-        result.append(gammalib::str(m_num_zeta_max));
 
         // Append rejection flag selection statistics
         result.append("\n"+gammalib::parformat("Rejection flag selection"));
@@ -902,8 +866,6 @@ void GCOMSelection::init_members(void)
     m_tof_max      =   130;  //!< Maximum TOF window
     m_psd_min      =     0;  //!< Minimum PSD window
     m_psd_max      =   110;  //!< Maximum PSD window
-    m_zeta_min     =   0.0;  //!< Minimum Earth horizon angle - Phibar window
-    m_zeta_max     = 180.0;  //!< Maximum Earth horizon angle - Phibar window
     m_reflag_min   =     1;  //!< Minimum rejection flag
     m_reflag_max   =  1000;  //!< Maximum rejection flag
     m_vetoflag_min =     0;  //!< Minimum veto flag
@@ -942,8 +904,6 @@ void GCOMSelection::copy_members(const GCOMSelection& select)
     m_tof_max      = select.m_tof_max;
     m_psd_min      = select.m_psd_min;
     m_psd_max      = select.m_psd_max;
-    m_zeta_min     = select.m_zeta_min;
-    m_zeta_max     = select.m_zeta_max;
     m_reflag_min   = select.m_reflag_min;
     m_reflag_max   = select.m_reflag_max;
     m_vetoflag_min = select.m_vetoflag_min;
@@ -970,8 +930,6 @@ void GCOMSelection::copy_members(const GCOMSelection& select)
     m_num_tof_max         = select.m_num_tof_max;
     m_num_psd_min         = select.m_num_psd_min;
     m_num_psd_max         = select.m_num_psd_max;
-    m_num_zeta_min        = select.m_num_zeta_min;
-    m_num_zeta_max        = select.m_num_zeta_max;
     m_num_reflag_min      = select.m_num_reflag_min;
     m_num_reflag_max      = select.m_num_reflag_max;
     m_num_vetoflag_min    = select.m_num_vetoflag_min;
