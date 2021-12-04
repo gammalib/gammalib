@@ -81,6 +81,10 @@ void gammalib::com_wcs_mer2car(GSkyMap& map)
         crval2 += adjust2;
         crpix2 += adjust2;
 
+        // Put latitude to zero to assure correct projection
+        crpix2 -= crval2;
+        crval2  = 0.0;
+
         // Allocate WCS
         GWcsCAR car(wcs->coordsys(), crval1, crval2,
                                      crpix1, crpix2,
