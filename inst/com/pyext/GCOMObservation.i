@@ -90,7 +90,9 @@ public:
     const GCOMDri&   drx(void) const;
     GCOMDri          drm(const GModels& models) const;
     const GCOMTim&   tim(void) const;
+    void             tim(const GCOMTim& tim);
     const GCOMOads&  oads(void) const;
+    void             oads(const GCOMOads& oads);
     const GFilename& drename(void) const;
     const GFilename& drbname(void) const;
     const GFilename& drgname(void) const;

@@ -37,6 +37,7 @@ Bug fixes
 Improvements
 ------------
 
+* Add ``GCOMObservation::tim()`` and ``GCOMObservation::oads()`` setter methods
 * [`3917 <https://cta-redmine.irap.omp.eu/issues/3913>`_] -
   Add ``GCOMSelection::fpmtflag()``, ``GCOMSelection::use_d1()`` and ``GCOMSelection::use_d2()`` methods
 * [`3913 <https://cta-redmine.irap.omp.eu/issues/3913>`_] -

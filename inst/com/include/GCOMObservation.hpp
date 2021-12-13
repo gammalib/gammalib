@@ -122,7 +122,9 @@ public:
     const GCOMDri&   drx(void) const;
     GCOMDri          drm(const GModels& models) const;
     const GCOMTim&   tim(void) const;
+    void             tim(const GCOMTim& tim);
     const GCOMOads&  oads(void) const;
+    void             oads(const GCOMOads& oads);
     const GFilename& drename(void) const;
     const GFilename& drbname(void) const;
     const GFilename& drgname(void) const;
@@ -442,6 +444,19 @@ const GCOMTim& GCOMObservation::tim(void) const
 
 
 /***********************************************************************//**
+ * @brief Set COMPTEL Good Time Intervals
+ *
+ * @param[in] tim COMPTEL Good Time Intervals.
+ ***************************************************************************/
+inline
+void GCOMObservation::tim(const GCOMTim& tim)
+{
+    m_tim = tim;
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Return Orbit Aspect Data
  *
  * @return Orbit Aspect Data
@@ -451,6 +466,19 @@ const GCOMOads& GCOMObservation::oads(void) const
 {
     // Return Orbit Aspect Data
     return (m_oads);
+}
+
+
+/***********************************************************************//**
+ * @brief Set Orbit Aspect Data
+ *
+ * @param[in] oads Orbit Aspect Data.
+ ***************************************************************************/
+inline
+void GCOMObservation::oads(const GCOMOads& oads)
+{
+    m_oads = oads;
+    return;
 }
 
 

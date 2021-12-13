@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-3 December 2021
+13 December 2021
 
 
 1. Introduction
@@ -105,6 +105,8 @@ The following methods have been added:
 - GCOMObservation::drxname()
 - GCOMObservation::response(GCOMResponse&)
 - GCOMObservation::compute_drb()
+- GCOMObservation::tim(GCOMTim&)
+- GCOMObservation::oads(GCOMOads&)
 - GCOMEventAtom::x_d2()
 - GCOMEventAtom::y_d2()
 - GCOMDri::tof_correction()
