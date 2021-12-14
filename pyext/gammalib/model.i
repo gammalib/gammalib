@@ -180,6 +180,7 @@
 %include "GModelSpatialRadialDisk.i"
 %include "GModelSpatialRadialRing.i"
 %include "GModelSpatialRadialGauss.i"
+%include "GModelSpatialRadialGeneralGauss.i"
 %include "GModelSpatialRadialShell.i"
 %include "GModelSpatialRadialProfile.i"
 %include "GModelSpatialRadialProfileGauss.i"

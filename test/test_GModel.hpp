@@ -58,6 +58,7 @@ public:
     void                test_radial_disk(void);
     void                test_radial_ring(void);
     void                test_radial_gauss(void);
+    void                test_radial_general_gauss(); 
     void                test_radial_shell(void);
     void                test_profile_dmburkert(void);
     void                test_profile_dmeinasto(void);
@@ -147,6 +148,7 @@ private:
     std::string m_xml_model_radial_disk;
     std::string m_xml_model_radial_ring;
     std::string m_xml_model_radial_gauss;
+  std::string m_xml_model_radial_general_gauss;
     std::string m_xml_model_radial_shell;
     std::string m_xml_model_profile_dmburkert;
     std::string m_xml_model_profile_dmeinasto;

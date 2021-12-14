@@ -171,6 +171,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GModelSpatialRadial.hpp \
                      GModelSpatialRadialDisk.hpp \
                      GModelSpatialRadialGauss.hpp \
+                     GModelSpatialRadialGeneralGauss.hpp \
                      GModelSpatialRadialShell.hpp \
                      GModelSpatialRadialRing.hpp \
                      GModelSpatialRadialProfile.hpp \
