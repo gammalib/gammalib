@@ -37,13 +37,13 @@
 
 
 /***********************************************************************//**
- * @brief Convert TJD and COMPTEL ticks in GTime object
+ * @brief Convert TJD and COMPTEL tics in GTime object
  *
  * @param[in] tjd Truncated Julian Days (days).
- * @param[in] tics COMPTEL ticks (1/8 ms).
+ * @param[in] tics COMPTEL tics (1/8 ms).
  * @return Time.
  *
- * Converts TJD and COMPTEL ticks into a GTime object. COMPTEL times are
+ * Converts TJD and COMPTEL tics into a GTime object. COMPTEL times are
  * given in UTC, i.e. 8393:0 converts into 1991-05-17T00:00:00 UT
  * (see COM-RP-UNH-DRG-037).
  ***************************************************************************/
@@ -57,7 +57,7 @@ GTime gammalib::com_time(const int& tjd, const int& tics)
     time.mjd(mjd, "UTC");
     double secs = time.secs();
 
-    // Add ticks and set time in native seconds
+    // Add tics and set time in native seconds
     secs += double(tics) * 0.000125;
 
     // Set time
@@ -90,9 +90,9 @@ int gammalib::com_tjd(const GTime& time)
  * @brief Convert GTime in COMPTEL tics
  *
  * @param[in] time Time.
- * @return COMPTEL ticks (1/8 ms).
+ * @return COMPTEL tics (1/8 ms).
  *
- * Converts GTime object in COMPTEL ticks (1/8 ms).
+ * Converts GTime object in COMPTEL tics (1/8 ms).
  ***************************************************************************/
 int gammalib::com_tics(const GTime& time)
 {
