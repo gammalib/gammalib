@@ -635,7 +635,7 @@ void GModelSpatialRadialGeneralGauss::update() const
         if (radius_rad > 0.0 and ridx() > 0) {
             m_inv_radius_rad = 1.0 / radius_rad;
 	    m_inv_ridx = 1.0 / ridx() ;
-            m_value_norm     = 1.0 / (gammalib::twopi * radius_rad * radius_rad * ridx() * std::exp(gammalib::gammln(ridx())) );
+            m_value_norm     = 1.0 / (gammalib::twopi * radius_rad * radius_rad * ridx() * std::exp(gammalib::gammln(2 * ridx())) );
         }
         else {
             m_inv_radius_rad = 0.0;
