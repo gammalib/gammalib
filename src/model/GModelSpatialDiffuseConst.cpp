@@ -548,7 +548,7 @@ void GModelSpatialDiffuseConst::init_members(void)
     m_value.fix();
     m_value.value(1.0);
     m_value.scale(1.0);
-    m_value.range(0.0, 10.0);
+    m_value.range(0.0, 1000.0);
     m_value.gradient(0.0);
     m_value.has_grad(true);
 
