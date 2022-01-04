@@ -115,6 +115,7 @@ void TestGModel::set(void)
     m_xml_model_profile_dmzhao       = datadir + "/model_profile_dmzhao.xml";
     m_xml_model_elliptical_disk      = datadir + "/model_elliptical_disk.xml";
     m_xml_model_elliptical_gauss     = datadir + "/model_elliptical_gauss.xml";
+    m_xml_model_elliptical_general_gauss     = datadir + "/model_elliptical_general_gauss.xml";
     m_xml_model_spatial_composite    = datadir + "/model_spatial_composite.xml";
 
     // Set temporal model definition XML files
@@ -170,6 +171,8 @@ void TestGModel::set(void)
            "Test GModelSpatialEllipticalDisk");
     append(static_cast<pfunction>(&TestGModel::test_elliptical_gauss),
            "Test GModelSpatialEllipticalGauss");
+    append(static_cast<pfunction>(&TestGModel::test_elliptical_general_gauss),
+           "Test GModelSpatialEllipticalGeneralGauss");
     append(static_cast<pfunction>(&TestGModel::test_diffuse_const),
            "Test GModelSpatialDiffuseConst");
     append(static_cast<pfunction>(&TestGModel::test_diffuse_cube),
@@ -1793,6 +1796,92 @@ void TestGModel::test_elliptical_gauss(void)
     return;
 }
 
+/***********************************************************************//**
+ * @brief Test GModelSpatialEllipticalGeneralGauss class
+ ***************************************************************************/
+void TestGModel::test_elliptical_general_gauss(void)
+{
+    // Test void constructor
+    GModelSpatialEllipticalGeneralGauss model1;
+    test_value(model1.type(), "EllipticalGeneralGaussian");
+
+    // Test value constructor
+    GSkyDir dir1;
+    dir1.radec_deg(83.6331, +22.0145);
+    GModelSpatialEllipticalGeneralGauss model2(dir1, 3.0, 2.0, 45.0,0.5);
+    test_value(model2.ra(), 83.6331);
+    test_value(model2.dec(), 22.0145);
+    test_value(model2.posangle(), 45.0);
+    test_value(model2.semimajor(), 3.0);
+    test_value(model2.semiminor(), 2.0);
+    test_value(model2.semiminor(), 2.0);
+    test_value(model2.ridx(), 0.5);
+
+    // Test XML constructor
+    GXml         xml(m_xml_model_elliptical_general_gauss);
+    GXmlElement* element = xml.element(0)->element(0)->element("spatialModel", 0);
+    GModelSpatialEllipticalGeneralGauss model3(*element);
+    test_value(model3.size(), 6);
+    test_value(model3.type(), "EllipticalGeneralGaussian");
+    test_value(model3.ra(), 83.6331);
+    test_value(model3.dec(), 22.0145);
+    test_value(model3.posangle(), 45.0);
+    test_value(model3.semimajor(), 0.3);
+    test_value(model3.semiminor(), 0.1);
+    test_value(model3.ridx(), 0.3);
+
+    // Test ra method
+    model3.ra(100.0);
+    test_value(model3.ra(), 100.0);
+
+    // Test dec method
+    model3.dec(10.0);
+    test_value(model3.dec(), 10.0);
+
+    // Test dir method
+    GSkyDir dir2;
+    dir2.radec_deg(83.6331, +22.0145);
+    model3.dir(dir2);
+    test_assert(model3.dir() == dir2, "Test sky direction");
+
+    // Test posangle method
+    model3.posangle(3.9);
+    test_value(model3.posangle(), 3.9);
+
+    // Test semimajor method
+    model3.semimajor(3.9);
+    test_value(model3.semimajor(), 3.9);
+
+    // Test semiminor method
+    model3.semiminor(3.9);
+    test_value(model3.semiminor(), 3.9);
+
+    // Test ridx method
+    model3.ridx(0.7);
+    test_value(model3.ridx(), 0.7);
+
+    // Test region method
+    GSkyDir dir3;
+    dir3.radec_deg(83.6331, +22.0145);
+    test_assert(model3.region()->contains(dir3), "Test region() method (inside)");
+    dir3.radec_deg(83.6331, +61.5);
+    test_assert(!model3.region()->contains(dir3), "Test region() method (outside)");
+
+    // Test operator access
+    const char* strarray[] = {"RA", "DEC", "PA", "MinorRadius", "MajorRadius", "R_Index"};
+    for (int i = 0; i < 6; ++i) {
+        std::string keyname(strarray[i]);
+        model3[keyname].value(2.1);
+        model3[keyname].error(1.9);
+        model3[keyname].gradient(0.8);
+        test_value(model3[keyname].value(), 2.1);
+        test_value(model3[keyname].error(), 1.9);
+        test_value(model3[keyname].gradient(), 0.8);
+    }
+
+    // Exit test
+    return;
+}
 
 /***********************************************************************//**
  * @brief Test GModelSpatialComposite class

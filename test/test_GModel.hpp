@@ -65,6 +65,7 @@ public:
     void                test_profile_dmzhao(void);
     void                test_elliptical_disk(void);
     void                test_elliptical_gauss(void);
+    void                test_elliptical_general_gauss(void);
     void                test_spatial_composite(void);
     void                test_spatial_model(void);
     void                test_const(void);
@@ -155,6 +156,7 @@ private:
     std::string m_xml_model_profile_dmzhao;
     std::string m_xml_model_elliptical_disk;
     std::string m_xml_model_elliptical_gauss;
+    std::string m_xml_model_elliptical_general_gauss;
     std::string m_xml_model_spatial_composite;
     std::string m_xml_model_point_temp_lightcurve;
     std::string m_xml_model_point_temp_phasecurve;

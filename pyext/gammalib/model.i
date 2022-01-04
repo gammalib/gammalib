@@ -190,6 +190,7 @@
 %include "GModelSpatialElliptical.i"
 %include "GModelSpatialEllipticalDisk.i"
 %include "GModelSpatialEllipticalGauss.i"
+%include "GModelSpatialEllipticalGeneralGauss.i"
 %include "GModelSpatialDiffuse.i"
 %include "GModelSpatialDiffuseConst.i"
 %include "GModelSpatialDiffuseCube.i"

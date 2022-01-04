@@ -50,6 +50,7 @@ sources = GModelPar.cpp \
           GModelSpatialElliptical.cpp \
           GModelSpatialEllipticalDisk.cpp \
           GModelSpatialEllipticalGauss.cpp \
+	  GModelSpatialEllipticalGeneralGauss.cpp \
           GModelSpatialDiffuse.cpp \
           GModelSpatialDiffuseConst.cpp \
           GModelSpatialDiffuseCube.cpp \
