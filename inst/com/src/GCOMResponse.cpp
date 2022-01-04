@@ -1374,7 +1374,7 @@ GVector GCOMResponse::irf_diffuse(const GModelSky&    model,
         for (int iphigeo = 0; iphigeo < m_phigeo_bins; ++iphigeo) {
 
             // Determine Phigeo value in radians
-            double phigeo     = phigeo_min + iphigeo * phigeo_bin;
+            double phigeo     = phigeo_min + (double(iphigeo) + 0.5) * phigeo_bin;
             double sin_phigeo = std::sin(phigeo);
 
             // Determine number of azimuthal integration steps and step size
