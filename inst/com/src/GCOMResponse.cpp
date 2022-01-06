@@ -1040,8 +1040,8 @@ GVector GCOMResponse::irf_radial(const GModelSky&    model,
     GVector irfs(nevents);
 
     // Initialise some variables
-    double         phigeo_min = m_phigeo_min      * gammalib::deg2rad;
     double         phigeo_bin = m_phigeo_bin_size * gammalib::deg2rad;
+    double         phigeo_min = m_phigeo_min      * gammalib::deg2rad - 0.5 * phigeo_bin;
     double         phigeo_max = phigeo_min + phigeo_bin * m_phigeo_bins;
     const GSkyMap& drx        = obs_ptr->drx().map();
     const double*  drg        = obs_ptr->drg().map().pixels();
@@ -1191,8 +1191,8 @@ GVector GCOMResponse::irf_elliptical(const GModelSky&    model,
     GVector irfs(nevents);
 
     // Initialise some variables
-    double         phigeo_min = m_phigeo_min      * gammalib::deg2rad;
     double         phigeo_bin = m_phigeo_bin_size * gammalib::deg2rad;
+    double         phigeo_min = m_phigeo_min      * gammalib::deg2rad - 0.5 * phigeo_bin;
     double         phigeo_max = phigeo_min + phigeo_bin * m_phigeo_bins;
     const GSkyMap& drx        = obs_ptr->drx().map();
     const double*  drg        = obs_ptr->drg().map().pixels();
@@ -1373,8 +1373,9 @@ GVector GCOMResponse::irf_diffuse(const GModelSky&    model,
         // Loop over Phigeo
         for (int iphigeo = 0; iphigeo < m_phigeo_bins; ++iphigeo) {
 
-            // Determine Phigeo value in radians
-            double phigeo     = phigeo_min + (double(iphigeo) + 0.5) * phigeo_bin;
+            // Determine Phigeo value in radians. Note that phigeo_min is the value
+            // for bin zero.
+            double phigeo     = phigeo_min + double(iphigeo) * phigeo_bin;
             double sin_phigeo = std::sin(phigeo);
 
             // Determine number of azimuthal integration steps and step size
