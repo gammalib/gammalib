@@ -1,7 +1,7 @@
 .. _2.0:
 
-GammaLib 2.0 release (3 December 2021)
-======================================
+GammaLib 2.0 release (7 January 2022)
+=====================================
 
 Overview
 --------
@@ -12,7 +12,7 @@ In particular, this release provides:
 
 * vectorised response computation
 * full support of all spatial models for COMPTEL
-* ...
+* support for pulsar analysis
 
 
 Bug fixes
@@ -96,6 +96,8 @@ Improvements
 New features
 ------------
 
+* [`3973 <https://cta-redmine.irap.omp.eu/issues/3973>`_] -
+  Add ``GCOMBvc`` and ``GCOMBvcs`` classes to support COMPTEL pulsar analysis
 * [`3910 <https://cta-redmine.irap.omp.eu/issues/3910>`_] -
   Add ``GCOMModelDRM`` class
 * [`3606 <https://cta-redmine.irap.omp.eu/issues/3606>`_] -

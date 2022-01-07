@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GVector.i - Vector class                          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -201,4 +201,14 @@ public:
     GVector tanh() {
         return tanh(*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = tuple([x for x in self]),
+        return state
+    def __setstate__(self, state):
+        size = len(state[0])
+        self.__init__(size)
+        for i, x in enumerate(state[0]):
+            self[i] = (x)
+}
 };

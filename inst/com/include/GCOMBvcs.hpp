@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GCOMOads.hpp - COMPTEL Orbit Aspect Data container class        *
+ *   GCOMBvcs.hpp - COMPTEL Solar System Barycentre Data container class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2022 by Juergen Knodlseder                          *
+ *  copyright (C) 2022 by Juergen Knodlseder                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,18 +19,18 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCOMOads.hpp
- * @brief COMPTEL Orbit Aspect Data container class definition
+ * @file GCOMBvcs.hpp
+ * @brief COMPTEL Solar System Barycentre Data container class definition
  * @author Juergen Knodlseder
  */
 
-#ifndef GCOMOADS_HPP
-#define GCOMOADS_HPP
+#ifndef GCOMBVCS_HPP
+#define GCOMBVCS_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
-#include "GCOMOad.hpp"
+#include "GCOMBvc.hpp"
 #include "GContainer.hpp"
 
 /* __ Forward declarations _______________________________________________ */
@@ -41,40 +41,41 @@ class GFitsTable;
 
 
 /***********************************************************************//**
- * @class GCOMOads
+ * @class GCOMBvcs
  *
- * @brief COMPTEL Orbit Aspect Data container class
+ * @brief COMPTEL Solar System Barycentre Data container class
  *
- * The COMPTEL Orbit Aspect Data container class holds records of Orbit
- * Aspect data that were extracted from one COMPTEL OAD FITS file.
+ * The COMPTEL Solar System Barycentre Data container class holds records
+ * of Solar System Barycentre data that were extracted from one COMPTEL BVC
+ * FITS file.
  ***************************************************************************/
-class GCOMOads : public GContainer {
+class GCOMBvcs : public GContainer {
 
 public:
     // Constructors and destructors
-    GCOMOads(void);
-    explicit GCOMOads(const GFilename& filename);
-    GCOMOads(const GCOMOads& oads);
-    virtual ~GCOMOads(void);
+    GCOMBvcs(void);
+    explicit GCOMBvcs(const GFilename& filename);
+    GCOMBvcs(const GCOMBvcs& bvcs);
+    virtual ~GCOMBvcs(void);
 
     // Operators
-    GCOMOads&      operator=(const GCOMOads& oads);
-    GCOMOad&       operator[](const int& index);
-    const GCOMOad& operator[](const int& index) const;
+    GCOMBvcs&      operator=(const GCOMBvcs& bvcs);
+    GCOMBvc&       operator[](const int& index);
+    const GCOMBvc& operator[](const int& index) const;
 
     // Methods
     void           clear(void);
-    GCOMOads*      clone(void) const;
+    GCOMBvcs*      clone(void) const;
     std::string    classname(void) const;
-    GCOMOad&       at(const int& index);
-    const GCOMOad& at(const int& index) const;
+    GCOMBvc&       at(const int& index);
+    const GCOMBvc& at(const int& index) const;
     int            size(void) const;
     bool           is_empty(void) const;
-    GCOMOad&       append(const GCOMOad& oad);
-    GCOMOad&       insert(const int& index, const GCOMOad& oad);
+    GCOMBvc&       append(const GCOMBvc& bvc);
+    GCOMBvc&       insert(const int& index, const GCOMBvc& bvc);
     void           remove(const int& index);
     void           reserve(const int& num);
-    void           extend(const GCOMOads& oads);
+    void           extend(const GCOMBvcs& bvcs);
     void           load(const GFilename& filename);
     void           read(const GFitsTable& table);
     std::string    print(const GChatter& chatter = NORMAL) const;
@@ -82,95 +83,97 @@ public:
 protected:
     // Protected methods
     void init_members(void);
-    void copy_members(const GCOMOads& oads);
+    void copy_members(const GCOMBvcs& bvcs);
     void free_members(void);
 
     // Protected data members
-    std::vector<GCOMOad> m_oads; //!< Orbit Aspect Data records
+    std::vector<GCOMBvc> m_bvcs; //!< Solar System Barycentre Data records
 };
 
 
 /***********************************************************************//**
  * @brief Return class name
  *
- * @return String containing the class name ("GCOMOads").
+ * @return String containing the class name ("GCOMBvcs").
  ***************************************************************************/
 inline
-std::string GCOMOads::classname(void) const
+std::string GCOMBvcs::classname(void) const
 {
-    return ("GCOMOads");
+    return ("GCOMBvcs");
 }
 
 
 /***********************************************************************//**
- * @brief Return reference to Orbit Aspect Data
+ * @brief Return reference to Solar System Barycentre Data
  *
- * @param[in] index Orbit Aspect Data index [0,...,size()-1].
+ * @param[in] index Solar System Barycentre Data index [0,...,size()-1].
  *
- * Returns a reference to the Orbit Aspect Data with the specified @p index.
+ * Returns a reference to the Solar System Barycentre Data with the
+ * specified @p index.
  ***************************************************************************/
 inline
-GCOMOad& GCOMOads::operator[](const int& index)
+GCOMBvc& GCOMBvcs::operator[](const int& index)
 {
-    return (m_oads[index]);
+    return (m_bvcs[index]);
 }
 
 
 /***********************************************************************//**
- * @brief Return reference to Orbit Aspect Data (const version)
+ * @brief Return reference to Solar System Barycentre Data (const version)
  *
- * @param[in] index Orbit Aspect Data index [0,...,size()-1].
+ * @param[in] index Solar System Barycentre Data index [0,...,size()-1].
  *
- * Returns a reference to the Orbit Aspect Data with the specified @p index.
+ * Returns a reference to the Solar System Barycentre Data with the specified
+ * @p index.
  ***************************************************************************/
 inline
-const GCOMOad& GCOMOads::operator[](const int& index) const
+const GCOMBvc& GCOMBvcs::operator[](const int& index) const
 {
-    return (m_oads[index]);
+    return (m_bvcs[index]);
 }
 
 
 /***********************************************************************//**
- * @brief Return number of Orbit Aspect Data in container
+ * @brief Return number of Solar System Barycentre Data in container
  *
- * @return Number of Orbit Aspect Data in container.
+ * @return Number of Solar System Barycentre Data in container.
  *
- * Returns the number of Orbit Aspect Data in the container.
+ * Returns the number of Solar System Barycentre Data in the container.
  ***************************************************************************/
 inline
-int GCOMOads::size(void) const
+int GCOMBvcs::size(void) const
 {
-    return (int)m_oads.size();
+    return (int)m_bvcs.size();
 }
 
 
 /***********************************************************************//**
- * @brief Signals if there are no Orbit Aspect Data in container
+ * @brief Signals if there are no Solar System Barycentre Data in container
  *
  * @return True if container is empty, false otherwise.
  *
- * Signals if the Orbit Aspect Data container does not contain any Orbit
- * Aspect Data.
+ * Signals if the Solar System Barycentre Data container does not contain
+ * any Solar System Barycentre Data.
  ***************************************************************************/
 inline
-bool GCOMOads::is_empty(void) const
+bool GCOMBvcs::is_empty(void) const
 {
-    return (m_oads.empty());
+    return (m_bvcs.empty());
 }
 
 
 /***********************************************************************//**
- * @brief Reserves space for Orbit Aspect Data in container
+ * @brief Reserves space for Solar System Barycentre Data in container
  *
- * @param[in] num Number of Orbit Aspect Data.
+ * @param[in] num Number of Solar System Barycentre Data.
  *
- * Reserves space for @p num Orbit Aspect Data in the container.
+ * Reserves space for @p num Solar System Barycentre Data in the container.
  ***************************************************************************/
 inline
-void GCOMOads::reserve(const int& num)
+void GCOMBvcs::reserve(const int& num)
 {
-    m_oads.reserve(num);
+    m_bvcs.reserve(num);
     return;
 }
 
-#endif /* GCOMOADS_HPP */
+#endif /* GCOMBVCS_HPP */

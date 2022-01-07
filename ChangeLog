@@ -1,8 +1,9 @@
-2021-12-13
+2022-01-07
 
         * Version 2.0.0 released
         ========================
 
+        Add support for COMPTEL pulsar analysis (#3973)
         Add GCOMObservation::tim() and GCOMObservation::oads() setter methods
         Remove GCOMSelection::zeta_min() and GCOMSelection::zeta_max()
           methods

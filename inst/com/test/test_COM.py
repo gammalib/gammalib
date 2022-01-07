@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib COMPTEL module.
 #
-# Copyright (C) 2012-2021 Juergen Knoedlseder
+# Copyright (C) 2012-2022 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -64,6 +64,8 @@ class Test(gammalib.GPythonTestSuite):
         test_support.pickeling(self, gammalib.GCOMModelDRM())
         test_support.pickeling(self, gammalib.GCOMOad())
         test_support.pickeling(self, gammalib.GCOMOads())
+        test_support.pickeling(self, gammalib.GCOMBvc())
+        test_support.pickeling(self, gammalib.GCOMBvcs())
         test_support.pickeling(self, gammalib.GCOMObservation())
         test_support.pickeling(self, gammalib.GCOMResponse())
         test_support.pickeling(self, gammalib.GCOMRoi())
@@ -123,6 +125,15 @@ class Test(gammalib.GPythonTestSuite):
         oad.georad(30.0)
         oads = gammalib.GCOMOads()
         oads.append(oad)
+        bvc = gammalib.GCOMBvc()
+        bvc.tstart(gammalib.GTime(1.0,'secs'))
+        bvc.tstop(gammalib.GTime(3.0,'secs'))
+        bvc.tjd(1000)
+        bvc.tics(100)
+        bvc.ssb(gammalib.GVector(1.0,2.0,3.0))
+        bvc.tdelta(123.0)
+        bvcs = gammalib.GCOMBvcs()
+        bvcs.append(bvc)
 
         # Take provision for rounding errors
         fits = gammalib.GFits()
@@ -143,6 +154,8 @@ class Test(gammalib.GPythonTestSuite):
         test_support.pickeling(self, gammalib.GCOMModelDRBFitting(model['Background']))
         test_support.pickeling(self, gammalib.GCOMOad(oad))
         test_support.pickeling(self, gammalib.GCOMOads(oads))
+        test_support.pickeling(self, gammalib.GCOMBvc(bvc))
+        test_support.pickeling(self, gammalib.GCOMBvcs(bvcs))
         test_support.pickeling(self, gammalib.GCOMObservation(obs[0]))
         test_support.pickeling(self, gammalib.GCOMResponse(caldb, 'UNH(1.0-3.0)MeV'))
         test_support.pickeling(self, gammalib.GCOMRoi(instdir, 10.0, 1.0, 5.0))

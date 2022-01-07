@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCOMLib.hpp - COMPTEL Support Header files              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -45,6 +45,8 @@
 #include "GCOMDri.hpp"
 #include "GCOMOads.hpp"
 #include "GCOMOad.hpp"
+#include "GCOMBvcs.hpp"
+#include "GCOMBvc.hpp"
 #include "GCOMTim.hpp"
 #include "GCOMRoi.hpp"
 #include "GCOMEventAtom.hpp"

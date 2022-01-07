@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-13 December 2021
+7 January 2022
 
 
 1. Introduction
@@ -22,6 +22,8 @@ The following classes have been added:
 - GModelSpectralBins
 - GCTAModelSkyCube
 - GCTABackground2D
+- GCOMBvc
+- GCOMBvcs
 - GCOMModelDRM
 - GCOMModelDRBPhibarBins
 
@@ -395,6 +397,9 @@ spatial model gradients (#3203).
 
 22. COMPTEL interface
 ---------------------
+Added GCOMBvc and GCOMBvcs classes to support reading and using of BVC files for
+pulsar analysis (#3973).
+
 Removed GCOMSelection::zeta_min() and GCOMSelection::zeta_max() since event-wise
 zeta selection is actually not used and the zeta cut is applied using the minimum
 value of the corresponding Phibar layer. Having this additional selection was always

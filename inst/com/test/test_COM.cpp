@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       test_COM.cpp - test COM classes                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -48,6 +48,7 @@ const std::string com_drg   = datadir+"/m34997_drg.fits";
 const std::string com_drx   = datadir+"/m32171_drx.fits";
 const std::string com_tim   = datadir+"/m10695_tim.fits";
 const std::string com_oad   = datadir+"/m20039_oad.fits";
+const std::string com_bvc   = datadir+"/s10150_10000rows_bvc.fits";
 const std::string com_obs   = datadir+"/obs.xml";
 const std::string com_model = datadir+"/crab.xml";
 
@@ -69,6 +70,10 @@ void TestGCOM::set(void)
            "GCOMOad: Test COMPTEL Orbit Aspect Data");
     append(static_cast<pfunction>(&TestGCOM::test_oads_class),
            "GCOMOads: Test COMPTEL Orbit Aspect Data container");
+    append(static_cast<pfunction>(&TestGCOM::test_bvc_class),
+           "GCOMOad: Test COMPTEL Solar System Barycentre Data");
+    append(static_cast<pfunction>(&TestGCOM::test_bvcs_class),
+           "GCOMOads: Test COMPTEL Solar System Barycentre Data container");
     append(static_cast<pfunction>(&TestGCOM::test_inst_dir),
            "GCOMInstDir: Test instrument direction");
     append(static_cast<pfunction>(&TestGCOM::test_event_bin),
@@ -234,6 +239,83 @@ void TestGCOM::test_oads_class(void)
                "Check OAD gcaz of row 2920");
     test_value(oads[2919].gcel(), 1.584999*gammalib::rad2deg, 1.0e-4,
                "Check OAD gecl of row 2920");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GCOMBvc class
+ ***************************************************************************/
+void TestGCOM::test_bvc_class(void)
+{
+    // Allocate GCOMBvc class
+    GCOMBvc bvc;
+
+    // Setup object
+    bvc.tstart(gammalib::com_time(8392, 624010000));
+    bvc.tstop(gammalib::com_time(8406, 542890000));
+    bvc.tjd(8403);
+    bvc.tics(3637760);
+    bvc.ssb(GVector(1.0,2.0,3.0));
+    bvc.tdelta(123.0);
+
+    // Check object
+    test_value(bvc.tstart().secs(), gammalib::com_time(8392, 624010000).secs(),
+               "Check start time");
+    test_value(bvc.tstop().secs(), gammalib::com_time(8406, 542890000).secs(),
+               "Check stop time");
+    test_value(bvc.tjd(), 8403, "Check TJD");
+    test_value(bvc.tics(), 3637760, "Check tics");
+    test_value(bvc.ssb()[0], 1.0, "Check ssb[0]");
+    test_value(bvc.ssb()[1], 2.0, "Check ssb[1]");
+    test_value(bvc.ssb()[2], 3.0, "Check ssb[2]");
+    test_value(bvc.tdelta(), 123.0, "Check tdelta");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GCOMBvcs class
+ ***************************************************************************/
+void TestGCOM::test_bvcs_class(void)
+{
+    // Read Solar System Barycentre Data
+    GCOMBvcs bvcs(com_bvc);
+
+    // Check Solar System Barycentre Data content
+    test_value(bvcs.size(), 10000, "Check that BVC contains 10000 rows");
+    
+    // Check row 1
+    test_value(bvcs[0].tstart().secs(),
+               gammalib::com_time(8392, 89536).secs(),
+               "Check start time of row 1");
+    test_value(bvcs[0].tstop().secs(),
+               gammalib::com_time(8392, 226111).secs(),
+               "Check stop time of row 1");
+    test_value(bvcs[0].tjd(),    8392,              "Check TJD of row 1");
+    test_value(bvcs[0].tics(),   89536,             "Check tics of row 1");
+    test_value(bvcs[0].ssb()[0], -290168044.359253, "Check SSB_X of row 1");
+    test_value(bvcs[0].ssb()[1], -377463428.324136, "Check SSB_Y of row 1");
+    test_value(bvcs[0].ssb()[2], -163691832.305560, "Check SSB_Z of row 1");
+    test_value(bvcs[0].tdelta(), 58.1852344768768,  "Check TDELTA of row 1");
+
+    // Check row 2920
+    test_value(bvcs[2919].tstart().secs(),
+               gammalib::com_time(8392, 382694208).secs(),
+               "Check start time of row 2920");
+    test_value(bvcs[2919].tstop().secs(),
+               gammalib::com_time(8392, 382825279).secs(),
+               "Check stop time of row 2920");
+    test_value(bvcs[2919].tjd(),    8392,              "Check TJD of row 2920");
+    test_value(bvcs[2919].tics(),   382694208,         "Check tics of row 2920");
+    test_value(bvcs[2919].ssb()[0], -286386110.986554, "Check SSB_X of row 2920");
+    test_value(bvcs[2919].ssb()[1], -379991804.402643, "Check SSB_Y of row 2920");
+    test_value(bvcs[2919].ssb()[2], -164801378.92117,  "Check SSB_Z of row 2920");
+    test_value(bvcs[2919].tdelta(), 58.185224181893,   "Check TDELTA of row 2920");
 
     // Return
     return;
