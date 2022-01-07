@@ -32,6 +32,7 @@
 #include "GBase.hpp"
 #include "GTime.hpp"
 #include "GVector.hpp"
+#include "GSkyDir.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 
@@ -73,6 +74,7 @@ public:
     void           ssb(const GVector& ssb);
     const double&  tdelta(void) const;
     void           tdelta(const double& tdelta);
+    double         tdelta(const GSkyDir& dir) const;
 
 protected:
     // Protected methods
@@ -84,7 +86,7 @@ protected:
     GTime   m_time;    //!< Time for Solar System Barycentre Data
     int     m_tjd;     //!< TJD of Solar System Barycentre Data
     int     m_tics;    //!< Tics of Solar System Barycentre Data
-    GVector m_ssb;     //!< Solar System Barycentre vector in celestial system (km)
+    GVector m_ssb;     //!< Solar System Barycentre vector in celestial system (micro seconds)
     double  m_tdelta;  //!< Time difference TDB-UTC (sec)
 };
 
@@ -193,10 +195,11 @@ void GCOMBvc::tics(const int& tics)
 /***********************************************************************//**
  * @brief Return Solar System Barycentre vector
  *
- * @return Solar System Barycentre vector (km).
+ * @return Solar System Barycentre vector (micro seconds).
  *
- * Returns the Solar System Barycentre vector in km. The vector is given in
- * the celestial system.
+ * Returns the Solar System Barycentre vector in micro seconds. The vector
+ * is given in the celestial system. It's length specifies the light travel
+ * time in micro seconds.
  ***************************************************************************/
 inline
 const GVector& GCOMBvc::ssb(void) const
@@ -208,10 +211,11 @@ const GVector& GCOMBvc::ssb(void) const
 /***********************************************************************//**
  * @brief Set Solar System Barycentre vector
  *
- * @param[in] ssb Solar System Barycentre vector (km).
+ * @param[in] ssb Solar System Barycentre vector (micro seconds).
  *
- * Set the Solar System Barycentre vector in km. The vector is defined in
- * the celestial system.
+ * Set the Solar System Barycentre vector in micro seconds. The vector is
+ * defined in the celestial system. It's length specifies the light travel
+ * time in micro seconds.
  ***************************************************************************/
 inline
 void GCOMBvc::ssb(const GVector& ssb)

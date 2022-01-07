@@ -385,8 +385,8 @@ GFitsTableCol* GFitsTable::set(const int& colnum, const GFitsTableCol& column)
  * @param[in] column Table column.
  * @return Pointer to table column that has been set.
  *
- * @xception GException::invalid_argument
- *           FITS table column not found.
+ * @exception GException::invalid_argument
+ *            FITS table column not found.
  *
  * Sets the column of a table by making a deep copy of the @p column
  * provided.

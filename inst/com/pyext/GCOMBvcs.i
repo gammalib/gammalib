@@ -44,18 +44,19 @@ public:
     virtual ~GCOMBvcs(void);
 
     // Methods
-    void        clear(void);
-    GCOMBvcs*   clone(void) const;
-    std::string classname(void) const;
-    int         size(void) const;
-    bool        is_empty(void) const;
-    GCOMBvc&    append(const GCOMBvc& bvc);
-    GCOMBvc&    insert(const int& index, const GCOMBvc& bvc);
-    void        remove(const int& index);
-    void        reserve(const int& num);
-    void        extend(const GCOMBvcs& bvcs);
-    void        load(const GFilename& filename);
-    void        read(const GFitsTable& table);
+    void           clear(void);
+    GCOMBvcs*      clone(void) const;
+    std::string    classname(void) const;
+    int            size(void) const;
+    bool           is_empty(void) const;
+    GCOMBvc&       append(const GCOMBvc& bvc);
+    GCOMBvc&       insert(const int& index, const GCOMBvc& bvc);
+    void           remove(const int& index);
+    void           reserve(const int& num);
+    void           extend(const GCOMBvcs& bvcs);
+    void           load(const GFilename& filename);
+    void           read(const GFitsTable& table);
+    const GCOMBvc* find(const GCOMOad& oad) const;
 };
 
 

@@ -58,6 +58,7 @@ public:
     void           ssb(const GVector& ssb);
     const double&  tdelta(void) const;
     void           tdelta(const double& tdelta);
+    double         tdelta(const GSkyDir& dir) const;
 };
 
 

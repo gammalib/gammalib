@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 #include "GTools.hpp"
+#include "GSkyDir.hpp"
 #include "GCOMBvc.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -153,6 +154,77 @@ void GCOMBvc::clear(void)
 GCOMBvc* GCOMBvc::clone(void) const
 {
     return new GCOMBvc(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Return time difference between photon arrival time at CGRO and
+ *        the Solar System Barycentre (SSB)
+ *
+ * @param[in] dir Source position.
+ * @return Time difference between photon arrival times (s)
+ *
+ * Returns the time difference between photon arrival time at CGRO and the
+ * Solar System Barycentre (SSB). The arrival time at the SSB is computed
+ * by adding the time difference to the photon arrival time as measured by
+ * COMPTEL
+ *
+ * \f[
+ *    T_{\rm SSB} = T_{\rm CGRO} + \Delta T
+ * \f]
+ *
+ * The routine implements the algorithm PUL-AL-004 and is inspried from the
+ * COMPASS code evpbin02.pulssb.f.
+ *
+ * It computes
+ *
+ * \f[
+ *    \Delta T = \Delta T_{\rm travel} - \Delta T_{\rm rel} + \Delta T_{\rm BVC}
+ * \f]
+ *
+ * where
+ *
+ * \f[
+ *    \Delta T_{\rm travel} = \left( \vec{SSB} \cdot \vec{n} \right) \times 10^{-6}
+ * \f]
+ *
+ * is the light travel time in seconds between CGRO and the SSB, with
+ * \f$\vec{SSB}\f$ being the vector going from the SSB to CGRO, specified
+ * using the GCOMBvc::ssb() method, and \f$\vec{n}\f$ is the normalised
+ * vector of the source position, provided by the GSkyDir::celvector()
+ * method,
+ *
+ * \f[
+ *    \Delta T_{\rm rel} =
+ *    -2 R \log \left( 1 + \frac{\Delta T_{\rm travel}}{|\vec{SSB}| * 10^{-6}} \right)
+ * \f]
+ *
+ * is the relativistic delay due to the Sun in seconds, with
+ * \f$R=0.49254909 \times 10^{-5}\f$ s, and \f$\Delta T_{\rm BVC}\f$ is the
+ * difference in seconds due to the time unit conversion as specified by the
+ * GCOMBvc::tdelta() method.
+ ***************************************************************************/
+double GCOMBvc::tdelta(const GSkyDir& dir) const
+{
+    // Set constants
+    const double radius = 0.49254909e-5;
+
+    // Get celestial vector
+    GVector n = dir.celvector();
+
+    // Compute the light travel time from the satellite to SSB along the
+    // pulsar direction
+    double travt = m_ssb * n * 1.0e-6;
+
+    // Compute the relativistic delay due to the Sun
+    double r     = norm(m_ssb) * 1.0e-6;
+    double relat = -2.0 * radius * std::log(1.0 + (travt/r));
+
+    // Compute the time difference at SSB
+    double tdelta = travt - relat + this->tdelta();
+
+    // Return
+    return tdelta;
 }
 
 

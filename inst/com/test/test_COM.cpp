@@ -254,23 +254,43 @@ void TestGCOM::test_bvc_class(void)
     GCOMBvc bvc;
 
     // Set reference time
-    GTime ref_time = gammalib::com_time(8392, 624010000);
+    GTime ref_time = gammalib::com_time(8392, 89536);
 
     // Setup object
     bvc.time(ref_time);
-    bvc.tjd(8403);
-    bvc.tics(3637760);
-    bvc.ssb(GVector(1.0,2.0,3.0));
-    bvc.tdelta(123.0);
+    bvc.tjd(8392);
+    bvc.tics(89536);
+    bvc.ssb(GVector(-290168044.359253, -377463428.324136, -163691832.305569));
+    bvc.tdelta(58.1852344768768);
 
     // Check object
     test_value(bvc.time().secs(), ref_time.secs(), "Check time");
-    test_value(bvc.tjd(), 8403, "Check TJD");
-    test_value(bvc.tics(), 3637760, "Check tics");
-    test_value(bvc.ssb()[0], 1.0, "Check ssb[0]");
-    test_value(bvc.ssb()[1], 2.0, "Check ssb[1]");
-    test_value(bvc.ssb()[2], 3.0, "Check ssb[2]");
-    test_value(bvc.tdelta(), 123.0, "Check tdelta");
+    test_value(bvc.tjd(),    8392,                 "Check TJD");
+    test_value(bvc.tics(),   89536,                "Check tics");
+    test_value(bvc.ssb()[0], -290168044.359253,    "Check ssb[0]");
+    test_value(bvc.ssb()[1], -377463428.324136,    "Check ssb[1]");
+    test_value(bvc.ssb()[2], -163691832.305569,    "Check ssb[2]");
+    test_value(bvc.tdelta(), 58.1852344768768,     "Check tdelta");
+
+    // Set a couple of source position
+    GSkyDir source_opposition;
+    GSkyDir source_conjunction;
+    GSkyDir source_north_pole;
+    GSkyDir source_south_pole;
+    source_opposition.radec_deg(-127.5506, -18.9737);
+    source_conjunction.radec_deg(52.4494, 18.9737);
+    source_north_pole.radec_deg(270.0, 66.560708);
+    source_south_pole.radec_deg(90.0, -66.560708);
+
+    // Check time difference between SSB and CGRO
+    test_value(bvc.tdelta(source_opposition),   561.64442501,
+               "Check tdelta for source opposition");
+    test_value(bvc.tdelta(source_conjunction), -445.27424982,
+               "Check tdelta for source conjunction");
+    test_value(bvc.tdelta(source_north_pole),    58.14725000,
+               "Check tdelta for North ecliptic pole");
+    test_value(bvc.tdelta(source_south_pole),    58.22321896,
+               "Check tdelta for South ecliptic pole");
 
     // Return
     return;
