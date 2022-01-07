@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCOMDri.cpp - COMPTEL Data Space class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1108,9 +1108,9 @@ void GCOMDri::init_statistics(void)
  *
  * Checks if a superpacket should be used. A superpacket will be used if
  * it is fully enclosed within the COMPTEL Good Time Intervals and the
- * Good Time Intervals of the DRI dataset. In case that phases are selected
- * in the selection set, the superpacket will be used when the start time
- * is comprised in one of the phases.
+ * Good Time Intervals of the DRI dataset. In case that orbital phases are
+ * present in the selection set, the superpacket will be used when the start
+ * time is comprised in one of the orbital phases.
  *
  * The method updates the superpacket statistics and selected time interval.
  ***************************************************************************/
@@ -1143,9 +1143,9 @@ bool GCOMDri::use_superpacket(const GCOMOad&       oad,
     // If there are phase intervals then skip if superpacket is the phase
     // corresponding to the start time does not fall into any of the phase
     // intervals
-    else if (!select.phases().is_empty()) {
-        double phase = select.phase_curve().phase(oad.tstart());
-        if (select.phases().contains(phase)) {
+    else if (!select.orbital_phases().is_empty()) {
+        double phase = select.orbital_phase(oad.tstart());
+        if (select.orbital_phases().contains(phase)) {
             m_num_used_superpackets++;
         }
         else {
