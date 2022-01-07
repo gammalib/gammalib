@@ -36,6 +36,7 @@
 /* __ Forward declarations _______________________________________________ */
 class GFilename;
 class GFitsTable;
+class GCOMOad;
 
 /* __ Constants __________________________________________________________ */
 
@@ -78,6 +79,7 @@ public:
     void           extend(const GCOMBvcs& bvcs);
     void           load(const GFilename& filename);
     void           read(const GFitsTable& table);
+    const GCOMBvc* find(const GCOMOad& oad) const;
     std::string    print(const GChatter& chatter = NORMAL) const;
 
 protected:

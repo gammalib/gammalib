@@ -48,10 +48,8 @@ public:
     virtual std::string classname(void) const;
 
     // Other methods
-    const GTime&   tstart(void) const;
-    void           tstart(const GTime& tstart);
-    const GTime&   tstop(void) const;
-    void           tstop(const GTime& tstop);
+    const GTime&   time(void) const;
+    void           time(const GTime& time);
     const int&     tjd(void) const;
     void           tjd(const int& tjd);
     const int&     tics(void) const;
@@ -72,8 +70,7 @@ public:
     }
 %pythoncode {
     def __getstate__(self):
-        state = {'tstart': self.tstart(),
-                 'tstop':  self.tstop(),
+        state = {'time':   self.time(),
                  'tjd':    self.tjd(),
                  'tics':   self.tics(),
                  'ssb':    self.ssb(),
@@ -81,8 +78,7 @@ public:
         return state
     def __setstate__(self, state):
         self.__init__()
-        self.tstart(state['tstart'])
-        self.tstop(state['tstop'])
+        self.time(state['time'])
         self.tjd(state['tjd'])
         self.tics(state['tics'])
         self.ssb(state['ssb'])

@@ -179,15 +179,11 @@ std::string GCOMBvc::print(const GChatter& chatter) const
         result.append(gammalib::str(m_tjd));
         result.append(":");
         result.append(gammalib::str(m_tics));
-        result.append("\n"+gammalib::parformat("Superpacket MJD range"));
-        result.append(gammalib::str(m_tstart.mjd()));
-        result.append(" - ");
-        result.append(gammalib::str(m_tstop.mjd()));
+        result.append("\n"+gammalib::parformat("MJD"));
+        result.append(gammalib::str(m_time.mjd()));
         result.append(" days");
-        result.append("\n"+gammalib::parformat("Superpacket UTC range"));
-        result.append(m_tstart.utc());
-        result.append(" - ");
-        result.append(m_tstop.utc());
+        result.append("\n"+gammalib::parformat("UTC"));
+        result.append(m_time.utc());
 
     } // endif: chatter was not silent
 
@@ -208,8 +204,7 @@ std::string GCOMBvc::print(const GChatter& chatter) const
 void GCOMBvc::init_members(void)
 {
     // Initialise members
-    m_tstart.clear();
-    m_tstop.clear();
+    m_time.clear();
     m_ssb.clear();
     m_tjd    = 0;
     m_tics   = 0;
@@ -228,8 +223,7 @@ void GCOMBvc::init_members(void)
 void GCOMBvc::copy_members(const GCOMBvc& bvc)
 {
     // Copy members
-    m_tstart = bvc.m_tstart;
-    m_tstop  = bvc.m_tstop;
+    m_time   = bvc.m_time;
     m_tjd    = bvc.m_tjd;
     m_tics   = bvc.m_tics;
     m_ssb    = bvc.m_ssb;

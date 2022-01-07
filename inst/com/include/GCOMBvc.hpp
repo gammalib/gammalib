@@ -63,10 +63,8 @@ public:
     virtual std::string print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    const GTime&   tstart(void) const;
-    void           tstart(const GTime& tstart);
-    const GTime&   tstop(void) const;
-    void           tstop(const GTime& tstop);
+    const GTime&   time(void) const;
+    void           time(const GTime& time);
     const int&     tjd(void) const;
     void           tjd(const int& tjd);
     const int&     tics(void) const;
@@ -83,10 +81,9 @@ protected:
     void free_members(void);
 
     // Protected members
-    GTime   m_tstart;  //!< Start time of superpacket
-    GTime   m_tstop;   //!< Stop time of superpacket
-    int     m_tjd;     //!< TJD of BVC record
-    int     m_tics;    //!< Tics of BVC record
+    GTime   m_time;    //!< Time for Solar System Barycentre Data
+    int     m_tjd;     //!< TJD of Solar System Barycentre Data
+    int     m_tics;    //!< Tics of Solar System Barycentre Data
     GVector m_ssb;     //!< Solar System Barycentre vector in celestial system (km)
     double  m_tdelta;  //!< Time difference TDB-UTC (sec)
 };
@@ -105,71 +102,42 @@ std::string GCOMBvc::classname(void) const
 
 
 /***********************************************************************//**
- * @brief Return start time of superpacket
+ * @brief Return time of Solar System Barycentre Data
  *
- * @return Start time of superpacket.
+ * @return Time of Solar System Barycentre Data.
  *
- * Returns the start time of the superpacket.
+ * Returns the time of the Solar System Barycentre Data. The time is defined
+ * as the mid-point of the corresponding superpacket.
  ***************************************************************************/
 inline
-const GTime& GCOMBvc::tstart(void) const
+const GTime& GCOMBvc::time(void) const
 {
-    return (m_tstart);
+    return (m_time);
 }
 
 
 /***********************************************************************//**
- * @brief Set start time of superpacket
+ * @brief Set time of Solar System Barycentre Data
  *
- * @param[in] tstart Start time of superpacket.
+ * @param[in] time Time of Solar System Barycentre Data.
  *
- * Set the start time of the superpacket.
+ * Set the time of the Solar System Barycentre Data. The time is defined as
+ * the mid-point of the corresponding superpacket.
  ***************************************************************************/
 inline
-void GCOMBvc::tstart(const GTime& tstart)
+void GCOMBvc::time(const GTime& time)
 {
-    m_tstart = tstart;
+    m_time = time;
     return;
 }
 
 
 /***********************************************************************//**
- * @brief Return stop time of superpacket
+ * @brief Return Truncated Julian Days of Solar System Barycentre Data
  *
- * @return Stop time of superpacket.
+ * @return Truncated Julian Days of Solar System Barycentre Data.
  *
- * Returns the stop time of the superpacket. The stop time is defined as the
- * start time plus 131071 tics, since the length of one superpacket is
- * 16.384 secs, i.e. 16.384 * 8000 = 131072 ticks.
- ***************************************************************************/
-inline
-const GTime& GCOMBvc::tstop(void) const
-{
-    return (m_tstop);
-}
-
-
-/***********************************************************************//**
- * @brief Set stop time of superpacket
- *
- * @param[in] tstop Stop time of superpacket.
- *
- * Set the stop time of the superpacket.
- ***************************************************************************/
-inline
-void GCOMBvc::tstop(const GTime& tstop)
-{
-    m_tstop = tstop;
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Return Truncated Julian Days of Orbit Aspect Record
- *
- * @return Truncated Julian Days of Orbit Aspect Record.
- *
- * Returns the Truncated Julian Days of the Orbit Aspect Record.
+ * Returns the Truncated Julian Days of Solar System Barycentre Data.
  ***************************************************************************/
 inline
 const int& GCOMBvc::tjd(void) const
@@ -179,11 +147,11 @@ const int& GCOMBvc::tjd(void) const
 
 
 /***********************************************************************//**
- * @brief Set Truncated Julian Days of Orbit Aspect Record
+ * @brief Set Truncated Julian Days of Solar System Barycentre Data
  *
- * @param[in] tjd Truncated Julian Days of Orbit Aspect Record.
+ * @param[in] tjd Truncated Julian Days of Solar System Barycentre Data.
  *
- * Set the Truncated Julian Days of the Orbit Aspect Record.
+ * Set the Truncated Julian Days of the Solar System Barycentre Data.
  ***************************************************************************/
 inline
 void GCOMBvc::tjd(const int& tjd)
@@ -194,11 +162,11 @@ void GCOMBvc::tjd(const int& tjd)
 
 
 /***********************************************************************//**
- * @brief Return tics of Orbit Aspect Record
+ * @brief Return tics of Solar System Barycentre Data
  *
- * @return Tics of Orbit Aspect Record.
+ * @return Tics of Solar System Barycentre Data.
  *
- * Returns the tics of the Orbit Aspect Record.
+ * Returns the tics of the Solar System Barycentre Data.
  ***************************************************************************/
 inline
 const int& GCOMBvc::tics(void) const
@@ -208,11 +176,11 @@ const int& GCOMBvc::tics(void) const
 
 
 /***********************************************************************//**
- * @brief Set tics of Orbit Aspect Record
+ * @brief Set tics of Solar System Barycentre Data
  *
- * @param[in] tics Tics of Orbit Aspect Record.
+ * @param[in] tics Tics of Solar System Barycentre Data.
  *
- * Set the tics of the Orbit Aspect Record.
+ * Set the tics of the Solar System Barycentre Data.
  ***************************************************************************/
 inline
 void GCOMBvc::tics(const int& tics)

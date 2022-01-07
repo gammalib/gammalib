@@ -35,6 +35,7 @@
 #include "GCOMTools.hpp"
 #include "GCOMSupport.hpp"
 #include "GCOMBvcs.hpp"
+#include "GCOMOad.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_AT                                             "GCOMBvcs::at(int&)"
@@ -422,13 +423,11 @@ void GCOMBvcs::read(const GFitsTable& table)
             int tjd  = ptr_tjd->integer(i);
             int tics = ptr_tics->integer(i);
 
-            // Store time information. The stop time is defined as the start
-            // time plus 131071 tics, since the length of one superpacket is
-            // 16.384 secs, i.e. 16.384 * 8000 = 131072 ticks
+            // Store time information, both as native COMPTEL time and as
+            // GTime object
             bvc.tjd(tjd);
             bvc.tics(tics);
-            bvc.tstart(gammalib::com_time(tjd, tics));
-            bvc.tstop(gammalib::com_time(tjd, tics + 131071));
+            bvc.time(gammalib::com_time(tjd, tics));
 
             // Set Solar System Barycentre vector in celestial system
             GVector ssb(ptr_ssbx->real(i), ptr_ssby->real(i), ptr_ssbz->real(i));
@@ -446,6 +445,65 @@ void GCOMBvcs::read(const GFitsTable& table)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Find Solar System Barycentre Data for Orbit Aspect Data
+ *
+ * @param[in] oad Orbit Aspect Data.
+ * @return Pointer to Solar System Barycentre Data (NULL if no data were found)
+ *
+ * Finds Solar System Barycentre Data that correspond to the specified Orbit
+ * Aspect Data. The method returns the Solar System Barycentre Data with the
+ * same TJD as the Orbit Aspect Data and the smallest difference in the
+ * number of tics.
+ *
+ * If this smallest difference is larger than 131072, which is the length
+ * of one superpacket, the method returns a NULL pointer.
+ *
+ * The method also returns a NULL pointer in case that no matching Solar
+ * System Barycentre Data was found.
+ *
+ * The client needs to verify the validity of the Solar System Barycentre
+ * Data pointer. The client must not deallocate the associated memory.
+ ***************************************************************************/
+const GCOMBvc* GCOMBvcs::find(const GCOMOad& oad) const
+{
+    // Initialise Solar System Barycentre Data
+    const GCOMBvc* bvc = NULL;
+
+    // Compute TJD and tics at the centre of the OAD superpacket
+    int oad_tjd  = oad.tjd();
+    int oad_tics = oad.tics() + 65536;
+
+    // Loop over all records and among those that have the same TJD find
+    // the one with the closest number of tics
+    int size                = this->size();
+    int max_tics_difference = 700000000;
+    int ibest               = -1;
+    for (int i = 0; i < size; ++i) {
+        if (m_bvcs[i].tjd() == oad_tjd) {
+            int tics_difference = std::abs(m_bvcs[i].tics() - oad_tics);
+            if (tics_difference < max_tics_difference) {
+                ibest               = i;
+                max_tics_difference = tics_difference;
+            }
+        }
+    }
+
+    // If matching Solar System Barycentre Data were found then check
+    // whether the tics difference is acceptable. A maximum difference
+    // of 131072 tics, corresponding to the duration of one superpacket
+    // of 16.384 sec, is considered as acceptable.
+    if (ibest >= 0) {
+        if (max_tics_difference < 131072) {
+            bvc = &(m_bvcs[ibest]);
+        }
+    }
+
+    // Return Solar System Barycentre Data
+    return bvc;
 }
 
 
@@ -482,14 +540,14 @@ std::string GCOMBvcs::print(const GChatter& chatter) const
             result.append(":");
             result.append(gammalib::str(m_bvcs[size()-1].tics()));
             result.append("\n"+gammalib::parformat("MJD range"));
-            result.append(gammalib::str(m_bvcs[0].tstart().mjd()));
+            result.append(gammalib::str(m_bvcs[0].time().mjd()));
             result.append(" - ");
-            result.append(gammalib::str(m_bvcs[size()-1].tstop().mjd()));
+            result.append(gammalib::str(m_bvcs[size()-1].time().mjd()));
             result.append(" days");
             result.append("\n"+gammalib::parformat("UTC range"));
-            result.append(m_bvcs[0].tstart().utc());
+            result.append(m_bvcs[0].time().utc());
             result.append(" - ");
-            result.append(m_bvcs[size()-1].tstop().utc());
+            result.append(m_bvcs[size()-1].time().utc());
 
             // Append detailed information
             GChatter reduced_chatter = gammalib::reduce(chatter);
