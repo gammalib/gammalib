@@ -508,6 +508,167 @@ const GCOMBvc* GCOMBvcs::find(const GCOMOad& oad) const
 
 
 /***********************************************************************//**
+ * @brief Return time difference between photon arrival time at CGRO and
+ *        the Solar System Barycentre (SSB)
+ *
+ * @param[in] dir Source position.
+ * @param[in] time CGRO photon arrival time.
+ * @return Time difference between photon arrival times (s)
+ *
+ * Returns the time difference between photon arrival time at CGRO and the
+ * Solar System Barycentre (SSB). The arrival time at the SSB is computed
+ * by adding the time difference to the photon arrival time as measured by
+ * COMPTEL
+ *
+ * \f[
+ *    T_{\rm SSB} = T_{\rm CGRO} + \Delta T
+ * \f]
+ *
+ * The routine implements the algorithm PUL-AL-004 and is inspried from the
+ * COMPASS code evpbin02.pulssb.f.
+ *
+ * It computes
+ *
+ * \f[
+ *    \Delta T = \Delta T_{\rm travel} - \Delta T_{\rm rel} + \Delta T_{\rm BVC}
+ * \f]
+ *
+ * where
+ *
+ * \f[
+ *    \Delta T_{\rm travel} = \left( \vec{SSB} \cdot \vec{n} \right) \times 10^{-6}
+ * \f]
+ *
+ * is the light travel time in seconds between CGRO and the SSB, with
+ * \f$\vec{SSB}\f$ being the vector going from the SSB to CGRO, and
+ * \f$\vec{n}\f$ is the normalised vector of the source position, provided
+ * by the GSkyDir::celvector() method,
+ *
+ * \f[
+ *    \Delta T_{\rm rel} =
+ *    -2 R \log \left( 1 + \frac{\Delta T_{\rm travel}}{|\vec{SSB}| * 10^{-6}} \right)
+ * \f]
+ *
+ * is the relativistic delay due to the Sun in seconds, with
+ * \f$R=0.49254909 \times 10^{-5}\f$ s, and \f$\Delta T_{\rm BVC}\f$ is the
+ * difference in seconds due to the time unit conversion.
+ *
+ * The values of \f$\vec{SSB}\f$ and \f$\Delta T_{\rm BVC}\f$ are linearly
+ * interpolated from the tabulated values based on the specified @p time.
+ ***************************************************************************/
+double GCOMBvcs::tdelta(const GSkyDir& dir, const GTime& time) const
+{
+    // Set constants
+    const double radius = 0.49254909e-5;
+
+    // Initialise SSB vector and time difference
+    GVector ssb;
+    double  tdelta = 0.0;
+
+    // Get number of elements in container
+    int size = this->size();
+
+    // If time is before first BVC element then extrapolate using the first
+    // two BVC elements
+    if (time < m_bvcs[0].time()) {
+        int    ilow = 0;
+        int    iup  = 1;
+        double wlow = (m_bvcs[iup].time() - time) / (m_bvcs[iup].time() - m_bvcs[ilow].time());
+        double wup  = 1.0 - wlow;
+        ssb    = wlow * m_bvcs[ilow].ssb()    + wup * m_bvcs[iup].ssb();
+        tdelta = wlow * m_bvcs[ilow].tdelta() + wup * m_bvcs[iup].tdelta();
+    }
+
+    // ... else if time is after last BVC element then extrapolate using the last
+    // two BVC elements
+    else if (time > m_bvcs[size-1].time()) {
+        int    ilow = size-2;
+        int    iup  = size-1;
+        double wlow = (m_bvcs[iup].time() - time) / (m_bvcs[iup].time() - m_bvcs[ilow].time());
+        double wup  = 1.0 - wlow;
+        ssb    = wlow * m_bvcs[ilow].ssb()    + wup * m_bvcs[iup].ssb();
+        tdelta = wlow * m_bvcs[ilow].tdelta() + wup * m_bvcs[iup].tdelta();
+    }
+
+    // ... otherwise time is comprised in the elements hence we search for
+    // the bracketing elements and perform a linear interpolation of the
+    // vector and time delay
+    else {
+
+        // Compute TJD and tics from CGRO photon arrival time
+        int tjd  = gammalib::com_tjd(time);
+        int tics = gammalib::com_tics(time);
+
+        // Loop over all records and among those that have the same TJD find
+        // the one with the closest number of tics
+        int max_tics_difference = 700000000;
+        int ibest               = -1;
+        for (int i = 0; i < size; ++i) {
+            if (m_bvcs[i].tjd() == tjd) {
+                int tics_difference = std::abs(m_bvcs[i].tics() - tics);
+                if (tics_difference < max_tics_difference) {
+                    ibest               = i;
+                    max_tics_difference = tics_difference;
+                }
+            }
+        }
+
+        // Find bracketing records and interpolating weighting factors
+        int    ilow =  -1;
+        int    iup  =  -1;
+        double wlow = 0.0;
+        double wup  = 0.0;
+        if (m_bvcs[ibest].tics() <= tics) {
+            ilow = ibest;
+            if (ibest < size-1) {
+                iup  = ibest + 1;
+                wlow = (m_bvcs[iup].time() - time) / (m_bvcs[iup].time() - m_bvcs[ilow].time());
+                wup  = 1.0 - wlow;
+            }
+            else {
+                iup  = ibest;
+                wlow = 1.0;
+            }
+        }
+        else {
+            iup = ibest;
+            if (ibest > 0) {
+                ilow = ibest - 1;
+                wlow = (m_bvcs[iup].time() - time) / (m_bvcs[iup].time() - m_bvcs[ilow].time());
+                wup  = 1.0 - wlow;
+            }
+            else {
+                ilow = ibest;
+                wup  = 1.0;
+            }
+        }
+
+        // Interpolate vector and time difference
+        ssb    = wlow * m_bvcs[ilow].ssb()    + wup * m_bvcs[iup].ssb();
+        tdelta = wlow * m_bvcs[ilow].tdelta() + wup * m_bvcs[iup].tdelta();
+
+    } // endelse: performed linear interpolation
+
+    // Get celestial vector
+    GVector n = dir.celvector();
+
+    // Compute the light travel time from the satellite to SSB along the
+    // pulsar direction
+    double travt = ssb * n * 1.0e-6;
+
+    // Compute the relativistic delay due to the Sun
+    double r     = norm(ssb) * 1.0e-6;
+    double relat = -2.0 * radius * std::log(1.0 + (travt/r));
+
+    // Compute the time difference at SSB
+    tdelta += travt - relat;
+
+    // Return
+    return tdelta;
+}
+
+
+/***********************************************************************//**
  * @brief Print COMPTEL Solar System Barycentre Data container
  *
  * @param[in] chatter Chattiness.

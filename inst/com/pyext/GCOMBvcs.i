@@ -57,6 +57,7 @@ public:
     void           load(const GFilename& filename);
     void           read(const GFitsTable& table);
     const GCOMBvc* find(const GCOMOad& oad) const;
+    double         tdelta(const GSkyDir& dir, const GTime& time) const;
 };
 
 

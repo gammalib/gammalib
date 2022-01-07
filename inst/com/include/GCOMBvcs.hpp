@@ -36,6 +36,7 @@
 /* __ Forward declarations _______________________________________________ */
 class GFilename;
 class GFitsTable;
+class GTime;
 class GCOMOad;
 
 /* __ Constants __________________________________________________________ */
@@ -80,6 +81,7 @@ public:
     void           load(const GFilename& filename);
     void           read(const GFitsTable& table);
     const GCOMBvc* find(const GCOMOad& oad) const;
+    double         tdelta(const GSkyDir& dir, const GTime& time) const;
     std::string    print(const GChatter& chatter = NORMAL) const;
 
 protected:

@@ -272,7 +272,7 @@ void TestGCOM::test_bvc_class(void)
     test_value(bvc.ssb()[2], -163691832.305569,    "Check ssb[2]");
     test_value(bvc.tdelta(), 58.1852344768768,     "Check tdelta");
 
-    // Set a couple of source position
+    // Set a couple of source positions
     GSkyDir source_opposition;
     GSkyDir source_conjunction;
     GSkyDir source_north_pole;
@@ -348,6 +348,26 @@ void TestGCOM::test_bvcs_class(void)
         test_value(bvc2750->tjd(),  oads[2749].tjd(),        "Check TJD of SSB for OAD row 2750");
         test_value(bvc2750->tics(), oads[2749].tics()+65536, "Check tics of SSB for OAD row 2750");
     }
+
+    // Set a couple of source positions
+    GSkyDir source_opposition;
+    GSkyDir source_conjunction;
+    GSkyDir source_north_pole;
+    GSkyDir source_south_pole;
+    source_opposition.radec_deg(-127.5506, -18.9737);
+    source_conjunction.radec_deg(52.4494, 18.9737);
+    source_north_pole.radec_deg(270.0, 66.560708);
+    source_south_pole.radec_deg(90.0, -66.560708);
+
+    // Check time difference between SSB and CGRO
+    test_value(bvcs.tdelta(source_opposition, ref_time1),   561.64442501,
+               "Check tdelta for source opposition");
+    test_value(bvcs.tdelta(source_conjunction, ref_time1), -445.27424982,
+               "Check tdelta for source conjunction");
+    test_value(bvcs.tdelta(source_north_pole, ref_time1),    58.14725000,
+               "Check tdelta for North ecliptic pole");
+    test_value(bvcs.tdelta(source_south_pole, ref_time1),    58.22321896,
+               "Check tdelta for South ecliptic pole");
 
     // Return
     return;
