@@ -48,7 +48,17 @@ public:
     virtual std::string         classname(void) const;
 
     // Other methods
-    // TODO: Copy methods from GPulsarEphemerides.hpp file
+    const GTime& tstart(void) const;
+    const GTime& tstop(void) const;
+    GTime        t0(void) const;
+    void         t0(const GTime& t0);
+    double       f0(void) const;
+    void         f0(const double& f0);
+    double       f1(void) const;
+    void         f1(const double& f1);
+    double       f2(void) const;
+    void         f2(const double& f2);
+    double       phase(const GTime& time) const;
 };
 
 

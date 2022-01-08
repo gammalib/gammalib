@@ -15,6 +15,7 @@ The following classes have been added:
 - GFunctions
 - GIntegrals
 - GResponseVectorCache
+- GPulsarEphemerides
 - GSkyDirs
 - GSkyRegionRect
 - GModelAssociation

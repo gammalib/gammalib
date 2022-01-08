@@ -161,8 +161,6 @@ GPulsarEphemerides* GPulsarEphemerides::clone(void) const
  *
  * @param[in] chatter Chattiness.
  * @return String containing Pulsar ephemerides information.
- *
- * @todo Implement method.
  ***************************************************************************/
 std::string GPulsarEphemerides::print(const GChatter& chatter) const
 {
@@ -175,8 +173,57 @@ std::string GPulsarEphemerides::print(const GChatter& chatter) const
         // Append header
         result.append("=== GPulsarEphemerides ===");
 
-        // Append information
-        // TODO: Add any relevant information
+        // Append pulsar name and direction
+        result.append("\n"+gammalib::parformat("Pulsar name"));
+        result.append(m_name);
+        result.append("\n"+gammalib::parformat("Pulsar Right Ascension"));
+        result.append(gammalib::str(m_dir.ra_deg()));
+        result.append(" deg");
+        result.append("\n"+gammalib::parformat("Pulsar Declination"));
+        result.append(gammalib::str(m_dir.dec_deg()));
+        result.append(" deg");
+
+        // Get phase information
+        double f0 = this->f0();
+
+        // Append phase information
+        result.append("\n"+gammalib::parformat("Time of phase 0"));
+        result.append("MJD ");
+        result.append(gammalib::str(t0().mjd()));
+        result.append("\n"+gammalib::parformat("Frequency"));
+        result.append(gammalib::str(f0));
+        result.append(" Hz");
+        result.append("\n"+gammalib::parformat("Frequency derivative"));
+        result.append(gammalib::str(f1()));
+        result.append(" Hz^2");
+        result.append("\n"+gammalib::parformat("2nd frequency derivative"));
+        result.append(gammalib::str(f2()));
+        result.append(" Hz^3");
+        result.append("\n"+gammalib::parformat("Period"));
+        if (f0 != 0.0) {
+            double p0 = 1.0 / f0;
+            if (p0 < 1.0) {
+                result.append(gammalib::str(p0*1000.0));
+                result.append(" ms");
+            }
+            else {
+                result.append(gammalib::str(p0));
+                result.append(" s");
+            }
+        }
+        else {
+            result.append("infinity");
+        }
+
+        // Append validity information
+        result.append("\n"+gammalib::parformat("Validity MJD range"));
+        result.append(gammalib::str(tstart().mjd()));
+        result.append(" - ");
+        result.append(gammalib::str(tstop().mjd()));
+        result.append("\n"+gammalib::parformat("Validity UTC range"));
+        result.append(tstart().utc());
+        result.append(" - ");
+        result.append(tstop().utc());
 
     } // endif: chatter was not silent
 
@@ -197,8 +244,21 @@ std::string GPulsarEphemerides::print(const GChatter& chatter) const
 void GPulsarEphemerides::init_members(void)
 {
     // Initialise members
-    // TODO: Initialise all data members
-    
+    m_name.clear();
+    m_tstart.clear();
+    m_tstop.clear();
+    m_dir.clear();
+    m_phase_curve.clear();
+
+    // Remove range from phase curve parameters
+    m_phase_curve["MJD"].remove_range();
+    m_phase_curve["F0"].remove_range();
+    m_phase_curve["F1"].remove_range();
+    m_phase_curve["F2"].remove_range();
+
+    // Make sure that reference phase is zero
+    m_phase_curve["Phase"].value(0.0);
+
     // Return
     return;
 }
@@ -212,7 +272,11 @@ void GPulsarEphemerides::init_members(void)
 void GPulsarEphemerides::copy_members(const GPulsarEphemerides& ephemerides)
 {
     // Copy members
-    // TODO: Copy all data members
+    m_name        = ephemerides.m_name;
+    m_tstart      = ephemerides.m_tstart;
+    m_tstop       = ephemerides.m_tstop;
+    m_dir         = ephemerides.m_dir;
+    m_phase_curve = ephemerides.m_phase_curve;
 
     // Return
     return;
