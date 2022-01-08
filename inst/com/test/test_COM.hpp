@@ -59,6 +59,7 @@ public:
     void                test_bvcs_class(void);
     void                test_inst_dir(void);
     void                test_response(void);
+    void                test_unbinned_obs(void);
     void                test_binned_obs(void);
     void                test_event_bin(void);
     void                test_event_cube(void);

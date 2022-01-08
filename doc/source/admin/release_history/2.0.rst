@@ -97,7 +97,9 @@ New features
 ------------
 
 * [`3973 <https://cta-redmine.irap.omp.eu/issues/3973>`_] -
-  Add ``GCOMBvc`` and ``GCOMBvcs`` classes to support COMPTEL pulsar analysis
+  Add ``GCOMBvc`` and ``GCOMBvcs`` classes to support COMPTEL pulsar analysis, revise
+  ``GCOMSelection`` interface to support both orbital and pulsar phase selection,
+  extend ``GCOMObservation`` interface to handle Solar System Barycentre Data
 * [`3910 <https://cta-redmine.irap.omp.eu/issues/3910>`_] -
   Add ``GCOMModelDRM`` class
 * [`3606 <https://cta-redmine.irap.omp.eu/issues/3606>`_] -

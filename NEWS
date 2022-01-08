@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-7 January 2022
+8 January 2022
 
 
 1. Introduction
@@ -109,14 +109,18 @@ The following methods have been added:
 - GCOMObservation::compute_drb()
 - GCOMObservation::tim(GCOMTim&)
 - GCOMObservation::oads(GCOMOads&)
+- GCOMObservation::bvcs(GCOMBvcs&)
+- GCOMObservation::bvcs()
 - GCOMEventAtom::x_d2()
 - GCOMEventAtom::y_d2()
 - GCOMDri::tof_correction()
 - GCOMDri::num_superpackets()
 - GCOMDri::num_used_superpackets()
 - GCOMDri::num_skipped_superpackets()
-- GCOMSelection::phase_curve()
-- GCOMSelection::phases()
+- GCOMSelection::orbital_phases()
+- GCOMSelection::orbital_period()
+- GCOMSelection::orbital_phase()
+- GCOMSelection::pulsar_phases()
 - GCOMSelection::fpmtflag()
 - GCOMSelection::use_d1()
 - GCOMSelection::use_d2()
@@ -134,6 +138,7 @@ The following methods have been removed:
 - GCOMResponse::irf_spatial()
 - GCOMSelection::zeta_min()
 - GCOMSelection::zeta_max()
+- GCOMSelection::phase_curve()
 
 The following methods have been renamed:
 - none
@@ -398,7 +403,9 @@ spatial model gradients (#3203).
 22. COMPTEL interface
 ---------------------
 Added GCOMBvc and GCOMBvcs classes to support reading and using of BVC files for
-pulsar analysis (#3973).
+pulsar analysis. The interface of the GCOMSelection was modified so that it
+supports both orbital and pulsar phase selection. The interface of GCOMObservation
+was extended so that the class supports the optional handling of BVC files (#3973).
 
 Removed GCOMSelection::zeta_min() and GCOMSelection::zeta_max() since event-wise
 zeta selection is actually not used and the zeta cut is applied using the minimum

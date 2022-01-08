@@ -39,18 +39,21 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string datadir   = std::getenv("TEST_COM_DATA");
-const std::string com_caldb = datadir + "/../../caldb";
-const std::string com_iaq   = "UNH(1.0-3.0)MeV";          // 1-3 MeV
-const std::string com_dre   = datadir+"/m50439_dre.fits"; // 1-3 MeV
-const std::string com_drb   = datadir+"/m34997_drg.fits";
-const std::string com_drg   = datadir+"/m34997_drg.fits";
-const std::string com_drx   = datadir+"/m32171_drx.fits";
-const std::string com_tim   = datadir+"/m10695_tim.fits";
-const std::string com_oad   = datadir+"/m20039_oad.fits";
-const std::string com_bvc   = datadir+"/s10150_10000rows_bvc.fits";
-const std::string com_obs   = datadir+"/obs.xml";
-const std::string com_model = datadir+"/crab.xml";
+const std::string datadir              = std::getenv("TEST_COM_DATA");
+const std::string com_caldb            = datadir + "/../../caldb";
+const std::string com_iaq              = "UNH(1.0-3.0)MeV";          // 1-3 MeV
+const std::string com_dre              = datadir+"/m50439_dre.fits"; // 1-3 MeV
+const std::string com_drb              = datadir+"/m34997_drg.fits";
+const std::string com_drg              = datadir+"/m34997_drg.fits";
+const std::string com_drx              = datadir+"/m32171_drx.fits";
+const std::string com_evp              = datadir+"/m16992_tjd8393_evp.fits";
+const std::string com_tim              = datadir+"/m10695_tim.fits";
+const std::string com_oad              = datadir+"/m20039_oad.fits";
+const std::string com_bvc              = datadir+"/s10150_10000rows_bvc.fits";
+const std::string com_obs              = datadir+"/obs.xml";
+const std::string com_obs_unbinned     = datadir+"/obs_unbinned.xml";
+const std::string com_obs_unbinned_bvc = datadir+"/obs_unbinned_bvc.xml";
+const std::string com_model            = datadir+"/crab.xml";
 
 
 /***********************************************************************//**
@@ -82,6 +85,8 @@ void TestGCOM::set(void)
            "GCOMEventCube: Test event cube");
     append(static_cast<pfunction>(&TestGCOM::test_response),
            "GCOMResponse: Test response");
+    append(static_cast<pfunction>(&TestGCOM::test_unbinned_obs),
+           "GCOMObservation: Test unbinned observation");
     append(static_cast<pfunction>(&TestGCOM::test_binned_obs),
            "GCOMObservation: Test binned observation");
     append(static_cast<pfunction>(&TestGCOM::test_binned_optimizer),
@@ -484,7 +489,59 @@ void TestGCOM::test_response(void)
 
 
 /***********************************************************************//**
- * @brief Checks handling of binned observations
+ * @brief Checks handling of unbinned observation
+ ***************************************************************************/
+void TestGCOM::test_unbinned_obs(void)
+{
+    // Set OADs vector
+    std::vector<GFilename> oads;
+    oads.push_back(com_oad);
+
+    // Test filename constructor without BVC
+    GCOMObservation obs1(com_evp, com_tim, oads);
+    test_assert(obs1.is_unbinned(), "Test if observation is unbinned");
+    test_assert(!obs1.is_binned(), "Test if observation is not binned");
+    test_value(obs1.events()->number(), 81063, "Test number of events");
+    test_value(obs1.tim().gti().size(), 194, "Test size of TIM");
+    test_value(obs1.oads().size(), 5273, "Test size of OADs");
+    test_value(obs1.bvcs().size(), 0, "Test size of BVC");
+
+    // Test filename constructor with BVC
+    GCOMObservation obs2(com_evp, com_tim, oads, com_bvc);
+    test_assert(obs2.is_unbinned(), "Test if observation is unbinned");
+    test_assert(!obs2.is_binned(), "Test if observation is not binned");
+    test_value(obs2.events()->number(), 81063, "Test number of events");
+    test_value(obs2.tim().gti().size(), 194, "Test size of TIM");
+    test_value(obs2.oads().size(), 5273, "Test size of OADs");
+    test_value(obs2.bvcs().size(), 10000, "Test size of BVC");
+
+    // Test XML constructor without BVC dataset
+    GObservations    obss3(com_obs_unbinned);
+    GCOMObservation* obs3 = static_cast<GCOMObservation*>(obss3[0]);
+    test_assert(obs3->is_unbinned(), "Test if observation is unbinned");
+    test_assert(!obs3->is_binned(), "Test if observation is not binned");
+    test_value(obs3->events()->number(), 81063, "Test number of events");
+    test_value(obs3->tim().gti().size(), 194, "Test size of TIM");
+    test_value(obs3->oads().size(), 10545, "Test size of OADs");
+    test_value(obs3->bvcs().size(), 0, "Test size of BVC");
+
+    // Test XML constructor with BVC dataset
+    GObservations    obss4(com_obs_unbinned_bvc);
+    GCOMObservation* obs4 = static_cast<GCOMObservation*>(obss4[0]);
+    test_assert(obs4->is_unbinned(), "Test if observation is unbinned");
+    test_assert(!obs4->is_binned(), "Test if observation is not binned");
+    test_value(obs4->events()->number(), 81063, "Test number of events");
+    test_value(obs4->tim().gti().size(), 194, "Test size of TIM");
+    test_value(obs4->oads().size(), 10545, "Test size of OADs");
+    test_value(obs4->bvcs().size(), 10000, "Test size of BVC");
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Checks handling of binned observation
  *
  * This function checks the handling of binned observations. Binned
  * observations are defined by

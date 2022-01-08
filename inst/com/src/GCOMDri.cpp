@@ -392,6 +392,20 @@ void GCOMDri::compute_dre(const GCOMObservation& obs,
                 continue;
             }
 
+            // Optionally apply pulsar phase selection
+            if (!obs.bvcs().is_empty() && !m_selection.pulsar_phases().is_empty()) {
+                //TODO: implement pulsar phase selection
+                //time = obs.bvcs().tdelta(m_selection.pulsar(), event->time());
+                //double phase = m_selection.pulsar_phase(time);
+                //if (!m_selection.pulsar_phases().contains(phase)) {
+                //    continue;
+                //}
+                // .... OR .... (to update selection statistics)
+                //if (!m_selection.use_event(time)) {
+                //    continue;
+                //}
+            }
+
             // Compute Compton scatter angle index. Skip if it's invalid.
             int iphibar = (event->phibar() - m_phimin) / m_phibin;
             if (iphibar < 0) {
