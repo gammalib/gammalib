@@ -31,6 +31,7 @@
 #include <string>
 #include "GBase.hpp"
 #include "GPhases.hpp"
+#include "GPulsar.hpp"
 #include "GModelTemporalPhaseCurve.hpp"
 
 /* __ Forward declarations _______________________________________________ */
@@ -103,6 +104,8 @@ public:
     double         orbital_phase(const GTime& time) const;
     const GPhases& pulsar_phases(void) const;
     void           pulsar_phases(const GPhases& phases);
+    const GPulsar& pulsar(void) const;
+    void           pulsar(const GPulsar& pulsar);
     void           read(const GFitsHDU& hdu);
     void           write(GFitsHDU& hdu) const;
 
@@ -131,8 +134,9 @@ protected:
     bool                     m_use_d1[7];           //!< D1 module usage
     bool                     m_use_d2[14];          //!< D2 module usage
     GPhases                  m_orbital_phases;      //!< Phases for orbital phase selection
-    GPhases                  m_pulsar_phases;       //!< Phases for pulse phase selection
     GModelTemporalPhaseCurve m_orbital_phase_curve; //!< Orbital phase curve
+    GPhases                  m_pulsar_phases;       //!< Phases for pulse phase selection
+    GPulsar                  m_pulsar;              //!< Pulsar information
 
     // Selection statistics
     mutable int m_num_events_checked;  //!< Number of checked events
@@ -554,6 +558,31 @@ inline
 void GCOMSelection::pulsar_phases(const GPhases& phases)
 {
     m_pulsar_phases = phases;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return pulsar
+ *
+ * @return Pulsar
+ ***************************************************************************/
+inline
+const GPulsar& GCOMSelection::pulsar(void) const
+{
+    return (m_pulsar);
+}
+
+
+/***********************************************************************//**
+ * @brief Set pulsar
+ *
+ * @param[in] pulsar Pulsar.
+ ***************************************************************************/
+inline
+void GCOMSelection::pulsar(const GPulsar& pulsar)
+{
+    m_pulsar = pulsar;
     return;
 }
 

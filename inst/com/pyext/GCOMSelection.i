@@ -86,6 +86,8 @@ public:
     double         orbital_phase(const GTime& time) const;
     const GPhases& pulsar_phases(void) const;
     void           pulsar_phases(const GPhases& phases);
+    const GPulsar& pulsar(void) const;
+    void           pulsar(const GPulsar& pulsar);
     void           read(const GFitsHDU& hdu);
     void           write(GFitsHDU& hdu) const;
 };

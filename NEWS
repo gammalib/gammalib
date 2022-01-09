@@ -125,6 +125,7 @@ The following methods have been added:
 - GCOMSelection::orbital_period()
 - GCOMSelection::orbital_phase()
 - GCOMSelection::pulsar_phases()
+- GCOMSelection::pulsar()
 - GCOMSelection::fpmtflag()
 - GCOMSelection::use_d1()
 - GCOMSelection::use_d2()

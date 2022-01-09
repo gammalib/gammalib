@@ -905,8 +905,9 @@ void GCOMSelection::init_members(void)
     m_vetoflag_max =     0;  //!< Maximum veto flag
     m_fpmtflag     =     0;  //!< D2 PMT failure flag
     m_orbital_phases.clear();
-    m_pulsar_phases.clear();
     m_orbital_phase_curve.clear();
+    m_pulsar_phases.clear();
+    m_pulsar.clear();
     for (int i = 0; i < 7; ++i) {
         m_use_d1[i] = true;
     }
@@ -946,6 +947,7 @@ void GCOMSelection::copy_members(const GCOMSelection& select)
     m_orbital_phases      = select.m_orbital_phases;
     m_pulsar_phases       = select.m_pulsar_phases;
     m_orbital_phase_curve = select.m_orbital_phase_curve;
+    m_pulsar              = select.m_pulsar;
     for (int i = 0; i < 7; ++i) {
         m_use_d1[i] = select.m_use_d1[i];
     }
