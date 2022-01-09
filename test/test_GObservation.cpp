@@ -1,7 +1,7 @@
 /***************************************************************************
  *              test_GObservation.cpp - Test observation module            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2020 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2022 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -690,6 +690,53 @@ void TestGObservation::test_gti(void)
                "Check GGti::overlap(): interval comprises GTIs");
     test_value(test7.overlap(GTime(5.5), GTime(9.5)), 1.0, 1.0e-7,
                "Check GGti::overlap(): interval partly overlaps GTIs");
+
+    // Check reduce(GGti) method
+    GGti test8;
+    test8.append(GTime(1.0), GTime(3.0));
+    test8.append(GTime(5.0), GTime(6.0));
+    GGti test9 = test8;
+    GGti test10;
+    test10.append(GTime(1.0), GTime(6.0));
+    test9.reduce(test10);
+    test_value(test9.size(), 2, "Check GGti::reduce(): size=2");
+    test_value(test9.ontime(), 3.0, "Check GGti::reduce(): ontime=3");
+    test_value(test9.tstart(0).secs(), 1.0, 1.0e-7, "Check GGti::reduce(): tstart[0]=1");
+    test_value(test9.tstop(0).secs(),  3.0, 1.0e-7, "Check GGti::reduce(): tstop[0]=3");
+    test_value(test9.tstart(1).secs(), 5.0, 1.0e-7, "Check GGti::reduce(): tstart[1]=5");
+    test_value(test9.tstop(1).secs(),  6.0, 1.0e-7, "Check GGti::reduce(): tstop[1]=6");
+    test9 = test8;
+    test10.clear();
+    test10.append(GTime(0.0), GTime(10.0));
+    test9.reduce(test10);
+    test_value(test9.size(), 2, "Check GGti::reduce(): size=2");
+    test_value(test9.ontime(), 3.0, "Check GGti::reduce(): ontime=3");
+    test_value(test9.tstart(0).secs(), 1.0, 1.0e-7, "Check GGti::reduce(): tstart[0]=1");
+    test_value(test9.tstop(0).secs(),  3.0, 1.0e-7, "Check GGti::reduce(): tstop[0]=3");
+    test_value(test9.tstart(1).secs(), 5.0, 1.0e-7, "Check GGti::reduce(): tstart[1]=5");
+    test_value(test9.tstop(1).secs(),  6.0, 1.0e-7, "Check GGti::reduce(): tstop[1]=6");
+    test9 = test8;
+    test10.clear();
+    test10.append(GTime(0.0), GTime(4.0));
+    test9.reduce(test10);
+    test_value(test9.size(), 1, "Check GGti::reduce(): size=1");
+    test_value(test9.ontime(), 2.0, "Check GGti::reduce(): ontime=2");
+    test_value(test9.tstart(0).secs(), 1.0, 1.0e-7, "Check GGti::reduce(): tstart[0]=1");
+    test_value(test9.tstop(0).secs(),  3.0, 1.0e-7, "Check GGti::reduce(): tstop[0]=3");
+    test9 = test8;
+    test10.clear();
+    test10.append(GTime(1.5), GTime(2.0));
+    test10.append(GTime(2.2), GTime(2.5));
+    test10.append(GTime(5.1), GTime(5.2));
+    test9.reduce(test10);
+    test_value(test9.size(), 3, "Check GGti::reduce(): size=3");
+    test_value(test9.ontime(), 0.9, "Check GGti::reduce(): ontime=0.9");
+    test_value(test9.tstart(0).secs(), 1.5, 1.0e-7, "Check GGti::reduce(): tstart[0]=1.5");
+    test_value(test9.tstop(0).secs(),  2.0, 1.0e-7, "Check GGti::reduce(): tstop[0]=2");
+    test_value(test9.tstart(1).secs(), 2.2, 1.0e-7, "Check GGti::reduce(): tstart[1]=2.2");
+    test_value(test9.tstop(1).secs(),  2.5, 1.0e-7, "Check GGti::reduce(): tstop[1]=2.5");
+    test_value(test9.tstart(2).secs(), 5.1, 1.0e-7, "Check GGti::reduce(): tstart[1]=5.1");
+    test_value(test9.tstop(2).secs(),  5.2, 1.0e-7, "Check GGti::reduce(): tstop[1]=5.2");
 
     // Return
     return;

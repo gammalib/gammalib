@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-8 January 2022
+9 January 2022
 
 
 1. Introduction
@@ -51,6 +51,7 @@ The following methods have been added:
 - GObservation::model(GModels&, GMatrixSparse*)
 - GObservation::model_grad(GModel&, GModelPar&)
 - GObservation::grad_step_size()
+- GGti::reduce(GGti&)
 - GMatrixBase::is_empty()
 - angle(GVector&, GVector&)
 - GModels::eval(GObservation&, GMatrixSparse*)
@@ -271,6 +272,9 @@ of functions (#3328).
 
 11. Observation module
 ----------------------
+Add GGti::reduce(GGti&) method to reduce Good Time Intervals to the intersection
+with a specific list of intervals (#3973).
+
 Add GPulsar and GPulsarEphemerides classes to support pulsar analysis (#3973).
 
 Add likelihood fit event selection hook (#3912).
