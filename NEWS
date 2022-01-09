@@ -15,6 +15,7 @@ The following classes have been added:
 - GFunctions
 - GIntegrals
 - GResponseVectorCache
+- GPulsar
 - GPulsarEphemerides
 - GSkyDirs
 - GSkyRegionRect
@@ -270,6 +271,8 @@ of functions (#3328).
 
 11. Observation module
 ----------------------
+Add GPulsar and GPulsarEphemerides classes to support pulsar analysis (#3973).
+
 Add likelihood fit event selection hook (#3912).
 
 Add numerical gradient step size as member of GObservation to allow instrument-

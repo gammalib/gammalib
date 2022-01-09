@@ -1,5 +1,5 @@
 /***************************************************************************
- *             GPulsarEphemerides.i - Pulsar ephemerides class             *
+ *                        GPulsar.hpp - Pulsar class                       *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2022 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -19,60 +19,79 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GPulsarEphemerides.i
- * @brief Pulsar ephemerides class definition
+ * @file GPulsar.hpp
+ * @brief Pulsar class definition
  * @author Juergen Knoedlseder
  */
-%{
-/* Put headers and other declarations here that are needed for compilation */
+
+#ifndef GPULSAR_HPP
+#define GPULSAR_HPP
+
+/* __ Includes ___________________________________________________________ */
+#include <string>
+#include <vector>
+#include "GBase.hpp"
 #include "GPulsarEphemerides.hpp"
-%}
+
+/* __ Forward declarations _______________________________________________ */
+
+/* __ Constants __________________________________________________________ */
 
 
 /***********************************************************************//**
- * @class GPulsarEphemerides
+ * @class GPulsar
  *
- * @brief Pulsar ephemerides class
+ * @brief Pulsar class
+ *
+ * @todo Add class description.
  ***************************************************************************/
-class GPulsarEphemerides : public GBase {
+class GPulsar : public GBase {
 
 public:
     // Constructors and destructors
-    GPulsarEphemerides(void);
-    GPulsarEphemerides(const GPulsarEphemerides& ephemerides);
-    virtual ~GPulsarEphemerides(void);
+    GPulsar(void);
+    GPulsar(const GFilename& filename, const std::string& name = "");
+    GPulsar(const GPulsar& pulsar);
+    virtual ~GPulsar(void);
+
+    // Operators
+    GPulsar& operator=(const GPulsar& pulsar);
 
     // Implemented pure virtual base class methods
-    virtual void                clear(void);
-    virtual GPulsarEphemerides* clone(void) const;
-    virtual std::string         classname(void) const;
+    virtual void        clear(void);
+    virtual GPulsar*    clone(void) const;
+    virtual std::string classname(void) const;
+    virtual std::string print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    const std::string& name(void) const;
-    void               name(const std::string& name);
-    const GSkyDir&     dir(void) const;
-    void               dir(const GSkyDir& dir);
-    const GTime&       tstart(void) const;
-    void               tstart(const GTime& tstart);
-    const GTime&       tstop(void) const;
-    void               tstop(const GTime& tstop);
-    GTime              t0(void) const;
-    void               t0(const GTime& t0);
-    double             f0(void) const;
-    void               f0(const double& f0);
-    double             f1(void) const;
-    void               f1(const double& f1);
-    double             f2(void) const;
-    void               f2(const double& f2);
-    double             phase(const GTime& time) const;
+    void load(const GFilename& filename, const std::string& name = "");
+
+protected:
+    // Protected methods
+    void init_members(void);
+    void copy_members(const GPulsar& pulsar);
+    void free_members(void);
+    void load_fits(const GFilename& filename, const std::string& name = "");
+    void load_integral(const GFitsTable* table, const std::string& name = "");
+    void load_fermi(const GFitsTable* table, const std::string& name = "");
+    void load_psrtime(const GFilename& filename, const std::string& name = "");
+    void load_parfile(const GFilename& filename);
+
+    // Protected members
+    std::string                     m_name;        //!< Pulsar name
+    std::vector<GPulsarEphemerides> m_ephemerides; //!< Pulsar ephemerides
 };
 
 
 /***********************************************************************//**
- * @brief GPulsarEphemerides class extension
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GPulsar").
  ***************************************************************************/
-%extend GPulsarEphemerides {
-    GPulsarEphemerides copy() {
-        return (*self);
-    }
-};
+inline
+std::string GPulsar::classname(void) const
+{
+    return ("GPulsar");
+}
+
+#endif /* GPULSAR_HPP */

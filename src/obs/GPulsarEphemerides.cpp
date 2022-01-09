@@ -195,10 +195,10 @@ std::string GPulsarEphemerides::print(const GChatter& chatter) const
         result.append(" Hz");
         result.append("\n"+gammalib::parformat("Frequency derivative"));
         result.append(gammalib::str(f1()));
-        result.append(" Hz^2");
+        result.append(" Hz/s");
         result.append("\n"+gammalib::parformat("2nd frequency derivative"));
         result.append(gammalib::str(f2()));
-        result.append(" Hz^3");
+        result.append(" Hz/s^2");
         result.append("\n"+gammalib::parformat("Period"));
         if (f0 != 0.0) {
             double p0 = 1.0 / f0;

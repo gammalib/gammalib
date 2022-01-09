@@ -157,6 +157,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GPhotons.hpp \
                      GPhoton.hpp \
                      GSource.hpp \
+                     GPulsar.hpp \
                      GPulsarEphemerides.hpp \
                      GModelPar.hpp \
                      GModelAssociation.hpp \

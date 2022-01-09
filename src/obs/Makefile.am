@@ -52,6 +52,7 @@ sources = GEnergies.cpp \
           GPhotons.cpp \
           GPhoton.cpp \
           GSource.cpp \
+          GPulsar.cpp \
           GPulsarEphemerides.cpp
 
 # Build libtool library

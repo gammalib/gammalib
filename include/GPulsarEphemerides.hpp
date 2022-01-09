@@ -64,17 +64,23 @@ public:
     virtual std::string         print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    const GTime& tstart(void) const;
-    const GTime& tstop(void) const;
-    GTime        t0(void) const;
-    void         t0(const GTime& t0);
-    double       f0(void) const;
-    void         f0(const double& f0);
-    double       f1(void) const;
-    void         f1(const double& f1);
-    double       f2(void) const;
-    void         f2(const double& f2);
-    double       phase(const GTime& time) const;
+    const std::string& name(void) const;
+    void               name(const std::string& name);
+    const GSkyDir&     dir(void) const;
+    void               dir(const GSkyDir& dir);
+    const GTime&       tstart(void) const;
+    void               tstart(const GTime& tstart);
+    const GTime&       tstop(void) const;
+    void               tstop(const GTime& tstop);
+    GTime              t0(void) const;
+    void               t0(const GTime& t0);
+    double             f0(void) const;
+    void               f0(const double& f0);
+    double             f1(void) const;
+    void               f1(const double& f1);
+    double             f2(void) const;
+    void               f2(const double& f2);
+    double             phase(const GTime& time) const;
 
 protected:
     // Protected methods
@@ -104,6 +110,58 @@ std::string GPulsarEphemerides::classname(void) const
 
 
 /***********************************************************************//**
+ * @brief Returns pulsar name
+ *
+ * @return Pulsar name.
+ ***************************************************************************/
+inline
+const std::string& GPulsarEphemerides::name(void) const
+{
+    // Return
+    return m_name;
+}
+
+
+/***********************************************************************//**
+ * @brief Set pulsar name
+ *
+ * @param[in] name Pulsar name.
+ ***************************************************************************/
+inline
+void GPulsarEphemerides::name(const std::string& name)
+{
+    m_name = name;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pulsar sky direction
+ *
+ * @return Pulsar sky direction.
+ ***************************************************************************/
+inline
+const GSkyDir& GPulsarEphemerides::dir(void) const
+{
+    // Return
+    return m_dir;
+}
+
+
+/***********************************************************************//**
+ * @brief Set pulsar sky direction
+ *
+ * @param[in] dir Pulsar sky direction.
+ ***************************************************************************/
+inline
+void GPulsarEphemerides::dir(const GSkyDir& dir)
+{
+    m_dir = dir;
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Returns validity start time
  *
  * @return Validity start time.
@@ -117,6 +175,19 @@ const GTime& GPulsarEphemerides::tstart(void) const
 
 
 /***********************************************************************//**
+ * @brief Set validity start time
+ *
+ * @param[in] tstart Validity start time.
+ ***************************************************************************/
+inline
+void GPulsarEphemerides::tstart(const GTime& tstart)
+{
+    m_tstart = tstart;
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Returns validity stop time
  *
  * @return Validity stop time.
@@ -126,6 +197,19 @@ const GTime& GPulsarEphemerides::tstop(void) const
 {
     // Return
     return m_tstop;
+}
+
+
+/***********************************************************************//**
+ * @brief Set validity stop time
+ *
+ * @param[in] tstop Validity stop time.
+ ***************************************************************************/
+inline
+void GPulsarEphemerides::tstop(const GTime& tstop)
+{
+    m_tstop = tstop;
+    return;
 }
 
 
