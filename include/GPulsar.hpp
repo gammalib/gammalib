@@ -34,6 +34,7 @@
 #include "GPulsarEphemerides.hpp"
 
 /* __ Forward declarations _______________________________________________ */
+class GGti;
 
 /* __ Constants __________________________________________________________ */
 
@@ -43,7 +44,8 @@
  *
  * @brief Pulsar class
  *
- * @todo Add class description.
+ * This class implements a pulsar, defined by a name and a list of pulsar
+ * ephemerides.
  ***************************************************************************/
 class GPulsar : public GBase {
 
@@ -64,6 +66,9 @@ public:
     virtual std::string print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
+    int  size(void) const;
+    bool is_empty(void) const;
+    GGti validity(void) const;
     void load(const GFilename& filename, const std::string& name = "");
 
 protected:
@@ -92,6 +97,34 @@ inline
 std::string GPulsar::classname(void) const
 {
     return ("GPulsar");
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of ephemerides for pulsar
+ *
+ * @return Number of ephemerides for pulsar.
+ *
+ * Returns the number of ephemerides for pulsar.
+ ***************************************************************************/
+inline
+int GPulsar::size(void) const
+{
+    return (int)m_ephemerides.size();
+}
+
+
+/***********************************************************************//**
+ * @brief Signals if there are no ephemerides for pulsar
+ *
+ * @return True if there are no ephemerides for pulsar, false otherwise.
+ *
+ * Signals if there are no ephemerides for pulsar.
+ ***************************************************************************/
+inline
+bool GPulsar::is_empty(void) const
+{
+    return (m_ephemerides.empty());
 }
 
 #endif /* GPULSAR_HPP */

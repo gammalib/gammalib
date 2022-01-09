@@ -30,6 +30,7 @@
 #endif
 #include "GPulsar.hpp"
 #include "GFits.hpp"
+#include "GGti.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_LOAD                      "GPulsar::load(GFilename&, std::string&)"
@@ -187,6 +188,29 @@ GPulsar* GPulsar::clone(void) const
 
 
 /***********************************************************************//**
+ * @brief Return validity intervals of pulsar ephemerides
+ *
+ * @return Validity intervals of pulsar ephemerides.
+ *
+ * Returns the validity intervals of pulsar ephemerides as Good Time
+ * Intervals.
+ ***************************************************************************/
+GGti GPulsar::validity(void) const
+{
+    // Initialise Good Time Intervals
+    GGti gti;
+
+    // Loop over ephemerides
+    for (int i = 0; i < size(); ++i) {
+        gti.append(m_ephemerides[i].tstart(), m_ephemerides[i].tstop());
+    }
+
+    // Return Good Time Intervals
+    return gti;
+}
+
+
+/***********************************************************************//**
  * @brief Load Pulsar from ephemerides file
  *
  * @param[in] filename File name of pulsar ephemerides
@@ -201,6 +225,9 @@ GPulsar* GPulsar::clone(void) const
  ***************************************************************************/
 void GPulsar::load(const GFilename& filename, const std::string& name)
 {
+    // Clear pulsar
+    clear();
+
     // If filename is a FITS file then load ephemerides from a FITS file
     if (filename.is_fits()) {
         load_fits(filename, name);
@@ -396,9 +423,6 @@ void GPulsar::load_fits(const GFilename& filename, const std::string& name)
  ***************************************************************************/
 void GPulsar::load_integral(const GFitsTable* table, const std::string& name)
 {
-    // Clear pulsar
-    clear();
-
     // Get pulsar attributes from FITS table
     m_name     = table->string("SOURCEID");
     double ra  = table->real("RA_OBJ");
@@ -477,9 +501,6 @@ void GPulsar::load_integral(const GFitsTable* table, const std::string& name)
  ***************************************************************************/
 void GPulsar::load_fermi(const GFitsTable* table, const std::string& name)
 {
-    // Clear pulsar
-    clear();
-
     // Get pointers to table columns
     const GFitsTableCol* psrname      = (*table)["PSRNAME"];
     const GFitsTableCol* ra           = (*table)["RA"];

@@ -49,6 +49,9 @@ public:
     virtual std::string classname(void) const;
 
     // Other methods
+    int  size(void) const;
+    bool is_empty(void) const;
+    GGti validity(void) const;
     void load(const GFilename& filename, const std::string& name = "");
 };
 
