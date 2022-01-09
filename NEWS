@@ -116,6 +116,7 @@ The following methods have been added:
 - GCOMObservation::bvcs()
 - GCOMEventAtom::x_d2()
 - GCOMEventAtom::y_d2()
+- GCOMTim::reduce(GGti&)
 - GCOMDri::tof_correction()
 - GCOMDri::num_superpackets()
 - GCOMDri::num_used_superpackets()
@@ -413,7 +414,9 @@ spatial model gradients (#3203).
 Added GCOMBvc and GCOMBvcs classes to support reading and using of BVC files for
 pulsar analysis. The interface of the GCOMSelection was modified so that it
 supports both orbital and pulsar phase selection. The interface of GCOMObservation
-was extended so that the class supports the optional handling of BVC files (#3973).
+was extended so that the class supports the optional handling of BVC files. A
+GCOMTim::reduce(GGti&) method was added to allow the reduction of the COMPTEL
+Good Time Intervals to the intervals covered by the pulsar ephemerides (#3973).
 
 Removed GCOMSelection::zeta_min() and GCOMSelection::zeta_max() since event-wise
 zeta selection is actually not used and the zeta cut is applied using the minimum
