@@ -126,7 +126,7 @@ bool GCOMTim::contains(const GTime& time) const
  * list of Good Time Intervals.
  ***************************************************************************/
 inline
-void GCOMTim::contains(const GGti& gti)
+void GCOMTim::reduce(const GGti& gti)
 {
     m_gti.reduce(gti);
     return;

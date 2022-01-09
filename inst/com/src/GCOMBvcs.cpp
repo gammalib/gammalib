@@ -558,7 +558,7 @@ const GCOMBvc* GCOMBvcs::find(const GCOMOad& oad) const
  ***************************************************************************/
 double GCOMBvcs::tdelta(const GSkyDir& dir, const GTime& time) const
 {
-    // Set constants
+    // Set Schwartzschild radius of sun in lightseconds
     const double radius = 0.49254909e-5;
 
     // Initialise SSB vector and time difference
@@ -661,7 +661,7 @@ double GCOMBvcs::tdelta(const GSkyDir& dir, const GTime& time) const
     double relat = -2.0 * radius * std::log(1.0 + (travt/r));
 
     // Compute the time difference at SSB
-    tdelta += travt - relat;
+    tdelta = travt - relat + tdelta;
 
     // Return
     return tdelta;

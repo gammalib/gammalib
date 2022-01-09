@@ -66,10 +66,14 @@ public:
     virtual std::string print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    int  size(void) const;
-    bool is_empty(void) const;
-    GGti validity(void) const;
-    void load(const GFilename& filename, const std::string& name = "");
+    int                       size(void) const;
+    bool                      is_empty(void) const;
+    const std::string&        name(void) const;
+    void                      name(const std::string& name);
+    const GPulsarEphemerides& ephemerides(const GTime& time) const;
+    GGti                      validity(void) const;
+    void                      load(const GFilename& filename,
+                                   const std::string& name = "");
 
 protected:
     // Protected methods
@@ -125,6 +129,31 @@ inline
 bool GPulsar::is_empty(void) const
 {
     return (m_ephemerides.empty());
+}
+
+
+/***********************************************************************//**
+ * @brief Return pulsar name
+ *
+ * @return Pulsar name
+ ***************************************************************************/
+inline
+const std::string& GPulsar::name(void) const
+{
+    return (m_name);
+}
+
+
+/***********************************************************************//**
+ * @brief Set pulsar name
+ *
+ * @param[in] name Pulsar name.
+ ***************************************************************************/
+inline
+void GPulsar::name(const std::string& name)
+{
+    m_name = name;
+    return;
 }
 
 #endif /* GPULSAR_HPP */

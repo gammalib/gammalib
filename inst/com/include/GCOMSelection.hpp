@@ -106,6 +106,7 @@ public:
     void           pulsar_phases(const GPhases& phases);
     const GPulsar& pulsar(void) const;
     void           pulsar(const GPulsar& pulsar);
+    bool           has_pulsar(void) const;
     void           read(const GFitsHDU& hdu);
     void           write(GFitsHDU& hdu) const;
 
@@ -584,6 +585,21 @@ void GCOMSelection::pulsar(const GPulsar& pulsar)
 {
     m_pulsar = pulsar;
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Signals that pulsar selection should be performed
+ *
+ * @return True if pulsar selection should be performed, false otherwise
+ *
+ * This method returns true if the pulsar and the pulsar phase selection are
+ * not empty.
+ ***************************************************************************/
+inline
+bool GCOMSelection::has_pulsar(void) const
+{
+    return (!pulsar().is_empty() && !pulsar_phases().is_empty());
 }
 
 #endif /* GCOMSELECTION_HPP */

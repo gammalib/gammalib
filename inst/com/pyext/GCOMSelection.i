@@ -88,6 +88,7 @@ public:
     void           pulsar_phases(const GPhases& phases);
     const GPulsar& pulsar(void) const;
     void           pulsar(const GPulsar& pulsar);
+    bool           has_pulsar(void) const;
     void           read(const GFitsHDU& hdu);
     void           write(GFitsHDU& hdu) const;
 };

@@ -52,6 +52,10 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_COMPUTE_DRE               "GCOMDri::compute_dre(GCOMObservation&, "\
                                                    "GCOMSelection&, double&)"
+#define G_COMPUTE_DRG               "GCOMDri::compute_drg(GCOMObservation&, "\
+                                                   "GCOMSelection&, double&)"
+#define G_COMPUTE_DRX               "GCOMDri::compute_drx(GCOMObservation&, "\
+                                                   "GCOMSelection&, double&)"
 #define G_COMPUTE_DRM       "GCOMDri::compute_drm(GCOMObservation&, GModel&)"
 #define G_COMPUTE_TOF_CORRECTION          "GCOMDri::compute_tof_correction()"
 
@@ -255,6 +259,8 @@ GCOMDri* GCOMDri::clone(void) const
  *
  * @exception GException::invalid_argument
  *            DRE cube has a non-positive Phibar bin size.
+ * @exception GException::invalid_value
+ *            No BVC data available for pulsar selection
  *
  * Compute DRE event cube for a COMPTEL observation.
  ***************************************************************************/
@@ -322,6 +328,27 @@ void GCOMDri::compute_dre(const GCOMObservation& obs,
     // Signal that loop should be terminated
     bool terminate = false;
 
+    // Get Good Time Intervals and if a pulsar is specified then reduce
+    // them according to the validity of the pulsar emphemerides. Throw
+    // an exception if a pulsar is specified but no BVC data is present.
+    GCOMTim tim        = obs.tim();
+    bool    has_pulsar = false;
+    if (m_selection.has_pulsar()) {
+        if (!obs.bvcs().is_empty()) {
+            tim.reduce(m_selection.pulsar().validity());
+            m_gti.reduce(m_selection.pulsar().validity());
+            has_pulsar = true;
+            m_phasecor = m_selection.pulsar_phases().length();
+        }
+        else {
+            std::string msg = "Phase selection for pulsar \""+
+                              m_selection.pulsar().name()+"\" specified but no "
+                              "BVC data found for observation. Please specify an "
+                              "observation that contains BVC data.";
+            throw GException::invalid_value(G_COMPUTE_DRE, msg);
+        }
+    }
+
     // Loop over Orbit Aspect Data
     for (int i_oad = 0; i_oad < obs.oads().size(); ++i_oad) {
 
@@ -329,7 +356,7 @@ void GCOMDri::compute_dre(const GCOMObservation& obs,
         const GCOMOad &oad = obs.oads()[i_oad];
 
         // Check superpacket usage
-        if (!use_superpacket(oad, obs.tim(), select)) {
+        if (!use_superpacket(oad, tim, select)) {
             continue;
         }
 
@@ -369,7 +396,8 @@ void GCOMDri::compute_dre(const GCOMObservation& obs,
                     terminate = true;
                     break;
                 }
-            }
+
+            } // endif: DRE had GTIs
 
             // Skip event if it lies before the superpacket start
             if (event->time() < oad.tstart()) {
@@ -390,20 +418,6 @@ void GCOMDri::compute_dre(const GCOMObservation& obs,
             // Apply event selection
             if (!m_selection.use_event(*event)) {
                 continue;
-            }
-
-            // Optionally apply pulsar phase selection
-            if (!obs.bvcs().is_empty() && !m_selection.pulsar_phases().is_empty()) {
-                //TODO: implement pulsar phase selection
-                //time = obs.bvcs().tdelta(m_selection.pulsar(), event->time());
-                //double phase = m_selection.pulsar_phase(time);
-                //if (!m_selection.pulsar_phases().contains(phase)) {
-                //    continue;
-                //}
-                // .... OR .... (to update selection statistics)
-                //if (!m_selection.use_event(time)) {
-                //    continue;
-                //}
             }
 
             // Compute Compton scatter angle index. Skip if it's invalid.
@@ -442,6 +456,27 @@ void GCOMDri::compute_dre(const GCOMObservation& obs,
                 num_eha_too_small++;
                 continue;
             }
+
+            // Optionally apply pulsar phase selection
+            if (has_pulsar) {
+
+                // Get pulsar ephemerides
+                const GPulsarEphemerides& ephemerides =
+                      m_selection.pulsar().ephemerides(event->time());
+
+                // Convert time to Solar System Barycentre
+                GTime time  = event->time() +
+                              obs.bvcs().tdelta(ephemerides.dir(), event->time());
+
+                // Compute pulsar phase
+                double phase = ephemerides.phase(time);
+
+                // If phase is not contained in phase interval then skip event
+                if (!m_selection.pulsar_phases().contains(phase)) {
+                    continue;
+                }
+
+            } // endif: applied pulsar selection
 
             // Now fill the event into the DRE. Put this in a try-catch
             // block so that any invalid transformations are catched.
@@ -506,6 +541,9 @@ void GCOMDri::compute_dre(const GCOMObservation& obs,
  * @param[in] select Selection set.
  * @param[in] zetamin Minimum Earth horizon - Phibar cut (deg).
  *
+ * @exception GException::invalid_value
+ *            No BVC data available for pulsar selection
+ *
  * Compute DRG cube for a COMPTEL observation.
  ***************************************************************************/
 void GCOMDri::compute_drg(const GCOMObservation& obs,
@@ -531,6 +569,25 @@ void GCOMDri::compute_drg(const GCOMObservation& obs,
     // Set all DRG bins to zero
     init_cube();
 
+    // Get Good Time Intervals and if a pulsar is specified then reduce
+    // them according to the validity of the pulsar emphemerides. Throw
+    // an exception if a pulsar is specified but no BVC data is present.
+    GCOMTim tim        = obs.tim();
+    bool    has_pulsar = false;
+    if (m_selection.has_pulsar()) {
+        if (!obs.bvcs().is_empty()) {
+            tim.reduce(m_selection.pulsar().validity());
+            has_pulsar = true;
+        }
+        else {
+            std::string msg = "Phase selection for pulsar \""+
+                              m_selection.pulsar().name()+"\" specified but no "
+                              "BVC data found for observation. Please specify an "
+                              "observation that contains BVC data.";
+            throw GException::invalid_value(G_COMPUTE_DRG, msg);
+        }
+    }
+
     // Loop over Orbit Aspect Data
     for (int i_oad = 0; i_oad < obs.oads().size(); ++i_oad) {
 
@@ -538,7 +595,7 @@ void GCOMDri::compute_drg(const GCOMObservation& obs,
         const GCOMOad &oad = obs.oads()[i_oad];
 
         // Check superpacket usage
-        if (!use_superpacket(oad, obs.tim(), select)) {
+        if (!use_superpacket(oad, tim, select)) {
             continue;
         }
 
@@ -626,6 +683,9 @@ void GCOMDri::compute_drg(const GCOMObservation& obs,
  * @param[in] obs COMPTEL observation.
  * @param[in] select Selection set.
  *
+ * @exception GException::invalid_value
+ *            No BVC data available for pulsar selection
+ *
  * Compute DRX exposure map for a COMPTEL observation.
  *
  * For a given superpacket, the exposure is computed using
@@ -660,6 +720,25 @@ void GCOMDri::compute_drx(const GCOMObservation& obs,
     // Set all DRX bins to zero
     init_cube();
 
+    // Get Good Time Intervals and if a pulsar is specified then reduce
+    // them according to the validity of the pulsar emphemerides. Throw
+    // an exception if a pulsar is specified but no BVC data is present.
+    GCOMTim tim        = obs.tim();
+    bool    has_pulsar = false;
+    if (select.has_pulsar()) {
+        if (!obs.bvcs().is_empty()) {
+            tim.reduce(select.pulsar().validity());
+            has_pulsar = true;
+        }
+        else {
+            std::string msg = "Phase selection for pulsar \""+
+                              m_selection.pulsar().name()+"\" specified but no "
+                              "BVC data found for observation. Please specify an "
+                              "observation that contains BVC data.";
+            throw GException::invalid_value(G_COMPUTE_DRX, msg);
+        }
+    }
+
     // Loop over Orbit Aspect Data
     for (int i_oad = 0; i_oad < obs.oads().size(); ++i_oad) {
 
@@ -667,7 +746,7 @@ void GCOMDri::compute_drx(const GCOMObservation& obs,
         const GCOMOad &oad = obs.oads()[i_oad];
 
         // Check superpacket usage
-        if (!use_superpacket(oad, obs.tim(), select)) {
+        if (!use_superpacket(oad, tim, select)) {
             continue;
         }
 
@@ -1018,9 +1097,10 @@ void GCOMDri::init_members(void)
     m_dri.clear();
     m_ebounds.clear();
     m_gti.clear();
-    m_phimin = 0.0;
-    m_phibin = 0.0;
-    m_tofcor = 1.0;
+    m_phimin   = 0.0;
+    m_phibin   = 0.0;
+    m_tofcor   = 1.0;
+    m_phasecor = 1.0;
 
     // Initialise statistics
     init_statistics();
@@ -1043,13 +1123,14 @@ void GCOMDri::init_members(void)
 void GCOMDri::copy_members(const GCOMDri& dri)
 {
     // Copy members
-    m_name    = dri.m_name;
-    m_dri     = dri.m_dri;
-    m_ebounds = dri.m_ebounds;
-    m_gti     = dri.m_gti;
-    m_phimin  = dri.m_phimin;
-    m_phibin  = dri.m_phibin;
-    m_tofcor  = dri.m_tofcor;
+    m_name     = dri.m_name;
+    m_dri      = dri.m_dri;
+    m_ebounds  = dri.m_ebounds;
+    m_gti      = dri.m_gti;
+    m_phimin   = dri.m_phimin;
+    m_phibin   = dri.m_phibin;
+    m_tofcor   = dri.m_tofcor;
+    m_phasecor = dri.m_phasecor;
 
     // Copy statistics
     m_tstart                   = dri.m_tstart;
@@ -1259,6 +1340,11 @@ void GCOMDri::read_attributes(const GFitsHDU* hdu)
         m_tofcor = hdu->real("TOFCOR");
     }
 
+    // Optionally read pulsar phase correction
+    if (hdu->has_card("PHASECOR")) {
+        m_phasecor = hdu->real("PHASECOR");
+    }
+
     // Optionally read superpacket statistics
     if (hdu->has_card("NSPINP")) {
         m_num_superpackets = hdu->integer("NSPINP");
@@ -1360,6 +1446,11 @@ void GCOMDri::write_attributes(GFitsHDU* hdu) const
     // If there is a ToF correction then write it
     if (m_tofcor > 1.0) {
         hdu->card("TOFCOR", m_tofcor, "ToF correction");
+    }
+
+    // If there is a pulsar phase correction then write it
+    if (m_phasecor < 1.0) {
+        hdu->card("PHASECOR", m_phasecor, "Pulsar phase correction");
     }
 
     // Write superpacket statistics

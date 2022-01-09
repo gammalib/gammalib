@@ -52,6 +52,7 @@ The following methods have been added:
 - GObservation::model_grad(GModel&, GModelPar&)
 - GObservation::grad_step_size()
 - GGti::reduce(GGti&)
+- GPhases::length()
 - GMatrixBase::is_empty()
 - angle(GVector&, GVector&)
 - GModels::eval(GObservation&, GMatrixSparse*)
@@ -118,6 +119,7 @@ The following methods have been added:
 - GCOMEventAtom::y_d2()
 - GCOMTim::reduce(GGti&)
 - GCOMDri::tof_correction()
+- GCOMDri::phase_correction()
 - GCOMDri::num_superpackets()
 - GCOMDri::num_used_superpackets()
 - GCOMDri::num_skipped_superpackets()
@@ -126,6 +128,7 @@ The following methods have been added:
 - GCOMSelection::orbital_phase()
 - GCOMSelection::pulsar_phases()
 - GCOMSelection::pulsar()
+- GCOMSelection::has_pulsar()
 - GCOMSelection::fpmtflag()
 - GCOMSelection::use_d1()
 - GCOMSelection::use_d2()
@@ -274,6 +277,9 @@ of functions (#3328).
 
 11. Observation module
 ----------------------
+Add GPhases::length() method that returns the total length of the phase
+intervals (#3973).
+
 Add GGti::reduce(GGti&) method to reduce Good Time Intervals to the intersection
 with a specific list of intervals (#3973).
 

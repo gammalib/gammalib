@@ -867,6 +867,11 @@ std::string GCOMSelection::print(const GChatter& chatter) const
             result.append("\n"+m_orbital_phase_curve.print());
         }
 
+        // Append pulsar if it exists
+        if (!m_pulsar.is_empty()) {
+            result.append("\n"+m_pulsar.print());
+        }
+
         // Append pulsar phase selection if it exists
         if (!m_pulsar_phases.is_empty()) {
             result.append("\n"+m_pulsar_phases.print());

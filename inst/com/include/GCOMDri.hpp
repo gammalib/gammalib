@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCOMDri.hpp - COMPTEL Data Space class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -97,6 +97,8 @@ public:
     const double&      phibin(void) const;
     const double&      tof_correction(void) const;
     void               tof_correction(const double& tofcor);
+    const double&      phase_correction(void) const;
+    void               phase_correction(const double& phasecor);
     const int&         num_superpackets(void) const;
     void               num_superpackets(const int& number);
     const int&         num_used_superpackets(void) const;
@@ -154,6 +156,7 @@ protected:
     double      m_phimin;   //!< Phibar minimum (deg)
     double      m_phibin;   //!< Phibar binsize (deg)
     double      m_tofcor;   //!< ToF correction
+    double      m_phasecor; //!< Pulsar phase correction
 
     // Computation statistics
     GTime m_tstart;                   //!< Selection start time
@@ -399,6 +402,37 @@ inline
 void GCOMDri::tof_correction(const double& tofcor)
 {
     m_tofcor = tofcor;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return pulsar phase correction factor
+ *
+ * @return Pulsar phase correction factor.
+ *
+ * Returns the pulsar phase correction factor that corrects for the phase
+ * selection for pulsar analysis.
+ ***************************************************************************/
+inline
+const double& GCOMDri::phase_correction(void) const
+{
+    return (m_phasecor);
+}
+
+
+/***********************************************************************//**
+ * @brief Set pulsar phase correction factor
+ *
+ * @param[in] phasecor Pulsar phase correction factor.
+ *
+ * Set the pulsar phase correction factor that corrects for the phase
+ * selection for pulsar analysis.
+ ***************************************************************************/
+inline
+void GCOMDri::phase_correction(const double& phasecor)
+{
+    m_phasecor = phasecor;
     return;
 }
 

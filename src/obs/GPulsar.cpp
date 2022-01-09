@@ -33,6 +33,7 @@
 #include "GGti.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_PHASE                                      "GPulsar::phase(GTime&)"
 #define G_LOAD                      "GPulsar::load(GFilename&, std::string&)"
 #define G_LOAD_FITS            "GPulsar::load_fits(GFilename&, std::string&)"
 #define G_LOAD_INTEGRAL   "GPulsar::load_integral(GFitsTable*, std::string&)"
@@ -188,6 +189,42 @@ GPulsar* GPulsar::clone(void) const
 
 
 /***********************************************************************//**
+ * @brief Return pulsar ephemerides
+ *
+ * param[in] time Time.
+ * @return Pulsar ephemerides.
+ *
+ * @exception GException::invalid_argument
+ *            No valid ephemerides found for specified @p time.
+ *
+ * Returns the pulsar ephemerides as function of time.
+ ***************************************************************************/
+const GPulsarEphemerides& GPulsar::ephemerides(const GTime& time) const
+{
+    // Find appropriate ephemerides
+    int ifound = -1;
+    for (int i = 0; i < size(); ++i) {
+        if (time >= m_ephemerides[i].tstart() &&
+            time <= m_ephemerides[i].tstop()) {
+            ifound = i;
+            break;
+        }
+    }
+
+    // Throw an expection if no valid ephemerides were found
+    if (ifound == -1) {
+        std::string msg = "No valid ephemerides found for MJD "+
+                          gammalib::str(time.mjd())+". Please specify "
+                          "ephemerides that comprise the time.";
+        throw GException::invalid_argument(G_PHASE, msg);
+    }
+
+    // Return ephemerides
+    return (m_ephemerides[ifound]);
+}
+
+
+/***********************************************************************//**
  * @brief Return validity intervals of pulsar ephemerides
  *
  * @return Validity intervals of pulsar ephemerides.
@@ -298,16 +335,33 @@ std::string GPulsar::print(const GChatter& chatter) const
     // Continue only if chatter is not silent
     if (chatter != SILENT) {
 
+        // Get ephemerides validity interval
+        GGti gti = validity();
+
         // Append header
         result.append("=== GPulsar ===");
 
-        // Append pulsar name
+        // Append information
         result.append("\n"+gammalib::parformat("Pulsar name"));
         result.append(m_name);
+        result.append("\n"+gammalib::parformat("Number of ephemerides"));
+        result.append(gammalib::str(m_ephemerides.size()));
+        if (!is_empty()) {
+            result.append("\n"+gammalib::parformat("Validity MJD range"));
+            result.append(gammalib::str(gti.tstart().mjd()));
+            result.append(" - ");
+            result.append(gammalib::str(gti.tstop().mjd()));
+            result.append("\n"+gammalib::parformat("Validity UTC range"));
+            result.append(gti.tstart().utc());
+            result.append(" - ");
+            result.append(gti.tstop().utc());
+        }
 
-        // Append ephemerides
-        for (int i = 0; i < m_ephemerides.size(); ++i) {
-            result.append("\n"+m_ephemerides[i].print());
+        // EXPLICIT: Append ephemerides
+        if (chatter >= EXPLICIT) {
+            for (int i = 0; i < m_ephemerides.size(); ++i) {
+                result.append("\n"+m_ephemerides[i].print());
+            }
         }
 
     } // endif: chatter was not silent

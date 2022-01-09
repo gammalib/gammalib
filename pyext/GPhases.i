@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GPhases.i - Phase intervals class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -57,6 +57,7 @@ public:
     void        extend(const GPhases& phases);
     double      pmin(const int& index) const;
     double      pmax(const int& index) const;
+    double      length(void) const;
 };
 
 
