@@ -1,7 +1,8 @@
 /***************************************************************************
- *    GModelSpatialRadialGeneralGauss.cpp - Radial Generalized Gaussian source model class    *
+ *    GModelSpatialRadialGeneralGauss.cpp - Generalized radial Gaussian    *
+ *                           source model class                            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2021- by Luigi Tibaldo                                   *
+ *  copyright (C) 2021-2022 by Luigi Tibaldo                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,14 +39,14 @@
 
 /* __ Globals ____________________________________________________________ */
 const GModelSpatialRadialGeneralGauss g_radial_general_gauss_seed;
-const GModelSpatialRegistry    g_radial_general_gauss_registry(&g_radial_general_gauss_seed);
+const GModelSpatialRegistry           g_radial_general_gauss_registry(&g_radial_general_gauss_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_EVAL   "GModelSpatialRadialGeneralGauss::eval(double&, GEnergy&, GTime&, "\
-                                                                     "bool&)"
-#define G_READ                 "GModelSpatialRadialGeneralGauss::read(GXmlElement&)"
-#define G_WRITE               "GModelSpatialRadialGeneralGauss::write(GXmlElement&)"
-#define G_MC          "GModelSpatialRadialGeneralGauss::mc(GEnergy&, GTime&, GRan&)"
+#define G_EVAL    "GModelSpatialRadialGeneralGauss::eval(double&, GEnergy&, "\
+                                                             "GTime&, bool&)"
+#define G_READ          "GModelSpatialRadialGeneralGauss::read(GXmlElement&)"
+#define G_WRITE        "GModelSpatialRadialGeneralGauss::write(GXmlElement&)"
+#define G_MC   "GModelSpatialRadialGeneralGauss::mc(GEnergy&, GTime&, GRan&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -65,33 +66,11 @@ const GModelSpatialRegistry    g_radial_general_gauss_registry(&g_radial_general
  *
  * Constructs empty radial Gaussian model.
  ***************************************************************************/
-GModelSpatialRadialGeneralGauss::GModelSpatialRadialGeneralGauss(void) : GModelSpatialRadial()
+GModelSpatialRadialGeneralGauss::GModelSpatialRadialGeneralGauss(void) :
+                                 GModelSpatialRadial()
 {
     // Initialise members
     init_members();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Model type constructor
- *
- * @param[in] dummy Dummy flag.
- * @param[in] type Model type.
- *
- * Constructs empty radial Gaussian model by specifying a model @p type.
- ***************************************************************************/
-GModelSpatialRadialGeneralGauss::GModelSpatialRadialGeneralGauss(const bool&        dummy,
-                                                   const std::string& type) :
-                          GModelSpatialRadial()
-{
-    // Initialise members
-    init_members();
-
-    // Set model type
-    m_type = type;
 
     // Return
     return;
@@ -102,17 +81,17 @@ GModelSpatialRadialGeneralGauss::GModelSpatialRadialGeneralGauss(const bool&    
  * @brief Constructor
  *
  * @param[in] dir Sky position of Gaussian.
- * @param[in] radius Width of Generalized Gaussian (in degrees).
+ * @param[in] radius Width of Generalized Gaussian (deg).
  * @param[in] ridx Reciprocal of exponential index of radial profile.
  *
- * Constructs a Generalized Gaussian spatial model using a sky direction (@p dir),
- * a Gaussian width parameter @p radius in degrees and a reciprocal of the 
- * exponential index @p ridx.
+ * Constructs a Generalized Gaussian spatial model using a sky direction
+ * (@p dir), a Gaussian width parameter @p radius in degrees and a reciprocal
+ * of the exponential index @p ridx.
  ***************************************************************************/
 GModelSpatialRadialGeneralGauss::GModelSpatialRadialGeneralGauss(const GSkyDir& dir,
-                                                   const double&  radius,
-						   const double& ridx) :
-                          GModelSpatialRadial()
+                                                                 const double&  radius,
+						                                         const double&  ridx) :
+                                 GModelSpatialRadial()
 {
     // Initialise members
     init_members();
@@ -132,12 +111,12 @@ GModelSpatialRadialGeneralGauss::GModelSpatialRadialGeneralGauss(const GSkyDir& 
  *
  * @param[in] xml XML element.
  *
- * Constructs a Generalized Gaussian spatial model by extracting information from an XML
- * element. See the method read() for more information about the expected
- * structure of the XML element.
+ * Constructs a Generalized Gaussian spatial model by extracting information
+ * from an XML element. See the method read() for more information about the
+ * expected structure of the XML element.
  ***************************************************************************/
 GModelSpatialRadialGeneralGauss::GModelSpatialRadialGeneralGauss(const GXmlElement& xml) :
-                          GModelSpatialRadial()
+                                 GModelSpatialRadial()
 {
     // Initialise members
     init_members();
@@ -153,10 +132,10 @@ GModelSpatialRadialGeneralGauss::GModelSpatialRadialGeneralGauss(const GXmlEleme
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] model Radial Gaussian model.
+ * @param[in] model Generalized radial Gaussian model.
  ***************************************************************************/
 GModelSpatialRadialGeneralGauss::GModelSpatialRadialGeneralGauss(const GModelSpatialRadialGeneralGauss& model) : 
-                          GModelSpatialRadial(model)
+                                 GModelSpatialRadial(model)
 {
     // Initialise members
     init_members();
@@ -191,8 +170,8 @@ GModelSpatialRadialGeneralGauss::~GModelSpatialRadialGeneralGauss(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] model Radial Gaussian model.
- * @return Radial Gaussian model.
+ * @param[in] model Generalized radial Gaussian model.
+ * @return Radial Generalized radial Gaussian model.
  ***************************************************************************/
 GModelSpatialRadialGeneralGauss& GModelSpatialRadialGeneralGauss::operator=(const GModelSpatialRadialGeneralGauss& model)
 {
@@ -284,16 +263,16 @@ GModelSpatialRadialGeneralGauss* GModelSpatialRadialGeneralGauss::clone(void) co
  * approximation and for  \f$\eta\f$ order unity or smaller.
  ***************************************************************************/
 double GModelSpatialRadialGeneralGauss::eval(const double&  theta,
-                                      const GEnergy& energy,
-                                      const GTime&   time,
-                                      const bool&    gradients) const
+                                             const GEnergy& energy,
+                                             const GTime&   time,
+                                             const bool&    gradients) const
 {
     // Update
     update();
 
     // Compute value
-    double arg       = -1.0 * std::pow(m_inv_radius_rad * theta,m_inv_ridx);
-    double value     = m_value_norm * std::exp(arg);
+    double arg   = -1.0 * std::pow(m_inv_radius_rad * theta,m_inv_ridx);
+    double value = m_value_norm * std::exp(arg);
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
@@ -380,13 +359,13 @@ GSkyDir GModelSpatialRadialGeneralGauss::mc(const GEnergy& energy,
  * @brief Checks where model contains specified sky direction
  *
  * @param[in] dir Sky direction.
- * @param[in] margin Margin to be added to sky direction (degrees)
+ * @param[in] margin Margin to be added to sky direction (deg)
  * @return True if the model contains the sky direction.
  *
  * Signals whether a sky direction is contained in the radial gauss model.
  ***************************************************************************/
 bool GModelSpatialRadialGeneralGauss::contains(const GSkyDir& dir,
-                                        const double&  margin) const
+                                               const double&  margin) const
 {
     // Compute distance to centre (radians)
     double distance = dir.dist(this->dir());
@@ -419,19 +398,19 @@ double GModelSpatialRadialGeneralGauss::theta_max(void) const
  * element shall have either the format 
  *
  *     <spatialModel type="RadialGeneralGaussian">
- *       <parameter name="RA"    scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
- *       <parameter name="DEC"   scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
- *       <parameter name="Radius" scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
-*       <parameter name="R_Index" scale="1.0" value="0.5"    min="0.01" max="10"  free="1"/>
+ *       <parameter name="RA"      scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
+ *       <parameter name="DEC"     scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
+ *       <parameter name="Radius"  scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
+ *       <parameter name="R_Index" scale="1.0" value="0.5"     min="0.01" max="10"  free="1"/>
  *     </spatialModel>
  *
  * or
  *
  *     <spatialModel type="RadialGeneralGaussian">
- *       <parameter name="GLON"  scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
- *       <parameter name="GLAT"  scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
- *       <parameter name="Radius" scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
-*       <parameter name="R_Index" scale="1.0" value="0.5"    min="0.01" max="10"  free="1"/>
+ *       <parameter name="GLON"    scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
+ *       <parameter name="GLAT"    scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
+ *       <parameter name="Radius"  scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
+ *       <parameter name="R_Index" scale="1.0" value="0.5"     min="0.01" max="10"  free="1"/>
  *     </spatialModel>
  *
  * @todo Implement a test of the radius and radius boundary. The sigma
@@ -466,11 +445,11 @@ void GModelSpatialRadialGeneralGauss::read(const GXmlElement& xml)
  * Writes the radial disk model information into an XML element. The XML
  * element will have the format 
  *
- *     <spatialModel type="RadialGaussian">
- *       <parameter name="RA"    scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
- *       <parameter name="DEC"   scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
- *       <parameter name="Sigma" scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
- *       <parameter name="R_Index" scale="1.0" value="0.5"    min="0.01" max="10"  free="1"/>
+ *     <spatialModel type="RadialGeneralGaussian">
+ *       <parameter name="RA"      scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
+ *       <parameter name="DEC"     scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
+ *       <parameter name="Sigma"   scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
+ *       <parameter name="R_Index" scale="1.0" value="0.5"     min="0.01" max="10"  free="1"/>
  *     </spatialModel>
  *
  ***************************************************************************/
@@ -567,11 +546,11 @@ void GModelSpatialRadialGeneralGauss::init_members(void)
 
     // Initialise precomputation cache. Note that zero values flag
     // uninitialised as a zero radius and width shell is not meaningful
-    m_last_radius = 0.0;
+    m_last_radius    = 0.0;
     m_inv_radius_rad = 0.0;
-    m_last_ridx = 0.0;
-    m_inv_ridx = 0.0;
-    m_value_norm = 0.0;
+    m_last_ridx      = 0.0;
+    m_inv_ridx       = 0.0;
+    m_value_norm     = 0.0;
 
     // Return
     return;
@@ -581,7 +560,7 @@ void GModelSpatialRadialGeneralGauss::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] model Gaussian spatial model.
+ * @param[in] model Reneralized radial Gaussian spatial model.
  *
  * We do not have to push back the members on the parameter stack as this
  * should have been done by init_members() that was called before. Otherwise
@@ -590,12 +569,12 @@ void GModelSpatialRadialGeneralGauss::init_members(void)
 void GModelSpatialRadialGeneralGauss::copy_members(const GModelSpatialRadialGeneralGauss& model)
 {
     // Copy members
-    m_type  = model.m_type;   // Needed to conserve model type
+    m_type   = model.m_type;   // Needed to conserve model type
     m_radius = model.m_radius;
-    m_ridx = model.m_ridx;
+    m_ridx   = model.m_ridx;
 
     // Copy pre-computation cache
-    m_last_radius     = model.m_last_radius;
+    m_last_radius    = model.m_last_radius;
     m_inv_radius_rad = model.m_inv_radius_rad;
     m_last_ridx      = model.m_last_ridx;
     m_inv_ridx       = model.m_inv_ridx;
@@ -618,28 +597,27 @@ void GModelSpatialRadialGeneralGauss::free_members(void)
 
 /***********************************************************************//**
  * @brief Update precomputation cache
- *
- * @param[in] gradients Gradient computation requested?
  ***************************************************************************/
 void GModelSpatialRadialGeneralGauss::update() const
 {
     // Update if radius has changed
-  if (m_last_radius != radius() or m_last_ridx != ridx()) {
+    if (m_last_radius != radius() or m_last_ridx != ridx()) {
 
         // Store last values
         m_last_radius = radius();
-	m_last_ridx = ridx();
+        m_last_ridx   = ridx();
 
         // Compute radius in radians
-        double radius_rad  = radius() * gammalib::deg2rad;
-        if (radius_rad > 0.0 and ridx() > 0) {
+        double radius_rad = radius() * gammalib::deg2rad;
+        if (radius_rad > 0.0 and ridx() > 0.0) {
             m_inv_radius_rad = 1.0 / radius_rad;
-	    m_inv_ridx = 1.0 / ridx() ;
-            m_value_norm     = 1.0 / (gammalib::twopi * radius_rad * radius_rad * ridx() * std::exp(gammalib::gammln(2 * ridx())) );
+            m_inv_ridx       = 1.0 / ridx() ;
+            m_value_norm     = 1.0 / (gammalib::twopi * radius_rad * radius_rad * ridx() *
+                                      std::exp(gammalib::gammln(2.0 * ridx())));
         }
         else {
             m_inv_radius_rad = 0.0;
-	    m_inv_ridx = 1.0;
+            m_inv_ridx       = 1.0;
             m_value_norm     = 0.0;
         }
 

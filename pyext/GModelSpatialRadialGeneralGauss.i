@@ -1,7 +1,8 @@
 /***************************************************************************
- * GModelSpatialRadialGeneralGauss.i - Radial Generalised Gaussian source model class     *
+ *     GModelSpatialRadialGeneralGauss.i - Generalized radial Gaussian     *
+ *                           source model class                            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2021- by Luigi Tibaldo                      *
+ *  copyright (C) 2021-2022          by Luigi Tibaldo                      *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +21,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpatialRadialGeneralGauss.i
- * @brief Radial Generalised Gaussian model class Python interface definition
+ * @brief Generalised radial Gaussian model class Python interface definition
  * @author Luigi Tibaldo
  */
 %{
@@ -32,40 +33,42 @@
 /***********************************************************************//**
  * @class GModelSpatialRadialGeneralGauss
  *
- * @brief Radial Generalised Gaussian model class
+ * @brief Generalised radial Gaussian model class
  ***************************************************************************/
 class GModelSpatialRadialGeneralGauss : public GModelSpatialRadial {
 
 public:
     // Constructors and destructors
     GModelSpatialRadialGeneralGauss(void);
-    GModelSpatialRadialGeneralGauss(const GSkyDir& dir, const double& radius,  const double& ridx);
+    GModelSpatialRadialGeneralGauss(const GSkyDir& dir,
+                                    const double&  radius,
+                                    const double&  ridx);
     explicit GModelSpatialRadialGeneralGauss(const GXmlElement& xml);
     GModelSpatialRadialGeneralGauss(const GModelSpatialRadialGeneralGauss& model);
     virtual ~GModelSpatialRadialGeneralGauss(void);
 
     // Implemented pure virtual methods
-    virtual void                      clear(void);
+    virtual void                             clear(void);
     virtual GModelSpatialRadialGeneralGauss* clone(void) const;
-    virtual std::string               classname(void) const;
-    virtual double                    eval(const double&  theta,
-                                           const GEnergy& energy,
-                                           const GTime&   time,
-                                           const bool&    gradients = false) const;
-    virtual GSkyDir                   mc(const GEnergy& energy,
-                                         const GTime& time,
-                                         GRan& ran) const;
-    virtual bool                      contains(const GSkyDir& dir,
-                                               const double&  margin = 0.0) const;
-    virtual double                    theta_max(void) const;
-    virtual void                      read(const GXmlElement& xml);
-    virtual void                      write(GXmlElement& xml) const;
+    virtual std::string                      classname(void) const;
+    virtual double                           eval(const double&  theta,
+                                                  const GEnergy& energy,
+                                                  const GTime&   time,
+                                                  const bool&    gradients = false) const;
+    virtual GSkyDir                          mc(const GEnergy& energy,
+                                                const GTime& time,
+                                                GRan& ran) const;
+    virtual bool                             contains(const GSkyDir& dir,
+                                                      const double&  margin = 0.0) const;
+    virtual double                           theta_max(void) const;
+    virtual void                             read(const GXmlElement& xml);
+    virtual void                             write(GXmlElement& xml) const;
 
     // Other methods
-    double  radius(void) const;
-    double  ridx(void) const;
-    void    radius(const double& radius);
-    void    ridx(const double& ridx);
+    double radius(void) const;
+    double ridx(void) const;
+    void   radius(const double& radius);
+    void   ridx(const double& ridx);
 };
 
 

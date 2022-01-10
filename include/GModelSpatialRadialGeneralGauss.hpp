@@ -1,7 +1,8 @@
 /***************************************************************************
- *    GModelSpatialRadialGeneralGauss.hpp - Radial General Gaussian source model class    *
+ *    GModelSpatialRadialGeneralGauss.hpp - Generalized radial Gaussian    *
+ *                           source model class                            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2021- by Luigi Tibaldo                                   *
+ *  copyright (C) 2021-2022 by Luigi Tibaldo                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +21,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpatialRadialGeneralGauss.hpp
- * @brief Radial Generalized Gaussian model class interface definition
+ * @brief Generalized radial Gaussian model class interface definition
  * @author Luigi Tibaldo
  */
 
@@ -41,7 +42,7 @@
 /***********************************************************************//**
  * @class GModelSpatialRadialGeneralGauss
  *
- * @brief Radial Generalized Gaussian model class
+ * @brief Generalized radial Gaussian model class
  *
  * This class implements the spatial component of the factorised source
  * model for a Generalized Gaussian source.
@@ -51,8 +52,9 @@ class GModelSpatialRadialGeneralGauss : public GModelSpatialRadial {
 public:
     // Constructors and destructors
     GModelSpatialRadialGeneralGauss(void);
-    GModelSpatialRadialGeneralGauss(const bool& dummy, const std::string& type);
-    GModelSpatialRadialGeneralGauss(const GSkyDir& dir, const double& radius, const double& ridx);
+    GModelSpatialRadialGeneralGauss(const GSkyDir& dir,
+                                    const double&  radius,
+                                    const double&  ridx);
     explicit GModelSpatialRadialGeneralGauss(const GXmlElement& xml);
     GModelSpatialRadialGeneralGauss(const GModelSpatialRadialGeneralGauss& model);
     virtual ~GModelSpatialRadialGeneralGauss(void);
@@ -61,28 +63,28 @@ public:
     virtual GModelSpatialRadialGeneralGauss& operator=(const GModelSpatialRadialGeneralGauss& model);
 
     // Implemented pure virtual methods
-    virtual void                      clear(void);
+    virtual void                             clear(void);
     virtual GModelSpatialRadialGeneralGauss* clone(void) const;
-    virtual std::string               classname(void) const;
-    virtual double                    eval(const double&  theta,
-                                           const GEnergy& energy,
-                                           const GTime&   time,
-                                           const bool&    gradients = false) const;
-    virtual GSkyDir                   mc(const GEnergy& energy,
-                                         const GTime& time,
-                                         GRan& ran) const;
-    virtual bool                      contains(const GSkyDir& dir,
-                                               const double&  margin = 0.0) const;
-    virtual double                    theta_max(void) const;
-    virtual void                      read(const GXmlElement& xml);
-    virtual void                      write(GXmlElement& xml) const;
-    virtual std::string               print(const GChatter& chatter = NORMAL) const;
+    virtual std::string                      classname(void) const;
+    virtual double                           eval(const double&  theta,
+                                                  const GEnergy& energy,
+                                                  const GTime&   time,
+                                                  const bool&    gradients = false) const;
+    virtual GSkyDir                          mc(const GEnergy& energy,
+                                                const GTime& time,
+                                                GRan& ran) const;
+    virtual bool                                contains(const GSkyDir& dir,
+                                                         const double&  margin = 0.0) const;
+    virtual double                           theta_max(void) const;
+    virtual void                             read(const GXmlElement& xml);
+    virtual void                             write(GXmlElement& xml) const;
+    virtual std::string                      print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    double  radius(void) const;
-    void    radius(const double& radius);
-    double  ridx(void) const;
-    void    ridx(const double& ridx);
+    double radius(void) const;
+    void   radius(const double& radius);
+    double ridx(void) const;
+    void   ridx(const double& ridx);
 
 protected:
     // Protected methods
@@ -94,14 +96,14 @@ protected:
 
     // Protected members
     GModelPar m_radius;                 //!< Gaussian width (deg)
-    GModelPar m_ridx;                   //!< reciprocal of exponent of the radial profile
+    GModelPar m_ridx;                   //!< Reciprocal of exponent of the radial profile
 
     // Cached members used for pre-computations
     mutable double m_last_radius;       //!< Last radius
-    mutable double m_inv_radius_rad;   //!< radius(rad)^-1
-    mutable double m_last_ridx;        // Last reciprocal radial index
-    mutable double m_inv_ridx;         // Spatial profile index
-    mutable double m_value_norm;       //!< 1/(2pi radius(rad)^2 ridx Gamma(ridx))
+    mutable double m_inv_radius_rad;    //!< radius(rad)^-1
+    mutable double m_last_ridx;         //!< Last reciprocal radial index
+    mutable double m_inv_ridx;          //!< Spatial profile index
+    mutable double m_value_norm;        //!< 1/(2pi radius(rad)^2 ridx Gamma(ridx))
 };
 
 
@@ -120,7 +122,7 @@ std::string GModelSpatialRadialGeneralGauss::classname(void) const
 /***********************************************************************//**
  * @brief Return radius
  *
- * @return radius (degrees).
+ * @return Radius (deg).
  *
  * Returns the radius in degrees.
  ***************************************************************************/
@@ -133,7 +135,7 @@ double GModelSpatialRadialGeneralGauss::radius(void) const
 /***********************************************************************//**
  * @brief Set radius
  *
- * @param[in] radius (degrees).
+ * @param[in] radius (deg).
  *
  * Sets the radius in degrees.
  ***************************************************************************/
@@ -147,7 +149,7 @@ void GModelSpatialRadialGeneralGauss::radius(const double& radius)
 /***********************************************************************//**
  * @brief Return ridx
  *
- * @return ridx
+ * @return Reciprocal of the radial profile index.
  *
  * Returns the reciprocal of the radial profile index.
  ***************************************************************************/
@@ -160,7 +162,7 @@ double GModelSpatialRadialGeneralGauss::ridx(void) const
 /***********************************************************************//**
  * @brief Set reciprocal index
  *
- * @param[in] ridx.
+ * @param[in] ridx Reciprocal of the radial profile index.
  *
  * Sets the reciprocal index of the radial profile.
  ***************************************************************************/
