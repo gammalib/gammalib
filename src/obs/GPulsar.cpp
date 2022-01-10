@@ -189,17 +189,17 @@ GPulsar* GPulsar::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Return pulsar ephemerides
+ * @brief Return pulsar ephemeris
  *
  * param[in] time Time.
- * @return Pulsar ephemerides.
+ * @return Pulsar ephemeris.
  *
  * @exception GException::invalid_argument
- *            No valid ephemerides found for specified @p time.
+ *            No valid ephemeris found for specified @p time.
  *
- * Returns the pulsar ephemerides as function of time.
+ * Returns the pulsar ephemeris as function of time.
  ***************************************************************************/
-const GPulsarEphemerides& GPulsar::ephemerides(const GTime& time) const
+const GPulsarEphemeris& GPulsar::ephemeris(const GTime& time) const
 {
     // Find appropriate ephemerides
     int ifound = -1;
@@ -213,7 +213,7 @@ const GPulsarEphemerides& GPulsar::ephemerides(const GTime& time) const
 
     // Throw an expection if no valid ephemerides were found
     if (ifound == -1) {
-        std::string msg = "No valid ephemerides found for MJD "+
+        std::string msg = "No valid ephemeris found for MJD "+
                           gammalib::str(time.mjd())+". Please specify "
                           "ephemerides that comprise the time.";
         throw GException::invalid_argument(G_PHASE, msg);
@@ -519,21 +519,21 @@ void GPulsar::load_integral(const GFitsTable* table, const std::string& name)
         t0.mjd(tref0->real(i));
         t0 += t2peak->real(i);
 
-        // Allocate ephemerides
-        GPulsarEphemerides ephemerides;
+        // Allocate ephemeris
+        GPulsarEphemeris ephemeris;
 
         // Set attributes
-        ephemerides.name(m_name);
-        ephemerides.dir(dir);
-        ephemerides.tstart(tstart);
-        ephemerides.tstop(tstop);
-        ephemerides.t0(t0);
-        ephemerides.f0(f0->real(i));
-        ephemerides.f1(f1->real(i));
-        ephemerides.f2(f2->real(i));
+        ephemeris.name(m_name);
+        ephemeris.dir(dir);
+        ephemeris.tstart(tstart);
+        ephemeris.tstop(tstop);
+        ephemeris.t0(t0);
+        ephemeris.f0(f0->real(i));
+        ephemeris.f1(f1->real(i));
+        ephemeris.f2(f2->real(i));
 
-        // Push back ephemerides
-        m_ephemerides.push_back(ephemerides);
+        // Push back ephemeris
+        m_ephemerides.push_back(ephemeris);
 
     } // endfor: looped over ephemerides
 
@@ -592,21 +592,21 @@ void GPulsar::load_fermi(const GFitsTable* table, const std::string& name)
         GTime t0;
         t0.mjd(toabary_int->integer(i)+toabary_frac->real(i));
 
-        // Allocate ephemerides
-        GPulsarEphemerides ephemerides;
+        // Allocate ephemeris
+        GPulsarEphemeris ephemeris;
 
         // Set attributes
-        ephemerides.name(m_name);
-        ephemerides.dir(dir);
-        ephemerides.tstart(tstart);
-        ephemerides.tstop(tstop);
-        ephemerides.t0(t0);
-        ephemerides.f0(f0->real(i));
-        ephemerides.f1(f1->real(i));
-        ephemerides.f2(f2->real(i));
+        ephemeris.name(m_name);
+        ephemeris.dir(dir);
+        ephemeris.tstart(tstart);
+        ephemeris.tstop(tstop);
+        ephemeris.t0(t0);
+        ephemeris.f0(f0->real(i));
+        ephemeris.f1(f1->real(i));
+        ephemeris.f2(f2->real(i));
 
-        // Push back ephemerides
-        m_ephemerides.push_back(ephemerides);
+        // Push back ephemeris
+        m_ephemerides.push_back(ephemeris);
 
     } // endfor: looped over ephemerides
 
@@ -731,21 +731,21 @@ void GPulsar::load_psrtime(const GFilename& filename, const std::string& name)
         GTime t0;
         t0.mjd(t0geo); // TODO: conversion to Bary ???
 
-        // Allocate ephemerides
-        GPulsarEphemerides ephemerides;
+        // Allocate ephemeris
+        GPulsarEphemeris ephemeris;
 
         // Set attributes
-        ephemerides.name(m_name);
-        ephemerides.dir(dir);
-        ephemerides.tstart(tstart);
-        ephemerides.tstop(tstop);
-        ephemerides.t0(t0);
-        ephemerides.f0(f0);
-        ephemerides.f1(f1);
-        ephemerides.f2(f2);
+        ephemeris.name(m_name);
+        ephemeris.dir(dir);
+        ephemeris.tstart(tstart);
+        ephemeris.tstop(tstop);
+        ephemeris.t0(t0);
+        ephemeris.f0(f0);
+        ephemeris.f1(f1);
+        ephemeris.f2(f2);
 
-        // Push back ephemerides
-        m_ephemerides.push_back(ephemerides);
+        // Push back ephemeris
+        m_ephemerides.push_back(ephemeris);
 
     } // endwhile: looped over lines
 
@@ -758,17 +758,17 @@ void GPulsar::load_psrtime(const GFilename& filename, const std::string& name)
 
 
 /***********************************************************************//**
- * @brief Load Pulsar from ephemerides par file
+ * @brief Load Pulsar from ephemeris par file
  *
- * @param[in] filename Name of pulsar ephemerides par file
+ * @param[in] filename Name of pulsar ephemeris par file
  * @param[in] name Pulsar name
  *
  * @exception GException::file_error
- *            Could not open ephemerides ASCII file
+ *            Could not open ephemeris ASCII file
  * @exception GException::invalid_argument
  *            No valid Right Ascension and Declination found
  *
- * Load a pulsar from an ephemerides par file.
+ * Load a pulsar from an ephemeris par file.
  ***************************************************************************/
 void GPulsar::load_parfile(const GFilename& filename)
 {
@@ -779,16 +779,16 @@ void GPulsar::load_parfile(const GFilename& filename)
     // Open file
     FILE* fptr = std::fopen(filename.url().c_str(), "r");
     if (fptr == NULL) {
-        std::string msg = "Pulsar ephemerides file \""+filename.url()+
+        std::string msg = "Pulsar ephemeris file \""+filename.url()+
                           "\" not found or readable. Please specify a "
-                          "valid and readable ephemerides file.";
+                          "valid and readable ephemeris file.";
         throw GException::file_error(G_LOAD_PARFILE, msg);
     }
 
-    // Allocate ephemerides
-    GPulsarEphemerides ephemerides;
-    double             ra  = 9999.0;
-    double             dec = 9999.0;
+    // Allocate ephemeris
+    GPulsarEphemeris ephemeris;
+    double           ra  = 9999.0;
+    double           dec = 9999.0;
 
     // Read lines
     while (std::fgets(line, n, fptr) != NULL) {
@@ -799,7 +799,7 @@ void GPulsar::load_parfile(const GFilename& filename)
         // Extract keywords
         if (elements[0] == "PSRJ") {
             m_name = "PSR " + gammalib::rstrip_chars(elements[1], "\n");
-            ephemerides.name(m_name);
+            ephemeris.name(m_name);
         }
         else if (elements[0] == "RAJ") {
             std::vector<std::string> ras = gammalib::split(elements[1], ":");
@@ -819,44 +819,44 @@ void GPulsar::load_parfile(const GFilename& filename)
         else if (elements[0] == "START") {
             GTime tstart;
             tstart.mjd(gammalib::todouble(elements[1]));
-            ephemerides.tstart(tstart);
+            ephemeris.tstart(tstart);
         }
         else if (elements[0] == "FINISH") {
             GTime tstop;
             tstop.mjd(gammalib::todouble(elements[1]));
-            ephemerides.tstop(tstop);
+            ephemeris.tstop(tstop);
         }
         else if (elements[0] == "TZRMJD") {  // TODO: Are you sure???
             GTime t0;
             t0.mjd(gammalib::todouble(elements[1]));
-            ephemerides.t0(t0);
+            ephemeris.t0(t0);
         }
         else if (elements[0] == "F0") {
-            ephemerides.f0(gammalib::todouble(elements[1]));
+            ephemeris.f0(gammalib::todouble(elements[1]));
         }
         else if (elements[0] == "F1") {
-            ephemerides.f1(gammalib::todouble(elements[1]));
+            ephemeris.f1(gammalib::todouble(elements[1]));
         }
         else if (elements[0] == "F2") {
-            ephemerides.f2(gammalib::todouble(elements[1]));
+            ephemeris.f2(gammalib::todouble(elements[1]));
         }
 
     } // endwhile: looped over lines
 
     // If Right Ascension and Declination is valid then set sky direction
-    // and push back ephemerides
+    // and push back ephemeris
     if (ra >= 0.0 && ra <= 360.0 && dec >= -90.0 && dec <= 90.0) {
         GSkyDir dir;
         dir.radec_deg(ra, dec);
-        ephemerides.dir(dir);
-        m_ephemerides.push_back(ephemerides);
+        ephemeris.dir(dir);
+        m_ephemerides.push_back(ephemeris);
     }
 
     // ... otherwise throw an exception
     else {
         std::string msg = "No valid Right Ascension or Declination found in "
-                          "pulsar ephemerides file \""+filename.url()+"\". "
-                          "Please verify the ephemerides file.";
+                          "pulsar ephemeris file \""+filename.url()+"\". "
+                          "Please verify the ephemeris file.";
         throw GException::invalid_argument(G_LOAD_PARFILE, msg);
     }
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *             GPulsarEphemerides.i - Pulsar ephemerides class             *
+ *               GPulsarEphemeris.i - Pulsar ephemeris class               *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2022 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -19,33 +19,33 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GPulsarEphemerides.i
- * @brief Pulsar ephemerides class definition
+ * @file GPulsarEphemeris.i
+ * @brief Pulsar ephemeris class definition
  * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GPulsarEphemerides.hpp"
+#include "GPulsarEphemeris.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GPulsarEphemerides
+ * @class GPulsarEphemeris
  *
- * @brief Pulsar ephemerides class
+ * @brief Pulsar ephemeris class
  ***************************************************************************/
-class GPulsarEphemerides : public GBase {
+class GPulsarEphemeris : public GBase {
 
 public:
     // Constructors and destructors
-    GPulsarEphemerides(void);
-    GPulsarEphemerides(const GPulsarEphemerides& ephemerides);
-    virtual ~GPulsarEphemerides(void);
+    GPulsarEphemeris(void);
+    GPulsarEphemeris(const GPulsarEphemeris& ephemeris);
+    virtual ~GPulsarEphemeris(void);
 
     // Implemented pure virtual base class methods
-    virtual void                clear(void);
-    virtual GPulsarEphemerides* clone(void) const;
-    virtual std::string         classname(void) const;
+    virtual void              clear(void);
+    virtual GPulsarEphemeris* clone(void) const;
+    virtual std::string       classname(void) const;
 
     // Other methods
     const std::string& name(void) const;
@@ -69,10 +69,10 @@ public:
 
 
 /***********************************************************************//**
- * @brief GPulsarEphemerides class extension
+ * @brief GPulsarEphemeris class extension
  ***************************************************************************/
-%extend GPulsarEphemerides {
-    GPulsarEphemerides copy() {
+%extend GPulsarEphemeris {
+    GPulsarEphemeris copy() {
         return (*self);
     }
 };

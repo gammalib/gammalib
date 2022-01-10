@@ -16,7 +16,7 @@ The following classes have been added:
 - GIntegrals
 - GResponseVectorCache
 - GPulsar
-- GPulsarEphemerides
+- GPulsarEphemeris
 - GSkyDirs
 - GSkyRegionRect
 - GModelAssociation
@@ -283,7 +283,7 @@ intervals (#3973).
 Add GGti::reduce(GGti&) method to reduce Good Time Intervals to the intersection
 with a specific list of intervals (#3973).
 
-Add GPulsar and GPulsarEphemerides classes to support pulsar analysis (#3973).
+Add GPulsar and GPulsarEphemeris classes to support pulsar analysis (#3973).
 
 Add likelihood fit event selection hook (#3912).
 

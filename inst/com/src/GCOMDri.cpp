@@ -460,16 +460,16 @@ void GCOMDri::compute_dre(const GCOMObservation& obs,
             // Optionally apply pulsar phase selection
             if (has_pulsar) {
 
-                // Get pulsar ephemerides
-                const GPulsarEphemerides& ephemerides =
-                      m_selection.pulsar().ephemerides(event->time());
+                // Get pulsar ephemeris
+                const GPulsarEphemeris& ephemeris =
+                      m_selection.pulsar().ephemeris(event->time());
 
                 // Convert time to Solar System Barycentre
                 GTime time  = event->time() +
-                              obs.bvcs().tdelta(ephemerides.dir(), event->time());
+                              obs.bvcs().tdelta(ephemeris.dir(), event->time());
 
                 // Compute pulsar phase
-                double phase = ephemerides.phase(time);
+                double phase = ephemeris.phase(time);
 
                 // If phase is not contained in phase interval then skip event
                 if (!m_selection.pulsar_phases().contains(phase)) {

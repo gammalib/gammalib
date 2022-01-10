@@ -245,4 +245,4 @@
 %include "GPhotons.i"
 %include "GSource.i"
 %include "GPulsar.i"
-%include "GPulsarEphemerides.i"
+%include "GPulsarEphemeris.i"

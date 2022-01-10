@@ -198,7 +198,7 @@
 #include "GPhoton.hpp"
 #include "GSource.hpp"
 #include "GPulsar.hpp"
-#include "GPulsarEphemerides.hpp"
+#include "GPulsarEphemeris.hpp"
 
 /* __ Model handling _____________________________________________________ */
 #include "GModelPar.hpp"

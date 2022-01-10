@@ -49,14 +49,14 @@ public:
     virtual std::string classname(void) const;
 
     // Other methods
-    int                       size(void) const;
-    bool                      is_empty(void) const;
-    const std::string&        name(void) const;
-    void                      name(const std::string& name);
-    const GPulsarEphemerides& ephemerides(const GTime& time) const;
-    GGti                      validity(void) const;
-    void                      load(const GFilename& filename,
-                                   const std::string& name = "");
+    int                     size(void) const;
+    bool                    is_empty(void) const;
+    const std::string&      name(void) const;
+    void                    name(const std::string& name);
+    const GPulsarEphemeris& ephemeris(const GTime& time) const;
+    GGti                    validity(void) const;
+    void                    load(const GFilename& filename,
+                                 const std::string& name = "");
 };
 
 

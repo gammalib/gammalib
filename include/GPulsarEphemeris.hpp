@@ -1,5 +1,5 @@
 /***************************************************************************
- *            GPulsarEphemerides.hpp - Pulsar ephemerides class            *
+ *              GPulsarEphemeris.hpp - Pulsar ephemeris class              *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2022 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -19,13 +19,13 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GPulsarEphemerides.hpp
- * @brief Pulsar ephemerides class definition
+ * @file GPulsarEphemeris.hpp
+ * @brief Pulsar ephemeris class definition
  * @author Juergen Knoedlseder
  */
 
-#ifndef GPULSAREPHEMERIDES_HPP
-#define GPULSAREPHEMERIDES_HPP
+#ifndef GPULSAREPHEMERIS_HPP
+#define GPULSAREPHEMERIS_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
@@ -40,28 +40,28 @@
 
 
 /***********************************************************************//**
- * @class GPulsarEphemerides
+ * @class GPulsarEphemeris
  *
- * @brief Pulsar ephemerides class
+ * @brief Pulsar ephemeris class
  *
- * @todo Add class description.
+ * This class implements an ephemeris for a pulsar.
  ***************************************************************************/
-class GPulsarEphemerides : public GBase {
+class GPulsarEphemeris : public GBase {
 
 public:
     // Constructors and destructors
-    GPulsarEphemerides(void);
-    GPulsarEphemerides(const GPulsarEphemerides& ephemerides);
-    virtual ~GPulsarEphemerides(void);
+    GPulsarEphemeris(void);
+    GPulsarEphemeris(const GPulsarEphemeris& ephemeris);
+    virtual ~GPulsarEphemeris(void);
 
     // Operators
-    GPulsarEphemerides& operator=(const GPulsarEphemerides& ephemerides);
+    GPulsarEphemeris& operator=(const GPulsarEphemeris& ephemeris);
 
     // Implemented pure virtual base class methods
-    virtual void                clear(void);
-    virtual GPulsarEphemerides* clone(void) const;
-    virtual std::string         classname(void) const;
-    virtual std::string         print(const GChatter& chatter = NORMAL) const;
+    virtual void              clear(void);
+    virtual GPulsarEphemeris* clone(void) const;
+    virtual std::string       classname(void) const;
+    virtual std::string       print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     const std::string& name(void) const;
@@ -85,7 +85,7 @@ public:
 protected:
     // Protected methods
     void init_members(void);
-    void copy_members(const GPulsarEphemerides& ephemerides);
+    void copy_members(const GPulsarEphemeris& ephemeris);
     void free_members(void);
     
     // Protected members
@@ -100,12 +100,12 @@ protected:
 /***********************************************************************//**
  * @brief Return class name
  *
- * @return String containing the class name ("GPulsarEphemerides").
+ * @return String containing the class name ("GPulsarEphemeris").
  ***************************************************************************/
 inline
-std::string GPulsarEphemerides::classname(void) const
+std::string GPulsarEphemeris::classname(void) const
 {
-    return ("GPulsarEphemerides");
+    return ("GPulsarEphemeris");
 }
 
 
@@ -115,7 +115,7 @@ std::string GPulsarEphemerides::classname(void) const
  * @return Pulsar name.
  ***************************************************************************/
 inline
-const std::string& GPulsarEphemerides::name(void) const
+const std::string& GPulsarEphemeris::name(void) const
 {
     // Return
     return m_name;
@@ -128,7 +128,7 @@ const std::string& GPulsarEphemerides::name(void) const
  * @param[in] name Pulsar name.
  ***************************************************************************/
 inline
-void GPulsarEphemerides::name(const std::string& name)
+void GPulsarEphemeris::name(const std::string& name)
 {
     m_name = name;
     return;
@@ -141,7 +141,7 @@ void GPulsarEphemerides::name(const std::string& name)
  * @return Pulsar sky direction.
  ***************************************************************************/
 inline
-const GSkyDir& GPulsarEphemerides::dir(void) const
+const GSkyDir& GPulsarEphemeris::dir(void) const
 {
     // Return
     return m_dir;
@@ -154,7 +154,7 @@ const GSkyDir& GPulsarEphemerides::dir(void) const
  * @param[in] dir Pulsar sky direction.
  ***************************************************************************/
 inline
-void GPulsarEphemerides::dir(const GSkyDir& dir)
+void GPulsarEphemeris::dir(const GSkyDir& dir)
 {
     m_dir = dir;
     return;
@@ -167,7 +167,7 @@ void GPulsarEphemerides::dir(const GSkyDir& dir)
  * @return Validity start time.
  ***************************************************************************/
 inline
-const GTime& GPulsarEphemerides::tstart(void) const
+const GTime& GPulsarEphemeris::tstart(void) const
 {
     // Return
     return m_tstart;
@@ -180,7 +180,7 @@ const GTime& GPulsarEphemerides::tstart(void) const
  * @param[in] tstart Validity start time.
  ***************************************************************************/
 inline
-void GPulsarEphemerides::tstart(const GTime& tstart)
+void GPulsarEphemeris::tstart(const GTime& tstart)
 {
     m_tstart = tstart;
     return;
@@ -193,7 +193,7 @@ void GPulsarEphemerides::tstart(const GTime& tstart)
  * @return Validity stop time.
  ***************************************************************************/
 inline
-const GTime& GPulsarEphemerides::tstop(void) const
+const GTime& GPulsarEphemeris::tstop(void) const
 {
     // Return
     return m_tstop;
@@ -206,7 +206,7 @@ const GTime& GPulsarEphemerides::tstop(void) const
  * @param[in] tstop Validity stop time.
  ***************************************************************************/
 inline
-void GPulsarEphemerides::tstop(const GTime& tstop)
+void GPulsarEphemeris::tstop(const GTime& tstop)
 {
     m_tstop = tstop;
     return;
@@ -219,7 +219,7 @@ void GPulsarEphemerides::tstop(const GTime& tstop)
  * @return Reference time of phase 0.
  ***************************************************************************/
 inline
-GTime GPulsarEphemerides::t0(void) const
+GTime GPulsarEphemeris::t0(void) const
 {
     return (m_phase_curve.mjd());
 }
@@ -231,7 +231,7 @@ GTime GPulsarEphemerides::t0(void) const
  * @param[in] t0 Reference time of phase 0.
  ***************************************************************************/
 inline
-void GPulsarEphemerides::t0(const GTime& t0)
+void GPulsarEphemeris::t0(const GTime& t0)
 {
     m_phase_curve.mjd(t0);
     return;
@@ -244,7 +244,7 @@ void GPulsarEphemerides::t0(const GTime& t0)
  * @return Pulsar frequency (Hz).
  ***************************************************************************/
 inline
-double GPulsarEphemerides::f0(void) const
+double GPulsarEphemeris::f0(void) const
 {
     return (m_phase_curve.f0());
 }
@@ -256,7 +256,7 @@ double GPulsarEphemerides::f0(void) const
  * @param[in] f0 Pulsar frequency (Hz).
  ***************************************************************************/
 inline
-void GPulsarEphemerides::f0(const double& f0)
+void GPulsarEphemeris::f0(const double& f0)
 {
     m_phase_curve.f0(f0);
     return;
@@ -269,7 +269,7 @@ void GPulsarEphemerides::f0(const double& f0)
  * @return Pulsar frequency derivative (s^-2).
  ***************************************************************************/
 inline
-double GPulsarEphemerides::f1(void) const
+double GPulsarEphemeris::f1(void) const
 {
     return (m_phase_curve.f1());
 }
@@ -281,7 +281,7 @@ double GPulsarEphemerides::f1(void) const
  * @param[in] f1 Pulsar frequency derivative (s^-2).
  ***************************************************************************/
 inline
-void GPulsarEphemerides::f1(const double& f1)
+void GPulsarEphemeris::f1(const double& f1)
 {
     m_phase_curve.f1(f1);
     return;
@@ -294,7 +294,7 @@ void GPulsarEphemerides::f1(const double& f1)
  * @return Pulsar second frequency derivative (s^-3).
  ***************************************************************************/
 inline
-double GPulsarEphemerides::f2(void) const
+double GPulsarEphemeris::f2(void) const
 {
     return (m_phase_curve.f2());
 }
@@ -306,7 +306,7 @@ double GPulsarEphemerides::f2(void) const
  * @param[in] f2 Pulsar second frequency derivative (s^-3).
  ***************************************************************************/
 inline
-void GPulsarEphemerides::f2(const double& f2)
+void GPulsarEphemeris::f2(const double& f2)
 {
     m_phase_curve.f2(f2);
     return;
@@ -319,9 +319,9 @@ void GPulsarEphemerides::f2(const double& f2)
  * @return Pulsar phase.
  ***************************************************************************/
 inline
-double GPulsarEphemerides::phase(const GTime& time) const
+double GPulsarEphemeris::phase(const GTime& time) const
 {
     return (m_phase_curve.phase(time));
 }
 
-#endif /* GPULSAREPHEMERIDES_HPP */
+#endif /* GPULSAREPHEMERIS_HPP */

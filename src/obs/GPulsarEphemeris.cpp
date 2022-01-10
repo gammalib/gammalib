@@ -1,5 +1,5 @@
 /***************************************************************************
- *            GPulsarEphemerides.cpp - Pulsar ephemerides class            *
+ *              GPulsarEphemeris.cpp - Pulsar ephemeris class              *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2022 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -19,8 +19,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GPulsarEphemerides.cpp
- * @brief Pulsar ephemerides class implementation
+ * @file GPulsarEphemeris.cpp
+ * @brief Pulsar ephemeris class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -28,7 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GPulsarEphemerides.hpp"
+#include "GPulsarEphemeris.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -49,7 +49,7 @@
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GPulsarEphemerides::GPulsarEphemerides(void)
+GPulsarEphemeris::GPulsarEphemeris(void)
 {
     // Initialise class members
     init_members();
@@ -62,15 +62,15 @@ GPulsarEphemerides::GPulsarEphemerides(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] ephemerides Pulsar ephemerides.
+ * @param[in] ephemeris Pulsar ephemeris.
  ***************************************************************************/
-GPulsarEphemerides::GPulsarEphemerides(const GPulsarEphemerides& ephemerides)
+GPulsarEphemeris::GPulsarEphemeris(const GPulsarEphemeris& ephemeris)
 {
     // Initialise class members
     init_members();
 
     // Copy members
-    copy_members(ephemerides);
+    copy_members(ephemeris);
 
     // Return
     return;
@@ -80,7 +80,7 @@ GPulsarEphemerides::GPulsarEphemerides(const GPulsarEphemerides& ephemerides)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GPulsarEphemerides::~GPulsarEphemerides(void)
+GPulsarEphemeris::~GPulsarEphemeris(void)
 {
     // Free members
     free_members();
@@ -99,13 +99,13 @@ GPulsarEphemerides::~GPulsarEphemerides(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] ephemerides Pulsar ephemerides.
- * @return Pulsar ephemerides.
+ * @param[in] ephemeris Pulsar ephemeris.
+ * @return Pulsar ephemeris.
  ***************************************************************************/
-GPulsarEphemerides& GPulsarEphemerides::operator=(const GPulsarEphemerides& ephemerides)
+GPulsarEphemeris& GPulsarEphemeris::operator=(const GPulsarEphemeris& ephemeris)
 {
     // Execute only if object is not identical
-    if (this != &ephemerides) {
+    if (this != &ephemeris) {
 
         // Free members
         free_members();
@@ -114,7 +114,7 @@ GPulsarEphemerides& GPulsarEphemerides::operator=(const GPulsarEphemerides& ephe
         init_members();
 
         // Copy members
-        copy_members(ephemerides);
+        copy_members(ephemeris);
 
     } // endif: object was not identical
 
@@ -130,9 +130,9 @@ GPulsarEphemerides& GPulsarEphemerides::operator=(const GPulsarEphemerides& ephe
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear Pulsar ephemerides
+ * @brief Clear Pulsar ephemeris
  ***************************************************************************/
-void GPulsarEphemerides::clear(void)
+void GPulsarEphemeris::clear(void)
 {
     // Free members
     free_members();
@@ -146,23 +146,23 @@ void GPulsarEphemerides::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone Pulsar ephemerides
+ * @brief Clone Pulsar ephemeris
  *
- * @return Pointer to deep copy of Pulsar ephemerides.
+ * @return Pointer to deep copy of Pulsar ephemeris.
  ***************************************************************************/
-GPulsarEphemerides* GPulsarEphemerides::clone(void) const
+GPulsarEphemeris* GPulsarEphemeris::clone(void) const
 {
-    return new GPulsarEphemerides(*this);
+    return new GPulsarEphemeris(*this);
 }
 
 
 /***********************************************************************//**
- * @brief Print Pulsar ephemerides
+ * @brief Print Pulsar ephemeris
  *
  * @param[in] chatter Chattiness.
- * @return String containing Pulsar ephemerides information.
+ * @return String containing Pulsar ephemeris information.
  ***************************************************************************/
-std::string GPulsarEphemerides::print(const GChatter& chatter) const
+std::string GPulsarEphemeris::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
@@ -171,7 +171,7 @@ std::string GPulsarEphemerides::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append header
-        result.append("=== GPulsarEphemerides ===");
+        result.append("=== GPulsarEphemeris ===");
 
         // Append pulsar name and direction
         result.append("\n"+gammalib::parformat("Pulsar name"));
@@ -241,7 +241,7 @@ std::string GPulsarEphemerides::print(const GChatter& chatter) const
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GPulsarEphemerides::init_members(void)
+void GPulsarEphemeris::init_members(void)
 {
     // Initialise members
     m_name.clear();
@@ -267,16 +267,16 @@ void GPulsarEphemerides::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] ephemerides Pulsar ephemerides.
+ * @param[in] ephemeris Pulsar ephemeris.
  ***************************************************************************/
-void GPulsarEphemerides::copy_members(const GPulsarEphemerides& ephemerides)
+void GPulsarEphemeris::copy_members(const GPulsarEphemeris& ephemeris)
 {
     // Copy members
-    m_name        = ephemerides.m_name;
-    m_tstart      = ephemerides.m_tstart;
-    m_tstop       = ephemerides.m_tstop;
-    m_dir         = ephemerides.m_dir;
-    m_phase_curve = ephemerides.m_phase_curve;
+    m_name        = ephemeris.m_name;
+    m_tstart      = ephemeris.m_tstart;
+    m_tstop       = ephemeris.m_tstop;
+    m_dir         = ephemeris.m_dir;
+    m_phase_curve = ephemeris.m_phase_curve;
 
     // Return
     return;
@@ -286,7 +286,7 @@ void GPulsarEphemerides::copy_members(const GPulsarEphemerides& ephemerides)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GPulsarEphemerides::free_members(void)
+void GPulsarEphemeris::free_members(void)
 {
     // Return
     return;
