@@ -40,6 +40,7 @@ sources = GModelPar.cpp \
           GModelSpatialRadialDisk.cpp \
           GModelSpatialRadialRing.cpp \
           GModelSpatialRadialGauss.cpp \
+	  GModelSpatialRadialGeneralGauss.cpp \
           GModelSpatialRadialShell.cpp \
           GModelSpatialRadialProfile.cpp \
           GModelSpatialRadialProfileGauss.cpp \
@@ -49,6 +50,7 @@ sources = GModelPar.cpp \
           GModelSpatialElliptical.cpp \
           GModelSpatialEllipticalDisk.cpp \
           GModelSpatialEllipticalGauss.cpp \
+	  GModelSpatialEllipticalGeneralGauss.cpp \
           GModelSpatialDiffuse.cpp \
           GModelSpatialDiffuseConst.cpp \
           GModelSpatialDiffuseCube.cpp \

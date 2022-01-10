@@ -1,12 +1,14 @@
-2021-12-13
+2022-01-10
 
         * Version 2.0.0 released
         ========================
 
         Add GCOMObservation::tim() and GCOMObservation::oads() setter methods
+        Add GModelSpatialRadialGeneralGauss and 
+          GModelSpatialEllipticalGeneralGauss classes (#3924)
         Remove GCOMSelection::zeta_min() and GCOMSelection::zeta_max()
           methods
-	Add GCOMSelection::fpmtflag(), GCOMSelection::use_d1() and 
+        Add GCOMSelection::fpmtflag(), GCOMSelection::use_d1() and 
           GCOMSelection::use_d2() methods (#3917)
         Add GCOMModelDRBPhibarBins class (#3913)
         Compute spectral model gradients for negative factor values

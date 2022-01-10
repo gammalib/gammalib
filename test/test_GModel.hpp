@@ -1,7 +1,7 @@
 /***************************************************************************
  *                test_GModel.hpp - Test model module                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2021 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2022 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -58,12 +58,14 @@ public:
     void                test_radial_disk(void);
     void                test_radial_ring(void);
     void                test_radial_gauss(void);
+    void                test_radial_general_gauss(); 
     void                test_radial_shell(void);
     void                test_profile_dmburkert(void);
     void                test_profile_dmeinasto(void);
     void                test_profile_dmzhao(void);
     void                test_elliptical_disk(void);
     void                test_elliptical_gauss(void);
+    void                test_elliptical_general_gauss(void);
     void                test_spatial_composite(void);
     void                test_spatial_model(void);
     void                test_const(void);
@@ -147,12 +149,14 @@ private:
     std::string m_xml_model_radial_disk;
     std::string m_xml_model_radial_ring;
     std::string m_xml_model_radial_gauss;
+  std::string m_xml_model_radial_general_gauss;
     std::string m_xml_model_radial_shell;
     std::string m_xml_model_profile_dmburkert;
     std::string m_xml_model_profile_dmeinasto;
     std::string m_xml_model_profile_dmzhao;
     std::string m_xml_model_elliptical_disk;
     std::string m_xml_model_elliptical_gauss;
+    std::string m_xml_model_elliptical_general_gauss;
     std::string m_xml_model_spatial_composite;
     std::string m_xml_model_point_temp_lightcurve;
     std::string m_xml_model_point_temp_phasecurve;

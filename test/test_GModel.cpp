@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   test_GModel.cpp - test GModel class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -84,37 +84,39 @@ void TestGModel::set(void)
     m_assoc_file      = datadir + "/crab_associations.xml";
 
     // Set model definiton XML files
-    m_xml_model_point_const        = datadir + "/model_point_const.xml";
-    m_xml_model_point_gauss        = datadir + "/model_point_gauss.xml";
-    m_xml_model_point_plaw         = datadir + "/model_point_plaw.xml";
-    m_xml_model_point_plaw_phflux  = datadir + "/model_point_plaw_phflux.xml";
-    m_xml_model_point_plaw_eflux   = datadir + "/model_point_plaw_eflux.xml";
-    m_xml_model_point_eplaw        = datadir + "/model_point_eplaw.xml";
-    m_xml_model_point_einvplaw     = datadir + "/model_point_einvplaw.xml";
-    m_xml_model_point_bplaw        = datadir + "/model_point_bplaw.xml";
-    m_xml_model_point_smoothbplaw  = datadir + "/model_point_smoothbplaw.xml";
-    m_xml_model_point_supeplaw     = datadir + "/model_point_supeplaw.xml";
-    m_xml_model_point_logparabola  = datadir + "/model_point_logparabola.xml";
-    m_xml_model_point_bins         = datadir + "/model_point_bins.xml";
-    m_xml_model_point_nodes        = datadir + "/model_point_nodes.xml";
-    m_xml_model_point_filefct      = datadir + "/model_point_filefct.xml";
-    m_xml_model_point_table        = datadir + "/model_point_table.xml";
-    m_xml_point_multiplicative     = datadir + "/model_point_multiplicative.xml";
-    m_xml_point_exponential        = datadir + "/model_point_exponential.xml";
-    m_xml_model_spectral_composite = datadir + "/model_spectral_composite.xml";
-    m_xml_model_diffuse_const      = datadir + "/model_diffuse_const.xml";
-    m_xml_model_diffuse_cube       = datadir + "/model_diffuse_cube.xml";
-    m_xml_model_diffuse_map        = datadir + "/model_diffuse_map.xml";
-    m_xml_model_radial_disk        = datadir + "/model_radial_disk.xml";
-    m_xml_model_radial_ring        = datadir + "/model_radial_ring.xml";
-    m_xml_model_radial_gauss       = datadir + "/model_radial_gauss.xml";
-    m_xml_model_radial_shell       = datadir + "/model_radial_shell.xml";
-    m_xml_model_profile_dmburkert  = datadir + "/model_profile_dmburkert.xml";
-    m_xml_model_profile_dmeinasto  = datadir + "/model_profile_dmeinasto.xml";
-    m_xml_model_profile_dmzhao     = datadir + "/model_profile_dmzhao.xml";
-    m_xml_model_elliptical_disk    = datadir + "/model_elliptical_disk.xml";
-    m_xml_model_elliptical_gauss   = datadir + "/model_elliptical_gauss.xml";
-    m_xml_model_spatial_composite  = datadir + "/model_spatial_composite.xml";
+    m_xml_model_point_const              = datadir + "/model_point_const.xml";
+    m_xml_model_point_gauss              = datadir + "/model_point_gauss.xml";
+    m_xml_model_point_plaw               = datadir + "/model_point_plaw.xml";
+    m_xml_model_point_plaw_phflux        = datadir + "/model_point_plaw_phflux.xml";
+    m_xml_model_point_plaw_eflux         = datadir + "/model_point_plaw_eflux.xml";
+    m_xml_model_point_eplaw              = datadir + "/model_point_eplaw.xml";
+    m_xml_model_point_einvplaw           = datadir + "/model_point_einvplaw.xml";
+    m_xml_model_point_bplaw              = datadir + "/model_point_bplaw.xml";
+    m_xml_model_point_smoothbplaw        = datadir + "/model_point_smoothbplaw.xml";
+    m_xml_model_point_supeplaw           = datadir + "/model_point_supeplaw.xml";
+    m_xml_model_point_logparabola        = datadir + "/model_point_logparabola.xml";
+    m_xml_model_point_bins               = datadir + "/model_point_bins.xml";
+    m_xml_model_point_nodes              = datadir + "/model_point_nodes.xml";
+    m_xml_model_point_filefct            = datadir + "/model_point_filefct.xml";
+    m_xml_model_point_table              = datadir + "/model_point_table.xml";
+    m_xml_point_multiplicative           = datadir + "/model_point_multiplicative.xml";
+    m_xml_point_exponential              = datadir + "/model_point_exponential.xml";
+    m_xml_model_spectral_composite       = datadir + "/model_spectral_composite.xml";
+    m_xml_model_diffuse_const            = datadir + "/model_diffuse_const.xml";
+    m_xml_model_diffuse_cube             = datadir + "/model_diffuse_cube.xml";
+    m_xml_model_diffuse_map              = datadir + "/model_diffuse_map.xml";
+    m_xml_model_radial_disk              = datadir + "/model_radial_disk.xml";
+    m_xml_model_radial_ring              = datadir + "/model_radial_ring.xml";
+    m_xml_model_radial_gauss             = datadir + "/model_radial_gauss.xml";
+    m_xml_model_radial_general_gauss     = datadir + "/model_radial_general_gauss.xml";
+    m_xml_model_radial_shell             = datadir + "/model_radial_shell.xml";
+    m_xml_model_profile_dmburkert        = datadir + "/model_profile_dmburkert.xml";
+    m_xml_model_profile_dmeinasto        = datadir + "/model_profile_dmeinasto.xml";
+    m_xml_model_profile_dmzhao           = datadir + "/model_profile_dmzhao.xml";
+    m_xml_model_elliptical_disk          = datadir + "/model_elliptical_disk.xml";
+    m_xml_model_elliptical_gauss         = datadir + "/model_elliptical_gauss.xml";
+    m_xml_model_elliptical_general_gauss = datadir + "/model_elliptical_general_gauss.xml";
+    m_xml_model_spatial_composite        = datadir + "/model_spatial_composite.xml";
 
     // Set temporal model definition XML files
     m_xml_model_point_temp_lightcurve = datadir + "/model_temporal_lightcurve.xml";
@@ -155,6 +157,8 @@ void TestGModel::set(void)
            "Test GModelSpatialRadialRing");
     append(static_cast<pfunction>(&TestGModel::test_radial_gauss),
            "Test GModelSpatialRadialGauss");
+    append(static_cast<pfunction>(&TestGModel::test_radial_general_gauss),
+           "Test GModelSpatialRadialGeneralGauss");
     append(static_cast<pfunction>(&TestGModel::test_radial_shell),
            "Test GModelSpatialRadialShell");
     append(static_cast<pfunction>(&TestGModel::test_profile_dmburkert),
@@ -167,6 +171,8 @@ void TestGModel::set(void)
            "Test GModelSpatialEllipticalDisk");
     append(static_cast<pfunction>(&TestGModel::test_elliptical_gauss),
            "Test GModelSpatialEllipticalGauss");
+    append(static_cast<pfunction>(&TestGModel::test_elliptical_general_gauss),
+           "Test GModelSpatialEllipticalGeneralGauss");
     append(static_cast<pfunction>(&TestGModel::test_diffuse_const),
            "Test GModelSpatialDiffuseConst");
     append(static_cast<pfunction>(&TestGModel::test_diffuse_cube),
@@ -1398,6 +1404,80 @@ void TestGModel::test_radial_gauss(void)
     return;
 }
 
+/***********************************************************************//**
+ * @brief Test GModelSpatialRadialGauss class
+ ***************************************************************************/
+void TestGModel::test_radial_general_gauss(void)
+{
+    // Test void constructor
+    GModelSpatialRadialGeneralGauss model1;
+    test_value(model1.type(), "RadialGeneralGaussian");
+
+    // Test value constructor
+    GSkyDir dir1;
+    dir1.radec_deg(83.6331, +22.0145);
+    GModelSpatialRadialGeneralGauss model2(dir1, 3.0, 0.5);
+    test_value(model2.ra(), 83.6331);
+    test_value(model2.dec(), 22.0145);
+    test_value(model2.radius(), 3.0);
+    test_value(model2.ridx(), 0.5);
+
+    // Test XML constructor
+    GXml         xml(m_xml_model_radial_general_gauss);
+    GXmlElement* element = xml.element(0)->element(0)->element("spatialModel", 0);
+    GModelSpatialRadialGeneralGauss model3(*element);
+    test_value(model3.size(), 4);
+    test_value(model3.type(), "RadialGeneralGaussian");
+    test_value(model3.ra(), 83.6331);
+    test_value(model3.dec(), 22.0145);
+    test_value(model3.radius(), 0.20);
+    test_value(model3.ridx(), 0.3);
+
+    // Test ra method
+    model3.ra(100.0);
+    test_value(model3.ra(), 100.0);
+
+    // Test dec method
+    model3.dec(10.0);
+    test_value(model3.dec(), 10.0);
+
+    // Test dir method
+    GSkyDir dir2;
+    dir2.radec_deg(83.6331, +22.0145);
+    model3.dir(dir2);
+    test_assert(model3.dir() == dir2, "Test sky direction");
+
+    // Test radius method
+    model3.radius(3.9);
+    test_value(model3.radius(), 3.9);
+
+    // Test ridx method
+    model3.ridx(0.76);
+    test_value(model3.ridx(), 0.76);
+
+    // Test region method
+    GSkyDir dir3;
+    dir3.radec_deg(83.6331, +22.0145);
+    test_assert(model3.region()->contains(dir3), "Test region() method (inside)");
+    dir3.radec_deg(83.6331, -70.0);
+    test_assert(!model3.region()->contains(dir3), "Test region() method (outside)");
+
+    // Test operator access
+    const char* strarray[] = {"RA", "DEC", "Radius", "R_Index"};
+    for (int i = 0; i < 4; ++i) {
+        std::string keyname(strarray[i]);
+        model3[keyname].value(2.1);
+        model3[keyname].error(1.9);
+        model3[keyname].gradient(0.8);
+        test_value(model3[keyname].value(), 2.1);
+        test_value(model3[keyname].error(), 1.9);
+        test_value(model3[keyname].gradient(), 0.8);
+    }
+
+    // Exit test
+    return;
+}
+
 
 /***********************************************************************//**
  * @brief Test GModelSpatialRadialShell class
@@ -1716,6 +1796,92 @@ void TestGModel::test_elliptical_gauss(void)
     return;
 }
 
+/***********************************************************************//**
+ * @brief Test GModelSpatialEllipticalGeneralGauss class
+ ***************************************************************************/
+void TestGModel::test_elliptical_general_gauss(void)
+{
+    // Test void constructor
+    GModelSpatialEllipticalGeneralGauss model1;
+    test_value(model1.type(), "EllipticalGeneralGaussian");
+
+    // Test value constructor
+    GSkyDir dir1;
+    dir1.radec_deg(83.6331, +22.0145);
+    GModelSpatialEllipticalGeneralGauss model2(dir1, 3.0, 2.0, 45.0,0.5);
+    test_value(model2.ra(), 83.6331);
+    test_value(model2.dec(), 22.0145);
+    test_value(model2.posangle(), 45.0);
+    test_value(model2.semimajor(), 3.0);
+    test_value(model2.semiminor(), 2.0);
+    test_value(model2.semiminor(), 2.0);
+    test_value(model2.ridx(), 0.5);
+
+    // Test XML constructor
+    GXml         xml(m_xml_model_elliptical_general_gauss);
+    GXmlElement* element = xml.element(0)->element(0)->element("spatialModel", 0);
+    GModelSpatialEllipticalGeneralGauss model3(*element);
+    test_value(model3.size(), 6);
+    test_value(model3.type(), "EllipticalGeneralGaussian");
+    test_value(model3.ra(), 83.6331);
+    test_value(model3.dec(), 22.0145);
+    test_value(model3.posangle(), 45.0);
+    test_value(model3.semimajor(), 0.3);
+    test_value(model3.semiminor(), 0.1);
+    test_value(model3.ridx(), 0.3);
+
+    // Test ra method
+    model3.ra(100.0);
+    test_value(model3.ra(), 100.0);
+
+    // Test dec method
+    model3.dec(10.0);
+    test_value(model3.dec(), 10.0);
+
+    // Test dir method
+    GSkyDir dir2;
+    dir2.radec_deg(83.6331, +22.0145);
+    model3.dir(dir2);
+    test_assert(model3.dir() == dir2, "Test sky direction");
+
+    // Test posangle method
+    model3.posangle(3.9);
+    test_value(model3.posangle(), 3.9);
+
+    // Test semimajor method
+    model3.semimajor(3.9);
+    test_value(model3.semimajor(), 3.9);
+
+    // Test semiminor method
+    model3.semiminor(3.9);
+    test_value(model3.semiminor(), 3.9);
+
+    // Test ridx method
+    model3.ridx(0.7);
+    test_value(model3.ridx(), 0.7);
+
+    // Test region method
+    GSkyDir dir3;
+    dir3.radec_deg(83.6331, +22.0145);
+    test_assert(model3.region()->contains(dir3), "Test region() method (inside)");
+    dir3.radec_deg(83.6331, +61.5);
+    test_assert(!model3.region()->contains(dir3), "Test region() method (outside)");
+
+    // Test operator access
+    const char* strarray[] = {"RA", "DEC", "PA", "MinorRadius", "MajorRadius", "R_Index"};
+    for (int i = 0; i < 6; ++i) {
+        std::string keyname(strarray[i]);
+        model3[keyname].value(2.1);
+        model3[keyname].error(1.9);
+        model3[keyname].gradient(0.8);
+        test_value(model3[keyname].value(), 2.1);
+        test_value(model3[keyname].error(), 1.9);
+        test_value(model3[keyname].gradient(), 0.8);
+    }
+
+    // Exit test
+    return;
+}
 
 /***********************************************************************//**
  * @brief Test GModelSpatialComposite class
