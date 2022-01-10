@@ -81,10 +81,10 @@ public:
         return (*self);
     }
     double eval(const GPhoton& photon) const {
-        return self->GModelSpatialEllipticalGeneralGauss::eval(photon);
+        return self->GModelSpatialElliptical::eval(photon);
     }
     double eval(const GPhoton& photon, const bool& gradients) const {
-        return self->GModelSpatialEllipticalGeneralGauss::eval(photon, gradients);
+        return self->GModelSpatialElliptical::eval(photon, gradients);
     }
 %pythoncode {
     def __getstate__(self):
