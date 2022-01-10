@@ -1,8 +1,8 @@
 /***************************************************************************
- *  GModelSpatialEllipticalGeneralGauss.hpp -                              *
- *  Elliptical generalised gauss source model class                        *
+ *    GModelSpatialEllipticalGeneralGauss.hpp - Generalised elliptical     *
+ *                      Gaussian source model class                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2022- by Luigi Tibaldo                                   *
+ *  copyright (C) 2022 by Luigi Tibaldo                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpatialEllipticalGeneralGauss.hpp
- * @brief Elliptical generalised gaussian model class interface definition
+ * @brief Generalised elliptical gaussian model class interface definition
  * @author Luigi Tibaldo
  */
 
@@ -40,23 +40,22 @@
 /**************************************************************************
  * @class GModelSpatialEllipticalGeneralGauss
  *
- * @brief Elliptical generalised gaussian source model class
+ * @brief Generalised elliptical gaussian source model class
  *
  * This class implements the spatial component of the factorised source
- * model for an elliptical generalised  gaussian source, i.e. surface brightness
- * according to an asymmetric generalised Gaussian.
+ * model for an generalised elliptical Gaussian source, i.e. surface
+ * brightness according to an asymmetric generalised Gaussian.
  ***************************************************************************/
 class GModelSpatialEllipticalGeneralGauss : public GModelSpatialElliptical {
 
 public:
     // Constructors and destructors
     GModelSpatialEllipticalGeneralGauss(void);
-    GModelSpatialEllipticalGeneralGauss(const bool& dummy, const std::string& type);
     GModelSpatialEllipticalGeneralGauss(const GSkyDir& dir,
-					const double&  major,
-					const double&  minor,
-					const double&  posangle,
-					const double& ridx);
+                                        const double&  major,
+                                        const double&  minor,
+                                        const double&  posangle,
+                                        const double&  ridx);
     explicit GModelSpatialEllipticalGeneralGauss(const GXmlElement& xml);
     GModelSpatialEllipticalGeneralGauss(const GModelSpatialEllipticalGeneralGauss& model);
     virtual ~GModelSpatialEllipticalGeneralGauss(void);
@@ -65,27 +64,27 @@ public:
     virtual GModelSpatialEllipticalGeneralGauss& operator=(const GModelSpatialEllipticalGeneralGauss& model);
 
     // Implemented pure virtual base class methods
-    virtual void                          clear(void);
+    virtual void                                 clear(void);
     virtual GModelSpatialEllipticalGeneralGauss* clone(void) const;
-    virtual std::string                   classname(void) const;
-    virtual double                        eval(const double&  theta,
-                                               const double&  posangle,
-                                               const GEnergy& energy,
-                                               const GTime&   time,
-                                               const bool&    gradients = false) const;
-    virtual GSkyDir                       mc(const GEnergy& energy,
-                                             const GTime& time,
-                                             GRan& ran) const;
-    virtual bool                          contains(const GSkyDir& dir,
-                                                   const double&  margin = 0.0) const;
-    virtual double                        theta_max(void) const;
-    virtual void                          read(const GXmlElement& xml);
-    virtual void                          write(GXmlElement& xml) const;
-    virtual std::string                   print(const GChatter& chatter = NORMAL) const;
+    virtual std::string                          classname(void) const;
+    virtual double                               eval(const double&  theta,
+                                                      const double&  posangle,
+                                                      const GEnergy& energy,
+                                                      const GTime&   time,
+                                                      const bool&    gradients = false) const;
+    virtual GSkyDir                              mc(const GEnergy& energy,
+                                                    const GTime& time,
+                                                    GRan& ran) const;
+    virtual bool                                 contains(const GSkyDir& dir,
+                                                          const double&  margin = 0.0) const;
+    virtual double                               theta_max(void) const;
+    virtual void                                 read(const GXmlElement& xml);
+    virtual void                                 write(GXmlElement& xml) const;
+    virtual std::string                          print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    double  ridx(void) const;
-    void    ridx(const double& ridx);
+    double ridx(void) const;
+    void   ridx(const double& ridx);
 
 
 protected:
@@ -97,7 +96,7 @@ protected:
     virtual void set_region(void) const;
 
     // Protected members
-    GModelPar m_ridx;                   //!< reciprocal of exponent of the radial profile
+    GModelPar m_ridx;                   //!< Reciprocal of exponent of the radial profile
 
     // Cached members used for pre-computations
     mutable double m_last_minor;        //!< Last semi-minor axis
@@ -114,8 +113,8 @@ protected:
     mutable double m_term1;             //!< Help term 1
     mutable double m_term2;             //!< Help term 2
     mutable double m_term3;             //!< Help term 3
-    mutable double m_last_ridx;        // Last reciprocal radial index
-    mutable double m_inv_ridx;         // Spatial profile index
+    mutable double m_last_ridx;         //!< Last reciprocal radial index
+    mutable double m_inv_ridx;          //!< Spatial profile index
 
 };
 
@@ -132,11 +131,11 @@ std::string GModelSpatialEllipticalGeneralGauss::classname(void) const
 }
 
 /***********************************************************************//**
- * @brief Return ridx
+ * @brief Return reciprocal of the elliptical profile index
  *
- * @return ridx
+ * @return Reciprocal of the elliptical profile index.
  *
- * Returns the reciprocal of the radial profile index.
+ * Returns the reciprocal of the elliptical profile index.
  ***************************************************************************/
 inline
 double GModelSpatialEllipticalGeneralGauss::ridx(void) const
@@ -145,11 +144,11 @@ double GModelSpatialEllipticalGeneralGauss::ridx(void) const
 }
 
 /***********************************************************************//**
- * @brief Set reciprocal index
+ * @brief Set reciprocal of the elliptical profile index
  *
- * @param[in] ridx.
+ * @param[in] ridx Reciprocal of the elliptical profile index.
  *
- * Sets the reciprocal index of the radial profile.
+ * Sets the reciprocal of the elliptical profile index.
  ***************************************************************************/
 inline
 void GModelSpatialEllipticalGeneralGauss::ridx(const double& ridx)
@@ -157,6 +156,5 @@ void GModelSpatialEllipticalGeneralGauss::ridx(const double& ridx)
     m_ridx.value(ridx);
     return;
 }
-
 
 #endif /* GMODELSPATIALELLIPTICALGENERALGAUSS_HPP */

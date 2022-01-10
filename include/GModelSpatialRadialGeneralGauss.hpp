@@ -1,5 +1,5 @@
 /***************************************************************************
- *    GModelSpatialRadialGeneralGauss.hpp - Generalized radial Gaussian    *
+ *    GModelSpatialRadialGeneralGauss.hpp - Generalised radial Gaussian    *
  *                           source model class                            *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2021-2022 by Luigi Tibaldo                               *
@@ -45,7 +45,7 @@
  * @brief Generalized radial Gaussian model class
  *
  * This class implements the spatial component of the factorised source
- * model for a Generalized Gaussian source.
+ * model for a generalised radial Gaussian source.
  ***************************************************************************/
 class GModelSpatialRadialGeneralGauss : public GModelSpatialRadial {
 

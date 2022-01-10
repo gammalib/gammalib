@@ -1,8 +1,8 @@
 /***************************************************************************
- *     GModelSpatialRadialGeneralGauss.i - Generalized radial Gaussian     *
+ *     GModelSpatialRadialGeneralGauss.i - Generalised radial Gaussian     *
  *                           source model class                            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2021-2022          by Luigi Tibaldo                      *
+ *  copyright (C) 2021-2022 by Luigi Tibaldo                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -86,10 +86,10 @@ public:
         return (*self);
     }
     double eval(const GPhoton& photon) const {
-        return self->GModelSpatialRadial::eval(photon);
+        return self->GModelSpatialRadialGeneralGauss::eval(photon);
     }
     double eval(const GPhoton& photon, const bool& gradients) const {
-        return self->GModelSpatialRadial::eval(photon, gradients);
+        return self->GModelSpatialRadialGeneralGauss::eval(photon, gradients);
     }
 %pythoncode {
     def __getstate__(self):

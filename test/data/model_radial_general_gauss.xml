@@ -7,10 +7,10 @@
       <parameter scale="1.0"   name="PivotEnergy" min="10.0"  max="1000000.0" value="100.0" free="0"/>
     </spectrum>
     <spatialModel type="RadialGeneralGaussian">
-      <parameter name="RA"    scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
-      <parameter name="DEC"   scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
-      <parameter name="Radius" scale="1.0" value="0.20"    min="0.01" max="10"  free="1"/>
-      <parameter name="R_Index" scale="1.0" value="0.3"    min="0.01" max="10"  free="1"/>
+      <parameter name="RA"      scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
+      <parameter name="DEC"     scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
+      <parameter name="Radius"  scale="1.0" value="0.20"    min="0.01" max="10"  free="1"/>
+      <parameter name="R_Index" scale="1.0" value="0.3"     min="0.01" max="10"  free="1"/>
     </spatialModel>
   </source>
 </source_library>

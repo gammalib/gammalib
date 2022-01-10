@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   test_GModel.cpp - test GModel class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -84,39 +84,39 @@ void TestGModel::set(void)
     m_assoc_file      = datadir + "/crab_associations.xml";
 
     // Set model definiton XML files
-    m_xml_model_point_const          = datadir + "/model_point_const.xml";
-    m_xml_model_point_gauss          = datadir + "/model_point_gauss.xml";
-    m_xml_model_point_plaw           = datadir + "/model_point_plaw.xml";
-    m_xml_model_point_plaw_phflux    = datadir + "/model_point_plaw_phflux.xml";
-    m_xml_model_point_plaw_eflux     = datadir + "/model_point_plaw_eflux.xml";
-    m_xml_model_point_eplaw          = datadir + "/model_point_eplaw.xml";
-    m_xml_model_point_einvplaw       = datadir + "/model_point_einvplaw.xml";
-    m_xml_model_point_bplaw          = datadir + "/model_point_bplaw.xml";
-    m_xml_model_point_smoothbplaw    = datadir + "/model_point_smoothbplaw.xml";
-    m_xml_model_point_supeplaw       = datadir + "/model_point_supeplaw.xml";
-    m_xml_model_point_logparabola    = datadir + "/model_point_logparabola.xml";
-    m_xml_model_point_bins           = datadir + "/model_point_bins.xml";
-    m_xml_model_point_nodes          = datadir + "/model_point_nodes.xml";
-    m_xml_model_point_filefct        = datadir + "/model_point_filefct.xml";
-    m_xml_model_point_table          = datadir + "/model_point_table.xml";
-    m_xml_point_multiplicative       = datadir + "/model_point_multiplicative.xml";
-    m_xml_point_exponential          = datadir + "/model_point_exponential.xml";
-    m_xml_model_spectral_composite   = datadir + "/model_spectral_composite.xml";
-    m_xml_model_diffuse_const        = datadir + "/model_diffuse_const.xml";
-    m_xml_model_diffuse_cube         = datadir + "/model_diffuse_cube.xml";
-    m_xml_model_diffuse_map          = datadir + "/model_diffuse_map.xml";
-    m_xml_model_radial_disk          = datadir + "/model_radial_disk.xml";
-    m_xml_model_radial_ring          = datadir + "/model_radial_ring.xml";
-    m_xml_model_radial_gauss         = datadir + "/model_radial_gauss.xml";
-    m_xml_model_radial_general_gauss = datadir + "/model_radial_general_gauss.xml";
-    m_xml_model_radial_shell         = datadir + "/model_radial_shell.xml";
-    m_xml_model_profile_dmburkert    = datadir + "/model_profile_dmburkert.xml";
-    m_xml_model_profile_dmeinasto    = datadir + "/model_profile_dmeinasto.xml";
-    m_xml_model_profile_dmzhao       = datadir + "/model_profile_dmzhao.xml";
-    m_xml_model_elliptical_disk      = datadir + "/model_elliptical_disk.xml";
-    m_xml_model_elliptical_gauss     = datadir + "/model_elliptical_gauss.xml";
-    m_xml_model_elliptical_general_gauss     = datadir + "/model_elliptical_general_gauss.xml";
-    m_xml_model_spatial_composite    = datadir + "/model_spatial_composite.xml";
+    m_xml_model_point_const              = datadir + "/model_point_const.xml";
+    m_xml_model_point_gauss              = datadir + "/model_point_gauss.xml";
+    m_xml_model_point_plaw               = datadir + "/model_point_plaw.xml";
+    m_xml_model_point_plaw_phflux        = datadir + "/model_point_plaw_phflux.xml";
+    m_xml_model_point_plaw_eflux         = datadir + "/model_point_plaw_eflux.xml";
+    m_xml_model_point_eplaw              = datadir + "/model_point_eplaw.xml";
+    m_xml_model_point_einvplaw           = datadir + "/model_point_einvplaw.xml";
+    m_xml_model_point_bplaw              = datadir + "/model_point_bplaw.xml";
+    m_xml_model_point_smoothbplaw        = datadir + "/model_point_smoothbplaw.xml";
+    m_xml_model_point_supeplaw           = datadir + "/model_point_supeplaw.xml";
+    m_xml_model_point_logparabola        = datadir + "/model_point_logparabola.xml";
+    m_xml_model_point_bins               = datadir + "/model_point_bins.xml";
+    m_xml_model_point_nodes              = datadir + "/model_point_nodes.xml";
+    m_xml_model_point_filefct            = datadir + "/model_point_filefct.xml";
+    m_xml_model_point_table              = datadir + "/model_point_table.xml";
+    m_xml_point_multiplicative           = datadir + "/model_point_multiplicative.xml";
+    m_xml_point_exponential              = datadir + "/model_point_exponential.xml";
+    m_xml_model_spectral_composite       = datadir + "/model_spectral_composite.xml";
+    m_xml_model_diffuse_const            = datadir + "/model_diffuse_const.xml";
+    m_xml_model_diffuse_cube             = datadir + "/model_diffuse_cube.xml";
+    m_xml_model_diffuse_map              = datadir + "/model_diffuse_map.xml";
+    m_xml_model_radial_disk              = datadir + "/model_radial_disk.xml";
+    m_xml_model_radial_ring              = datadir + "/model_radial_ring.xml";
+    m_xml_model_radial_gauss             = datadir + "/model_radial_gauss.xml";
+    m_xml_model_radial_general_gauss     = datadir + "/model_radial_general_gauss.xml";
+    m_xml_model_radial_shell             = datadir + "/model_radial_shell.xml";
+    m_xml_model_profile_dmburkert        = datadir + "/model_profile_dmburkert.xml";
+    m_xml_model_profile_dmeinasto        = datadir + "/model_profile_dmeinasto.xml";
+    m_xml_model_profile_dmzhao           = datadir + "/model_profile_dmzhao.xml";
+    m_xml_model_elliptical_disk          = datadir + "/model_elliptical_disk.xml";
+    m_xml_model_elliptical_gauss         = datadir + "/model_elliptical_gauss.xml";
+    m_xml_model_elliptical_general_gauss = datadir + "/model_elliptical_general_gauss.xml";
+    m_xml_model_spatial_composite        = datadir + "/model_spatial_composite.xml";
 
     // Set temporal model definition XML files
     m_xml_model_point_temp_lightcurve = datadir + "/model_temporal_lightcurve.xml";

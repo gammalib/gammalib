@@ -1,7 +1,7 @@
 /***************************************************************************
  *                test_GModel.hpp - Test model module                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2021 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2022 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *

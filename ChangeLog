@@ -1,8 +1,10 @@
-2021-12-03
+2022-01-10
 
         * Version 2.0.0 released
         ========================
 
+        Add GModelSpatialRadialGeneralGauss and 
+          GModelSpatialEllipticalGeneralGauss classes (#3924)
         Remove GCOMSelection::zeta_min() and GCOMSelection::zeta_max()
           methods
 	Add GCOMSelection::fpmtflag(), GCOMSelection::use_d1() and 

@@ -1,8 +1,8 @@
 /***************************************************************************
- *   GModelSpatialEllipticalGeneralGauss.i                                 *
- * - Elliptical gauss source model class                                   *
+ *     GModelSpatialEllipticalGeneralGauss.i - Generalised elliptical      *
+ *                      Gaussian source model class                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2022- by Luigi Tibaldo                                   *
+ *  copyright (C) 2022 by Luigi Tibaldo                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -41,35 +41,35 @@ public:
     // Constructors and destructors
     GModelSpatialEllipticalGeneralGauss(void);
     GModelSpatialEllipticalGeneralGauss(const GSkyDir& dir,
-					const double&  semiminor,
-					const double&  semimajor,
-					const double&  posangle,
-					const double&  ridx);
+                                        const double&  major,
+                                        const double&  minor,
+                                        const double&  posangle,
+                                        const double&  ridx);
     explicit GModelSpatialEllipticalGeneralGauss(const GXmlElement& xml);
     GModelSpatialEllipticalGeneralGauss(const GModelSpatialEllipticalGeneralGauss& model);
     virtual ~GModelSpatialEllipticalGeneralGauss(void);
 
     // Implemented pure virtual base class methods
-    virtual void                          clear(void);
-    virtual GModelSpatialEllipticalGauss* clone(void) const;
-    virtual std::string                   classname(void) const;
-    virtual double                        eval(const double&  theta,
-                                               const double&  posangle,
-                                               const GEnergy& energy,
-                                               const GTime&   time,
-                                               const bool&    gradients = false) const;
-    virtual GSkyDir                       mc(const GEnergy& energy,
-                                             const GTime& time,
-                                             GRan& ran) const;
-    virtual bool                          contains(const GSkyDir& dir,
-                                                   const double&  margin = 0.0) const;
-    virtual double                        theta_max(void) const;
-    virtual void                          read(const GXmlElement& xml);
-    virtual void                          write(GXmlElement& xml) const;
+    virtual void                                 clear(void);
+    virtual GModelSpatialEllipticalGeneralGauss* clone(void) const;
+    virtual std::string                          classname(void) const;
+    virtual double                               eval(const double&  theta,
+                                                      const double&  posangle,
+                                                      const GEnergy& energy,
+                                                      const GTime&   time,
+                                                      const bool&    gradients = false) const;
+    virtual GSkyDir                              mc(const GEnergy& energy,
+                                                    const GTime& time,
+                                                    GRan& ran) const;
+    virtual bool                                 contains(const GSkyDir& dir,
+                                                          const double&  margin = 0.0) const;
+    virtual double                               theta_max(void) const;
+    virtual void                                 read(const GXmlElement& xml);
+    virtual void                                 write(GXmlElement& xml) const;
 
     // Other methods
-    double  ridx(void) const;
-    void    ridx(const double& ridx);
+    double ridx(void) const;
+    void   ridx(const double& ridx);
 };
 
 
@@ -81,10 +81,10 @@ public:
         return (*self);
     }
     double eval(const GPhoton& photon) const {
-        return self->GModelSpatialElliptical::eval(photon);
+        return self->GModelSpatialEllipticalGeneralGauss::eval(photon);
     }
     double eval(const GPhoton& photon, const bool& gradients) const {
-        return self->GModelSpatialElliptical::eval(photon, gradients);
+        return self->GModelSpatialEllipticalGeneralGauss::eval(photon, gradients);
     }
 %pythoncode {
     def __getstate__(self):

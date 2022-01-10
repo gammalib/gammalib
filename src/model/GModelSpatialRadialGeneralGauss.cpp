@@ -1,5 +1,5 @@
 /***************************************************************************
- *    GModelSpatialRadialGeneralGauss.cpp - Generalized radial Gaussian    *
+ *    GModelSpatialRadialGeneralGauss.cpp - Generalised radial Gaussian    *
  *                           source model class                            *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2021-2022 by Luigi Tibaldo                               *
@@ -81,10 +81,10 @@ GModelSpatialRadialGeneralGauss::GModelSpatialRadialGeneralGauss(void) :
  * @brief Constructor
  *
  * @param[in] dir Sky position of Gaussian.
- * @param[in] radius Width of Generalized Gaussian (deg).
+ * @param[in] radius Width of generalised Gaussian (deg).
  * @param[in] ridx Reciprocal of exponential index of radial profile.
  *
- * Constructs a Generalized Gaussian spatial model using a sky direction
+ * Constructs a generalised Gaussian spatial model using a sky direction
  * (@p dir), a Gaussian width parameter @p radius in degrees and a reciprocal
  * of the exponential index @p ridx.
  ***************************************************************************/
@@ -111,7 +111,7 @@ GModelSpatialRadialGeneralGauss::GModelSpatialRadialGeneralGauss(const GSkyDir& 
  *
  * @param[in] xml XML element.
  *
- * Constructs a Generalized Gaussian spatial model by extracting information
+ * Constructs a generalised Gaussian spatial model by extracting information
  * from an XML element. See the method read() for more information about the
  * expected structure of the XML element.
  ***************************************************************************/
@@ -132,7 +132,7 @@ GModelSpatialRadialGeneralGauss::GModelSpatialRadialGeneralGauss(const GXmlEleme
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] model Generalized radial Gaussian model.
+ * @param[in] model Generalised radial Gaussian model.
  ***************************************************************************/
 GModelSpatialRadialGeneralGauss::GModelSpatialRadialGeneralGauss(const GModelSpatialRadialGeneralGauss& model) : 
                                  GModelSpatialRadial(model)
@@ -170,8 +170,8 @@ GModelSpatialRadialGeneralGauss::~GModelSpatialRadialGeneralGauss(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] model Generalized radial Gaussian model.
- * @return Radial Generalized radial Gaussian model.
+ * @param[in] model Generalised radial Gaussian model.
+ * @return Radial Generalised radial Gaussian model.
  ***************************************************************************/
 GModelSpatialRadialGeneralGauss& GModelSpatialRadialGeneralGauss::operator=(const GModelSpatialRadialGeneralGauss& model)
 {
@@ -234,7 +234,7 @@ GModelSpatialRadialGeneralGauss* GModelSpatialRadialGeneralGauss::clone(void) co
 
 
 /***********************************************************************//**
- * @brief Evaluate Generalized Gaussian source model
+ * @brief Evaluate Generalised Gaussian source model
  *
  * @param[in] theta Angular distance from source centre (radians).
  * @param[in] energy Photon energy (not used).
@@ -242,7 +242,7 @@ GModelSpatialRadialGeneralGauss* GModelSpatialRadialGeneralGauss::clone(void) co
  * @param[in] gradients Compute gradients?
  * @return Model value (\f${\rm sr}^{-1}\f$).
  *
- * Evaluates the spatial component for a Generalized Gaussian source model using
+ * Evaluates the spatial component for a Generalised Gaussian source model using
  *
  * \f[
  *    M_{\rm S}({\bf p} | E, t) = M_{\rm S}(\theta) =
@@ -252,7 +252,7 @@ GModelSpatialRadialGeneralGauss* GModelSpatialRadialGeneralGauss::clone(void) co
  *
  * where
  * - \f$\theta\f$ is the angular separation from the centre of the model, and
- * - \f$r\f$ is the Generalized Gaussian radius.
+ * - \f$r\f$ is the Generalised Gaussian radius.
  * - \f$\eta\f$ is the reciprocal of the radial profile exponent.
  *
  * If @p gradients is `true` the method will also compute parameter
@@ -301,8 +301,8 @@ double GModelSpatialRadialGeneralGauss::eval(const double&  theta,
  * @param[in,out] ran Random number generator.
  * @return Sky direction.
  *
- * Draws an arbitrary sky direction from the 2D Generalized  Gaussian distribution
- * as function of the photon @p energy and arrival @p time.
+ * Draws an arbitrary sky direction from the 2D Generalised Gaussian
+ * distribution as function of the photon @p energy and arrival @p time.
  *
  * @todo This method is only valid in the small angle approximation.
  ***************************************************************************/
@@ -394,8 +394,8 @@ double GModelSpatialRadialGeneralGauss::theta_max(void) const
  *
  * @param[in] xml XML element.
  *
- * Reads the radial Generalized Gauss model information from an XML element. The XML
- * element shall have either the format 
+ * Reads the generalised radial Gaussian model information from an XML
+ * element. The XML element shall have either the format
  *
  *     <spatialModel type="RadialGeneralGaussian">
  *       <parameter name="RA"      scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
@@ -472,7 +472,7 @@ void GModelSpatialRadialGeneralGauss::write(GXmlElement& xml) const
 
 
 /***********************************************************************//**
- * @brief Print Generalized Gaussian source information
+ * @brief Print generalised radial Gaussian source information
  *
  * @param[in] chatter Chattiness.
  * @return String containing model information.
@@ -560,7 +560,7 @@ void GModelSpatialRadialGeneralGauss::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] model Reneralized radial Gaussian spatial model.
+ * @param[in] model Generalised radial Gaussian spatial model.
  *
  * We do not have to push back the members on the parameter stack as this
  * should have been done by init_members() that was called before. Otherwise
