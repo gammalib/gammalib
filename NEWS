@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-13 December 2021
+10 January 2022
 
 
 1. Introduction
@@ -20,6 +20,8 @@ The following classes have been added:
 - GModelAssociation
 - GModelAssociations
 - GModelSpectralBins
+- GModelSpatialRadialGeneralGauss
+- GModelSpatialEllipticalGeneralGauss
 - GCTAModelSkyCube
 - GCTABackground2D
 - GCOMModelDRM
@@ -207,6 +209,9 @@ Implemented GMatrixSparse::row() and GMatrixSparse::add_to_row() methods.
 
 9. Model module
 ---------------
+Added GModelSpatialRadialGeneralGauss and GModelSpatialEllipticalGeneralGauss
+classes to model general Gaussian functions as spatial components (#3924).
+
 Gradients for spectral model parameters are now also computed for all models in
 case that the factor values are negative. This provides now error bars for photon
 and energy flux power laws that are allowed to take negative flux values.

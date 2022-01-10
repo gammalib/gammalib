@@ -1,6 +1,6 @@
 .. _2.0:
 
-GammaLib 2.0 release (3 December 2021)
+GammaLib 2.0 release (10 January 2022)
 ======================================
 
 Overview
@@ -96,6 +96,8 @@ Improvements
 New features
 ------------
 
+* [`3924 <https://cta-redmine.irap.omp.eu/issues/3924>`_] -
+  Add ``GModelSpatialRadialGeneralGauss`` and ``GModelSpatialEllipticalGeneralGauss`` classes
 * [`3910 <https://cta-redmine.irap.omp.eu/issues/3910>`_] -
   Add ``GCOMModelDRM`` class
 * [`3606 <https://cta-redmine.irap.omp.eu/issues/3606>`_] -
