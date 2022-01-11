@@ -33,7 +33,8 @@
 #include "GGti.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_PHASE                                      "GPulsar::phase(GTime&)"
+#define G_AT                            "GPulsarEphemeris& GPulsar::at(int&)"
+#define G_EPHEMERIS                              "GPulsar::ephemeris(GTime&)"
 #define G_LOAD                      "GPulsar::load(GFilename&, std::string&)"
 #define G_LOAD_FITS            "GPulsar::load_fits(GFilename&, std::string&)"
 #define G_LOAD_INTEGRAL   "GPulsar::load_integral(GFitsTable*, std::string&)"
@@ -187,6 +188,53 @@ GPulsar* GPulsar::clone(void) const
     return new GPulsar(*this);
 }
 
+/***********************************************************************//**
+ * @brief Return reference to ephemeris
+ *
+ * @param[in] index Ephemeris index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Ephemeris index is out of range.
+ *
+ * Returns a reference to the ephemeris with the specified @p index.
+ ***************************************************************************/
+GPulsarEphemeris& GPulsar::at(const int& index)
+{
+    // Compile option: raise an exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_AT, "Ephemeris index", index, size());
+    }
+    #endif
+
+    // Return reference
+    return (m_ephemerides[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return reference to ephemeris (const version)
+ *
+ * @param[in] index Ephemeris index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Ephemeris index is out of range.
+ *
+ * Returns a const reference to the ephemeris with the specified @p index.
+ ***************************************************************************/
+const GPulsarEphemeris& GPulsar::at(const int& index) const
+{
+    // Compile option: raise an exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_AT, "Ephemeris index", index, size());
+    }
+    #endif
+
+    // Return reference
+    return (m_ephemerides[index]);
+}
+
 
 /***********************************************************************//**
  * @brief Return pulsar ephemeris
@@ -216,7 +264,7 @@ const GPulsarEphemeris& GPulsar::ephemeris(const GTime& time) const
         std::string msg = "No valid ephemeris found for MJD "+
                           gammalib::str(time.mjd())+". Please specify "
                           "ephemerides that comprise the time.";
-        throw GException::invalid_argument(G_PHASE, msg);
+        throw GException::invalid_argument(G_EPHEMERIS, msg);
     }
 
     // Return ephemerides

@@ -64,6 +64,34 @@ public:
  * @brief GPulsar class extension
  ***************************************************************************/
 %extend GPulsar {
+    GPulsarEphemeris& __getitem__(const int& index) {
+        // Counting from start, e.g. [2]
+        if (index >= 0 && index < self->size()) {
+            return (*self)[index];
+        }
+        // Counting from end, e.g. [-1]
+        else if (index < 0 && self->size()+index >= 0) {
+            return (*self)[self->size()+index];
+        }
+        else {
+            throw GException::out_of_range("__getitem__(int)", "Ephemeris index",
+                                           index, self->size());
+        }
+    }
+    void __setitem__(const int& index, const GPulsarEphemeris& val) {
+        // Counting from start, e.g. [2]
+        if (index >= 0 && index < self->size()) {
+            (*self)[index] = val;
+        }
+        // Counting from end, e.g. [-1]
+        else if (index < 0 && self->size()+index >= 0) {
+            (*self)[self->size()+index] = val;
+        }
+        else {
+            throw GException::out_of_range("__setitem__(int)", "Ephemeris index",
+                                           index, self->size());
+        }
+    }
     GPulsar copy() {
         return (*self);
     }

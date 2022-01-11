@@ -57,7 +57,9 @@ public:
     virtual ~GPulsar(void);
 
     // Operators
-    GPulsar& operator=(const GPulsar& pulsar);
+    GPulsar&                operator=(const GPulsar& pulsar);
+    GPulsarEphemeris&       operator[](const int& index);
+    const GPulsarEphemeris& operator[](const int& index) const;
 
     // Implemented pure virtual base class methods
     virtual void        clear(void);
@@ -68,6 +70,8 @@ public:
     // Other methods
     int                     size(void) const;
     bool                    is_empty(void) const;
+    GPulsarEphemeris&       at(const int& index);
+    const GPulsarEphemeris& at(const int& index) const;
     const std::string&      name(void) const;
     void                    name(const std::string& name);
     const GPulsarEphemeris& ephemeris(const GTime& time) const;
@@ -90,6 +94,34 @@ protected:
     std::string                   m_name;        //!< Pulsar name
     std::vector<GPulsarEphemeris> m_ephemerides; //!< Pulsar ephemerides
 };
+
+
+/***********************************************************************//**
+ * @brief Return reference to ephemeris
+ *
+ * @param[in] index Ephemeris index [0,...,size()-1].
+ *
+ * Returns a reference to the ephemeris with the specified @p index.
+ ***************************************************************************/
+inline
+GPulsarEphemeris& GPulsar::operator[](const int& index)
+{
+    return (m_ephemerides[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return reference to ephemeris (const version)
+ *
+ * @param[in] index Ephemeris index [0,...,size()-1].
+ *
+ * Returns a const reference to the ephemeris with the specified @p index.
+ ***************************************************************************/
+inline
+const GPulsarEphemeris& GPulsar::operator[](const int& index) const
+{
+    return (m_ephemerides[index]);
+}
 
 
 /***********************************************************************//**
