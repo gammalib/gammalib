@@ -74,6 +74,8 @@ public:
     void               tstop(const GTime& tstop);
     GTime              t0(void) const;
     void               t0(const GTime& t0);
+    double             phase(void) const;
+    void               phase(const double& phase);
     double             f0(void) const;
     void               f0(const double& f0);
     double             f1(void) const;
@@ -214,9 +216,9 @@ void GPulsarEphemeris::tstop(const GTime& tstop)
 
 
 /***********************************************************************//**
- * @brief Returns time of phase 0
+ * @brief Returns reference epoch of pulsar ephemeris
  *
- * @return Reference time of phase 0.
+ * @return Reference epoch of pulsar ephemeris.
  ***************************************************************************/
 inline
 GTime GPulsarEphemeris::t0(void) const
@@ -226,14 +228,39 @@ GTime GPulsarEphemeris::t0(void) const
 
 
 /***********************************************************************//**
- * @brief Set time of phase 0
+ * @brief Set reference epoch of pulsar ephemeris
  *
- * @param[in] t0 Reference time of phase 0.
+ * @param[in] t0 Reference epoch of pulsar ephemeris.
  ***************************************************************************/
 inline
 void GPulsarEphemeris::t0(const GTime& t0)
 {
     m_phase_curve.mjd(t0);
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pulse phase
+ *
+ * @return Pulse phase.
+ ***************************************************************************/
+inline
+double GPulsarEphemeris::phase(void) const
+{
+    return (m_phase_curve.phase());
+}
+
+
+/***********************************************************************//**
+ * @brief Set pulse phase
+ *
+ * @param[in] phase Pulse phase.
+ ***************************************************************************/
+inline
+void GPulsarEphemeris::phase(const double& phase)
+{
+    m_phase_curve.phase(phase);
     return;
 }
 
