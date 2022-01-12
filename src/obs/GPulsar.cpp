@@ -562,7 +562,19 @@ void GPulsar::load_integral(const GFitsTable* table, const std::string& name)
         tstart.mjd(mjdstart->real(i));
         tstop.mjd(mjdstop->real(i));
 
-        // Set t0
+        // Set t0. The interpretation of the FITS table information has been
+        // validated by inspecting the code in the INTEGRAL OSA task
+        // spi_phase_hist and specifically the file spi_phase_hist.cpp which
+        // defines the Ephem::load method that loads an ephemeris from a
+        // GNRL-EPHE-CAT extension. The computation of a pulsar phase from
+        // ephemeris data is implemented in Evt::phase, confirming that
+        // T2PEAK is to be added to TREF0 to define the pulsar reference
+        // time. The original code is
+        //
+        // double deltaT = 86400.0 * ( _orbi - ephem.tref0 ) - ephem.t2peak0;
+        //
+        // taking into account that tref0 is given in days and t2peak0 is
+        // given in seconds. _orbi is the time in days in the above code.
         GTime t0;
         t0.mjd(tref0->real(i));
         t0 += t2peak->real(i);
