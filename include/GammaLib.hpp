@@ -199,6 +199,7 @@
 #include "GSource.hpp"
 #include "GPulsar.hpp"
 #include "GPulsarEphemeris.hpp"
+#include "GEphemerides.hpp"
 
 /* __ Model handling _____________________________________________________ */
 #include "GModelPar.hpp"

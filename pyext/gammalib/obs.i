@@ -246,3 +246,4 @@
 %include "GSource.i"
 %include "GPulsar.i"
 %include "GPulsarEphemeris.i"
+%include "GEphemerides.i"
