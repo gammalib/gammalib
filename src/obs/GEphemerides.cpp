@@ -29,8 +29,14 @@
 #include <config.h>
 #endif
 #include "GEphemerides.hpp"
+#include "GFits.hpp"
+#include "GFitsTable.hpp"
+#include "GFitsTableCol.hpp"
+#include "GSkyDir.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_EPHEMERIS    "GEphemerides::ephemeris(GTime&, GVector*, GVector*, "\
+                                                         "GVector*, double*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -157,6 +163,244 @@ GEphemerides* GEphemerides::clone(void) const
 
 
 /***********************************************************************//**
+ * @brief Load Ephemerides
+ *
+ * @param[in] filename Ephemerides file name.
+ *
+ * Load ephemerides from FITS file.
+ ***************************************************************************/
+void GEphemerides::load(const GFilename& filename)
+{
+    // Clear members
+    clear();
+
+    // Open JPL ephemerides FITS file
+    GFits fits(filename);
+
+    // Get ephemerides table
+    const GFitsTable* ephem = fits.table("EPHEM");
+
+    // Extract number of events in FITS file
+    int num = ephem->nrows();
+
+    // Continue if there are ephemerides
+    if (num > 0) {
+
+        // Reserve data
+        m_times.reserve(num);
+        m_earth.reserve(num);
+        m_earth_dt.reserve(num);
+        m_earth_d2t.reserve(num);
+        m_earth_d3t.reserve(num);
+        m_sun.reserve(num);
+        m_tdb2tt.reserve(num);
+
+        // Get validity interval
+        double tstart = ephem->real("TSTART");
+        m_tstart.jd(tstart);
+        m_tstop.jd(ephem->real("TSTOP"));
+
+        // Get column pointers
+        const GFitsTableCol* ptr_earth  = (*ephem)["EARTH"];    // light seconds
+        const GFitsTableCol* ptr_sun    = (*ephem)["SUN"];      // light seconds
+        const GFitsTableCol* ptr_tbd2tt = (*ephem)["TIMEDIFF"]; // sec
+
+        // Extract data
+        for (int i = 0; i < num; ++i) {
+
+            // Set time
+            GTime time;
+            time.jd(tstart + double(i));
+
+            // Set vectors
+            GVector earth(ptr_earth->real(i,0),
+                          ptr_earth->real(i,1),
+                          ptr_earth->real(i,2));
+            GVector earth_dt(ptr_earth->real(i,3),
+                             ptr_earth->real(i,4),
+                             ptr_earth->real(i,5));
+            GVector earth_d2t(ptr_earth->real(i,6),
+                              ptr_earth->real(i,7),
+                              ptr_earth->real(i,8));
+            GVector earth_d3t(ptr_earth->real(i,9),
+                              ptr_earth->real(i,10),
+                              ptr_earth->real(i,11));
+            GVector sun(ptr_sun->real(i,0),
+                        ptr_sun->real(i,1),
+                        ptr_sun->real(i,2));
+
+            // Set tbd2tt
+            double tbd2tt = ptr_tbd2tt->real(i);
+
+            // Push back data
+            m_times.push_back(time);
+            m_earth.push_back(earth);
+            m_earth_dt.push_back(earth_dt);
+            m_earth_d2t.push_back(earth_d2t);
+            m_earth_d3t.push_back(earth_d3t);
+            m_sun.push_back(sun);
+            m_tdb2tt.push_back(tbd2tt);
+
+        } // endfor: looped over rows
+
+        // Store attributes
+        m_name     = ephem->string("NAME");
+        m_filename = filename;
+
+    } // endif: there were ephemerides to load
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Get ephemeris vector and TBD->TT value for a given time
+ *
+ * @param[in] time Time.
+ * @param[out] rce Pointer to vector from SSBC to Earth (light-s).
+ * @param[out] rcs Pointer to vector from SSBC to Sun (light-s).
+ * @param[out] vce Pointer to first time derivative of vector from SSBC to
+ *                 Earth (light-s/s).
+ * @param[out] etut Time difference TDB-TT (s)
+ *
+ * Get ephemeris vector and TBD->TT value for a given time. Information is
+ * only returned for pointers that are not NULL.
+ *
+ * @todo Check whether the conversion to UTC is needed and whether utc_to_tdt
+ *       needs to be added to etut since times are normally in TT, not UTC.
+ ***************************************************************************/
+void GEphemerides::ephemeris(const GTime& time,
+                             GVector*     rce,
+                             GVector*     rcs,
+                             GVector*     vce,
+                             double*      etut) const
+{
+    // Fetch ephemerides
+    const_cast<GEphemerides*>(this)->fetch_data();
+
+    // Compute jd_utc as int and dt as day fraction, between -0.5 and 0.5
+    double jd     = time.jd("UTC");
+    int    jd_utc = int(jd);
+    double dt     = jd - double(jd_utc);
+    if (dt > 0.5) {
+        jd_utc += 1;
+        dt     -= 1.0;
+    }
+
+    // Get Julian Day validity interval as int
+    int jd0 = int(m_tstart.jd());
+    int jd1 = int(m_tstop.jd());
+
+    // If date is outside range of ephemeris then throw an exception
+    if (jd_utc < jd0) {
+        std::string msg = "Time JD "+gammalib::str(jd_utc)+ " is before "
+                          "validity start JD "+gammalib::str(jd0)+" of "
+                          "ephemerides. Please specify a time later than "
+                          "the validity start.";
+        throw GException::invalid_argument(G_EPHEMERIS, msg);
+    }
+    else if (jd_utc > jd1) {
+        std::string msg = "Time JD "+gammalib::str(jd_utc)+ " is after "
+                          "validity end JD "+gammalib::str(jd1)+" of "
+                          "ephemerides. Please specify a time earlier than "
+                          "the validity end.";
+        throw GException::invalid_argument(G_EPHEMERIS, msg);
+    }
+
+    // Compute ephemeris index
+    int index = jd_utc - jd0;
+
+    // Make rough computation of time derivative of TDB-TDT
+    double tbd2tt_dot = (index+1 < size()) ? m_tdb2tt[index+1] - m_tdb2tt[index]
+                                           : m_tdb2tt[index]   - m_tdb2tt[index-1];
+
+    // Get Earth position and velocity vector at the desired time using
+    // Taylor expansion
+    const double c1 = 1.0/2.0;
+    const double c2 = 1.0/6.0;
+    if (rce != NULL) {
+        *rce = m_earth[index] + (m_earth_dt[index] + (m_earth_d2t[index] *
+               c1 + m_earth_d3t[index] * dt * c2) * dt) * dt;
+    }
+    if (vce != NULL) {
+        *vce = (m_earth_dt[index] + (m_earth_d2t[index] + m_earth_d3t[index] *
+               dt * c1)) * dt * gammalib::sec2day;
+    }
+
+    // Get Sun vector
+    if (rce != NULL) {
+        *rce = m_sun[index];
+    }
+
+    // Get TBD-TT (seconds)
+    if (etut != NULL) {
+        double utc_to_tdt = time.secs("TT") - time.secs("UTC");
+        *etut = m_tdb2tt[index] + dt * tbd2tt_dot + utc_to_tdt;
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Get time difference between geocentric and SSB (seconds)
+ *
+ * @param[in] time Time.
+ * @param[in] srcdir Source direction.
+ * @return Time difference in seconds.
+ ***************************************************************************/
+double GEphemerides::geo2ssb(const GTime& time, const GSkyDir& srcdir) const
+{
+    // Set constants
+    const double sunrad               = 2.315;
+    const double aultsc               = 499.004782;     // What ???
+    const double gauss                = 0.01720209895;  // What ???
+    const double schwarzschild_radius = (gauss*gauss) *
+                                        (aultsc*aultsc*aultsc) *
+                                        (gammalib::sec2day*gammalib::sec2day);
+
+    // Get ephemerides
+    GVector rce(3);
+    GVector rcs(3);
+    GVector vce(3);
+    double  etut;
+    ephemeris(time, &rce, &rcs, &vce, &etut);
+
+    // Get sky direction as celestial vector
+    GVector dir = srcdir.celvector();
+
+    // Calculate light-travel time to barycenter in Euclidean space
+    double light_travel_time = dir * rce;
+
+    // Now calculate the time delay due to the gravitational field of the
+    // Sun (I.I. Shapiro, Phys. Rev. Lett. 13, 789 (1964))
+    GVector rsa       = rce - rcs;
+    double  sundis    = norm(rsa);
+    double  sunsiz    = sunrad/sundis;
+    double  cos_theta = (dir * rsa) / sundis;
+
+    // Special handling if sky direction is inside the Sun
+    /*
+    if (cth + 1.0 < 0.5 * sunsiz * sunsiz) {
+        
+    }
+    */
+
+    // Compute Shapiro delay
+    double shapiro_delay = -2.0 * schwarzschild_radius * std::log(1.0 + cos_theta);
+
+    // Compute time difference between geocentric and Solar System Barycentric
+    // frame
+    double geo2ssb = light_travel_time - shapiro_delay + etut;
+
+    // Return barycentric correction (seconds)
+    return geo2ssb;
+}
+
+
+/***********************************************************************//**
  * @brief Print Ephemerides
  *
  * @param[in] chatter Chattiness.
@@ -178,6 +422,16 @@ std::string GEphemerides::print(const GChatter& chatter) const
         result.append(m_name);
         result.append("\n"+gammalib::parformat("File name"));
         result.append(m_filename.url());
+        if (!is_empty()) {
+            result.append("\n"+gammalib::parformat("Validity MJD range"));
+            result.append(gammalib::str(m_tstart.mjd()));
+            result.append(" - ");
+            result.append(gammalib::str(m_tstop.mjd()));
+            result.append("\n"+gammalib::parformat("Validity UTC range"));
+            result.append(m_tstart.utc());
+            result.append(" - ");
+            result.append(m_tstop.utc());
+        }
 
     } // endif: chatter was not silent
 
@@ -200,7 +454,16 @@ void GEphemerides::init_members(void)
     // Initialise members
     m_name.clear();
     m_filename.clear();
-    
+    m_tstart.clear();
+    m_tstop.clear();
+    m_times.clear();
+    m_earth.clear();
+    m_earth_dt.clear();
+    m_earth_d2t.clear();
+    m_earth_d3t.clear();
+    m_sun.clear();
+    m_tdb2tt.clear();
+
     // Return
     return;
 }
@@ -214,8 +477,17 @@ void GEphemerides::init_members(void)
 void GEphemerides::copy_members(const GEphemerides& ephemerides)
 {
     // Copy members
-    m_name     = ephemerides.m_name;
-    m_filename = ephemerides.m_filename;
+    m_name      = ephemerides.m_name;
+    m_filename  = ephemerides.m_filename;
+    m_tstart    = ephemerides.m_tstart;
+    m_tstop     = ephemerides.m_tstop;
+    m_times     = ephemerides.m_times;
+    m_earth     = ephemerides.m_earth;
+    m_earth_dt  = ephemerides.m_earth_dt;
+    m_earth_d2t = ephemerides.m_earth_d2t;
+    m_earth_d3t = ephemerides.m_earth_d3t;
+    m_sun       = ephemerides.m_sun;
+    m_tdb2tt    = ephemerides.m_tdb2tt;
 
     // Return
     return;
@@ -227,6 +499,24 @@ void GEphemerides::copy_members(const GEphemerides& ephemerides)
  ***************************************************************************/
 void GEphemerides::free_members(void)
 {
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Fetch ephemerides data
+ *
+ * This method loads the DE200 ephemerides data from the file provided in
+ * the reference data repository if no ephemerides are loaded.
+ ***************************************************************************/
+void GEphemerides::fetch_data(void)
+{
+    // If no ephemerides data are loaded then load the JPL DE200 ephemerides
+    if (is_empty()) {
+        load("$GAMMALIB/share/refdata/ephem_jpl_de200.fits");
+    }
+
     // Return
     return;
 }

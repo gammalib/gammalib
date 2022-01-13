@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-9 January 2022
+14 January 2022
 
 
 1. Introduction
@@ -17,6 +17,7 @@ The following classes have been added:
 - GResponseVectorCache
 - GPulsar
 - GPulsarEphemeris
+- GEphemerides
 - GSkyDirs
 - GSkyRegionRect
 - GModelAssociation
@@ -277,6 +278,10 @@ of functions (#3328).
 
 11. Observation module
 ----------------------
+Add GEphemerides class to deal with JPL ephemerides and specifically the
+DE200 ephemerides. A JPL DE200 ephemerides file was added to a refdata
+direction, the file is installed in $GAMMALIB/share/refdata (#3973).
+
 Add GPhases::length() method that returns the total length of the phase
 intervals (#3973).
 

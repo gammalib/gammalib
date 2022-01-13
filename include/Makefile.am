@@ -21,6 +21,7 @@
 
 # Define package included headers (to be installed)
 pkginclude_HEADERS = GammaLib.hpp \
+                     GEphemerides.hpp \
                      GTypemaps.hpp \
                      GBase.hpp \
                      GContainer.hpp \

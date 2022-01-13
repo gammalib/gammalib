@@ -54,8 +54,7 @@ sources = GEnergies.cpp \
           GSource.cpp \
           GPulsar.cpp \
           GPulsarEphemeris.cpp \
-          GEphemerides.cpp \
-
+          GEphemerides.cpp
 
 # Build libtool library
 noinst_LTLIBRARIES = libobs.la

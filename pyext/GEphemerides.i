@@ -48,7 +48,18 @@ public:
     virtual std::string   classname(void) const;
 
     // Other methods
-    // TODO: Copy methods from GEphemerides.hpp file
+    int                size(void) const;
+    bool               is_empty(void) const;
+    const std::string& name(void) const;
+    void               name(const std::string& name);
+    void               load(const GFilename& filename);
+    void               ephemeris(const GTime& time,
+                                 GVector*     rce,
+                                 GVector*     rcs,
+                                 GVector*     vce,
+                                 double*      etut) const;
+    double             geo2ssb(const GTime&   time,
+                               const GSkyDir& srcdir) const;
 };
 
 
