@@ -114,11 +114,14 @@ TestGCOM* TestGCOM::clone(void) const
  ***************************************************************************/
 void TestGCOM::test_com_time(void)
 {
-    // Verify time conversion given in COM-RP-UNH-DRG-037
+    // Verify time conversion given in COM-RP-UNH-DRG-037. The third time
+    // is after the CGRO clock correction.
     GTime time1(gammalib::com_time(8393, 0));
-    test_value(time1.utc(), "1991-05-17T00:00:00", "Test 8393:0");
+    test_value(time1.utc(), "1991-05-16T23:59:58", "Test 8393:0");
     GTime time2(gammalib::com_time(8406, 691199999));
-    test_value(time2.utc(), "1991-05-31T00:00:00", "Test 8406:691199999");
+    test_value(time2.utc(), "1991-05-30T23:59:58", "Test 8406:691199999");
+    GTime time3(gammalib::com_time(8798, 28800000));
+    test_value(time3.utc(), "1992-06-25T01:00:00", "Test 8798:28800000");
 
     // Verify back conversion
     int tjd1  = gammalib::com_tjd(time1);
@@ -129,6 +132,10 @@ void TestGCOM::test_com_time(void)
     int tics2 = gammalib::com_tics(time2);
     test_value(tjd2, 8406, "Test TJD 8406");
     test_value(tics2, 691199999, "Test tics 691199999");
+    int tjd3  = gammalib::com_tjd(time3);
+    int tics3 = gammalib::com_tics(time3);
+    test_value(tjd3, 8798, "Test TJD 8798");
+    test_value(tics3, 28800000, "Test tics 28800000");
 
     // Return
     return;

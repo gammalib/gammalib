@@ -3,6 +3,7 @@
         * Version 2.0.0 released
         ========================
 
+        Implement CGRO clock correction (#3973)
         Add support for COMPTEL pulsar analysis (#3973)
         Add GCOMObservation::tim() and GCOMObservation::oads() setter methods
         Remove GCOMSelection::zeta_min() and GCOMSelection::zeta_max()

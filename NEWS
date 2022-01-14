@@ -423,6 +423,9 @@ spatial model gradients (#3203).
 
 22. COMPTEL interface
 ---------------------
+Implement a 2.042144 seconds clock correction before TJD 8798 and tics 28800000 
+(1992-06-25T01:00:00) to provide accurate times for pulsar analysis (#3973).
+
 Added GCOMBvc and GCOMBvcs classes to support reading and using of BVC files for
 pulsar analysis. The interface of the GCOMSelection was modified so that it
 supports both orbital and pulsar phase selection. The interface of GCOMObservation

@@ -1,7 +1,7 @@
 .. _2.0:
 
-GammaLib 2.0 release (7 January 2022)
-=====================================
+GammaLib 2.0 release (14 January 2022)
+======================================
 
 Overview
 --------
@@ -18,6 +18,8 @@ In particular, this release provides:
 Bug fixes
 ---------
 
+* [`3973 <https://cta-redmine.irap.omp.eu/issues/3973>`_] -
+  Implement CGRO clock correction
 * Compute spectral model gradients for negative factor values
 * [`3563 <https://cta-redmine.irap.omp.eu/issues/3563>`_] -
   Fix incompatibility in ``GMatrixSparse::mix_column_prepare()`` method
