@@ -161,7 +161,7 @@ GPulsarEphemeris* GPulsarEphemeris::clone(void) const
  * @brief Returns pulsar phase
  *
  * @param[in] time Time.
- * @param[in] timesys Time system for evaluation of time.
+ * @param[in] timesys Time system of time to be used for evaluation.
  * @return Pulsar phase.
  *
  * Computes

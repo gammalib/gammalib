@@ -223,18 +223,6 @@ void GPulsarEphemeris::tstop(const GTime& tstop)
 
 
 /***********************************************************************//**
- * @brief Return class name
- *
- * @return String containing the class name ("GPulsarEphemeris").
- ***************************************************************************/
-inline
-std::string GPulsarEphemeris::classname(void) const
-{
-    return ("GPulsarEphemeris");
-}
-
-
-/***********************************************************************//**
  * @brief Returns pulsar ephemeris time system
  *
  * @return Pulsar ephemeris time system.
