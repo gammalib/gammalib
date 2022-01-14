@@ -32,7 +32,6 @@
 #include "GBase.hpp"
 #include "GTime.hpp"
 #include "GSkyDir.hpp"
-#include "GModelTemporalPhaseCurve.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 
@@ -72,6 +71,8 @@ public:
     void               tstart(const GTime& tstart);
     const GTime&       tstop(void) const;
     void               tstop(const GTime& tstop);
+    const std::string& timesys(void) const;
+    void               timesys(const std::string& timesys);
     GTime              t0(void) const;
     void               t0(const GTime& t0);
     double             phase(void) const;
@@ -82,7 +83,8 @@ public:
     void               f1(const double& f1);
     double             f2(void) const;
     void               f2(const double& f2);
-    double             phase(const GTime& time) const;
+    double             phase(const GTime&       time,
+                             const std::string& timesys) const;
 
 protected:
     // Protected methods
@@ -91,11 +93,16 @@ protected:
     void free_members(void);
     
     // Protected members
-    std::string              m_name;         //!< Pulsar name
-    GTime                    m_tstart;       //!< Validity start time
-    GTime                    m_tstop;        //!< Validity stop time
-    GSkyDir                  m_dir;          //!< Pulsar sky direction
-    GModelTemporalPhaseCurve m_phase_curve;  //!< Pulsar phase curve
+    std::string m_name;    //!< Pulsar name
+    GTime       m_tstart;  //!< Validity start time
+    GTime       m_tstop;   //!< Validity stop time
+    GSkyDir     m_dir;     //!< Pulsar sky direction
+    std::string m_timesys; //!< Time system of pulsar ephemeris
+    GTime       m_t0;      //!< Reference epoch of pulsar ephemeris
+    double      m_phase;   //!< Pulse phase
+    double      m_f0;      //!< Pulsar frequency (Hz)
+    double      m_f1;      //!< Pulsar frequency derivative (s^-2)
+    double      m_f2;      //!< Pulsar second frequency derivative (s^-3)
 };
 
 
@@ -216,6 +223,48 @@ void GPulsarEphemeris::tstop(const GTime& tstop)
 
 
 /***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GPulsarEphemeris").
+ ***************************************************************************/
+inline
+std::string GPulsarEphemeris::classname(void) const
+{
+    return ("GPulsarEphemeris");
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pulsar ephemeris time system
+ *
+ * @return Pulsar ephemeris time system.
+ *
+ * The pulsar ephemeris time system is one of "TT", "TAI" or "UTC".
+ ***************************************************************************/
+inline
+const std::string& GPulsarEphemeris::timesys(void) const
+{
+    // Return
+    return (m_timesys);
+}
+
+
+/***********************************************************************//**
+ * @brief Set pulsar ephemeris time system
+ *
+ * @param[in] timesys Pulsar ephemeris time system.
+ *
+ * The pulsar ephemeris time system is one of "TT", "TAI" or "UTC".
+ ***************************************************************************/
+inline
+void GPulsarEphemeris::timesys(const std::string& timesys)
+{
+    m_timesys = timesys;
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Returns reference epoch of pulsar ephemeris
  *
  * @return Reference epoch of pulsar ephemeris.
@@ -223,7 +272,7 @@ void GPulsarEphemeris::tstop(const GTime& tstop)
 inline
 GTime GPulsarEphemeris::t0(void) const
 {
-    return (m_phase_curve.mjd());
+    return (m_t0);
 }
 
 
@@ -235,7 +284,7 @@ GTime GPulsarEphemeris::t0(void) const
 inline
 void GPulsarEphemeris::t0(const GTime& t0)
 {
-    m_phase_curve.mjd(t0);
+    m_t0 = t0;
     return;
 }
 
@@ -248,7 +297,7 @@ void GPulsarEphemeris::t0(const GTime& t0)
 inline
 double GPulsarEphemeris::phase(void) const
 {
-    return (m_phase_curve.phase());
+    return (m_phase);
 }
 
 
@@ -260,7 +309,7 @@ double GPulsarEphemeris::phase(void) const
 inline
 void GPulsarEphemeris::phase(const double& phase)
 {
-    m_phase_curve.phase(phase);
+    m_phase = phase;
     return;
 }
 
@@ -273,7 +322,7 @@ void GPulsarEphemeris::phase(const double& phase)
 inline
 double GPulsarEphemeris::f0(void) const
 {
-    return (m_phase_curve.f0());
+    return (m_f0);
 }
 
 
@@ -285,7 +334,7 @@ double GPulsarEphemeris::f0(void) const
 inline
 void GPulsarEphemeris::f0(const double& f0)
 {
-    m_phase_curve.f0(f0);
+    m_f0 = f0;
     return;
 }
 
@@ -298,7 +347,7 @@ void GPulsarEphemeris::f0(const double& f0)
 inline
 double GPulsarEphemeris::f1(void) const
 {
-    return (m_phase_curve.f1());
+    return (m_f1);
 }
 
 
@@ -310,7 +359,7 @@ double GPulsarEphemeris::f1(void) const
 inline
 void GPulsarEphemeris::f1(const double& f1)
 {
-    m_phase_curve.f1(f1);
+    m_f1 = f1;
     return;
 }
 
@@ -323,7 +372,7 @@ void GPulsarEphemeris::f1(const double& f1)
 inline
 double GPulsarEphemeris::f2(void) const
 {
-    return (m_phase_curve.f2());
+    return (m_f2);
 }
 
 
@@ -335,20 +384,8 @@ double GPulsarEphemeris::f2(void) const
 inline
 void GPulsarEphemeris::f2(const double& f2)
 {
-    m_phase_curve.f2(f2);
+    m_f2 = f2;
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Returns pulsar phase
- *
- * @return Pulsar phase.
- ***************************************************************************/
-inline
-double GPulsarEphemeris::phase(const GTime& time) const
-{
-    return (m_phase_curve.phase(time));
 }
 
 #endif /* GPULSAREPHEMERIS_HPP */

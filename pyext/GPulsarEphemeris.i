@@ -56,6 +56,8 @@ public:
     void               tstart(const GTime& tstart);
     const GTime&       tstop(void) const;
     void               tstop(const GTime& tstop);
+    const std::string& timesys(void) const;
+    void               timesys(const std::string& timesys);
     GTime              t0(void) const;
     void               t0(const GTime& t0);
     double             phase(void) const;
@@ -66,7 +68,8 @@ public:
     void               f1(const double& f1);
     double             f2(void) const;
     void               f2(const double& f2);
-    double             phase(const GTime& time) const;
+    double             phase(const GTime&       time,
+                             const std::string& timesys) const;
 };
 
 

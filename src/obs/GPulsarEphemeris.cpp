@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 #include "GPulsarEphemeris.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -157,6 +158,53 @@ GPulsarEphemeris* GPulsarEphemeris::clone(void) const
 
 
 /***********************************************************************//**
+ * @brief Returns pulsar phase
+ *
+ * @param[in] time Time.
+ * @param[in] timesys Time system for evaluation of time.
+ * @return Pulsar phase.
+ *
+ * Computes
+ *
+ * \f[
+ *    \Phi(t) = \Phi_0 + f(t-t_0) + \frac{1}{2}\dot{f} (t-t_0)^2 +
+ *                                  \frac{1}{6}\ddot{f} (t-t_0)^3
+ * \f]
+ *
+ * where
+ * \f$t\f$ is the specified @p time in seconds,
+ * \f$t_0\f$ is a reference time in seconds,
+ * \f$\Phi_0\f$ is the phase at the reference time,
+ * \f$f\f$ is the variation frequency at the reference time,
+ * \f$\dot{f}\f$ is the first derivative of the variation frequency at the
+ * reference time, and
+ * \f$\dot{f}\f$ is the second derivative of the variation frequency at the
+ * reference time.
+ *
+ * The phase \f$\Phi(t)\f$ is in the interval [0,1].
+ ***************************************************************************/
+double GPulsarEphemeris::phase(const GTime&       time,
+                               const std::string& timesys) const
+{
+    // Set constants
+    const double c1 = 0.5;
+    const double c2 = 1.0 / 6.0;
+
+    // Compute time since reference time in seconds
+    double dt = time.secs(timesys) - m_t0.secs(m_timesys);
+
+    // Computes phase
+    double phase = m_phase + dt * (m_f0 + dt * (c1 * m_f1 + c2 * m_f2 * dt));
+
+    // Put phase into interval [0,1]
+    phase -= floor(phase);
+
+    // Return phase
+    return phase;
+}
+
+
+/***********************************************************************//**
  * @brief Print Pulsar ephemeris
  *
  * @param[in] chatter Chattiness.
@@ -187,9 +235,13 @@ std::string GPulsarEphemeris::print(const GChatter& chatter) const
         double f0 = this->f0();
 
         // Append phase information
-        result.append("\n"+gammalib::parformat("Time of phase 0"));
+        result.append("\n"+gammalib::parformat("Time system of ephemeris"));
+        result.append(m_timesys);
+        result.append("\n"+gammalib::parformat("Reference epoch"));
         result.append("MJD ");
-        result.append(gammalib::str(t0().mjd()));
+        result.append(gammalib::str(t0().mjd(m_timesys)));
+        result.append("\n"+gammalib::parformat("Phase"));
+        result.append(gammalib::str(phase()));
         result.append("\n"+gammalib::parformat("Frequency"));
         result.append(gammalib::str(f0));
         result.append(" Hz");
@@ -217,9 +269,9 @@ std::string GPulsarEphemeris::print(const GChatter& chatter) const
 
         // Append validity information
         result.append("\n"+gammalib::parformat("Validity MJD range"));
-        result.append(gammalib::str(tstart().mjd()));
+        result.append(gammalib::str(tstart().mjd(m_timesys)));
         result.append(" - ");
-        result.append(gammalib::str(tstop().mjd()));
+        result.append(gammalib::str(tstop().mjd(m_timesys)));
         result.append("\n"+gammalib::parformat("Validity UTC range"));
         result.append(tstart().utc());
         result.append(" - ");
@@ -248,16 +300,12 @@ void GPulsarEphemeris::init_members(void)
     m_tstart.clear();
     m_tstop.clear();
     m_dir.clear();
-    m_phase_curve.clear();
-
-    // Remove range from phase curve parameters
-    m_phase_curve["MJD"].remove_range();
-    m_phase_curve["F0"].remove_range();
-    m_phase_curve["F1"].remove_range();
-    m_phase_curve["F2"].remove_range();
-
-    // Make sure that reference phase is zero
-    m_phase_curve["Phase"].value(0.0);
+    m_t0.clear();
+    m_timesys = "TT";
+    m_phase   = 0.0;
+    m_f0      = 0.0;
+    m_f1      = 0.0;
+    m_f2      = 0.0;
 
     // Return
     return;
@@ -272,11 +320,16 @@ void GPulsarEphemeris::init_members(void)
 void GPulsarEphemeris::copy_members(const GPulsarEphemeris& ephemeris)
 {
     // Copy members
-    m_name        = ephemeris.m_name;
-    m_tstart      = ephemeris.m_tstart;
-    m_tstop       = ephemeris.m_tstop;
-    m_dir         = ephemeris.m_dir;
-    m_phase_curve = ephemeris.m_phase_curve;
+    m_name    = ephemeris.m_name;
+    m_tstart  = ephemeris.m_tstart;
+    m_tstop   = ephemeris.m_tstop;
+    m_dir     = ephemeris.m_dir;
+    m_timesys = ephemeris.m_timesys;
+    m_t0      = ephemeris.m_t0;
+    m_phase   = ephemeris.m_phase;
+    m_f0      = ephemeris.m_f0;
+    m_f1      = ephemeris.m_f1;
+    m_f2      = ephemeris.m_f2;
 
     // Return
     return;
