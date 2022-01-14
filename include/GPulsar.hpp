@@ -34,7 +34,10 @@
 #include "GPulsarEphemeris.hpp"
 
 /* __ Forward declarations _______________________________________________ */
+class GTime;
 class GGti;
+class GFilename;
+class GFitsTable;
 
 /* __ Constants __________________________________________________________ */
 

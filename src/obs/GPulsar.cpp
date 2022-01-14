@@ -31,6 +31,8 @@
 #include "GPulsar.hpp"
 #include "GFits.hpp"
 #include "GGti.hpp"
+#include "GEphemerides.hpp"
+#include "GFilename.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_AT                            "GPulsarEphemeris& GPulsar::at(int&)"
@@ -545,22 +547,22 @@ void GPulsar::load_integral(const GFitsTable* table, const std::string& name)
     dir.radec_deg(ra, dec);
 
     // Get pointers to table columns
-    const GFitsTableCol* mjdstart = (*table)["MJDSTART"];
-    const GFitsTableCol* mjdstop  = (*table)["MJDSTOP"];
-    const GFitsTableCol* tref0    = (*table)["TREF0"];
-    const GFitsTableCol* t2peak   = (*table)["T2PEAK"];
-    const GFitsTableCol* f0       = (*table)["F0"];
-    const GFitsTableCol* f1       = (*table)["FDOT0"];
-    const GFitsTableCol* f2       = (*table)["FDOTDOT0"];
+    const GFitsTableCol* col_mjdstart = (*table)["MJDSTART"];
+    const GFitsTableCol* col_mjdstop  = (*table)["MJDSTOP"];
+    const GFitsTableCol* col_tref0    = (*table)["TREF0"];
+    const GFitsTableCol* col_t2peak   = (*table)["T2PEAK"];
+    const GFitsTableCol* col_f0       = (*table)["F0"];
+    const GFitsTableCol* col_f1       = (*table)["FDOT0"];
+    const GFitsTableCol* col_f2       = (*table)["FDOTDOT0"];
 
     // Extract ephemerides
-    for (int i = 0; i < mjdstart->nrows(); ++i) {
+    for (int i = 0; i < col_mjdstart->nrows(); ++i) {
 
         // Set validity interval
         GTime tstart;
         GTime tstop;
-        tstart.mjd(mjdstart->real(i));
-        tstop.mjd(mjdstop->real(i));
+        tstart.mjd(col_mjdstart->real(i));
+        tstop.mjd(col_mjdstop->real(i));
 
         // Set t0. The interpretation of the FITS table information has been
         // validated by inspecting the code in the INTEGRAL OSA task
@@ -576,8 +578,20 @@ void GPulsar::load_integral(const GFitsTable* table, const std::string& name)
         // taking into account that tref0 is given in days and t2peak0 is
         // given in seconds. _orbi is the time in days in the above code.
         GTime t0;
-        t0.mjd(tref0->real(i));
-        t0 += t2peak->real(i);
+        t0.mjd(double(int(col_tref0->real(i))));
+        //t0 += col_t2peak->real(i);
+
+        // Get frequency and derivatives
+        double f0 = col_f0->real(i);
+        double f1 = col_f1->real(i);
+        double f2 = col_f2->real(i);
+
+        // Compute phase of first pulse
+        const double c1    = 1.0/2.0;
+        const double c2    = 1.0/6.0;
+        double       dt    = col_t2peak->real(i);
+        double       phase = -((f0 + (f1 * c1 + f2 * dt * c2) * dt) * dt);
+        phase -= floor(phase);
 
         // Allocate ephemeris
         GPulsarEphemeris ephemeris;
@@ -588,9 +602,10 @@ void GPulsar::load_integral(const GFitsTable* table, const std::string& name)
         ephemeris.tstart(tstart);
         ephemeris.tstop(tstop);
         ephemeris.t0(t0);
-        ephemeris.f0(f0->real(i));
-        ephemeris.f1(f1->real(i));
-        ephemeris.f2(f2->real(i));
+        ephemeris.phase(phase);
+        ephemeris.f0(f0);
+        ephemeris.f1(f1);
+        ephemeris.f2(f2);
 
         // Push back ephemeris
         m_ephemerides.push_back(ephemeris);
@@ -616,41 +631,54 @@ void GPulsar::load_integral(const GFitsTable* table, const std::string& name)
 void GPulsar::load_fermi(const GFitsTable* table, const std::string& name)
 {
     // Get pointers to table columns
-    const GFitsTableCol* psrname      = (*table)["PSRNAME"];
-    const GFitsTableCol* ra           = (*table)["RA"];
-    const GFitsTableCol* dec          = (*table)["DEC"];
-    const GFitsTableCol* valid_since  = (*table)["VALID_SINCE"];
-    const GFitsTableCol* valid_until  = (*table)["VALID_UNTIL"];
-    const GFitsTableCol* toabary_int  = (*table)["TOABARY_INT"];
-    const GFitsTableCol* toabary_frac = (*table)["TOABARY_FRAC"];
-    const GFitsTableCol* f0           = (*table)["F0"];
-    const GFitsTableCol* f1           = (*table)["F1"];
-    const GFitsTableCol* f2           = (*table)["F2"];
+    const GFitsTableCol* col_psrname      = (*table)["PSRNAME"];
+    const GFitsTableCol* col_ra           = (*table)["RA"];
+    const GFitsTableCol* col_dec          = (*table)["DEC"];
+    const GFitsTableCol* col_valid_since  = (*table)["VALID_SINCE"];
+    const GFitsTableCol* col_valid_until  = (*table)["VALID_UNTIL"];
+    const GFitsTableCol* col_toabary_int  = (*table)["TOABARY_INT"];
+    const GFitsTableCol* col_toabary_frac = (*table)["TOABARY_FRAC"];
+    const GFitsTableCol* col_f0           = (*table)["F0"];
+    const GFitsTableCol* col_f1           = (*table)["F1"];
+    const GFitsTableCol* col_f2           = (*table)["F2"];
 
     // Extract ephemerides
-    for (int i = 0; i < psrname->nrows(); ++i) {
+    for (int i = 0; i < col_psrname->nrows(); ++i) {
 
         // Skip if pulsar name does not correspond to specified name
-        if (psrname->string(i) != name) {
+        if (col_psrname->string(i) != name) {
             continue;
         }
 
         // Save the pulsar name
-        m_name = psrname->string(i);
+        m_name = col_psrname->string(i);
 
         // Set sky direction
         GSkyDir dir;
-        dir.radec_deg(ra->real(i), dec->real(i));
+        dir.radec_deg(col_ra->real(i), col_dec->real(i));
 
         // Set validity interval
         GTime tstart;
         GTime tstop;
-        tstart.mjd(valid_since->real(i));
-        tstop.mjd(valid_until->real(i));
+        tstart.mjd(col_valid_since->real(i));
+        tstop.mjd(col_valid_until->real(i));
 
         // Set t0
         GTime t0;
-        t0.mjd(toabary_int->integer(i)+toabary_frac->real(i));
+        //t0.mjd(col_toabary_int->integer(i)+col_toabary_frac->real(i));
+        t0.mjd(double(col_toabary_int->integer(i)));
+
+        // Get frequency and derivatives
+        double f0 = col_f0->real(i);
+        double f1 = col_f1->real(i);
+        double f2 = col_f2->real(i);
+
+        // Compute phase of first pulse
+        const double c1    = 1.0/2.0;
+        const double c2    = 1.0/6.0;
+        double       dt    = col_toabary_frac->real(i) * gammalib::sec_in_day;
+        double       phase = -((f0 + (f1 * c1 + f2 * dt * c2) * dt) * dt);
+        phase -= floor(phase);
 
         // Allocate ephemeris
         GPulsarEphemeris ephemeris;
@@ -661,9 +689,10 @@ void GPulsar::load_fermi(const GFitsTable* table, const std::string& name)
         ephemeris.tstart(tstart);
         ephemeris.tstop(tstop);
         ephemeris.t0(t0);
-        ephemeris.f0(f0->real(i));
-        ephemeris.f1(f1->real(i));
-        ephemeris.f2(f2->real(i));
+        ephemeris.phase(phase);
+        ephemeris.f0(f0);
+        ephemeris.f1(f1);
+        ephemeris.f2(f2);
 
         // Push back ephemeris
         m_ephemerides.push_back(ephemeris);
@@ -712,6 +741,9 @@ void GPulsar::load_psrtime(const GFilename& filename, const std::string& name)
     // Allocate line buffer
     const int n = 1000;
     char  line[n];
+
+    // Initialise ephemerides
+    GEphemerides ephemerides;
 
     // Open file
     FILE* fptr = std::fopen(filename.url().c_str(), "r");
@@ -787,9 +819,33 @@ void GPulsar::load_psrtime(const GFilename& filename, const std::string& name)
         tstart.mjd(mjdstart);
         tstop.mjd(mjdstop);
 
-        // Set t0
+        // Compute the barycentric (TDB) epoch of the spin parameters
+        double t0nom = double(int(t0geo));
+
+        // Set t0 = t0nom
         GTime t0;
-        t0.mjd(t0geo); // TODO: conversion to Bary ???
+        t0.mjd(t0nom);
+
+        // Compute the infinite-frequency geocentric UTC TOA of a pulse
+        // in seconds
+        double toa_utc = (t0geo - t0nom) * gammalib::sec_in_day;
+
+        // Convert TOA to barycentric (TDB) time in seconds
+        GTime toa;
+        toa.secs(toa_utc, "UTC");
+        //double toa_tt = toa.secs("TT");
+
+        // Add light propagation effects
+        double geo2ssb = ephemerides.geo2ssb(toa, dir);
+        double toa_tdb = toa_utc + geo2ssb;
+
+        // Compute phase of first pulse. Note that the phase is negative, see for
+        // example Eq. (3) in Yan et al. (2017), ApJ, 845, 119
+        const double c1    = 1.0/2.0;
+        const double c2    = 1.0/6.0;
+        double       dt    = toa_tdb;
+        double       phase = -((f0 + (f1 * c1 + f2 * dt * c2) * dt) * dt);
+        phase -= floor(phase);
 
         // Allocate ephemeris
         GPulsarEphemeris ephemeris;
@@ -799,7 +855,9 @@ void GPulsar::load_psrtime(const GFilename& filename, const std::string& name)
         ephemeris.dir(dir);
         ephemeris.tstart(tstart);
         ephemeris.tstop(tstop);
+        ephemeris.timesys("UTC");  // psrtime ephemerides are in UTC
         ephemeris.t0(t0);
+        ephemeris.phase(phase);
         ephemeris.f0(f0);
         ephemeris.f1(f1);
         ephemeris.f2(f2);
