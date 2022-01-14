@@ -464,12 +464,18 @@ void GCOMDri::compute_dre(const GCOMObservation& obs,
                 const GPulsarEphemeris& ephemeris =
                       m_selection.pulsar().ephemeris(event->time());
 
-                // Convert time to Solar System Barycentre
+                // Convert time to Solar System Barycentre. Note that the
+                // time correction includes an UTC_TO_TT conversion term,
+                // but this terms has already applied when setting the GTime
+                // object. Hence if time is read as time.mjd() the
+                // correction would be applied twice, yet reading the time as
+                // time.mjd('UTC') will remove the correation again.
                 GTime time  = event->time() +
                               obs.bvcs().tdelta(ephemeris.dir(), event->time());
 
-                // Compute pulsar phase
-                double phase = ephemeris.phase(time);
+                // Compute pulsar phase. See comment above why "UTC" needs
+                // to be specified.
+                double phase = ephemeris.phase(time, "UTC");
 
                 // If phase is not contained in phase interval then skip event
                 if (!m_selection.pulsar_phases().contains(phase)) {
