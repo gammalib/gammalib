@@ -264,11 +264,8 @@ void GEphemerides::load(const GFilename& filename)
  *                 Earth (light-s/s).
  * @param[out] etut Time difference TDB-TT (s)
  *
- * Get ephemeris vector and TBD->TT value for a given time. Information is
+ * Get ephemeris vector and TBD-TT value for a given time. Information is
  * only returned for pointers that are not NULL.
- *
- * @todo Check whether the conversion to UTC is needed and whether utc_to_tdt
- *       needs to be added to etut since times are normally in TT, not UTC.
  ***************************************************************************/
 void GEphemerides::ephemeris(const GTime& time,
                              GVector*     rce,
@@ -335,8 +332,7 @@ void GEphemerides::ephemeris(const GTime& time,
 
     // Get TBD-TT (seconds)
     if (etut != NULL) {
-        double utc_to_tdt = time.secs("TT") - time.secs("UTC");
-        *etut = m_tdb2tt[index] + dt * tbd2tt_dot + utc_to_tdt;
+        *etut = m_tdb2tt[index] + dt * tbd2tt_dot;
     }
 
     // Return
@@ -397,6 +393,23 @@ double GEphemerides::geo2ssb(const GTime& time, const GSkyDir& srcdir) const
 
     // Return barycentric correction (seconds)
     return geo2ssb;
+}
+
+
+/***********************************************************************//**
+ * @brief Get time difference between UTC and TT (seconds)
+ *
+ * @param[in] time Time.
+ * @return Time difference in seconds.
+ *
+ * Returns the time difference between UTC and TT. The time difference is
+ * a positive number and is given by the sum of 32.184 s and the number
+ * of leap seconds. The number of leap seconds depends on the @p time.
+ ***************************************************************************/
+double GEphemerides::utc2tt(const GTime& time) const
+{
+    // Return UTC to TT term
+    return (time.secs("TT") - time.secs("UTC"));
 }
 
 

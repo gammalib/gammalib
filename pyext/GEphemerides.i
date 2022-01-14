@@ -60,6 +60,7 @@ public:
                                  double*      etut) const;
     double             geo2ssb(const GTime&   time,
                                const GSkyDir& srcdir) const;
+    double             utc2tt(const GTime& time) const;
 };
 
 

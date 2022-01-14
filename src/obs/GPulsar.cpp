@@ -824,28 +824,22 @@ void GPulsar::load_psrtime(const GFilename& filename, const std::string& name)
 
         // Set t0 = t0nom
         GTime t0;
-        t0.mjd(t0nom);
+        t0.mjd(t0nom, "UTC");
 
-        // Compute the infinite-frequency geocentric UTC TOA of a pulse
-        // in seconds
-        double toa_utc = (t0geo - t0nom) * gammalib::sec_in_day;
-
-        // Convert TOA to barycentric (TDB) time in seconds
+        // Set infinite-frequency geocentric UTC arrival time of a pulse
         GTime toa;
-        toa.secs(toa_utc, "UTC");
-        //double toa_tt = toa.secs("TT");
+        toa.mjd(t0geo, "UTC");
 
-        // Add light propagation effects
-        double geo2ssb = ephemerides.geo2ssb(toa, dir);
-        double toa_tdb = toa_utc + geo2ssb;
-
-        // Compute phase of first pulse. Note that the phase is negative, see for
+        // Compute phase of first pulse according to formulae given in
+        // COM-RP-DOL-DRG-065.Note that the phase is negative, see for
         // example Eq. (3) in Yan et al. (2017), ApJ, 845, 119
+        double geo2ssb     = ephemerides.geo2ssb(toa, dir);
+        double utc2tt      = ephemerides.utc2tt(toa);
+        double dt          = (t0geo - t0nom) * gammalib::sec_in_day + geo2ssb + utc2tt;
         const double c1    = 1.0/2.0;
         const double c2    = 1.0/6.0;
-        double       dt    = toa_tdb;
         double       phase = -((f0 + (f1 * c1 + f2 * dt * c2) * dt) * dt);
-        phase -= floor(phase);
+        phase             -= floor(phase);
 
         // Allocate ephemeris
         GPulsarEphemeris ephemeris;
