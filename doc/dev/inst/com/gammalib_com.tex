@@ -1,0 +1,188 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% GammaLib COMPTEL Interface
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Definitions for manual package
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\task}{\mbox{GammaLib}}
+\newcommand{\this}{\mbox{\tt \task}}
+\newcommand{\shorttype}{\mbox{COMPTEL}}
+\newcommand{\doctype}{\mbox{COMPTEL interface}}
+\newcommand{\version}{\mbox{draft}}
+\newcommand{\calendar}{\mbox{17 January 2021}}
+\newcommand{\auth}{\mbox{J\"urgen Kn\"odlseder}}
+\newcommand{\approv}{\mbox{J\"urgen Kn\"odlseder}}
+\def\sun{\hbox{$\odot$}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Document definition
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass{article}[12pt,a4]
+\usepackage{epsfig}
+\usepackage{../manual}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Begin of document body
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\frontpage
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Introduction
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+The present document describes the COMPTEL specific interface that is implemented in \this.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Definitions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Definitions}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Time}
+
+COMPTEL times are defined by two integers: TJD (Truncated Julian Days) and tics (1/8 ms).
+COMPTEL times are given in UTC, and TJD:tics = 8393:0 converts into 1991-05-17T00:00:00 UTC
+(see COM-RP-UNH-DRG-037). 
+
+At 8798:28800000 (1992-06-25T01:00:00) the CGRO clock was corrected, before that date the
+CGRO clock was 2.042144 seconds too fast.
+
+Conversion of COMPTEL times to a {\tt GTime} object is implemented by the {\tt gammalib::com\_time()}
+function. The function applies the CGRO clock correction before 8798:28800000 and stores the
+corrected time as UTC time. Specifically
+\begin{equation}
+{\rm MJD} = {\rm TJD} + 40000 + {\rm tics} \times \frac{0.000125}{86400}
+\end{equation}
+and for ${\rm TJD} < 8798$ or ${\rm TJD} = 8798$ and ${\rm tics} < 28800000$:
+\begin{equation}
+{\rm MJD}_{\rm corr} = {\rm MJD} - \frac{2.042144}{86400}
+\end{equation}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Pulsar analysis
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Pulsar}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Barycentre correction}
+
+A Barycentre correction is applied to the event times. The formulae were extracted from the COMPASS
+code {\tt pulphi01.pulphi.f}.
+
+{\tt pulphi01.pulphi.f} reads the pulsar ephemeris from a PPT using the {\tt ppptrd.f} function. Specifically
+the following parameters are read
+\begin{itemize}
+\item $t_0$ is the reference epoch of the pulsar ephemeris (specified as TJD and tics);
+\item $\nu_0$ is the frequency at the reference epoch;
+\item $\dot{\nu}_0$ is the first frequency derivative at the reference epoch (specified in units of $10^{-15}$);
+\item $\ddot{\nu}_0$ is the second frequency derivative at the reference epoch (specified in units of $10^{-20}$);
+\item $\alpha$ is the Right Ascension of the pulsar;
+\item $\delta$ is the Declination of the pulsar;
+\item $\nu_{\rm obs}$ is the observed frequency at radio;
+\item $DM$ is the radio Dispersion measure;
+\item $\Phi_0$ is the zero phase defining main peak for EGRET.
+\end{itemize}
+
+The function computes then the centre time of the observation using
+\begin{equation}
+t_{\rm obs} = \frac{1}{2} (t_{\rm start} + t_{\rm end})
+\end{equation}
+where $t_{\rm start}$ and $t_{\rm end}$ are the start and stop time of the EVP dataset of
+interest. 
+Using the {\tt pula32.f} function, the pulsar frequency and frequency derivative as well as the zero phase
+are extrapolated to this centre time using
+\begin{equation}
+\nu = \nu_0 + \dot{\nu}_0 (t_{\rm obs} - t_0)  + \frac{\ddot{\nu}_0}{2} (t_{\rm obs} - t_0)^2 ,
+\end{equation}
+\begin{equation}
+\dot{\nu} = \dot{\nu}_0 + \ddot{\nu}_0 (t_{\rm obs} - t_0) ,
+\end{equation}
+and
+\begin{equation}
+\Phi = \Phi_0 + \nu_0 (t_{\rm obs} - t_0) + \frac{\dot{\nu}_0}{2} (t_{\rm obs} - t_0)^2 + \frac{\ddot{\nu}_0}{6} (t_{\rm obs} - t_0)^3
+\label{eq:phase-ephemeris}
+\end{equation}
+with $\Phi$ put in the interval $[0,1]$.
+Note that the second frequency derivative is not updated, as it would required a third frequency derivative for
+that.
+
+The subroutine then retrieves the Solar System Barycentre to CGRO spacecraft vector $\vec{s}$ based on the
+information provided in the {\tt BVC} file.
+Based on the event time $t_{\rm utc}$, given in the UTC time system, the routine uses the {\tt pulbcv.f} routine
+to perform a linear interpolation between the two vectors $\vec{s}(i)$ and $\vec{s}(i+1)$ that enclose the event
+time using
+\begin{equation}
+\vec{s} = (\vec{s}(i+1) - \vec{s}(i)) \frac{t_{\rm utc} - t(i) }{t(i+1) - t(i)} + \vec{s}(i)
+\end{equation}
+where $t(i)$ and $t(i+1)$ are the UTC times to which the vectors $i$ and $i+1$ correspond to.
+If $t_{\rm utc}<t(0)$ then the first vector in the file is returned, if $t_{\rm utc}\ge t(N)$ then the last vector
+is returned, where $N$ is the number of BVC vectors in the {\tt BVC} file.
+Note that the {\tt BVC} file specifies $\vec{s}$ in units of micro light seconds.
+
+The celestial vector of the pulsar position is then computed using
+\begin{equation}
+\vec{p} = \left\{ \cos \delta \cos \alpha, \cos \delta \sin \alpha, \sin \delta \right\}
+\end{equation}
+where $\alpha$ and $\delta$ are the Right Ascension and Declination of the pulsar.
+
+The photon arrival time in the Solar System Barycentre $t_{\rm sbb}$, given in Barycentric Dynamic
+Time (TDB), is then computed from the event time $t_{\rm utc}$ in the subroutine {\tt pula04.f} using
+\begin{equation}
+t_{\rm sbb} = t_{\rm utc} + \Delta t_{\rm travel} - \Delta t_{\rm relativistic} + \Delta t_{\rm system}
+\end{equation}
+where
+\begin{equation}
+\Delta t_{\rm travel} = 10^{-6} \times \vec{s} \cdot \vec{p} 
+\end{equation}
+is the light travel time from the CGRO to the Solar System Barycentre along the pulsar direction,
+\begin{equation}
+\Delta t_{\rm relativistic} = -2 t_{\sun} \log \left( 1 + \frac{ \Delta t_{\rm travel} }{10^{-6} | \vec{s} |} \right)
+\end{equation}
+is the relativistic delay due to the Sun, also known as Shapiro delay, with 
+$t_{\sun} \equiv G M_{\sun} c^{-3} = 4.9254909 \times 10^{-6}$ s 
+being half the Schwarzschild radius of the Sun divided by the speed of light, and
+\begin{equation}
+\Delta t_{\rm system} = N_{\rm leaps} + 32.184 + \Delta t_{TT \to TBD}
+\end{equation}
+converts from UTC to the TDB time system, with $N_{\rm leaps}$ being the number of leap seconds.
+In all equations, time is expressed in units of seconds.
+
+The pulse phase $\Phi_{\rm COMPTEL}$ for COMPTEL is then evaluated using
+\begin{equation}
+\Phi_{\rm COMPTEL} = \theta_0 + \Phi + \nu (t_{\rm sbb} - t_{\rm obs}) + \frac{\dot{\nu}}{2} (t_{\rm sbb} - t_{\rm obs})^2 + \frac{\ddot{\nu}_0}{6} (t_{\rm sbb} - t_{\rm obs})^3
+\label{eq:phase-comptel}
+\end{equation}
+with $\Phi_{\rm COMPTEL}$ put in the interval $[0,1]$, where 
+\begin{equation}
+\theta_0 = \frac{-DM \times 10^{4}}{2.41 \times \nu_{\rm obs}^2}
+\end{equation}
+is the phase shift of radio pulsars due to the dispersion in the Interstellar Medium, with $DM$ in units of g/cm$^3$,
+and $\theta_0=0$ for infinite frequency pulsar ephemerides.
+
+Figure \ref{fig:pulsar-phase} compares the phase computation using Eq.~(\ref{eq:phase-comptel}) to the one using
+Eq.~(\ref{eq:phase-ephemeris}), i.e.~without passing through an intermediate reference time $t_{\rm obs}$.
+Obviously the phase difference is negligible, and the computation, implemented in {\tt pula32.f}, of an intermediate
+reference time can be avoided.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[!t]
+\center
+\epsfig{figure=com-pulsar-phase.eps, width=12cm}
+\caption{Maximum phase difference between computing the phase via an intermediate 
+reference time $t_{\rm obs}$ using Eq.~(\ref{eq:phase-comptel}) or via using the ephemeris 
+reference time $t_0$ using Eq.~(\ref{eq:phase-ephemeris}). The phase difference is negligible.}
+\label{fig:pulsar-phase}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+\end{document}
