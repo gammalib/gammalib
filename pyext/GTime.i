@@ -1,7 +1,7 @@
 /***************************************************************************
  *                           GTime.i - Time class                          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -69,6 +69,8 @@ public:
     double         gast(void) const;
     double         lmst(const double& geolon) const;
     double         last(const double& geolon) const;
+    double         leap_seconds(void) const;
+    double         utc2tt(void) const;
     double         convert(const GTimeReference& ref) const;
     void           jd(const double& time);
     void           jd(const double& time, const std::string& timesys);

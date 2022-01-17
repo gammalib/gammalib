@@ -397,23 +397,6 @@ double GEphemerides::geo2ssb(const GTime& time, const GSkyDir& srcdir) const
 
 
 /***********************************************************************//**
- * @brief Get time difference between UTC and TT (seconds)
- *
- * @param[in] time Time.
- * @return Time difference in seconds.
- *
- * Returns the time difference between UTC and TT. The time difference is
- * a positive number and is given by the sum of 32.184 s and the number
- * of leap seconds. The number of leap seconds depends on the @p time.
- ***************************************************************************/
-double GEphemerides::utc2tt(const GTime& time) const
-{
-    // Return UTC to TT term
-    return (time.secs("TT") - time.secs("UTC"));
-}
-
-
-/***********************************************************************//**
  * @brief Print Ephemerides
  *
  * @param[in] chatter Chattiness.
