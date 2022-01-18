@@ -435,7 +435,7 @@ void GPulsar::init_members(void)
     // Initialise members
     m_name.clear();
     m_ephemerides.clear();
-    
+
     // Return
     return;
 }
@@ -785,7 +785,7 @@ void GPulsar::load_psrtime(const GFilename& filename, const std::string& name)
                 throw GException::invalid_argument(G_LOAD_PSRTIME, msg);
             }
         }
-        
+
         // Save the pulsar name
         psrname = psrb;
         m_name  = "PSR B" + psrb;
@@ -808,7 +808,7 @@ void GPulsar::load_psrtime(const GFilename& filename, const std::string& name)
         double ra  = (ra_h + ra_m/60.0 + ra_s/3600.0) * 15.0;
         double dec = (dec_d < 0.0) ? -(-dec_d + dec_m/60.0 + dec_s/3600.0)
                                    : (dec_d + dec_m/60.0 + dec_s/3600.0);
-       
+
         // Set sky direction
         GSkyDir dir;
         dir.radec_deg(ra, dec);
@@ -831,14 +831,14 @@ void GPulsar::load_psrtime(const GFilename& filename, const std::string& name)
         toa.mjd(t0geo, "UTC");
 
         // Compute phase of first pulse according to formulae given in
-        // COM-RP-DOL-DRG-065.Note that the phase is negative, see for
+        // COM-RP-DOL-DRG-065. Note that the phase is negative, see for
         // example Eq. (3) in Yan et al. (2017), ApJ, 845, 119
         double geo2ssb     = ephemerides.geo2ssb(toa, dir);
         double utc2tt      = toa.utc2tt();
         double dt          = (t0geo - t0nom) * gammalib::sec_in_day + geo2ssb + utc2tt;
         const double c1    = 1.0/2.0;
         const double c2    = 1.0/6.0;
-        double       phase = -((f0 + (f1 * c1 + f2 * dt * c2) * dt) * dt);
+        double       phase = ((f0 + (f1 * c1 + f2 * dt * c2) * dt) * dt);
         phase             -= floor(phase);
 
         // Allocate ephemeris
@@ -851,7 +851,7 @@ void GPulsar::load_psrtime(const GFilename& filename, const std::string& name)
         ephemeris.tstop(tstop);
         ephemeris.timesys("UTC");  // psrtime ephemerides are in UTC
         ephemeris.t0(t0);
-        ephemeris.phase(phase);
+        ephemeris.phase(-phase);
         ephemeris.f0(f0);
         ephemeris.f1(f1);
         ephemeris.f2(f2);

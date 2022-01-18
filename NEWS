@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-14 January 2022
+17 January 2022
 
 
 1. Introduction
@@ -53,6 +53,8 @@ The following methods have been added:
 - GObservation::model_grad(GModel&, GModelPar&)
 - GObservation::grad_step_size()
 - GGti::reduce(GGti&)
+- GTime::leap_seconds()
+- GTime::utc2tt()
 - GPhases::length()
 - GMatrixBase::is_empty()
 - angle(GVector&, GVector&)
@@ -280,7 +282,9 @@ of functions (#3328).
 ----------------------
 Add GEphemerides class to deal with JPL ephemerides and specifically the
 DE200 ephemerides. A JPL DE200 ephemerides file was added to a refdata
-direction, the file is installed in $GAMMALIB/share/refdata (#3973).
+direction, the file is installed in $GAMMALIB/share/refdata. Add further-
+more GTime::leap_seconds() and GTime::utc2tt() methods to support time
+system conversions in GEphemerides and GPulsar classes (#3973).
 
 Add GPhases::length() method that returns the total length of the phase
 intervals (#3973).

@@ -266,6 +266,9 @@ void GEphemerides::load(const GFilename& filename)
  *
  * Get ephemeris vector and TBD-TT value for a given time. Information is
  * only returned for pointers that are not NULL.
+ *
+ * The code was inspired from the ftools routine xtereadeph.f and the COMPASS
+ * routine bvceph.f.
  ***************************************************************************/
 void GEphemerides::ephemeris(const GTime& time,
                              GVector*     rce,
@@ -276,10 +279,16 @@ void GEphemerides::ephemeris(const GTime& time,
     // Fetch ephemerides
     const_cast<GEphemerides*>(this)->fetch_data();
 
-    // Compute jd_utc as int and dt as day fraction, between -0.5 and 0.5
+    // Compute jd_utc as int
     double jd     = time.jd("UTC");
     int    jd_utc = int(jd);
-    double dt     = jd - double(jd_utc);
+
+    // Compute dt in TT as day fraction, between -0.5 and 0.5. While the
+    // time system in the xtereadeph.f routine is not specified, the
+    // bvceph.f routine explicitly adds the UTC->TT conversion coefficient
+    // to the delta
+    //double dt     = jd - double(jd_utc);
+    double dt = time.jd("TT") - double(int(time.jd("TT")));
     if (dt > 0.5) {
         jd_utc += 1;
         dt     -= 1.0;
@@ -326,8 +335,8 @@ void GEphemerides::ephemeris(const GTime& time,
     }
 
     // Get Sun vector
-    if (rce != NULL) {
-        *rce = m_sun[index];
+    if (rcs != NULL) {
+        *rcs = m_sun[index];
     }
 
     // Get TBD-TT (seconds)
@@ -380,7 +389,7 @@ double GEphemerides::geo2ssb(const GTime& time, const GSkyDir& srcdir) const
     // Special handling if sky direction is inside the Sun
     /*
     if (cth + 1.0 < 0.5 * sunsiz * sunsiz) {
-        
+
     }
     */
 
