@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-17 January 2022
+18 January 2022
 
 
 1. Introduction
@@ -121,6 +121,7 @@ The following methods have been added:
 - GCOMEventAtom::x_d2()
 - GCOMEventAtom::y_d2()
 - GCOMTim::reduce(GGti&)
+- GCOMOad::pos()
 - GCOMDri::tof_correction()
 - GCOMDri::phase_correction()
 - GCOMDri::num_superpackets()

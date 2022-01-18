@@ -352,19 +352,16 @@ void GEphemerides::ephemeris(const GTime& time,
 /***********************************************************************//**
  * @brief Get time difference between geocentric and SSB (seconds)
  *
- * @param[in] time Time.
  * @param[in] srcdir Source direction.
+ * @param[in] time Geocentric time.
  * @return Time difference in seconds.
  ***************************************************************************/
-double GEphemerides::geo2ssb(const GTime& time, const GSkyDir& srcdir) const
+double GEphemerides::geo2ssb(const GSkyDir& srcdir, const GTime& time) const
 {
     // Set constants
-    const double sunrad               = 2.315;
-    const double aultsc               = 499.004782;     // What ???
-    const double gauss                = 0.01720209895;  // What ???
-    const double schwarzschild_radius = (gauss*gauss) *
-                                        (aultsc*aultsc*aultsc) *
-                                        (gammalib::sec2day*gammalib::sec2day);
+    const double t_sun = 4.92549089483e-6;                  // s
+    const double r_sun = 2.315;                             // light s
+    const double inv_c = 1000.0 / gammalib::speed_of_light; // s/km
 
     // Get ephemerides
     GVector rce(3);
@@ -383,7 +380,7 @@ double GEphemerides::geo2ssb(const GTime& time, const GSkyDir& srcdir) const
     // Sun (I.I. Shapiro, Phys. Rev. Lett. 13, 789 (1964))
     GVector rsa       = rce - rcs;
     double  sundis    = norm(rsa);
-    double  sunsiz    = sunrad/sundis;
+    double  sunsiz    = r_sun/sundis;
     double  cos_theta = (dir * rsa) / sundis;
 
     // Special handling if sky direction is inside the Sun
@@ -394,7 +391,70 @@ double GEphemerides::geo2ssb(const GTime& time, const GSkyDir& srcdir) const
     */
 
     // Compute Shapiro delay
-    double shapiro_delay = -2.0 * schwarzschild_radius * std::log(1.0 + cos_theta);
+    double shapiro_delay = -2.0 * t_sun * std::log(1.0 + cos_theta);
+
+    // Compute time difference between geocentric and Solar System Barycentric
+    // frame
+    double geo2ssb = light_travel_time - shapiro_delay + etut;
+
+    // Return barycentric correction (seconds)
+    return geo2ssb;
+}
+
+
+/***********************************************************************//**
+ * @brief Get time difference between observatory and SSB (seconds)
+ *
+ * @param[in] srcdir Source direction.
+ * @param[in] time Geocentric time.
+ * @param[in] obs Observatory vector (km).
+ * @return Time difference in seconds.
+ *
+ * Computes the time difference between the location of an observatory,
+ * specified by an observatory position vector @p obs in units of km, and the
+ * Solar System Barycentre.
+ ***************************************************************************/
+double GEphemerides::geo2ssb(const GSkyDir& srcdir,
+                             const GTime&   time,
+                             const GVector& obs) const
+{
+    // Set constants
+    const double t_sun = 4.92549089483e-6;                  // s
+    const double r_sun = 2.315;                             // light s
+    const double inv_c = 1000.0 / gammalib::speed_of_light; // s/km
+
+    // Get ephemerides
+    GVector rce(3);
+    GVector rcs(3);
+    GVector vce(3);
+    double  etut;
+    ephemeris(time, &rce, &rcs, &vce, &etut);
+
+    // Compute vector from Solar System Barycentre to observatory
+    GVector rca = rce + obs * inv_c;
+
+    // Get sky direction as celestial vector
+    GVector dir = srcdir.celvector();
+
+    // Calculate light-travel time to barycenter in Euclidean space
+    double light_travel_time = dir * rca;
+
+    // Now calculate the time delay due to the gravitational field of the
+    // Sun (I.I. Shapiro, Phys. Rev. Lett. 13, 789 (1964))
+    GVector rsa       = rca - rcs;
+    double  sundis    = norm(rsa);
+    double  sunsiz    = r_sun       / sundis;
+    double  cos_theta = (dir * rsa) / sundis;
+
+    // Special handling if sky direction is inside the Sun
+    /*
+    if (cth + 1.0 < 0.5 * sunsiz * sunsiz) {
+
+    }
+    */
+
+    // Compute Shapiro delay
+    double shapiro_delay = -2.0 * t_sun * std::log(1.0 + cos_theta);
 
     // Compute time difference between geocentric and Solar System Barycentric
     // frame

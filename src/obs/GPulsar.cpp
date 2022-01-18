@@ -833,7 +833,7 @@ void GPulsar::load_psrtime(const GFilename& filename, const std::string& name)
         // Compute phase of first pulse according to formulae given in
         // COM-RP-DOL-DRG-065. Note that the phase is negative, see for
         // example Eq. (3) in Yan et al. (2017), ApJ, 845, 119
-        double geo2ssb     = ephemerides.geo2ssb(toa, dir);
+        double geo2ssb     = ephemerides.geo2ssb(dir, toa);
         double utc2tt      = toa.utc2tt();
         double dt          = (t0geo - t0nom) * gammalib::sec_in_day + geo2ssb + utc2tt;
         const double c1    = 1.0/2.0;

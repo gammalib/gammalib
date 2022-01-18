@@ -76,8 +76,11 @@ public:
                                  GVector*     rcs,
                                  GVector*     vce,
                                  double*      etut) const;
-    double             geo2ssb(const GTime&   time,
-                               const GSkyDir& srcdir) const;
+    double             geo2ssb(const GSkyDir& srcdir,
+                               const GTime&   time) const;
+    double             geo2ssb(const GSkyDir& srcdir,
+                               const GTime&   time,
+                               const GVector& obs) const;
 
 protected:
     // Protected methods
@@ -85,7 +88,7 @@ protected:
     void copy_members(const GEphemerides& ephemerides);
     void free_members(void);
     void fetch_data(void);
-    
+
     // Protected members
     std::string          m_name;      //!< Ephemerides (e.g. DE200)
     GFilename            m_filename;  //!< Ephemerides filename
