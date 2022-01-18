@@ -37,6 +37,7 @@
 #include "GModelSky.hpp"
 #include "GModelSpatial.hpp"
 #include "GModelSpatialPointSource.hpp"
+#include "GEphemerides.hpp"
 #include "GCOMTools.hpp"
 #include "GCOMSupport.hpp"
 #include "GCOMDri.hpp"
@@ -51,8 +52,6 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_COMPUTE_DRE               "GCOMDri::compute_dre(GCOMObservation&, "\
-                                                   "GCOMSelection&, double&)"
-#define G_COMPUTE_DRG               "GCOMDri::compute_drg(GCOMObservation&, "\
                                                    "GCOMSelection&, double&)"
 #define G_COMPUTE_DRX               "GCOMDri::compute_drx(GCOMObservation&, "\
                                                    "GCOMSelection&, double&)"
@@ -328,25 +327,18 @@ void GCOMDri::compute_dre(const GCOMObservation& obs,
     // Signal that loop should be terminated
     bool terminate = false;
 
-    // Get Good Time Intervals and if a pulsar is specified then reduce
-    // them according to the validity of the pulsar emphemerides. Throw
-    // an exception if a pulsar is specified but no BVC data is present.
-    GCOMTim tim        = obs.tim();
-    bool    has_pulsar = false;
+    // Initialise JPL DE200 ephemerides (use in case that no BVC data are
+    // available)
+    GEphemerides ephem;
+
+    // Get Good Time Intervals. If a pulsar selection is specified then
+    // reduce the Good Time Intervals to the validity intervals of the pulsar
+    // emphemerides.
+    GCOMTim tim = obs.tim();
     if (m_selection.has_pulsar()) {
-        if (!obs.bvcs().is_empty()) {
-            tim.reduce(m_selection.pulsar().validity());
-            m_gti.reduce(m_selection.pulsar().validity());
-            has_pulsar = true;
-            m_phasecor = m_selection.pulsar_phases().length();
-        }
-        else {
-            std::string msg = "Phase selection for pulsar \""+
-                              m_selection.pulsar().name()+"\" specified but no "
-                              "BVC data found for observation. Please specify an "
-                              "observation that contains BVC data.";
-            throw GException::invalid_value(G_COMPUTE_DRE, msg);
-        }
+        tim.reduce(m_selection.pulsar().validity());
+        m_gti.reduce(m_selection.pulsar().validity());
+        m_phasecor = m_selection.pulsar_phases().length();
     }
 
     // Loop over Orbit Aspect Data
@@ -458,20 +450,31 @@ void GCOMDri::compute_dre(const GCOMObservation& obs,
             }
 
             // Optionally apply pulsar phase selection
-            if (has_pulsar) {
+            if (m_selection.has_pulsar()) {
 
                 // Get pulsar ephemeris
                 const GPulsarEphemeris& ephemeris =
                       m_selection.pulsar().ephemeris(event->time());
 
-                // Convert time to Solar System Barycentre. Note that the
-                // time correction includes an UTC_TO_TT conversion term,
-                // but this terms has already applied when setting the GTime
-                // object. Hence if time is read as time.mjd() the
-                // correction would be applied twice, yet reading the time as
-                // time.mjd('UTC') will remove the correation again.
-                GTime time  = event->time() +
-                              obs.bvcs().tdelta(ephemeris.dir(), event->time());
+                // Convert event time to Solar System Barycentre time. If BVC
+                // information is available it will be used for the computation,
+                // otherwise the time correction will be computed on-the-fly
+                // from the JPL DE200 ephemerides.
+                //
+                // Note that the time correction includes an UTC_TO_TT conversion
+                // term, but this terms has already applied when setting the GTime
+                // object. Hence if time is read as time.mjd() the correction
+                // would be applied twice, yet reading the time as time.mjd('UTC')
+                // will remove the correation again.
+                double tdelta = 0.0;
+                if (obs.bvcs().is_empty()) {
+                    tdelta = ephem.geo2ssb(ephemeris.dir(), event->time(), oad.pos()) +
+                             event->time().utc2tt();
+                }
+                else {
+                    tdelta = obs.bvcs().tdelta(ephemeris.dir(), event->time());
+                }
+                GTime time  = event->time() + tdelta;
 
                 // Compute pulsar phase. See comment above why "UTC" needs
                 // to be specified.
@@ -575,23 +578,12 @@ void GCOMDri::compute_drg(const GCOMObservation& obs,
     // Set all DRG bins to zero
     init_cube();
 
-    // Get Good Time Intervals and if a pulsar is specified then reduce
-    // them according to the validity of the pulsar emphemerides. Throw
-    // an exception if a pulsar is specified but no BVC data is present.
-    GCOMTim tim        = obs.tim();
-    bool    has_pulsar = false;
+    // Get Good Time Intervals. If a pulsar selection is specified then
+    // reduce the Good Time Intervals to the validity intervals of the pulsar
+    // emphemerides.
+    GCOMTim tim = obs.tim();
     if (m_selection.has_pulsar()) {
-        if (!obs.bvcs().is_empty()) {
-            tim.reduce(m_selection.pulsar().validity());
-            has_pulsar = true;
-        }
-        else {
-            std::string msg = "Phase selection for pulsar \""+
-                              m_selection.pulsar().name()+"\" specified but no "
-                              "BVC data found for observation. Please specify an "
-                              "observation that contains BVC data.";
-            throw GException::invalid_value(G_COMPUTE_DRG, msg);
-        }
+        tim.reduce(m_selection.pulsar().validity());
     }
 
     // Loop over Orbit Aspect Data
@@ -726,23 +718,12 @@ void GCOMDri::compute_drx(const GCOMObservation& obs,
     // Set all DRX bins to zero
     init_cube();
 
-    // Get Good Time Intervals and if a pulsar is specified then reduce
-    // them according to the validity of the pulsar emphemerides. Throw
-    // an exception if a pulsar is specified but no BVC data is present.
-    GCOMTim tim        = obs.tim();
-    bool    has_pulsar = false;
+    // Get Good Time Intervals. If a pulsar selection is specified then
+    // reduce the Good Time Intervals to the validity intervals of the pulsar
+    // emphemerides.
+    GCOMTim tim = obs.tim();
     if (select.has_pulsar()) {
-        if (!obs.bvcs().is_empty()) {
-            tim.reduce(select.pulsar().validity());
-            has_pulsar = true;
-        }
-        else {
-            std::string msg = "Phase selection for pulsar \""+
-                              m_selection.pulsar().name()+"\" specified but no "
-                              "BVC data found for observation. Please specify an "
-                              "observation that contains BVC data.";
-            throw GException::invalid_value(G_COMPUTE_DRX, msg);
-        }
+        tim.reduce(select.pulsar().validity());
     }
 
     // Loop over Orbit Aspect Data
