@@ -72,12 +72,15 @@ and for ${\rm TJD} < 8798$ or ${\rm TJD} = 8798$ and ${\rm tics} < 28800000$:
 \section{Pulsar}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Barycentre correction}
+\subsection{Notes of COMPASS code}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Barycentre correction}
 
 A Barycentre correction is applied to the event times. The formulae were extracted from the COMPASS
 code {\tt pulphi01.pulphi.f}.
 
-{\tt pulphi01.pulphi.f} reads the pulsar ephemeris from a PPT using the {\tt ppptrd.f} function. Specifically
+{\tt pulphi01.pulphi.f} reads the pulsar ephemeris from a {\tt PPT} file using the {\tt ppptrd.f} function. Specifically
 the following parameters are read
 \begin{itemize}
 \item $t_0$ is the reference epoch of the pulsar ephemeris (specified as TJD and tics);
@@ -88,7 +91,7 @@ the following parameters are read
 \item $\delta$ is the Declination of the pulsar;
 \item $\nu_{\rm obs}$ is the observed frequency at radio;
 \item $DM$ is the radio Dispersion measure;
-\item $\Phi_0$ is the zero phase defining main peak for EGRET.
+\item $\Phi_0$ is the zero phase defining main radio peak.
 \end{itemize}
 
 The function computes then the centre time of the observation using
@@ -150,7 +153,7 @@ is the relativistic delay due to the Sun, also known as Shapiro delay, with
 $t_{\sun} \equiv G M_{\sun} c^{-3} = 4.9254909 \times 10^{-6}$ s 
 being half the Schwarzschild radius of the Sun divided by the speed of light, and
 \begin{equation}
-\Delta t_{\rm system} = N_{\rm leaps} + 32.184 + \Delta t_{TT \to TBD}
+\Delta t_{\rm system} = N_{\rm leaps} + 32.184 + \Delta t_{TT \to TBB}
 \end{equation}
 converts from UTC to the TDB time system, with $N_{\rm leaps}$ being the number of leap seconds.
 In all equations, time is expressed in units of seconds.
@@ -184,5 +187,48 @@ reference time $t_0$ using Eq.~(\ref{eq:phase-ephemeris}). The phase difference 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{PPT files}
+
+The {\tt PPT} files are written by the COMPASS task {\tt pulcpp.f}. It writes a number of parameters,
+such as pulsar position, frequency and derivatives, and computes in particular the zero phase $\Phi_0$
+defining the main radio peak using
+\begin{equation}
+\Phi_0 = - \left( \nu_0 \Delta t + \frac{\dot{\nu}_0}{2} \Delta t^2 + \frac{\ddot{\nu}_0}{6} \Delta t^3 \right)
+\end{equation}
+where
+$\Phi_0$ is put in the interval $[-1,0]$.
+Here $\nu_0$ is the radio frequency, $\dot{\nu}_0$ the first frequency derivative and $\ddot{\nu}_0$
+is the second frequency derivative.
+The time $\Delta t$ since the reference time is computed using
+\begin{equation}
+\Delta t = f + \Delta t_{\rm cor} + \Delta t_{\rm delay}
+\end{equation}
+where
+$f$ is the fractional part of the reference time in a geocentric reference frame (t0geo in the psrtime files),
+$\Delta t_{\rm cor}$ is a correction parameter that can be specified by the user, and
+\begin{equation}
+\Delta t_{\rm delay} = \Delta t_{\rm travel} - \Delta t_{\rm relativistic} + \Delta t_{\rm system}
+\end{equation}
+is the time delay, with
+\begin{equation}
+\Delta t_{\rm travel} = \vec{r} \cdot \vec{p} 
+\end{equation}
+being the light travel time from the geocentre to the Solar System Barycentre along the pulsar direction,
+$\vec{r}$ is the vector from the Solar System Barycentre to the geocentre in light seconds,
+\begin{equation}
+\Delta t_{\rm relativistic} = -2 t_{\sun} \log \left( 1 + \frac{ \Delta t_{\rm travel} }{| \vec{r} |} \right)
+\end{equation}
+is the relativistic delay due to the Sun, also known as Shapiro delay, with 
+$t_{\sun} \equiv G M_{\sun} c^{-3} = 4.9254909 \times 10^{-6}$ s 
+being half the Schwarzschild radius of the Sun divided by the speed of light, and
+\begin{equation}
+\Delta t_{\rm system} = N_{\rm leaps} + 32.184 + \Delta t_{TT \to TBB}
+\end{equation}
+converts from UTC to the TDB time system, with $N_{\rm leaps}$ being the number of leap seconds
+(as a side note, it seems that in COMPASS the {\tt NLEAP} parameter counts the leap seconds from
+1972 on, and since 10 leap seconds were added in 1972 the code uses internally {\tt NLEAP + 10}).
+In all equations, time is expressed in units of seconds.
+Note that $\vec{r}$ and $\Delta t_{\rm system}$ are computed using the function {\tt bvceph.f}.
 
 \end{document}
