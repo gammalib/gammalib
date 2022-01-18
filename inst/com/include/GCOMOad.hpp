@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCOMOad.hpp - COMPTEL Orbit Aspect Data class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2020 by Juergen Knodlseder                          *
+ *  copyright (C) 2017-2022 by Juergen Knodlseder                          *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,6 +31,7 @@
 #include <string>
 #include "GBase.hpp"
 #include "GTime.hpp"
+#include "GVector.hpp"
 #include "GSkyDir.hpp"
 
 /* __ Forward declarations _______________________________________________ */
@@ -81,6 +82,8 @@ public:
     void           zaxis(const GSkyDir& zaxis);
     const GSkyDir& xaxis(void) const;
     void           xaxis(const GSkyDir& xaxis);
+    const GVector& pos(void) const;
+    void           pos(const GVector& pos);
     double         theta(const GSkyDir& sky) const;
     double         phi(const GSkyDir& sky) const;
 
@@ -100,6 +103,7 @@ protected:
     float   m_gcaz;    //!< Geocentre azimuth angle (deg)
     float   m_gcel;    //!< Geocentre zenith angle (deg)
     float   m_georad;  //!< Apparent radius of Earth (deg)
+    GVector m_pos;     //!< Position vector (km)
 
     // Precomputation cache
     mutable double m_posang; //!< X-axis position angle in COMPTEL system
@@ -379,6 +383,35 @@ void GCOMOad::xaxis(const GSkyDir& xaxis)
 {
     m_posang = 1.0e30; // To assure initialisation of position angle
     m_xaxis  = xaxis;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return telescope position vector (km)
+ *
+ * @return Telescope position vector (km).
+ *
+ * Returns the telescope position vector (km).
+ ***************************************************************************/
+inline
+const GVector& GCOMOad::pos(void) const
+{
+    return (m_pos);
+}
+
+
+/***********************************************************************//**
+ * @brief Set telescope position vector (km)
+ *
+ * @param[in] pos Telescope position vector (km).
+ *
+ * Set the telescope position vector (km).
+ ***************************************************************************/
+inline
+void GCOMOad::pos(const GVector& pos)
+{
+    m_pos  = pos;
     return;
 }
 
