@@ -42,6 +42,7 @@
 #define G_INSERT                           "GCOMBvcs::insert(int&, GCOMBvc&)"
 #define G_REMOVE                                     "GCOMBvcs::remove(int&)"
 #define G_READ                                  "GCOMBvcs::read(GFitsTable&)"
+#define G_TDELTA                         "GCOMBvcs::tdelta(GSkyDir&, GTime&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -515,6 +516,9 @@ const GCOMBvc* GCOMBvcs::find(const GCOMOad& oad) const
  * @param[in] time CGRO photon arrival time.
  * @return Time difference between photon arrival times (s)
  *
+ * @exception GException::invalid_value
+ *            Not enough SSB vectors loaded for computation
+ *
  * Returns the time difference between photon arrival time at CGRO and the
  * Solar System Barycentre (SSB). The arrival time at the SSB is computed
  * by adding the time difference to the photon arrival time as measured by
@@ -559,7 +563,7 @@ const GCOMBvc* GCOMBvcs::find(const GCOMOad& oad) const
 double GCOMBvcs::tdelta(const GSkyDir& dir, const GTime& time) const
 {
     // Set Schwartzschild radius of sun in lightseconds
-    const double radius = 0.49254909e-5;
+    const double t_sun = 4.92549089483e-6;
 
     // Initialise SSB vector and time difference
     GVector ssb;
@@ -567,6 +571,15 @@ double GCOMBvcs::tdelta(const GSkyDir& dir, const GTime& time) const
 
     // Get number of elements in container
     int size = this->size();
+
+    // Throw an exception if no vectors were loaded
+    if (size < 2) {
+        std::string msg = gammalib::str(size)+" SSB vectors loaded but at "
+                          "least two vectors are needed to compute the time "
+                          "delay. Please load SSB vectors from a BVC file "
+                          "before calling this method.";
+        throw GException::invalid_value(G_TDELTA, msg);
+    }
 
     // If time is before first BVC element then extrapolate using the first
     // two BVC elements
@@ -658,7 +671,7 @@ double GCOMBvcs::tdelta(const GSkyDir& dir, const GTime& time) const
 
     // Compute the relativistic delay due to the Sun
     double r     = norm(ssb) * 1.0e-6;
-    double relat = -2.0 * radius * std::log(1.0 + (travt/r));
+    double relat = -2.0 * t_sun * std::log(1.0 + (travt/r));
 
     // Compute the time difference at SSB
     tdelta = travt - relat + tdelta;
