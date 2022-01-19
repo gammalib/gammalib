@@ -37,6 +37,7 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_EPHEMERIS    "GEphemerides::ephemeris(GTime&, GVector*, GVector*, "\
                                                          "GVector*, double*)"
+#define G_FETCH_DATA                             "GEphemerides::fetch_data()"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -572,6 +573,9 @@ void GEphemerides::free_members(void)
 /***********************************************************************//**
  * @brief Fetch ephemerides data
  *
+ * @exception GException::file_error
+ *            Ephemerides data file not found.
+ *
  * This method loads the DE200 ephemerides data from the file provided in
  * the reference data repository if no ephemerides are loaded.
  ***************************************************************************/
@@ -579,8 +583,40 @@ void GEphemerides::fetch_data(void)
 {
     // If no ephemerides data are loaded then load the JPL DE200 ephemerides
     if (is_empty()) {
-        load("$GAMMALIB/share/refdata/ephem_jpl_de200.fits");
-    }
+
+        // Initialise filename
+        GFilename filename("$GAMMALIB/share/refdata/ephem_jpl_de200.fits");
+
+        // If file exists then load ephemerides
+        if (filename.is_fits()) {
+            load(filename);
+        }
+
+        // ... otherwise the file may not yet be installed, possibly because
+        // a unit test is performed. Therefore try to get file in the source
+        // directory.
+        else {
+        
+            // Initialise filename based on source directory
+            GFilename src_filename("$TEST_SRCDIR/refdata/ephem_jpl_de200.fits");
+
+            // If file exists then load ephemerides
+            if (src_filename.is_fits()) {
+                load(src_filename);
+            }
+
+            // ... otherwise throw an exception
+            else {
+                std::string msg = "Could not find ephemerides file in \""+
+                                  filename.url()+"\" or in \""+
+                                  src_filename.url()+"\". Unable to return "
+                                  "information based on ephemerides.";
+                throw GException::file_error(G_FETCH_DATA, msg);
+            }
+
+        } // endelse: check for file in source directory
+
+    } // endif: no data were loaded
 
     // Return
     return;
