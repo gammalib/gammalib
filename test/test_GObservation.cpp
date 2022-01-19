@@ -40,6 +40,17 @@ pthread_attr_t gomp_thread_attr;
 #endif
 #endif
 
+/* __ Namespaces _________________________________________________________ */
+
+/* __ Globals ____________________________________________________________ */
+
+/* __ Constants __________________________________________________________ */
+const std::string datadir        = std::getenv("TEST_DATA");
+const std::string ephem_integral = datadir + "/ephem_crab_integral.fits";
+const std::string ephem_tempo2   = datadir + "/ephem_crab_tempo2.par";
+const std::string ephem_fermi    = datadir + "/ephem_db_fermi.fits";
+const std::string ephem_psrtime  = datadir + "/ephem_xte.psrtime";
+
 /* __ Coding definitions _________________________________________________ */
 #define RATE      13.0        //!< Events per seconde. For events generation.
 #define UN_BINNED 0
@@ -69,6 +80,12 @@ void TestGObservation::set(void)
            "Test GEnergies class");
     append(static_cast<pfunction>(&TestGObservation::test_ebounds),
            "Test GEbounds class");
+    append(static_cast<pfunction>(&TestGObservation::test_pulsar),
+           "Test GPulsar class");
+    append(static_cast<pfunction>(&TestGObservation::test_pulsar_ephemeris),
+           "Test GPulsarEphemeris class");
+    append(static_cast<pfunction>(&TestGObservation::test_ephemerides),
+           "Test GEphemerides class");
     append(static_cast<pfunction>(&TestGObservation::test_phases),
            "Test GPhases class");
     append(static_cast<pfunction>(&TestGObservation::test_photons),
@@ -1082,6 +1099,12 @@ void TestGObservation::test_time(void)
     test_value(time.lmst(123.456), 2.384645, 2.777e-4);
     test_value(time.last(123.456), 2.384618, 2.777e-4);
 
+    // Test leap_seconds method
+    test_value(time.leap_seconds(), 36.0, "Test leap_seconds() method");
+
+    // Test utc2tt method
+    test_value(time.utc2tt(), 68.184, "Test utc2tt() method");
+
     // Test operators
     GTime a(13.72);
     GTime b(6.28);
@@ -1516,7 +1539,199 @@ void TestGObservation::test_photons(void)
 
 
 /***********************************************************************//**
- * @brief Test GPhases
+ * @brief Test GPulsar class
+ ***************************************************************************/
+void TestGObservation::test_pulsar(void)
+{
+    // Test void constructor
+    GPulsar pulsar1;
+    test_assert(pulsar1.is_empty(), "Test for empty void GPulsar object");
+    test_value(pulsar1.size(), 0, "Test for no ephemerides in void GPulsar object");
+
+    // Test filename constructor using INTEGRAL file
+    GPulsar pulsar2(ephem_integral);
+    test_assert(!pulsar2.is_empty(),
+         "Test for non-empty GPulsar object build from INTEGRAL file");
+    test_value(pulsar2.size(), 5,
+         "Test for 5 ephemerides in GPulsar object build from INTEGRAL file");
+    test_value(pulsar2.validity().tstart().mjd(), 52670.0,
+         "Test validity start for ephemerides in GPulsar object build from INTEGRAL file");
+    test_value(pulsar2.validity().tstop().mjd(), 53290.0,
+         "Test validity stop for ephemerides in GPulsar object build from INTEGRAL file");
+    const GPulsarEphemeris& ephemeris2 = pulsar2[0];
+    test_value(ephemeris2.name(), "Crab",
+         "Test name of pulsar in INTEGRAL ephemeris file");
+    test_value(ephemeris2.tstart().mjd(), 52670.0,
+         "Test MJD start of ephemeris in INTEGRAL file");
+    test_value(ephemeris2.tstop().mjd(), 52699.0,
+         "Test MJD stop of ephemeris in INTEGRAL file");
+    test_value(ephemeris2.timesys(), "TT",
+         "Test timesystem of ephemeris in INTEGRAL file");
+    test_value(ephemeris2.t0().mjd(), 52686.0,
+         "Test epoch of ephemeris in INTEGRAL file");
+    test_value(ephemeris2.phase(), 0.29227057582842,
+         "Test phase of ephemeris in INTEGRAL file");
+    test_value(ephemeris2.f0(), 29.8092382284677,
+         "Test F0 of ephemeris in INTEGRAL file");
+    test_value(ephemeris2.f1(), -3.736594e-10,
+         "Test F1 of ephemeris in INTEGRAL file");
+    test_value(ephemeris2.f2(), 2.9131e-20,
+         "Test F2 of ephemeris in INTEGRAL file");
+
+    // Test filename constructor using tempo2 file
+    GPulsar pulsar3(ephem_tempo2);
+    test_assert(!pulsar3.is_empty(),
+         "Test for non-empty GPulsar object build from tempo2 file");
+    test_value(pulsar3.size(), 1,
+         "Test for 1 ephemeris in GPulsar object build from tempo2 file");
+    test_value(pulsar3.validity().tstart().mjd(), 54588.676894515279855,
+         "Test validity start for ephemerides in GPulsar object build from tempo2 file");
+    test_value(pulsar3.validity().tstop().mjd(), 55257.704889561078744,
+         "Test validity stop for ephemerides in GPulsar object build from tempo2 file");
+    const GPulsarEphemeris& ephemeris3 = pulsar3[0];
+    test_value(ephemeris3.name(), "PSR J0534+2200",
+         "Test name of pulsar in tempo2 ephemeris file");
+    test_value(ephemeris3.tstart().mjd(), 54588.676894515279855,
+         "Test MJD start of ephemeris in tempo2 file");
+    test_value(ephemeris3.tstop().mjd(), 55257.704889561078744,
+         "Test MJD stop of ephemeris in tempo2 file");
+    test_value(ephemeris3.timesys(), "TT",
+         "Test timesystem of ephemeris in tempo2 file");
+    test_value(ephemeris3.t0().mjd(), 54673.454536766465928,
+         "Test epoch of ephemeris in tempo2 file");
+    test_value(ephemeris3.phase(), 0.0,
+         "Test phase of ephemeris in tempo2 file");
+    test_value(ephemeris3.f0(), 29.745209371530433057,
+         "Test F0 of ephemeris in tempo2 file");
+    test_value(ephemeris3.f1(), -3.7194575283370609575e-10,
+         "Test F1 of ephemeris in tempo2 file");
+    test_value(ephemeris3.f2(), 1.1593944148649215896e-20,
+         "Test F2 of ephemeris in tempo2 file");
+
+    // Test filename constructor using Fermi file
+    GPulsar pulsar4(ephem_fermi, "PSR J1028-5820");
+    test_assert(!pulsar4.is_empty(),
+         "Test for non-empty GPulsar object build from Fermi file");
+    test_value(pulsar4.size(), 1,
+         "Test for 1 ephemeris in GPulsar object build from Fermi file");
+    test_value(pulsar4.validity().tstart().mjd(), 54563.0,
+         "Test validity start for ephemerides in GPulsar object build from Fermi file");
+    test_value(pulsar4.validity().tstop().mjd(), 54786.0,
+         "Test validity stop for ephemerides in GPulsar object build from Fermi file");
+    const GPulsarEphemeris& ephemeris4 = pulsar4[0];
+    test_value(ephemeris4.name(), "PSR J1028-5820",
+         "Test name of pulsar in Fermi ephemeris file");
+    test_value(ephemeris4.tstart().mjd(), 54563.0,
+         "Test MJD start of ephemeris in Fermi file");
+    test_value(ephemeris4.tstop().mjd(), 54786.0,
+         "Test MJD stop of ephemeris in Fermi file");
+    test_value(ephemeris4.timesys(), "TT",
+         "Test timesystem of ephemeris in Fermi file");
+    test_value(ephemeris4.t0().mjd(), 54564.0,
+         "Test epoch of ephemeris in Fermi file");
+    test_value(ephemeris4.phase(), 0.955045061768033,
+         "Test phase of ephemeris in Fermi file");
+    test_value(ephemeris4.f0(), 10.9405324785477,
+         "Test F0 of ephemeris in Fermi file");
+    test_value(ephemeris4.f1(), -1.92828681288825e-12,
+         "Test F1 of ephemeris in Fermi file");
+    test_value(ephemeris4.f2(), 0.0,
+         "Test F2 of ephemeris in Fermi file");
+
+    // Test filename constructor using psrtime file
+    GPulsar pulsar5(ephem_psrtime, "0531+21");
+    test_assert(!pulsar5.is_empty(),
+         "Test for non-empty GPulsar object build from psrtime file");
+    test_value(pulsar5.size(), 56,
+         "Test for 56 ephemerides in GPulsar object build from psrtime file");
+    test_value(pulsar5.validity().tstart().mjd(), 48282.0,
+         "Test validity start for ephemerides in GPulsar object build from psrtime file");
+    test_value(pulsar5.validity().tstop().mjd(), 51122.0,
+         "Test validity stop for ephemerides in GPulsar object build from psrtime file");
+    const GPulsarEphemeris& ephemeris5 = pulsar5[0];
+    test_value(ephemeris5.name(), "PSR B0531+21",
+         "Test name of pulsar in psrtime ephemeris file");
+    test_value(ephemeris5.tstart().mjd(), 48282.0,
+         "Test MJD start of ephemeris in psrtime file");
+    test_value(ephemeris5.tstop().mjd(), 48316.0,
+         "Test MJD stop of ephemeris in psrtime file");
+    test_value(ephemeris5.timesys(), "UTC",
+         "Test timesystem of ephemeris in psrtime file");
+    test_value(ephemeris5.t0().mjd(), 48299.0,
+         "Test epoch of ephemeris in psrtime file");
+    test_value(ephemeris5.phase(), -0.845097897454252,
+         "Test phase of ephemeris in psrtime file");
+    test_value(ephemeris5.f0(), 29.9516010684378,
+         "Test F0 of ephemeris in psrtime file");
+    test_value(ephemeris5.f1(), -3.77726e-10,
+         "Test F1 of ephemeris in psrtime file");
+    test_value(ephemeris5.f2(), 0.0,
+         "Test F2 of ephemeris in psrtime file");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GPulsarEphemeris class
+ ***************************************************************************/
+void TestGObservation::test_pulsar_ephemeris(void)
+{
+    // Test void constructor
+    GPulsarEphemeris ephemeris1;
+    test_value(ephemeris1.name(), "", "Test name() of void GPulsarEphemeris object");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GEphemerides class
+ ***************************************************************************/
+void TestGObservation::test_ephemerides(void)
+{
+    // Test void constructor
+    GEphemerides ephemerides1;
+    test_assert(ephemerides1.is_empty(), "Test for empty void GEphemerides object");
+    test_value(ephemerides1.size(), 0, "Test for no ephemerides in void GEphemerides object");
+
+    // Test automatic ephemerides fetching procedure
+    GEphemerides ephemerides2;
+    test_assert(ephemerides2.is_empty(),
+         "Test for empty GEphemerides object before call to geo2sbb");
+    test_value(ephemerides2.size(), 0,
+         "Test for no ephemerides in GEphemerides object before call to geo2sbb");
+    test_value(ephemerides2.name(), "",
+         "Test name for no ephemerides in GEphemerides object before call to geo2sbb");
+    GSkyDir dir;
+    GTime   time;
+    GVector vector(3);
+    double geo2ssb = ephemerides2.geo2ssb(dir, time);
+    test_assert(!ephemerides2.is_empty(),
+         "Test for non-empty GEphemerides object after call to geo2sbb");
+    test_value(ephemerides2.size(), 32894,
+         "Test for 32894 ephemerides in GEphemerides object after call to geo2sbb");
+    test_value(ephemerides2.name(), "DE200",
+         "Test name for ephemerides in GEphemerides object after call to geo2sbb");
+    test_value(geo2ssb, -89.7124092753901, "Test for geo2sbb value");
+    geo2ssb = ephemerides2.geo2ssb(dir, time, vector);
+    test_assert(!ephemerides2.is_empty(),
+         "Test for non-empty GEphemerides object after call to geo2sbb");
+    test_value(ephemerides2.size(), 32894,
+         "Test for 32894 ephemerides in GEphemerides object after call to geo2sbb");
+    test_value(ephemerides2.name(), "DE200",
+         "Test name for ephemerides in GEphemerides object after call to geo2sbb");
+    test_value(geo2ssb, -89.7124092753901, "Test for geo2sbb value");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GPhases class
  ***************************************************************************/
 void TestGObservation::test_phases(void)
 {

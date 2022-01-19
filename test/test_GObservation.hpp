@@ -1,7 +1,7 @@
 /***************************************************************************
  *              test_GObservation.hpp - Test observation module            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2020 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2022 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -49,6 +49,9 @@ public:
     virtual std::string       classname(void) const { return "TestGObservation"; }
     void                      test_ebounds(void);
     void                      test_gti(void);
+    void                      test_pulsar(void);
+    void                      test_pulsar_ephemeris(void);
+    void                      test_ephemerides(void);
     void                      test_phases(void);
     void                      test_photons(void);
     void                      test_time_reference(void);

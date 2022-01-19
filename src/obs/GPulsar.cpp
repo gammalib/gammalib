@@ -907,22 +907,33 @@ void GPulsar::load_parfile(const GFilename& filename)
     while (std::fgets(line, n, fptr) != NULL) {
 
         // Split line in elements
-        std::vector<std::string> elements = gammalib::split(line, " ");
+        std::vector<std::string> elements = gammalib::split(line, " \t");
+
+        // Find index of second non-empty element
+        int i = 1;
+        for (; i < elements.size(); ++i) {
+            if (!elements[i].empty()) {
+                break;
+            }
+        }
+        if (i >= elements.size()) {
+            continue;
+        }
 
         // Extract keywords
         if (elements[0] == "PSRJ") {
-            m_name = "PSR " + gammalib::rstrip_chars(elements[1], "\n");
+            m_name = "PSR " + gammalib::rstrip_chars(elements[i], "\n");
             ephemeris.name(m_name);
         }
         else if (elements[0] == "RAJ") {
-            std::vector<std::string> ras = gammalib::split(elements[1], ":");
+            std::vector<std::string> ras = gammalib::split(elements[i], ":");
             double ra_h                  = gammalib::todouble(ras[0]);
             double ra_m                  = gammalib::todouble(ras[1]);
             double ra_s                  = gammalib::todouble(ras[2]);
             ra = (ra_h + ra_m/60.0 + ra_s/3600.0) * 15.0;
         }
         else if (elements[0] == "DECJ") {
-            std::vector<std::string> decs = gammalib::split(elements[1], ":");
+            std::vector<std::string> decs = gammalib::split(elements[i], ":");
             double dec_d                  = gammalib::todouble(decs[0]);
             double dec_m                  = gammalib::todouble(decs[1]);
             double dec_s                  = gammalib::todouble(decs[2]);
@@ -931,27 +942,27 @@ void GPulsar::load_parfile(const GFilename& filename)
         }
         else if (elements[0] == "START") {
             GTime tstart;
-            tstart.mjd(gammalib::todouble(elements[1]));
+            tstart.mjd(gammalib::todouble(elements[i]));
             ephemeris.tstart(tstart);
         }
         else if (elements[0] == "FINISH") {
             GTime tstop;
-            tstop.mjd(gammalib::todouble(elements[1]));
+            tstop.mjd(gammalib::todouble(elements[i]));
             ephemeris.tstop(tstop);
         }
-        else if (elements[0] == "TZRMJD") {  // TODO: Are you sure???
+        else if (elements[0] == "PEPOCH") {  // Period epoch
             GTime t0;
-            t0.mjd(gammalib::todouble(elements[1]));
+            t0.mjd(gammalib::todouble(elements[i]));
             ephemeris.t0(t0);
         }
         else if (elements[0] == "F0") {
-            ephemeris.f0(gammalib::todouble(elements[1]));
+            ephemeris.f0(gammalib::todouble(elements[i]));
         }
         else if (elements[0] == "F1") {
-            ephemeris.f1(gammalib::todouble(elements[1]));
+            ephemeris.f1(gammalib::todouble(elements[i]));
         }
         else if (elements[0] == "F2") {
-            ephemeris.f2(gammalib::todouble(elements[1]));
+            ephemeris.f2(gammalib::todouble(elements[i]));
         }
 
     } // endwhile: looped over lines
@@ -967,9 +978,10 @@ void GPulsar::load_parfile(const GFilename& filename)
 
     // ... otherwise throw an exception
     else {
-        std::string msg = "No valid Right Ascension or Declination found in "
-                          "pulsar ephemeris file \""+filename.url()+"\". "
-                          "Please verify the ephemeris file.";
+        std::string msg = "Right Ascension "+gammalib::str(ra)+
+                          " or Declination "+gammalib::str(dec)+" in "
+                          "pulsar ephemeris file \""+filename.url()+
+                          "\" are invalid. Please verify the ephemeris file.";
         throw GException::invalid_argument(G_LOAD_PARFILE, msg);
     }
 
