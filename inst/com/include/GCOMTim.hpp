@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCOMTim.hpp - COMPTEL Good Time Intervals class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2018 by Juergen Knodlseder                          *
+ *  copyright (C) 2017-2022 by Juergen Knodlseder                          *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -69,6 +69,7 @@ public:
 
     // Other methods
     bool        contains(const GTime& time) const;
+    void        reduce(const GGti& gti);
     const GGti& gti(void) const;
     void        gti(const GGti& gti);
     void        load(const GFilename& filename, const std::string& usage = "YES",
@@ -113,6 +114,22 @@ inline
 bool GCOMTim::contains(const GTime& time) const
 {
     return (m_gti.contains(time));
+}
+
+
+/***********************************************************************//**
+ * @brief Reduces Good Time Intervals to intersection with intervals
+ *
+ * @param[in] gti Good Time Intervals.
+ *
+ * Reduces the Good Time Intervals to the intersection with the specified
+ * list of Good Time Intervals.
+ ***************************************************************************/
+inline
+void GCOMTim::reduce(const GGti& gti)
+{
+    m_gti.reduce(gti);
+    return;
 }
 
 

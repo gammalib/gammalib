@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCOMObservation.cpp - COMPTEL Observation class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -123,6 +123,8 @@ GCOMObservation::GCOMObservation(const GXmlElement& xml) : GObservation()
  * @param[in] drx Exposure map.
  *
  * Creates COMPTEL observation from DRI instances.
+ *
+ * The method fixes the deadtime correction factor deadc to 0.965.
  ***************************************************************************/
 GCOMObservation::GCOMObservation(const GCOMDri& dre,
                                  const GCOMDri& drb,
@@ -194,20 +196,24 @@ GCOMObservation::GCOMObservation(const GFilename& drename,
  * @param[in] evpname Event list FITS file name.
  * @param[in] timname Good Time Intervals FITS file name.
  * @param[in] oadnames List of Orbit Aspect Data FITS file names.
+ * @param[in] bvcname Solar System Barycentre Data FITS file name.
  *
  * Creates a COMPTEL unbinned observation by loading the event list, Good
- * Time Interval and Orbit Aspect Data from FITS files. All files are
- * mandatory.
+ * Time Interval, Orbit Aspect Data and optionally the Solar System
+ * Barycentre Data from FITS files. Except of the Solar System Barycentre
+ * Data all files are mandatory. The Solar System Barycentre Data will only
+ * be loaded if the file name is not empty.
  ***************************************************************************/
 GCOMObservation::GCOMObservation(const GFilename&              evpname,
                                  const GFilename&              timname,
-                                 const std::vector<GFilename>& oadnames)
+                                 const std::vector<GFilename>& oadnames,
+                                 const GFilename&              bvcname)
 {
     // Initialise members
     init_members();
 
     // Load observation
-    load(evpname, timname, oadnames);
+    load(evpname, timname, oadnames, bvcname);
 
     // Return
     return;
@@ -390,13 +396,15 @@ void GCOMObservation::response(const GCaldb& caldb, const std::string& rspname)
  *       <parameter name="TIM" file="m10695_tim.fits"/>
  *       <parameter name="OAD" file="m20039_oad.fits"/>
  *       <parameter name="OAD" file="m20041_oad.fits"/>
+ *       <parameter name="BVC" file="s10150_bvc.fits"/>
  *       ...
  *     </observation>
  *
  * where the observation can contain an arbitrary number of OAD file
  * parameters. The @p file attribute provide either absolute or relative
- * file name. If a file name includes no access path it is assumed that
- * the file resides in the same location as the XML file.
+ * file names. If a file name includes no access path it is assumed that
+ * the file resides in the same location as the XML file. The BVC file is
+ * optional and does not need to be specified.
  *
  * For a binned observation the XML format is
  *
@@ -439,8 +447,15 @@ void GCOMObservation::read(const GXmlElement& xml)
            }
         }
 
+        // Get and expand optional BVC file name
+        std::string bvcname = "";
+        if (gammalib::xml_has_par(xml, "BVC")) {
+            bvcname = gammalib::xml_get_attr(G_READ, xml, "BVC", "file");
+            bvcname = gammalib::xml_file_expand(xml, bvcname);
+        }
+
         // Load observation
-        load(evpname, timname, oadnames);
+        load(evpname, timname, oadnames, bvcname);
 
     } // endif: unbinned observation
 
@@ -504,13 +519,16 @@ void GCOMObservation::read(const GXmlElement& xml)
  *       <parameter name="TIM" file="m10695_tim.fits"/>
  *       <parameter name="OAD" file="m20039_oad.fits"/>
  *       <parameter name="OAD" file="m20041_oad.fits"/>
+ *       <parameter name="BVC" file="s10150_bvc.fits"/>
  *       ...
  *     </observation>
  *
  * where the observation can contain an arbitrary number of OAD file
  * parameters. The @p file attribute provide either absolute or relative
- * file name. If a file name includes no access path it is assumed that
- * the file resides in the same location as the XML file.
+ * file names. If a file name includes no access path it is assumed that
+ * the file resides in the same location as the XML file. The BVC file is
+ * optional and is only written if BVC information is contained in the
+ * observation.
  *
  * For a binned observation the XML format is
  *
@@ -550,6 +568,12 @@ void GCOMObservation::write(GXmlElement& xml) const
         for (int i = 0; i < m_oadnames.size(); ++i) {
             par = static_cast<GXmlElement*>(xml.append(GXmlElement("parameter name=\"OAD\"")));
             par->attribute("file", gammalib::xml_file_reduce(xml, m_oadnames[i]));
+        }
+
+        // Optionally set BVC parameters
+        if (!m_bvcs.is_empty()) {
+            par = gammalib::xml_need_par(G_WRITE, xml, "BVC");
+            par->attribute("file", gammalib::xml_file_reduce(xml, m_bvcname));
         }
 
     } // endif: observation was unbinned
@@ -634,13 +658,19 @@ void GCOMObservation::load(const GFilename& drename,
  * @param[in] evpname Event list FITS file name.
  * @param[in] timname Good Time Intervals FITS file name.
  * @param[in] oadnames List of Orbit Aspect Data FITS file names.
+ * @param[in] bvcname Solar System Barycentre Data FITS file name.
  *
- * Loads the event list, Good Time Interval and Orbit Aspect Data for an
- * unbinned observation. All files are mandatory.
+ * Loads the event list, Good Time Interval, Orbit Aspect Data and optionally
+ * the Solar System Barycentre Data for an unbinned observation. Except of
+ * the Solar System Barycentre Data all files are mandatory. The Solar
+ * System Barycentre Data will only be loaded if the file name is not empty.
+ *
+ * The method fixes the deadtime correction factor deadc to 0.965.
  ***************************************************************************/
 void GCOMObservation::load(const GFilename&              evpname,
                            const GFilename&              timname,
-                           const std::vector<GFilename>& oadnames)
+                           const std::vector<GFilename>& oadnames,
+                           const GFilename&              bvcname)
 {
     // Clear object
     clear();
@@ -700,10 +730,16 @@ void GCOMObservation::load(const GFilename&              evpname,
         m_oads.extend(oads[i]);
     }
 
+    // Optionally load BVC data
+    if (bvcname != "") {
+        m_bvcs.load(bvcname);
+    }
+
     // Store filenames
     m_evpname  = evpname;
     m_timname  = timname;
     m_oadnames = oadnames;
+    m_bvcname  = bvcname;
 
     // Return
     return;
@@ -873,6 +909,14 @@ std::string GCOMObservation::print(const GChatter& chatter) const
             result.append("\n"+gammalib::parformat("OADs")+"undefined");
         }
 
+        // Append BVCs (if available)
+        if (!m_bvcs.is_empty()) {
+            result.append("\n"+m_bvcs.print(gammalib::reduce(chatter)));
+        }
+        else {
+            result.append("\n"+gammalib::parformat("BVCs")+"undefined");
+        }
+
         // Append DRB, DRG and DRX
         //result.append("\n"+m_drb.print(chatter));
         //result.append("\n"+m_drg.print(chatter));
@@ -920,8 +964,10 @@ void GCOMObservation::init_members(void)
     m_evpname.clear();
     m_timname.clear();
     m_oadnames.clear();
+    m_bvcname.clear();
     m_tim.clear();
     m_oads.clear();
+    m_bvcs.clear();
 
     // Return
     return;
@@ -959,8 +1005,10 @@ void GCOMObservation::copy_members(const GCOMObservation& obs)
     m_evpname  = obs.m_evpname;
     m_timname  = obs.m_timname;
     m_oadnames = obs.m_oadnames;
+    m_bvcname  = obs.m_bvcname;
     m_tim      = obs.m_tim;
     m_oads     = obs.m_oads;
+    m_bvcs     = obs.m_bvcs;
 
     // Return
     return;
@@ -985,8 +1033,8 @@ void GCOMObservation::free_members(void)
  * Loads the event cube from a DRE file.
  *
  * The ontime is extracted from the Good Time Intervals. The deadtime
- * fraction is fixed to 15%, hence DEADC=0.85. The livetime is then computed
- * by multiplying the deadtime correction by the ontime, i.e.
+ * correction factor deadc is fixed to 0.965. The livetime is computed by
+ * multiplying the deadtime correction by the ontime, i.e.
  * LIVETIME = ONTIME * DEADC.
  ***************************************************************************/
 void GCOMObservation::load_dre(const GFilename& drename)
@@ -1057,7 +1105,7 @@ void GCOMObservation::load_drb(const GFilename& drbname)
         // Read background model
         m_drb.read(image);
 
-        // Correct WCS projection (HEASARC data format kluge)
+        // Correct WCS projection (HEASARC data format kludge)
         gammalib::com_wcs_mer2car(const_cast<GSkyMap&>(m_drb.map()));
 
         // Close FITS file
@@ -1102,7 +1150,7 @@ void GCOMObservation::load_drg(const GFilename& drgname)
     // Read geometry factors
     m_drg.read(image);
 
-    // Correct WCS projection (HEASARC data format kluge)
+    // Correct WCS projection (HEASARC data format kludge)
     gammalib::com_wcs_mer2car(const_cast<GSkyMap&>(m_drg.map()));
 
     // Close FITS file
@@ -1141,7 +1189,7 @@ void GCOMObservation::load_drx(const GFilename& drxname)
     // Read exposure map
     m_drx.read(image);
 
-    // Correct WCS projection (HEASARC data format kluge)
+    // Correct WCS projection (HEASARC data format kludge)
     gammalib::com_wcs_mer2car(const_cast<GSkyMap&>(m_drx.map()));
 
     // Close FITS file

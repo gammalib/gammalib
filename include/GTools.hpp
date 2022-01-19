@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GTools.hpp - GammaLib tools                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -42,14 +42,15 @@ class GXmlNode;
 
 /* __ Constants __________________________________________________________ */
 namespace gammalib {
-    const double MeV2erg      =  1.6021765e-6;    // MeV => erg
-    const double erg2MeV      =  624150.96;       // erg => MeV
-    const double MeV2Angstrom =  1.239841875e-2;  // MeV => Angstrom
-    const double pc2cm        =  3.08568025e18;   // pc => cm
-    const double sec_in_day   = 86400.0;          // seconds per day
-    const double sec2day      = 1.0 / sec_in_day; // seconds => days
-    const double tai2tt       = 32.184;           // TAI => TT time system
-    const double mec2         = 0.5109989461;     // Electron rest mass (MeV)
+    const double MeV2erg        =  1.6021765e-6;    // MeV => erg
+    const double erg2MeV        =  624150.96;       // erg => MeV
+    const double MeV2Angstrom   =  1.239841875e-2;  // MeV => Angstrom
+    const double pc2cm          =  3.08568025e18;   // pc => cm
+    const double sec_in_day     = 86400.0;          // seconds per day
+    const double sec2day        = 1.0 / sec_in_day; // seconds => days
+    const double tai2tt         = 32.184;           // TAI => TT time system
+    const double mec2           = 0.5109989461;     // Electron rest mass (MeV)
+    const double speed_of_light = 299792458.0;      // Vacuum speed of light (m/s)
 }
 
 /* __ Prototypes ________________________________________________________ */

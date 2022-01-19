@@ -2,7 +2,7 @@
 # Configuration for GammaLib - a versatile toolbox for high-level analysis  #
 #                              of astronomical gamma-ray data               #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2006-2021 Juergen Knoedlseder                               #
+# Copyright (C) 2006-2022 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -1485,6 +1485,7 @@ AC_CONFIG_FILES([Makefile
                  pyext/setup.py
                  pyext/gammalib/__init__.py
                  dev/conda.recipe/meta.yaml
+                 refdata/Makefile
                  examples/Makefile
                  examples/cpp/Makefile
                  examples/python/Makefile

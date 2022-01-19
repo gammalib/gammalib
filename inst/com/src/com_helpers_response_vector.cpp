@@ -178,6 +178,8 @@ GVector com_radial_kerns_omega::eval(const double& omega)
     // Return kernel values
     return m_irfs;
 }
+
+
 /***********************************************************************//**
  * @brief Kernel for radial integration of elliptical models
  *

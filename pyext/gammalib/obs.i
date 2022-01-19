@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       obs.i - Observation module                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -244,3 +244,6 @@
 %include "GPhoton.i"
 %include "GPhotons.i"
 %include "GSource.i"
+%include "GPulsar.i"
+%include "GPulsarEphemeris.i"
+%include "GEphemerides.i"

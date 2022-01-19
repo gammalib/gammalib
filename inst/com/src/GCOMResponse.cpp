@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCOMResponse.cpp - COMPTEL Response class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -262,7 +262,7 @@ GCOMResponse* GCOMResponse::clone(void) const
  *
  * \f[
  *    {\tt IRF} = \frac{{\tt IAQ} \times {\tt DRG} \times {\tt DRX}}
- *                     {T \times {\tt TOFCOR}}
+ *                     {T \times {\tt TOFCOR}} \times {\tt PHASECOR}
  * \f]
  *
  * where
@@ -273,6 +273,8 @@ GCOMResponse* GCOMResponse::clone(void) const
  * - \f$T\f$ is the ontime (\f$s\f$), and
  * - \f${\tt TOFCOR}\f$ is a correction that accounts for the Time of Flight
  *   selection window.
+ * - \f${\tt PHASECOR}\f$ is a correction that accounts for pulsar phase
+ *   selection.
  *
  * The observed photon direction is spanned by the three values \f$\Chi\f$,
  * \f$\Psi\f$, and \f$\bar{\varphi})\f$. \f$\Chi\f$ and \f$\Psi\f$ is the
@@ -385,8 +387,11 @@ double GCOMResponse::irf(const GEvent&       event,
         // Get ToF correction
         double tofcor = cube->dre().tof_correction();
 
+        // Get pulsar phase correction
+        double phasecor = cube->dre().phase_correction();
+
         // Compute IRF value
-        irf = iaq * drg * drx / (ontime * tofcor);
+        irf = iaq * drg * drx / (ontime * tofcor) * phasecor;
 
         // Apply deadtime correction
         irf *= obs.deadc(srcTime);
@@ -882,7 +887,8 @@ GVector GCOMResponse::irf_ptsrc(const GModelSky&    model,
 
     // Get IAQ normalisation (cm2): DRX (cm2 s) * DEADC / ONTIME (s)
     double iaq_norm = obs_ptr->drx().map()(srcDir) * obs_ptr->deadc() /
-                      (obs_ptr->ontime() * cube->dre().tof_correction());
+                      (obs_ptr->ontime() * cube->dre().tof_correction()) *
+                      cube->dre().phase_correction();
 
     // Get pointer to DRG pixels
     const double* drg = obs_ptr->drg().map().pixels();
@@ -1040,14 +1046,16 @@ GVector GCOMResponse::irf_radial(const GModelSky&    model,
     GVector irfs(nevents);
 
     // Initialise some variables
-    double         phigeo_min = m_phigeo_min      * gammalib::deg2rad;
     double         phigeo_bin = m_phigeo_bin_size * gammalib::deg2rad;
+    double         phigeo_min = m_phigeo_min      * gammalib::deg2rad - 0.5 * phigeo_bin;
     double         phigeo_max = phigeo_min + phigeo_bin * m_phigeo_bins;
     const GSkyMap& drx        = obs_ptr->drx().map();
     const double*  drg        = obs_ptr->drg().map().pixels();
 
     // Compute IAQ normalisation (1/s): DEADC / ONTIME (s)
-    double iaq_norm = obs_ptr->deadc() / (obs_ptr->ontime() * cube->dre().tof_correction());
+    double iaq_norm = obs_ptr->deadc() /
+                      (obs_ptr->ontime() * cube->dre().tof_correction()) *
+                      cube->dre().phase_correction();
 
     // Setup rotation matrix for conversion towards sky coordinates
     GMatrix ry;
@@ -1191,14 +1199,16 @@ GVector GCOMResponse::irf_elliptical(const GModelSky&    model,
     GVector irfs(nevents);
 
     // Initialise some variables
-    double         phigeo_min = m_phigeo_min      * gammalib::deg2rad;
     double         phigeo_bin = m_phigeo_bin_size * gammalib::deg2rad;
+    double         phigeo_min = m_phigeo_min      * gammalib::deg2rad - 0.5 * phigeo_bin;
     double         phigeo_max = phigeo_min + phigeo_bin * m_phigeo_bins;
     const GSkyMap& drx        = obs_ptr->drx().map();
     const double*  drg        = obs_ptr->drg().map().pixels();
 
     // Compute IAQ normalisation (1/s): DEADC / ONTIME (s)
-    double iaq_norm = obs_ptr->deadc() / (obs_ptr->ontime() * cube->dre().tof_correction());
+    double iaq_norm = obs_ptr->deadc() /
+                      (obs_ptr->ontime() * cube->dre().tof_correction()) *
+                      cube->dre().phase_correction();
 
     // Setup rotation matrix for conversion towards sky coordinates
     GMatrix ry;
@@ -1356,7 +1366,8 @@ GVector GCOMResponse::irf_diffuse(const GModelSky&    model,
 
     // Compute IAQ normalisation (1/s): DEADC / ONTIME (s)
     double iaq_norm = obs_ptr->deadc() /
-                      (obs_ptr->ontime() * cube->dre().tof_correction());
+                      (obs_ptr->ontime() * cube->dre().tof_correction()) *
+                      cube->dre().phase_correction();
 
     // Loop over Chi and Psi
     for (int ipix = 0; ipix < npix; ++ipix) {
@@ -1373,8 +1384,9 @@ GVector GCOMResponse::irf_diffuse(const GModelSky&    model,
         // Loop over Phigeo
         for (int iphigeo = 0; iphigeo < m_phigeo_bins; ++iphigeo) {
 
-            // Determine Phigeo value in radians
-            double phigeo     = phigeo_min + (double(iphigeo) + 0.5) * phigeo_bin;
+            // Determine Phigeo value in radians. Note that phigeo_min is the value
+            // for bin zero.
+            double phigeo     = phigeo_min + double(iphigeo) * phigeo_bin;
             double sin_phigeo = std::sin(phigeo);
 
             // Determine number of azimuthal integration steps and step size

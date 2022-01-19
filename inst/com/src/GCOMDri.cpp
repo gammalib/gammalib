@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCOMDri.cpp - COMPTEL Data Space class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -37,6 +37,7 @@
 #include "GModelSky.hpp"
 #include "GModelSpatial.hpp"
 #include "GModelSpatialPointSource.hpp"
+#include "GEphemerides.hpp"
 #include "GCOMTools.hpp"
 #include "GCOMSupport.hpp"
 #include "GCOMDri.hpp"
@@ -51,6 +52,8 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_COMPUTE_DRE               "GCOMDri::compute_dre(GCOMObservation&, "\
+                                                   "GCOMSelection&, double&)"
+#define G_COMPUTE_DRX               "GCOMDri::compute_drx(GCOMObservation&, "\
                                                    "GCOMSelection&, double&)"
 #define G_COMPUTE_DRM       "GCOMDri::compute_drm(GCOMObservation&, GModel&)"
 #define G_COMPUTE_TOF_CORRECTION          "GCOMDri::compute_tof_correction()"
@@ -255,6 +258,8 @@ GCOMDri* GCOMDri::clone(void) const
  *
  * @exception GException::invalid_argument
  *            DRE cube has a non-positive Phibar bin size.
+ * @exception GException::invalid_value
+ *            No BVC data available for pulsar selection
  *
  * Compute DRE event cube for a COMPTEL observation.
  ***************************************************************************/
@@ -322,6 +327,20 @@ void GCOMDri::compute_dre(const GCOMObservation& obs,
     // Signal that loop should be terminated
     bool terminate = false;
 
+    // Initialise JPL DE200 ephemerides (use in case that no BVC data are
+    // available)
+    GEphemerides ephem;
+
+    // Get Good Time Intervals. If a pulsar selection is specified then
+    // reduce the Good Time Intervals to the validity intervals of the pulsar
+    // emphemerides.
+    GCOMTim tim = obs.tim();
+    if (m_selection.has_pulsar()) {
+        tim.reduce(m_selection.pulsar().validity());
+        m_gti.reduce(m_selection.pulsar().validity());
+        m_phasecor = m_selection.pulsar_phases().length();
+    }
+
     // Loop over Orbit Aspect Data
     for (int i_oad = 0; i_oad < obs.oads().size(); ++i_oad) {
 
@@ -329,7 +348,7 @@ void GCOMDri::compute_dre(const GCOMObservation& obs,
         const GCOMOad &oad = obs.oads()[i_oad];
 
         // Check superpacket usage
-        if (!use_superpacket(oad, obs.tim(), select)) {
+        if (!use_superpacket(oad, tim, select)) {
             continue;
         }
 
@@ -369,7 +388,8 @@ void GCOMDri::compute_dre(const GCOMObservation& obs,
                     terminate = true;
                     break;
                 }
-            }
+
+            } // endif: DRE had GTIs
 
             // Skip event if it lies before the superpacket start
             if (event->time() < oad.tstart()) {
@@ -428,6 +448,44 @@ void GCOMDri::compute_dre(const GCOMObservation& obs,
                 num_eha_too_small++;
                 continue;
             }
+
+            // Optionally apply pulsar phase selection
+            if (m_selection.has_pulsar()) {
+
+                // Get pulsar ephemeris
+                const GPulsarEphemeris& ephemeris =
+                      m_selection.pulsar().ephemeris(event->time());
+
+                // Convert event time to Solar System Barycentre time. If BVC
+                // information is available it will be used for the computation,
+                // otherwise the time correction will be computed on-the-fly
+                // from the JPL DE200 ephemerides.
+                //
+                // Note that the time correction includes an UTC_TO_TT conversion
+                // term, but this terms has already applied when setting the GTime
+                // object. Hence if time is read as time.mjd() the correction
+                // would be applied twice, yet reading the time as time.mjd('UTC')
+                // will remove the correation again.
+                double tdelta = 0.0;
+                if (obs.bvcs().is_empty()) {
+                    tdelta = ephem.geo2ssb(ephemeris.dir(), event->time(), oad.pos()) +
+                             event->time().utc2tt();
+                }
+                else {
+                    tdelta = obs.bvcs().tdelta(ephemeris.dir(), event->time());
+                }
+                GTime time  = event->time() + tdelta;
+
+                // Compute pulsar phase. See comment above why "UTC" needs
+                // to be specified.
+                double phase = ephemeris.phase(time, "UTC");
+
+                // If phase is not contained in phase interval then skip event
+                if (!m_selection.pulsar_phases().contains(phase)) {
+                    continue;
+                }
+
+            } // endif: applied pulsar selection
 
             // Now fill the event into the DRE. Put this in a try-catch
             // block so that any invalid transformations are catched.
@@ -492,6 +550,9 @@ void GCOMDri::compute_dre(const GCOMObservation& obs,
  * @param[in] select Selection set.
  * @param[in] zetamin Minimum Earth horizon - Phibar cut (deg).
  *
+ * @exception GException::invalid_value
+ *            No BVC data available for pulsar selection
+ *
  * Compute DRG cube for a COMPTEL observation.
  ***************************************************************************/
 void GCOMDri::compute_drg(const GCOMObservation& obs,
@@ -517,6 +578,14 @@ void GCOMDri::compute_drg(const GCOMObservation& obs,
     // Set all DRG bins to zero
     init_cube();
 
+    // Get Good Time Intervals. If a pulsar selection is specified then
+    // reduce the Good Time Intervals to the validity intervals of the pulsar
+    // emphemerides.
+    GCOMTim tim = obs.tim();
+    if (m_selection.has_pulsar()) {
+        tim.reduce(m_selection.pulsar().validity());
+    }
+
     // Loop over Orbit Aspect Data
     for (int i_oad = 0; i_oad < obs.oads().size(); ++i_oad) {
 
@@ -524,7 +593,7 @@ void GCOMDri::compute_drg(const GCOMObservation& obs,
         const GCOMOad &oad = obs.oads()[i_oad];
 
         // Check superpacket usage
-        if (!use_superpacket(oad, obs.tim(), select)) {
+        if (!use_superpacket(oad, tim, select)) {
             continue;
         }
 
@@ -612,6 +681,9 @@ void GCOMDri::compute_drg(const GCOMObservation& obs,
  * @param[in] obs COMPTEL observation.
  * @param[in] select Selection set.
  *
+ * @exception GException::invalid_value
+ *            No BVC data available for pulsar selection
+ *
  * Compute DRX exposure map for a COMPTEL observation.
  *
  * For a given superpacket, the exposure is computed using
@@ -646,6 +718,14 @@ void GCOMDri::compute_drx(const GCOMObservation& obs,
     // Set all DRX bins to zero
     init_cube();
 
+    // Get Good Time Intervals. If a pulsar selection is specified then
+    // reduce the Good Time Intervals to the validity intervals of the pulsar
+    // emphemerides.
+    GCOMTim tim = obs.tim();
+    if (select.has_pulsar()) {
+        tim.reduce(select.pulsar().validity());
+    }
+
     // Loop over Orbit Aspect Data
     for (int i_oad = 0; i_oad < obs.oads().size(); ++i_oad) {
 
@@ -653,7 +733,7 @@ void GCOMDri::compute_drx(const GCOMObservation& obs,
         const GCOMOad &oad = obs.oads()[i_oad];
 
         // Check superpacket usage
-        if (!use_superpacket(oad, obs.tim(), select)) {
+        if (!use_superpacket(oad, tim, select)) {
             continue;
         }
 
@@ -1004,9 +1084,10 @@ void GCOMDri::init_members(void)
     m_dri.clear();
     m_ebounds.clear();
     m_gti.clear();
-    m_phimin = 0.0;
-    m_phibin = 0.0;
-    m_tofcor = 1.0;
+    m_phimin   = 0.0;
+    m_phibin   = 0.0;
+    m_tofcor   = 1.0;
+    m_phasecor = 1.0;
 
     // Initialise statistics
     init_statistics();
@@ -1029,13 +1110,14 @@ void GCOMDri::init_members(void)
 void GCOMDri::copy_members(const GCOMDri& dri)
 {
     // Copy members
-    m_name    = dri.m_name;
-    m_dri     = dri.m_dri;
-    m_ebounds = dri.m_ebounds;
-    m_gti     = dri.m_gti;
-    m_phimin  = dri.m_phimin;
-    m_phibin  = dri.m_phibin;
-    m_tofcor  = dri.m_tofcor;
+    m_name     = dri.m_name;
+    m_dri      = dri.m_dri;
+    m_ebounds  = dri.m_ebounds;
+    m_gti      = dri.m_gti;
+    m_phimin   = dri.m_phimin;
+    m_phibin   = dri.m_phibin;
+    m_tofcor   = dri.m_tofcor;
+    m_phasecor = dri.m_phasecor;
 
     // Copy statistics
     m_tstart                   = dri.m_tstart;
@@ -1108,9 +1190,9 @@ void GCOMDri::init_statistics(void)
  *
  * Checks if a superpacket should be used. A superpacket will be used if
  * it is fully enclosed within the COMPTEL Good Time Intervals and the
- * Good Time Intervals of the DRI dataset. In case that phases are selected
- * in the selection set, the superpacket will be used when the start time
- * is comprised in one of the phases.
+ * Good Time Intervals of the DRI dataset. In case that orbital phases are
+ * present in the selection set, the superpacket will be used when the start
+ * time is comprised in one of the orbital phases.
  *
  * The method updates the superpacket statistics and selected time interval.
  ***************************************************************************/
@@ -1143,9 +1225,9 @@ bool GCOMDri::use_superpacket(const GCOMOad&       oad,
     // If there are phase intervals then skip if superpacket is the phase
     // corresponding to the start time does not fall into any of the phase
     // intervals
-    else if (!select.phases().is_empty()) {
-        double phase = select.phase_curve().phase(oad.tstart());
-        if (select.phases().contains(phase)) {
+    else if (!select.orbital_phases().is_empty()) {
+        double phase = select.orbital_phase(oad.tstart());
+        if (select.orbital_phases().contains(phase)) {
             m_num_used_superpackets++;
         }
         else {
@@ -1243,6 +1325,11 @@ void GCOMDri::read_attributes(const GFitsHDU* hdu)
     // Optionally read ToF correction
     if (hdu->has_card("TOFCOR")) {
         m_tofcor = hdu->real("TOFCOR");
+    }
+
+    // Optionally read pulsar phase correction
+    if (hdu->has_card("PHASECOR")) {
+        m_phasecor = hdu->real("PHASECOR");
     }
 
     // Optionally read superpacket statistics
@@ -1346,6 +1433,11 @@ void GCOMDri::write_attributes(GFitsHDU* hdu) const
     // If there is a ToF correction then write it
     if (m_tofcor > 1.0) {
         hdu->card("TOFCOR", m_tofcor, "ToF correction");
+    }
+
+    // If there is a pulsar phase correction then write it
+    if (m_phasecor < 1.0) {
+        hdu->card("PHASECOR", m_phasecor, "Pulsar phase correction");
     }
 
     // Write superpacket statistics

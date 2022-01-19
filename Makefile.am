@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for GammaLib package                                          #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016-2021 Juergen Knoedlseder                               #
+# Copyright (C) 2016-2022 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -28,7 +28,7 @@ INST_DIR = inst
 endif
 
 # Subdirectories
-SUBDIRS = include $(INST_DIR) src pyext examples test
+SUBDIRS = include $(INST_DIR) src pyext refdata examples test
 
 # Pkgconfig directory
 pkgconfigdir = $(libdir)/pkgconfig

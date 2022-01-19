@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCOMObservation.hpp - COMPTEL observation class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -35,6 +35,7 @@
 #include "GCOMResponse.hpp"
 #include "GCOMTim.hpp"
 #include "GCOMOads.hpp"
+#include "GCOMBvcs.hpp"
 #include "GCOMDri.hpp"
 #include "GCOMEventList.hpp"
 #include "GCOMEventCube.hpp"
@@ -77,7 +78,8 @@ public:
                     const GFilename& drxname);
     GCOMObservation(const GFilename&              evpname,
                     const GFilename&              timname,
-                    const std::vector<GFilename>& oadnames);
+                    const std::vector<GFilename>& oadnames,
+                    const GFilename&              bvcname = "");
     GCOMObservation(const GCOMObservation& obs);
     virtual ~GCOMObservation(void);
 
@@ -107,7 +109,8 @@ public:
                           const GFilename& drxname);
     void             load(const GFilename&              evpname,
                           const GFilename&              timname,
-                          const std::vector<GFilename>& oadnames);
+                          const std::vector<GFilename>& oadnames,
+                          const GFilename&              bvcname = "");
     void             response(const GCaldb& caldb, const std::string& rspname);
     void             response(const GCOMResponse& response);
     void             obs_id(const double& id);
@@ -125,6 +128,8 @@ public:
     void             tim(const GCOMTim& tim);
     const GCOMOads&  oads(void) const;
     void             oads(const GCOMOads& oads);
+    const GCOMBvcs&  bvcs(void) const;
+    void             bvcs(const GCOMBvcs& bvcs);
     const GFilename& drename(void) const;
     const GFilename& drbname(void) const;
     const GFilename& drgname(void) const;
@@ -203,8 +208,10 @@ protected:
     GFilename              m_evpname;    //!< EVP filename
     GFilename              m_timname;    //!< TIM filename
     std::vector<GFilename> m_oadnames;   //!< OAD filenames
+    GFilename              m_bvcname;    //!< BVC filename
     GCOMTim                m_tim;        //!< COMPTEL Good Time Intervals
     GCOMOads               m_oads;       //!< Orbit Aspect Data
+    GCOMBvcs               m_bvcs;       //!< Solar System Barycentre Data
 };
 
 
@@ -478,6 +485,32 @@ inline
 void GCOMObservation::oads(const GCOMOads& oads)
 {
     m_oads = oads;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return Solar System Barycentre Data
+ *
+ * @return Solar System Barycentre Data
+ ***************************************************************************/
+inline
+const GCOMBvcs& GCOMObservation::bvcs(void) const
+{
+    // Return Solar System Barycentre Data
+    return (m_bvcs);
+}
+
+
+/***********************************************************************//**
+ * @brief Set Solar System Barycentre Data
+ *
+ * @param[in] bvcs Solar System Barycentre Data.
+ ***************************************************************************/
+inline
+void GCOMObservation::bvcs(const GCOMBvcs& bvcs)
+{
+    m_bvcs = bvcs;
     return;
 }
 

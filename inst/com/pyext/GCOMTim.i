@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCOMTim.i - COMPTEL Good Time Intervals class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2019 by Juergen Knodlseder                          *
+ *  copyright (C) 2017-2022 by Juergen Knodlseder                          *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -52,6 +52,7 @@ public:
 
     // Other methods
     bool        contains(const GTime& time) const;
+    void        reduce(const GGti& gti);
     const GGti& gti(void) const;
     void        gti(const GGti& gti);
     void        load(const GFilename& filename, const std::string& usage = "YES",

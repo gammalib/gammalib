@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GPhases.cpp - Phase intervals class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -354,6 +354,26 @@ double GPhases::pmax(const int& index) const
 
     // Return
     return (m_pmax[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns total length of phase intervals
+ *
+ * @return Total length of phase intervals.
+ ***************************************************************************/
+double GPhases::length(void) const
+{
+    // Initialise length
+    double length = 0.0;
+
+    // Loop over all intervals and add their length
+    for (int i = 0; i < size(); ++i) {
+        length += (m_pmax[i] - m_pmin[i]);
+    }
+
+    // Return
+    return length;
 }
 
 

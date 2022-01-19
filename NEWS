@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-10 January 2022
+18 January 2022
 
 
 1. Introduction
@@ -15,6 +15,9 @@ The following classes have been added:
 - GFunctions
 - GIntegrals
 - GResponseVectorCache
+- GPulsar
+- GPulsarEphemeris
+- GEphemerides
 - GSkyDirs
 - GSkyRegionRect
 - GModelAssociation
@@ -24,6 +27,8 @@ The following classes have been added:
 - GModelSpatialEllipticalGeneralGauss
 - GCTAModelSkyCube
 - GCTABackground2D
+- GCOMBvc
+- GCOMBvcs
 - GCOMModelDRM
 - GCOMModelDRBPhibarBins
 
@@ -49,6 +54,10 @@ The following methods have been added:
 - GObservation::model(GModels&, GMatrixSparse*)
 - GObservation::model_grad(GModel&, GModelPar&)
 - GObservation::grad_step_size()
+- GGti::reduce(GGti&)
+- GTime::leap_seconds()
+- GTime::utc2tt()
+- GPhases::length()
 - GMatrixBase::is_empty()
 - angle(GVector&, GVector&)
 - GModels::eval(GObservation&, GMatrixSparse*)
@@ -109,14 +118,23 @@ The following methods have been added:
 - GCOMObservation::compute_drb()
 - GCOMObservation::tim(GCOMTim&)
 - GCOMObservation::oads(GCOMOads&)
+- GCOMObservation::bvcs(GCOMBvcs&)
+- GCOMObservation::bvcs()
 - GCOMEventAtom::x_d2()
 - GCOMEventAtom::y_d2()
+- GCOMTim::reduce(GGti&)
+- GCOMOad::pos()
 - GCOMDri::tof_correction()
+- GCOMDri::phase_correction()
 - GCOMDri::num_superpackets()
 - GCOMDri::num_used_superpackets()
 - GCOMDri::num_skipped_superpackets()
-- GCOMSelection::phase_curve()
-- GCOMSelection::phases()
+- GCOMSelection::orbital_phases()
+- GCOMSelection::orbital_period()
+- GCOMSelection::orbital_phase()
+- GCOMSelection::pulsar_phases()
+- GCOMSelection::pulsar()
+- GCOMSelection::has_pulsar()
 - GCOMSelection::fpmtflag()
 - GCOMSelection::use_d1()
 - GCOMSelection::use_d2()
@@ -134,6 +152,7 @@ The following methods have been removed:
 - GCOMResponse::irf_spatial()
 - GCOMSelection::zeta_min()
 - GCOMSelection::zeta_max()
+- GCOMSelection::phase_curve()
 
 The following methods have been renamed:
 - none
@@ -267,6 +286,20 @@ of functions (#3328).
 
 11. Observation module
 ----------------------
+Add GEphemerides class to deal with JPL ephemerides and specifically the
+DE200 ephemerides. A JPL DE200 ephemerides file was added to a refdata
+direction, the file is installed in $GAMMALIB/share/refdata. Add further-
+more GTime::leap_seconds() and GTime::utc2tt() methods to support time
+system conversions in GEphemerides and GPulsar classes (#3973).
+
+Add GPhases::length() method that returns the total length of the phase
+intervals (#3973).
+
+Add GGti::reduce(GGti&) method to reduce Good Time Intervals to the intersection
+with a specific list of intervals (#3973).
+
+Add GPulsar and GPulsarEphemeris classes to support pulsar analysis (#3973).
+
 Add likelihood fit event selection hook (#3912).
 
 Add numerical gradient step size as member of GObservation to allow instrument-
@@ -400,6 +433,16 @@ spatial model gradients (#3203).
 
 22. COMPTEL interface
 ---------------------
+Implement a 2.042144 seconds clock correction before TJD 8798 and tics 28800000 
+(1992-06-25T01:00:00) to provide accurate times for pulsar analysis (#3973).
+
+Added GCOMBvc and GCOMBvcs classes to support reading and using of BVC files for
+pulsar analysis. The interface of the GCOMSelection was modified so that it
+supports both orbital and pulsar phase selection. The interface of GCOMObservation
+was extended so that the class supports the optional handling of BVC files. A
+GCOMTim::reduce(GGti&) method was added to allow the reduction of the COMPTEL
+Good Time Intervals to the intervals covered by the pulsar ephemerides (#3973).
+
 Removed GCOMSelection::zeta_min() and GCOMSelection::zeta_max() since event-wise
 zeta selection is actually not used and the zeta cut is applied using the minimum
 value of the corresponding Phibar layer. Having this additional selection was always

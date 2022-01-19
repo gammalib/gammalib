@@ -482,7 +482,8 @@ void GModelTemporalPhaseCurve::write(GXmlElement& xml) const
  * \f]
  *
  * where
- * \f$t_0\f$ is a reference time,
+ * \f$t\f$ is the specified @p time in seconds,
+ * \f$t_0\f$ is a reference time in seconds,
  * \f$\Phi_0\f$ is the phase at the reference time,
  * \f$f\f$ is the variation frequency at the reference time,
  * \f$\dot{f}\f$ is the first derivative of the variation frequency at the
@@ -499,10 +500,10 @@ double GModelTemporalPhaseCurve::phase(const GTime& time) const
     const double c2 = 1.0 / 6.0;
 
     // Compute time since reference time in seconds
-    double t = time - mjd();
+    double dt = time - mjd();
 
     // Computes phase
-    double phase = this->phase() + t * (f0() + t * (c1 * f1() + c2 * f2() * t));
+    double phase = this->phase() + dt * (f0() + dt * (c1 * f1() + c2 * f2() * dt));
 
     // Put phase into interval [0,1]
     phase -= floor(phase);

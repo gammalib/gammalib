@@ -1,0 +1,10 @@
+<?xml version="1.0" standalone="no"?>
+<observation_list title="observation library">
+  <observation name="Crab" id="000001" instrument="COM">
+    <parameter name="EVP" file="m16992_tjd8393_evp.fits"/>
+    <parameter name="TIM" file="m10695_tim.fits"/>
+    <parameter name="OAD" file="m20039_oad.fits"/>
+    <parameter name="OAD" file="m20041_oad.fits"/>
+    <parameter name="BVC" file="s10150_10000rows_bvc.fits"/>
+  </observation>
+</observation_list>
