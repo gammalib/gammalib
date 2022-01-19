@@ -1,6 +1,6 @@
 .. _2.0:
 
-GammaLib 2.0 release (14 January 2022)
+GammaLib 2.0 release (19 January 2022)
 ======================================
 
 Overview
@@ -10,9 +10,10 @@ GammaLib 2.0 is a major release that adds significant functionality.
 
 In particular, this release provides:
 
-* vectorised response computation
+* extended support for COMPTEL data analysis
 * full support of all spatial models for COMPTEL
 * support for pulsar analysis
+* vectorised response computation
 
 
 Bug fixes
