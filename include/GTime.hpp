@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          GTime.hpp - Time class                         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GBase.hpp"
+#include "GTools.hpp"
 #include "GTimeReference.hpp"
 
 /* __ Forward declarations _______________________________________________ */
@@ -99,6 +100,8 @@ public:
     double         gast(void) const;
     double         lmst(const double& geolon) const;
     double         last(const double& geolon) const;
+    double         leap_seconds(void) const;
+    double         utc2tt(void) const;
     double         convert(const GTimeReference& ref) const;
     void           jd(const double& time);
     void           jd(const double& time, const std::string& timesys);
@@ -166,6 +169,34 @@ void GTime::secs(const double& seconds)
 {
     m_time = seconds;
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of leap seconds for current time
+ *
+ * @return Number of leap seconds for current time (seconds).
+ ***************************************************************************/
+inline
+double GTime::leap_seconds(void) const
+{
+    return (leap_seconds(this->mjd()));
+}
+
+
+/***********************************************************************//**
+ * @brief Return time difference between UTC and TT (seconds)
+ *
+ * @return Time difference between UTC and TT (seconds).
+ *
+ * Returns the time difference between UTC and TT. The time difference is
+ * a positive number and is given by the sum of 32.184 s and the number
+ * of leap seconds.
+ ***************************************************************************/
+inline
+double GTime::utc2tt(void) const
+{
+    return (leap_seconds()+gammalib::tai2tt);
 }
 
 

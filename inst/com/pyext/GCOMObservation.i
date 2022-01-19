@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCOMObservation.i - COMPTEL observation class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -49,7 +49,8 @@ public:
                     const GFilename& drxname);
     GCOMObservation(const GFilename&              evpname,
                     const GFilename&              timname,
-                    const std::vector<GFilename>& oadnames);
+                    const std::vector<GFilename>& oadnames,
+                    const GFilename&              bvcname = "");
     GCOMObservation(const GCOMObservation& obs);
     virtual ~GCOMObservation(void);
 
@@ -75,7 +76,8 @@ public:
                           const GFilename& drxname);
     void             load(const GFilename&              evpname,
                           const GFilename&              timname,
-                          const std::vector<GFilename>& oadnames);
+                          const std::vector<GFilename>& oadnames,
+                          const GFilename&              bvcname = "");
     void             response(const GCaldb& caldb, const std::string& rspname);
     void             response(const GCOMResponse& response);
     void             obs_id(const double& id);
@@ -93,6 +95,8 @@ public:
     void             tim(const GCOMTim& tim);
     const GCOMOads&  oads(void) const;
     void             oads(const GCOMOads& oads);
+    const GCOMBvcs&  bvcs(void) const;
+    void             bvcs(const GCOMBvcs& bvcs);
     const GFilename& drename(void) const;
     const GFilename& drbname(void) const;
     const GFilename& drgname(void) const;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GGti.i - Good time interval class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -58,6 +58,7 @@ public:
     void                  merge(void);
     void                  merge(const GTime& tstart, const GTime& tstop);
     void                  reduce(const GTime& tstart, const GTime& tstop);
+    void                  reduce(const GGti& gti);
     void                  remove(const int& index);
     void                  reserve(const int& num);
     void                  extend(const GGti& gti);

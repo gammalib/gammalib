@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCOMSelection.hpp - COMPTEL selection set class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,6 +31,7 @@
 #include <string>
 #include "GBase.hpp"
 #include "GPhases.hpp"
+#include "GPulsar.hpp"
 #include "GModelTemporalPhaseCurve.hpp"
 
 /* __ Forward declarations _______________________________________________ */
@@ -65,44 +66,49 @@ public:
     virtual std::string    print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    void                            init_statistics(void) const;
-    bool                            use_event(const GCOMEventAtom& event) const;
-    const double&                   e1_min(void) const;
-    void                            e1_min(const double& e1_min);
-    const double&                   e1_max(void) const;
-    void                            e1_max(const double& e1_max);
-    const double&                   e2_min(void) const;
-    void                            e2_min(const double& e2_min);
-    const double&                   e2_max(void) const;
-    void                            e2_max(const double& e2_max);
-    const int&                      tof_min(void) const;
-    void                            tof_min(const int& tof_min);
-    const int&                      tof_max(void) const;
-    void                            tof_max(const int& tof_max);
-    const int&                      psd_min(void) const;
-    void                            psd_min(const int& psd_min);
-    const int&                      psd_max(void) const;
-    void                            psd_max(const int& psd_max);
-    const int&                      reflag_min(void) const;
-    void                            reflag_min(const int& reflag_min);
-    const int&                      reflag_max(void) const;
-    void                            reflag_max(const int& reflag_max);
-    const int&                      vetoflag_min(void) const;
-    void                            vetoflag_min(const int& vetoflag_min);
-    const int&                      vetoflag_max(void) const;
-    void                            vetoflag_max(const int& vetoflag_max);
-    const int&                      fpmtflag(void) const;
-    void                            fpmtflag(const int& fpmtflag);
-    const bool&                     use_d1(const int& id1) const;
-    void                            use_d1(const int& id1, const bool& use);
-    const bool&                     use_d2(const int& id2) const;
-    void                            use_d2(const int& id2, const bool& use);
-    const GModelTemporalPhaseCurve& phase_curve(void) const;
-    void                            phase_curve(const GModelTemporalPhaseCurve& phase_curve);
-    const GPhases&                  phases(void) const;
-    void                            phases(const GPhases& phases);
-    void                            read(const GFitsHDU& hdu);
-    void                            write(GFitsHDU& hdu) const;
+    void           init_statistics(void) const;
+    bool           use_event(const GCOMEventAtom& event) const;
+    const double&  e1_min(void) const;
+    void           e1_min(const double& e1_min);
+    const double&  e1_max(void) const;
+    void           e1_max(const double& e1_max);
+    const double&  e2_min(void) const;
+    void           e2_min(const double& e2_min);
+    const double&  e2_max(void) const;
+    void           e2_max(const double& e2_max);
+    const int&     tof_min(void) const;
+    void           tof_min(const int& tof_min);
+    const int&     tof_max(void) const;
+    void           tof_max(const int& tof_max);
+    const int&     psd_min(void) const;
+    void           psd_min(const int& psd_min);
+    const int&     psd_max(void) const;
+    void           psd_max(const int& psd_max);
+    const int&     reflag_min(void) const;
+    void           reflag_min(const int& reflag_min);
+    const int&     reflag_max(void) const;
+    void           reflag_max(const int& reflag_max);
+    const int&     vetoflag_min(void) const;
+    void           vetoflag_min(const int& vetoflag_min);
+    const int&     vetoflag_max(void) const;
+    void           vetoflag_max(const int& vetoflag_max);
+    const int&     fpmtflag(void) const;
+    void           fpmtflag(const int& fpmtflag);
+    const bool&    use_d1(const int& id1) const;
+    void           use_d1(const int& id1, const bool& use);
+    const bool&    use_d2(const int& id2) const;
+    void           use_d2(const int& id2, const bool& use);
+    const GPhases& orbital_phases(void) const;
+    void           orbital_phases(const GPhases& phases);
+    void           orbital_period(const double& period, const GTime& time);
+    double         orbital_phase(const GTime& time) const;
+    const GPhases& pulsar_phases(void) const;
+    void           pulsar_phases(const GPhases& phases);
+    const GPulsar& pulsar(void) const;
+    void           pulsar(const GPulsar& pulsar);
+    bool           has_pulsar(void) const;
+    void           read(const GFitsHDU& hdu);
+    void           write(GFitsHDU& hdu) const;
 
 protected:
     // Protected methods
@@ -111,25 +117,27 @@ protected:
     void free_members(void);
 
     // Protected members
-    double                   m_e1_min;       //!< Minimum D1 energy deposit (MeV)
-    double                   m_e1_max;       //!< Maximum D1 energy deposit (MeV)
-    double                   m_e2_min;       //!< Minimum D2 energy deposit (MeV)
-    double                   m_e2_max;       //!< Maximum D2 energy deposit (MeV)
-    int                      m_tof_min;      //!< Minimum TOF window
-    int                      m_tof_max;      //!< Maximum TOF window
-    int                      m_psd_min;      //!< Minimum PSD window
-    int                      m_psd_max;      //!< Maximum PSD window
-    int                      m_reflag_min;   //!< Minimum rejection flag
-    int                      m_reflag_max;   //!< Maximum rejection flag
-    int                      m_vetoflag_min; //!< Minimum veto flag
-    int                      m_vetoflag_max; //!< Maximum veto flag
-    int                      m_fpmtflag;     //!< D2 PMT failures
-                                             //!< (0: exclude modules, 1: include modules,
-                                             //!<  2: use FPM information)
-    bool                     m_use_d1[7];    //!< D1 module usage
-    bool                     m_use_d2[14];   //!< D2 module usage
-    GModelTemporalPhaseCurve m_phase_curve;  //!< Phase curve for phase selection
-    GPhases                  m_phases;       //!< Phases for phase selection
+    double                   m_e1_min;              //!< Minimum D1 energy deposit (MeV)
+    double                   m_e1_max;              //!< Maximum D1 energy deposit (MeV)
+    double                   m_e2_min;              //!< Minimum D2 energy deposit (MeV)
+    double                   m_e2_max;              //!< Maximum D2 energy deposit (MeV)
+    int                      m_tof_min;             //!< Minimum TOF window
+    int                      m_tof_max;             //!< Maximum TOF window
+    int                      m_psd_min;             //!< Minimum PSD window
+    int                      m_psd_max;             //!< Maximum PSD window
+    int                      m_reflag_min;          //!< Minimum rejection flag
+    int                      m_reflag_max;          //!< Maximum rejection flag
+    int                      m_vetoflag_min;        //!< Minimum veto flag
+    int                      m_vetoflag_max;        //!< Maximum veto flag
+    int                      m_fpmtflag;            //!< D2 PMT failures
+                                                    //!< (0: exclude modules, 1: include modules,
+                                                    //!<  2: use FPM information)
+    bool                     m_use_d1[7];           //!< D1 module usage
+    bool                     m_use_d2[14];          //!< D2 module usage
+    GPhases                  m_orbital_phases;      //!< Phases for orbital phase selection
+    GModelTemporalPhaseCurve m_orbital_phase_curve; //!< Orbital phase curve
+    GPhases                  m_pulsar_phases;       //!< Phases for pulse phase selection
+    GPulsar                  m_pulsar;              //!< Pulsar information
 
     // Selection statistics
     mutable int m_num_events_checked;  //!< Number of checked events
@@ -489,52 +497,109 @@ const int& GCOMSelection::fpmtflag(void) const
 
 
 /***********************************************************************//**
- * @brief Return phase curve
+ * @brief Return orbital phases
  *
- * @return Phase curve.
+ * @return Orbital phases
  ***************************************************************************/
 inline
-const GModelTemporalPhaseCurve& GCOMSelection::phase_curve(void) const
+const GPhases& GCOMSelection::orbital_phases(void) const
 {
-    return (m_phase_curve);
+    return (m_orbital_phases);
 }
 
 
 /***********************************************************************//**
- * @brief Set phase curve
+ * @brief Set orbital phases
  *
- * @param[in] phase_curve Phase curve.
+ * @param[in] phases Orbital phases.
  ***************************************************************************/
 inline
-void GCOMSelection::phase_curve(const GModelTemporalPhaseCurve& phase_curve)
+void GCOMSelection::orbital_phases(const GPhases& phases)
 {
-    m_phase_curve = phase_curve;
+    m_orbital_phases = phases;
     return;
 }
 
 
 /***********************************************************************//**
- * @brief Return phases
+ * @brief Return orbital phase for a given time
  *
- * @return Phases
+ * @param[in] time Time.
+ * @return Orbital phase.
  ***************************************************************************/
 inline
-const GPhases& GCOMSelection::phases(void) const
+double GCOMSelection::orbital_phase(const GTime& time) const
 {
-    return (m_phases);
+    // Compute phase
+    double phase = m_orbital_phase_curve.phase(time);
+
+    // Return phase
+    return phase;
 }
 
 
 /***********************************************************************//**
- * @brief Set phases
+ * @brief Return pulsar phases
  *
- * @param[in] phases Phases.
+ * @return Pulsar phases
  ***************************************************************************/
 inline
-void GCOMSelection::phases(const GPhases& phases)
+const GPhases& GCOMSelection::pulsar_phases(void) const
 {
-    m_phases = phases;
+    return (m_pulsar_phases);
+}
+
+
+/***********************************************************************//**
+ * @brief Set pulsar phases
+ *
+ * @param[in] phases Pulsar phases.
+ ***************************************************************************/
+inline
+void GCOMSelection::pulsar_phases(const GPhases& phases)
+{
+    m_pulsar_phases = phases;
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return pulsar
+ *
+ * @return Pulsar
+ ***************************************************************************/
+inline
+const GPulsar& GCOMSelection::pulsar(void) const
+{
+    return (m_pulsar);
+}
+
+
+/***********************************************************************//**
+ * @brief Set pulsar
+ *
+ * @param[in] pulsar Pulsar.
+ ***************************************************************************/
+inline
+void GCOMSelection::pulsar(const GPulsar& pulsar)
+{
+    m_pulsar = pulsar;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Signals that pulsar selection should be performed
+ *
+ * @return True if pulsar selection should be performed, false otherwise
+ *
+ * This method returns true if the pulsar and the pulsar phase selection are
+ * not empty.
+ ***************************************************************************/
+inline
+bool GCOMSelection::has_pulsar(void) const
+{
+    return (!pulsar().is_empty() && !pulsar_phases().is_empty());
 }
 
 #endif /* GCOMSELECTION_HPP */

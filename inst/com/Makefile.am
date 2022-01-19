@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for com module                                                #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016-2021 Juergen Knoedlseder                               #
+# Copyright (C) 2016-2022 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -42,6 +42,8 @@ sources = src/com_helpers_response_vector.cpp \
           src/GCOMDri.cpp \
           src/GCOMOads.cpp \
           src/GCOMOad.cpp \
+          src/GCOMBvcs.cpp \
+          src/GCOMBvc.cpp \
           src/GCOMTim.cpp \
           src/GCOMRoi.cpp \
           src/GCOMEventAtom.cpp \
@@ -66,6 +68,8 @@ pkginclude_HEADERS = include/GCOMTools.hpp \
                      include/GCOMDri.hpp \
                      include/GCOMOads.hpp \
                      include/GCOMOad.hpp \
+                     include/GCOMBvcs.hpp \
+                     include/GCOMBvc.hpp \
                      include/GCOMTim.hpp \
                      include/GCOMRoi.hpp \
                      include/GCOMEventAtom.hpp \
@@ -112,7 +116,13 @@ testdatacom       = test/data/obs.xml \
                     test/data/crab.xml \
                     test/data/m32171_drx.fits.gz \
                     test/data/m34997_drg.fits.gz \
-                    test/data/m50439_dre.fits.gz
+                    test/data/m50438_dre.fits.gz \
+                    test/data/m50439_dre.fits.gz \
+                    test/data/m50440_dre.fits.gz \
+                    test/data/m50441_dre.fits.gz \
+                    test/data/m20039_oad.fits.gz \
+                    test/data/m20041_oad.fits.gz \
+                    test/data/s10150_10000rows_bvc.fits.gz
 testdatacomdir    = $(pyexecdir)/gammalib/tests/com/data
 testdatacom_DATA  = $(testdatacom)
 testcaldbcom      = test/caldb/data/cgro/comptel/caldb.indx

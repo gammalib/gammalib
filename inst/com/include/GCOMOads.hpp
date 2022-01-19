@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCOMOads.hpp - COMPTEL Orbit Aspect Data container class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Juergen Knodlseder                               *
+ *  copyright (C) 2017-2022 by Juergen Knodlseder                          *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -24,8 +24,8 @@
  * @author Juergen Knodlseder
  */
 
-#ifndef GTPLCONTAINER_HPP
-#define GTPLCONTAINER_HPP
+#ifndef GCOMOADS_HPP
+#define GCOMOADS_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
@@ -45,7 +45,7 @@ class GFitsTable;
  *
  * @brief COMPTEL Orbit Aspect Data container class
  *
- * The COMPTEL Orbit Aspect Data container class holds record of Orbit
+ * The COMPTEL Orbit Aspect Data container class holds records of Orbit
  * Aspect data that were extracted from one COMPTEL OAD FITS file.
  ***************************************************************************/
 class GCOMOads : public GContainer {
@@ -173,4 +173,4 @@ void GCOMOads::reserve(const int& num)
     return;
 }
 
-#endif /* GTPLCONTAINER_HPP */
+#endif /* GCOMOADS_HPP */

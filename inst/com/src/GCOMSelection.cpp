@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCOMSelection.cpp - COMPTEL selection set class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -724,6 +724,34 @@ void GCOMSelection::write(GFitsHDU& hdu) const
 
 
 /***********************************************************************//**
+ * @brief Set orbital period
+ *
+ * @param[in] period Orbital period (days).
+ * @param[in] time Time of phase zero.
+ *
+ * Set the orbital phase for orbital phase selection.
+ ***************************************************************************/
+void GCOMSelection::orbital_period(const double& period, const GTime& time)
+{
+    // Clear temporal phase curve
+    m_orbital_phase_curve.clear();
+
+    // Get frequency of orbit in units of Hz
+    double f0 = 1.0 / (period * gammalib::sec_in_day);
+
+    // Set phase curve elements
+    m_orbital_phase_curve.mjd(time);   // Reference time
+    m_orbital_phase_curve.phase(0.0);  // Phase at reference time
+    m_orbital_phase_curve.f0(f0);      // Frequency at reference time
+    m_orbital_phase_curve.f1(0.0);     // No frequency derivative
+    m_orbital_phase_curve.f2(0.0);     // No 2nd frequency derivative
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Print COMPTEL selection set
  *
  * @param[in] chatter Chattiness.
@@ -833,10 +861,20 @@ std::string GCOMSelection::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Invalid minitelescope"));
         result.append(gammalib::str(m_num_invalid_modcom));
 
-        // Append phase selection if it exists
-        if (!m_phases.is_empty()) {
-            result.append("\n"+m_phases.print());
-            result.append("\n"+m_phase_curve.print());
+        // Append orbital phase selection if it exists
+        if (!m_orbital_phases.is_empty()) {
+            result.append("\n"+m_orbital_phases.print());
+            result.append("\n"+m_orbital_phase_curve.print());
+        }
+
+        // Append pulsar if it exists
+        if (!m_pulsar.is_empty()) {
+            result.append("\n"+m_pulsar.print());
+        }
+
+        // Append pulsar phase selection if it exists
+        if (!m_pulsar_phases.is_empty()) {
+            result.append("\n"+m_pulsar_phases.print());
         }
 
     } // endif: chatter was not silent
@@ -871,8 +909,10 @@ void GCOMSelection::init_members(void)
     m_vetoflag_min =     0;  //!< Minimum veto flag
     m_vetoflag_max =     0;  //!< Maximum veto flag
     m_fpmtflag     =     0;  //!< D2 PMT failure flag
-    m_phase_curve.clear();
-    m_phases.clear();
+    m_orbital_phases.clear();
+    m_orbital_phase_curve.clear();
+    m_pulsar_phases.clear();
+    m_pulsar.clear();
     for (int i = 0; i < 7; ++i) {
         m_use_d1[i] = true;
     }
@@ -896,21 +936,23 @@ void GCOMSelection::init_members(void)
 void GCOMSelection::copy_members(const GCOMSelection& select)
 {
     // Copy members
-    m_e1_min       = select.m_e1_min;
-    m_e1_max       = select.m_e1_max;
-    m_e2_min       = select.m_e2_min;
-    m_e2_max       = select.m_e2_max;
-    m_tof_min      = select.m_tof_min;
-    m_tof_max      = select.m_tof_max;
-    m_psd_min      = select.m_psd_min;
-    m_psd_max      = select.m_psd_max;
-    m_reflag_min   = select.m_reflag_min;
-    m_reflag_max   = select.m_reflag_max;
-    m_vetoflag_min = select.m_vetoflag_min;
-    m_vetoflag_max = select.m_vetoflag_max;
-    m_fpmtflag     = select.m_fpmtflag;
-    m_phase_curve  = select.m_phase_curve;
-    m_phases       = select.m_phases;
+    m_e1_min              = select.m_e1_min;
+    m_e1_max              = select.m_e1_max;
+    m_e2_min              = select.m_e2_min;
+    m_e2_max              = select.m_e2_max;
+    m_tof_min             = select.m_tof_min;
+    m_tof_max             = select.m_tof_max;
+    m_psd_min             = select.m_psd_min;
+    m_psd_max             = select.m_psd_max;
+    m_reflag_min          = select.m_reflag_min;
+    m_reflag_max          = select.m_reflag_max;
+    m_vetoflag_min        = select.m_vetoflag_min;
+    m_vetoflag_max        = select.m_vetoflag_max;
+    m_fpmtflag            = select.m_fpmtflag;
+    m_orbital_phases      = select.m_orbital_phases;
+    m_pulsar_phases       = select.m_pulsar_phases;
+    m_orbital_phase_curve = select.m_orbital_phase_curve;
+    m_pulsar              = select.m_pulsar;
     for (int i = 0; i < 7; ++i) {
         m_use_d1[i] = select.m_use_d1[i];
     }

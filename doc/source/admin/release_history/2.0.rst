@@ -1,6 +1,6 @@
 .. _2.0:
 
-GammaLib 2.0 release (10 January 2022)
+GammaLib 2.0 release (14 January 2022)
 ======================================
 
 Overview
@@ -12,12 +12,14 @@ In particular, this release provides:
 
 * vectorised response computation
 * full support of all spatial models for COMPTEL
-* ...
+* support for pulsar analysis
 
 
 Bug fixes
 ---------
 
+* [`3973 <https://cta-redmine.irap.omp.eu/issues/3973>`_] -
+  Implement CGRO clock correction
 * Compute spectral model gradients for negative factor values
 * [`3563 <https://cta-redmine.irap.omp.eu/issues/3563>`_] -
   Fix incompatibility in ``GMatrixSparse::mix_column_prepare()`` method
@@ -96,8 +98,15 @@ Improvements
 New features
 ------------
 
+<<<<<<< HEAD
 * [`3924 <https://cta-redmine.irap.omp.eu/issues/3924>`_] -
   Add ``GModelSpatialRadialGeneralGauss`` and ``GModelSpatialEllipticalGeneralGauss`` classes
+=======
+* [`3973 <https://cta-redmine.irap.omp.eu/issues/3973>`_] -
+  Add ``GCOMBvc`` and ``GCOMBvcs`` classes to support COMPTEL pulsar analysis, revise
+  ``GCOMSelection`` interface to support both orbital and pulsar phase selection,
+  extend ``GCOMObservation`` interface to handle Solar System Barycentre Data
+>>>>>>> 3973-add-pulsar-analysis
 * [`3910 <https://cta-redmine.irap.omp.eu/issues/3910>`_] -
   Add ``GCOMModelDRM`` class
 * [`3606 <https://cta-redmine.irap.omp.eu/issues/3606>`_] -

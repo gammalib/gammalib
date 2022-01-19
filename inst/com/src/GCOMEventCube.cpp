@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCOMEventCube.cpp - COMPTEL event bin container class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -485,6 +485,11 @@ std::string GCOMEventCube::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("ToF correction"));
         result.append(gammalib::str(tofcor));
 
+        // Append pulsar phase correction
+        double phasecor = m_dri.phase_correction();
+        result.append("\n"+gammalib::parformat("Phase correction"));
+        result.append(gammalib::str(phasecor));
+        
         // EXPLICIT: Append DRI
         if (chatter >= EXPLICIT) {
             result.append("\n"+m_dri.print(chatter));

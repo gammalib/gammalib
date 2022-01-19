@@ -452,6 +452,9 @@ void GCOMOads::read(const GFitsTable& table)
             oad.zaxis(zaxis);
             oad.xaxis(xaxis);
 
+            // Set telescope position vector
+            oad.pos(GVector(ptr_posx->real(i), ptr_posy->real(i), ptr_posz->real(i)));
+
             // Compute apparent radius of Earth
             double radius = std::sqrt(ptr_posx->real(i) * ptr_posx->real(i) +
                                       ptr_posy->real(i) * ptr_posy->real(i) +

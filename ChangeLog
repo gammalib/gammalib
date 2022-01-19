@@ -1,8 +1,10 @@
-2022-01-10
+2022-01-14
 
         * Version 2.0.0 released
         ========================
 
+        Implement CGRO clock correction (#3973)
+        Add support for COMPTEL pulsar analysis (#3973)
         Add GCOMObservation::tim() and GCOMObservation::oads() setter methods
         Add GModelSpatialRadialGeneralGauss and 
           GModelSpatialEllipticalGeneralGauss classes (#3924)

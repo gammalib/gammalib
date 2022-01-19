@@ -484,7 +484,7 @@ const float& GCOMEventAtom::x_d2(void) const
 /***********************************************************************//**
  * @brief Set D2 module Y value
  *
- * @param[in] x_d2 D2 module Y value (mm).
+ * @param[in] y_d2 D2 module Y value (mm).
  *
  * Sets D2 module Y value.
  ***************************************************************************/

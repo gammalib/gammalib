@@ -2,7 +2,7 @@
 # ==========================================================================
 # GammaLib code generator
 #
-# Copyright (C) 2017-2021 Juergen Knoedlseder
+# Copyright (C) 2017-2022 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -260,6 +260,66 @@ def set_inst_tokens(name, instrument, author):
 
     # Return tokens
     return tokens
+
+
+# ================= #
+# Add generic class #
+# ================= #
+def add_generic_class(name, tokens, classname, tmpname=None):
+    """
+    Add generic class
+
+    Parameters
+    ----------
+    name : str
+        Module name
+    tokens : str
+        Tokens for replacement
+    classname : str
+        Class name
+    tmpname : str, optional
+        Template name
+    """
+    # Set destination file names
+    incfile = 'include/%s.hpp' % (classname)
+    srcfile = 'src/%s/%s.cpp'  % (name, classname)
+    pyfile  = 'pyext/%s.i'     % (classname)
+    
+    # Add files
+    add_file('src/template/%s.hpp' % tmpname, incfile, tokens)
+    add_file('src/template/%s.cpp' % tmpname, srcfile, tokens)
+    add_file('src/template/%s.i'   % tmpname, pyfile,  tokens)
+
+    # Update GammaLib header file
+    filename   = 'include/GammaLib.hpp'
+    with open(filename, 'a') as f:
+        f.write('#include "%s.hpp"\n' % classname)
+
+    # Update include Makefile.am
+    filename   = 'include/Makefile.am'
+    insertline = '                     %s.hpp ' % (classname)
+    for line in fileinput.FileInput(filename,inplace=1):
+        if 'pkginclude_HEADERS=' in line.replace(' ', ''):
+            last = line[-2]
+            line = line.replace(line, line+insertline+last+'\n')
+        print line,
+
+    # Update module Makefile.am (excluding GXXXObservation and GXXXResponse)
+    filename    = 'src/%s/Makefile.am' % (name)
+    insertline = '          %s.cpp '   % (classname)
+    for line in fileinput.FileInput(filename,inplace=1):
+        if 'sources=' in line.replace(' ', ''):
+            last = line[-2]
+            line = line.replace(line, line+insertline+last+'\n')
+        print line,
+
+    # Update Python module
+    filename = 'pyext/gammalib/%s.i' % (name)
+    with open(filename, 'a') as f:
+        f.write('%%include "%s.i"\n' % classname)
+
+    # Return
+    return
 
 
 # ======================= #
@@ -728,7 +788,8 @@ def generic_class_menu():
 
     # Otherwise we have a core module
     else:
-        print('Core modules not supported yet, sorry ;)')
+        name = dir[4:]
+        add_generic_class(name, tokens, classname, 'GTPLBase')
 
     # Return
     return
@@ -795,7 +856,10 @@ def container_class_menu():
 
     # Otherwise we have a core module
     else:
-        print('Core modules not supported yet, sorry ;)')
+        name = dir[4:]
+        if confirm('Do you want to add the base class "%s"?' % basename):
+            add_generic_class(name, base_tokens, basename, 'GTPLBase')
+        add_generic_class(name, tokens, classname, 'GTPLContainer')
 
     # Return
     return

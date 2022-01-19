@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GGti.cpp - Good time interval class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -455,6 +455,115 @@ void GGti::reduce(const GTime& tstart, const GTime& tstop)
     else {
         clear();
     }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Reduce Good Time Intervals to specified intervals
+ *
+ * @param[in] gti Good Time Intervals.
+ *
+ * Reduces the Good Time Intervals to the specified intervals. Reducing means
+ * that the resulting Good Time Intervals are the intersection between the
+ * initial Good Time Intervals and the specified Good Time Intervals.
+ *
+ * Specifically, all Good Time Intervals are dropped that do not overlap
+ * with one of the specified intervals, and overlapping intervals will be
+ * reduced to the overlapping time intervals, eventually splitting a Good
+ * Time Interval into several overlapping intervals.
+ ***************************************************************************/
+void GGti::reduce(const GGti& gti)
+{
+    // Determine maximum size of reduced Good Time Intervals. Continue only
+    // if the size if positive
+    int size = m_num + gti.m_num;
+    if (size > 0) {
+
+        // Initialise tstart and tstop vectors for resulting Good Time
+        // Intervals
+        std::vector<GTime> tstart_reduced;
+        std::vector<GTime> tstop_reduced;
+        tstart_reduced.reserve(size);
+        tstop_reduced.reserve(size);
+
+        // Loop over all GTIs and reduce them to the specified intervals
+        for (int i = 0; i < m_num; ++i) {
+
+            // Loop over all intervals to which the Good Time Intervals
+            // should be reduced
+            for (int k = 0; k < gti.size(); ++k) {
+
+                // If GTI starts after interval then skip
+                if (m_start[i] >= gti.m_stop[k]) {
+                    continue;
+                }
+
+                // ... otherwise if GTI stops before interval then skip
+                else if (m_stop[i] <= gti.m_start[k]) {
+                    continue;
+                }
+
+                // ... otherwise there is an overlap and we reduce the
+                // interval to the overlapping interval. If this results
+                // in a positive interval we append the interval to the
+                // vector of reduced start and stop times
+                else {
+                    GTime tstart = m_start[i];
+                    GTime tstop  = m_stop[i];
+                    if (tstart < gti.m_start[k]) {
+                        tstart = gti.m_start[k];
+                    }
+                    if (tstop > gti.m_stop[k]) {
+                        tstop = gti.m_stop[k];
+                    }
+                    if (tstop > tstart) {
+                        tstart_reduced.push_back(tstart);
+                        tstop_reduced.push_back(tstop);
+                    }
+                }
+
+            } // endfor: looped over intervals
+
+        } // endfor: looped over GTIs
+
+        // If there are reduced GTIs then allocate memory for them, set
+        // the start and stop times, and update the attributes
+        int num = tstart_reduced.size();
+        if (num > 0) {
+
+            // Allocate new intervals
+            GTime* start = new GTime[num];
+            GTime* stop  = new GTime[num];
+
+            // Set intervals
+            for (int i = 0; i < num; ++i) {
+                start[i] = tstart_reduced[i];
+                stop[i]  = tstop_reduced[i];
+            }
+
+            // Free old memory
+            if (m_start != NULL) delete [] m_start;
+            if (m_stop  != NULL) delete [] m_stop;
+
+            // Set new memory
+            m_start = start;
+            m_stop  = stop;
+
+            // Set attributes
+            m_num = num;
+            set_attributes();
+
+        } // endif: there were still valid GTIs
+
+        // ... otherwise we remove all GTIs
+        else {
+            clear();
+        }
+
+    } // endif: there were elements to be reduced
 
     // Return
     return;

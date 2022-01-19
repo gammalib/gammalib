@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       test_COM.cpp - test COM classes                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,17 +39,21 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string datadir   = std::getenv("TEST_COM_DATA");
-const std::string com_caldb = datadir + "/../../caldb";
-const std::string com_iaq   = "UNH(1.0-3.0)MeV";          // 1-3 MeV
-const std::string com_dre   = datadir+"/m50439_dre.fits"; // 1-3 MeV
-const std::string com_drb   = datadir+"/m34997_drg.fits";
-const std::string com_drg   = datadir+"/m34997_drg.fits";
-const std::string com_drx   = datadir+"/m32171_drx.fits";
-const std::string com_tim   = datadir+"/m10695_tim.fits";
-const std::string com_oad   = datadir+"/m20039_oad.fits";
-const std::string com_obs   = datadir+"/obs.xml";
-const std::string com_model = datadir+"/crab.xml";
+const std::string datadir              = std::getenv("TEST_COM_DATA");
+const std::string com_caldb            = datadir + "/../../caldb";
+const std::string com_iaq              = "UNH(1.0-3.0)MeV";          // 1-3 MeV
+const std::string com_dre              = datadir+"/m50439_dre.fits"; // 1-3 MeV
+const std::string com_drb              = datadir+"/m34997_drg.fits";
+const std::string com_drg              = datadir+"/m34997_drg.fits";
+const std::string com_drx              = datadir+"/m32171_drx.fits";
+const std::string com_evp              = datadir+"/m16992_tjd8393_evp.fits";
+const std::string com_tim              = datadir+"/m10695_tim.fits";
+const std::string com_oad              = datadir+"/m20039_oad.fits";
+const std::string com_bvc              = datadir+"/s10150_10000rows_bvc.fits";
+const std::string com_obs              = datadir+"/obs.xml";
+const std::string com_obs_unbinned     = datadir+"/obs_unbinned.xml";
+const std::string com_obs_unbinned_bvc = datadir+"/obs_unbinned_bvc.xml";
+const std::string com_model            = datadir+"/crab.xml";
 
 
 /***********************************************************************//**
@@ -69,6 +73,10 @@ void TestGCOM::set(void)
            "GCOMOad: Test COMPTEL Orbit Aspect Data");
     append(static_cast<pfunction>(&TestGCOM::test_oads_class),
            "GCOMOads: Test COMPTEL Orbit Aspect Data container");
+    append(static_cast<pfunction>(&TestGCOM::test_bvc_class),
+           "GCOMOad: Test COMPTEL Solar System Barycentre Data");
+    append(static_cast<pfunction>(&TestGCOM::test_bvcs_class),
+           "GCOMOads: Test COMPTEL Solar System Barycentre Data container");
     append(static_cast<pfunction>(&TestGCOM::test_inst_dir),
            "GCOMInstDir: Test instrument direction");
     append(static_cast<pfunction>(&TestGCOM::test_event_bin),
@@ -77,6 +85,8 @@ void TestGCOM::set(void)
            "GCOMEventCube: Test event cube");
     append(static_cast<pfunction>(&TestGCOM::test_response),
            "GCOMResponse: Test response");
+    append(static_cast<pfunction>(&TestGCOM::test_unbinned_obs),
+           "GCOMObservation: Test unbinned observation");
     append(static_cast<pfunction>(&TestGCOM::test_binned_obs),
            "GCOMObservation: Test binned observation");
     append(static_cast<pfunction>(&TestGCOM::test_binned_optimizer),
@@ -104,11 +114,14 @@ TestGCOM* TestGCOM::clone(void) const
  ***************************************************************************/
 void TestGCOM::test_com_time(void)
 {
-    // Verify time conversion given in COM-RP-UNH-DRG-037
+    // Verify time conversion given in COM-RP-UNH-DRG-037. The third time
+    // is after the CGRO clock correction.
     GTime time1(gammalib::com_time(8393, 0));
-    test_value(time1.utc(), "1991-05-17T00:00:00", "Test 8393:0");
+    test_value(time1.utc(), "1991-05-16T23:59:58", "Test 8393:0");
     GTime time2(gammalib::com_time(8406, 691199999));
-    test_value(time2.utc(), "1991-05-31T00:00:00", "Test 8406:691199999");
+    test_value(time2.utc(), "1991-05-30T23:59:58", "Test 8406:691199999");
+    GTime time3(gammalib::com_time(8798, 28800000));
+    test_value(time3.utc(), "1992-06-25T01:00:00", "Test 8798:28800000");
 
     // Verify back conversion
     int tjd1  = gammalib::com_tjd(time1);
@@ -119,6 +132,10 @@ void TestGCOM::test_com_time(void)
     int tics2 = gammalib::com_tics(time2);
     test_value(tjd2, 8406, "Test TJD 8406");
     test_value(tics2, 691199999, "Test tics 691199999");
+    int tjd3  = gammalib::com_tjd(time3);
+    int tics3 = gammalib::com_tics(time3);
+    test_value(tjd3, 8798, "Test TJD 8798");
+    test_value(tics3, 28800000, "Test tics 28800000");
 
     // Return
     return;
@@ -205,7 +222,7 @@ void TestGCOM::test_oad_class(void)
  ***************************************************************************/
 void TestGCOM::test_oads_class(void)
 {
-    // Read Orbit Aspect Data
+    // Load Orbit Aspect Data
     GCOMOads oads(com_oad);
 
     // Check Orbit Aspect Data content
@@ -234,6 +251,135 @@ void TestGCOM::test_oads_class(void)
                "Check OAD gcaz of row 2920");
     test_value(oads[2919].gcel(), 1.584999*gammalib::rad2deg, 1.0e-4,
                "Check OAD gecl of row 2920");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GCOMBvc class
+ ***************************************************************************/
+void TestGCOM::test_bvc_class(void)
+{
+    // Allocate GCOMBvc class
+    GCOMBvc bvc;
+
+    // Set reference time
+    GTime ref_time = gammalib::com_time(8392, 89536);
+
+    // Setup object
+    bvc.time(ref_time);
+    bvc.tjd(8392);
+    bvc.tics(89536);
+    bvc.ssb(GVector(-290168044.359253, -377463428.324136, -163691832.305569));
+    bvc.tdelta(58.1852344768768);
+
+    // Check object
+    test_value(bvc.time().secs(), ref_time.secs(), "Check time");
+    test_value(bvc.tjd(),    8392,                 "Check TJD");
+    test_value(bvc.tics(),   89536,                "Check tics");
+    test_value(bvc.ssb()[0], -290168044.359253,    "Check ssb[0]");
+    test_value(bvc.ssb()[1], -377463428.324136,    "Check ssb[1]");
+    test_value(bvc.ssb()[2], -163691832.305569,    "Check ssb[2]");
+    test_value(bvc.tdelta(), 58.1852344768768,     "Check tdelta");
+
+    // Set a couple of source positions
+    GSkyDir source_opposition;
+    GSkyDir source_conjunction;
+    GSkyDir source_north_pole;
+    GSkyDir source_south_pole;
+    source_opposition.radec_deg(-127.5506, -18.9737);
+    source_conjunction.radec_deg(52.4494, 18.9737);
+    source_north_pole.radec_deg(270.0, 66.560708);
+    source_south_pole.radec_deg(90.0, -66.560708);
+
+    // Check time difference between SSB and CGRO
+    test_value(bvc.tdelta(source_opposition),   561.64442501,
+               "Check tdelta for source opposition");
+    test_value(bvc.tdelta(source_conjunction), -445.27424982,
+               "Check tdelta for source conjunction");
+    test_value(bvc.tdelta(source_north_pole),    58.14725000,
+               "Check tdelta for North ecliptic pole");
+    test_value(bvc.tdelta(source_south_pole),    58.22321896,
+               "Check tdelta for South ecliptic pole");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GCOMBvcs class
+ ***************************************************************************/
+void TestGCOM::test_bvcs_class(void)
+{
+    // Load Solar System Barycentre Data
+    GCOMBvcs bvcs(com_bvc);
+
+    // Check Solar System Barycentre Data content
+    test_value(bvcs.size(), 10000, "Check that BVC contains 10000 rows");
+
+    // Set times of rows 1 and 2920
+    GTime ref_time1    = gammalib::com_time(8392, 89536);
+    GTime ref_time2920 = gammalib::com_time(8392, 382694208);
+
+    // Check row 1
+    test_value(bvcs[0].time().secs(), ref_time1.secs(), "Check time of row 1");
+    test_value(bvcs[0].tjd(),    8392,                  "Check TJD of row 1");
+    test_value(bvcs[0].tics(),   89536,                 "Check tics of row 1");
+    test_value(bvcs[0].ssb()[0], -290168044.359253,     "Check SSB_X of row 1");
+    test_value(bvcs[0].ssb()[1], -377463428.324136,     "Check SSB_Y of row 1");
+    test_value(bvcs[0].ssb()[2], -163691832.305560,     "Check SSB_Z of row 1");
+    test_value(bvcs[0].tdelta(), 58.1852344768768,      "Check TDELTA of row 1");
+
+    // Check row 2920
+    test_value(bvcs[2919].time().secs(), ref_time2920.secs(), "Check time of row 2920");
+    test_value(bvcs[2919].tjd(),    8392,                     "Check TJD of row 2920");
+    test_value(bvcs[2919].tics(),   382694208,                "Check tics of row 2920");
+    test_value(bvcs[2919].ssb()[0], -286386110.986554,        "Check SSB_X of row 2920");
+    test_value(bvcs[2919].ssb()[1], -379991804.402643,        "Check SSB_Y of row 2920");
+    test_value(bvcs[2919].ssb()[2], -164801378.92117,         "Check SSB_Z of row 2920");
+    test_value(bvcs[2919].tdelta(), 58.185224181893,          "Check TDELTA of row 2920");
+
+    // Load Orbit Aspect Data
+    GCOMOads oads(com_oad);
+
+    // Find best Solar System Barycentre Data for Orbit Aspect Data row 1
+    const GCOMBvc* bvc1 = bvcs.find(oads[0]);
+    test_assert((bvc1 != NULL), "Check that find method returns valid data for OAD row 1");
+    if (bvc1 != NULL) {
+        test_value(bvc1->tjd(),  oads[0].tjd(),        "Check TJD of SSB for OAD row 1");
+        test_value(bvc1->tics(), oads[0].tics()+65536, "Check tics of SSB for OAD row 1");
+    }
+
+    // Find best Solar System Barycentre Data for Orbit Aspect Data row 2750
+    const GCOMBvc* bvc2750 = bvcs.find(oads[2749]);
+    test_assert((bvc2750 != NULL), "Check that find method returns valid data for OAD row 2750");
+    if (bvc2750 != NULL) {
+        test_value(bvc2750->tjd(),  oads[2749].tjd(),        "Check TJD of SSB for OAD row 2750");
+        test_value(bvc2750->tics(), oads[2749].tics()+65536, "Check tics of SSB for OAD row 2750");
+    }
+
+    // Set a couple of source positions
+    GSkyDir source_opposition;
+    GSkyDir source_conjunction;
+    GSkyDir source_north_pole;
+    GSkyDir source_south_pole;
+    source_opposition.radec_deg(-127.5506, -18.9737);
+    source_conjunction.radec_deg(52.4494, 18.9737);
+    source_north_pole.radec_deg(270.0, 66.560708);
+    source_south_pole.radec_deg(90.0, -66.560708);
+
+    // Check time difference between SSB and CGRO
+    test_value(bvcs.tdelta(source_opposition, ref_time1),   561.64442501,
+               "Check tdelta for source opposition");
+    test_value(bvcs.tdelta(source_conjunction, ref_time1), -445.27424982,
+               "Check tdelta for source conjunction");
+    test_value(bvcs.tdelta(source_north_pole, ref_time1),    58.14725000,
+               "Check tdelta for North ecliptic pole");
+    test_value(bvcs.tdelta(source_south_pole, ref_time1),    58.22321896,
+               "Check tdelta for South ecliptic pole");
 
     // Return
     return;
@@ -350,7 +496,59 @@ void TestGCOM::test_response(void)
 
 
 /***********************************************************************//**
- * @brief Checks handling of binned observations
+ * @brief Checks handling of unbinned observation
+ ***************************************************************************/
+void TestGCOM::test_unbinned_obs(void)
+{
+    // Set OADs vector
+    std::vector<GFilename> oads;
+    oads.push_back(com_oad);
+
+    // Test filename constructor without BVC
+    GCOMObservation obs1(com_evp, com_tim, oads);
+    test_assert(obs1.is_unbinned(), "Test if observation is unbinned");
+    test_assert(!obs1.is_binned(), "Test if observation is not binned");
+    test_value(obs1.events()->number(), 81063, "Test number of events");
+    test_value(obs1.tim().gti().size(), 194, "Test size of TIM");
+    test_value(obs1.oads().size(), 5273, "Test size of OADs");
+    test_value(obs1.bvcs().size(), 0, "Test size of BVC");
+
+    // Test filename constructor with BVC
+    GCOMObservation obs2(com_evp, com_tim, oads, com_bvc);
+    test_assert(obs2.is_unbinned(), "Test if observation is unbinned");
+    test_assert(!obs2.is_binned(), "Test if observation is not binned");
+    test_value(obs2.events()->number(), 81063, "Test number of events");
+    test_value(obs2.tim().gti().size(), 194, "Test size of TIM");
+    test_value(obs2.oads().size(), 5273, "Test size of OADs");
+    test_value(obs2.bvcs().size(), 10000, "Test size of BVC");
+
+    // Test XML constructor without BVC dataset
+    GObservations    obss3(com_obs_unbinned);
+    GCOMObservation* obs3 = static_cast<GCOMObservation*>(obss3[0]);
+    test_assert(obs3->is_unbinned(), "Test if observation is unbinned");
+    test_assert(!obs3->is_binned(), "Test if observation is not binned");
+    test_value(obs3->events()->number(), 81063, "Test number of events");
+    test_value(obs3->tim().gti().size(), 194, "Test size of TIM");
+    test_value(obs3->oads().size(), 10545, "Test size of OADs");
+    test_value(obs3->bvcs().size(), 0, "Test size of BVC");
+
+    // Test XML constructor with BVC dataset
+    GObservations    obss4(com_obs_unbinned_bvc);
+    GCOMObservation* obs4 = static_cast<GCOMObservation*>(obss4[0]);
+    test_assert(obs4->is_unbinned(), "Test if observation is unbinned");
+    test_assert(!obs4->is_binned(), "Test if observation is not binned");
+    test_value(obs4->events()->number(), 81063, "Test number of events");
+    test_value(obs4->tim().gti().size(), 194, "Test size of TIM");
+    test_value(obs4->oads().size(), 10545, "Test size of OADs");
+    test_value(obs4->bvcs().size(), 10000, "Test size of BVC");
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Checks handling of binned observation
  *
  * This function checks the handling of binned observations. Binned
  * observations are defined by

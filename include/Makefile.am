@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for include module                                            #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016-2021 Juergen Knoedlseder                               #
+# Copyright (C) 2016-2022 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -21,6 +21,7 @@
 
 # Define package included headers (to be installed)
 pkginclude_HEADERS = GammaLib.hpp \
+                     GEphemerides.hpp \
                      GTypemaps.hpp \
                      GBase.hpp \
                      GContainer.hpp \
@@ -157,6 +158,8 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GPhotons.hpp \
                      GPhoton.hpp \
                      GSource.hpp \
+                     GPulsar.hpp \
+                     GPulsarEphemeris.hpp \
                      GModelPar.hpp \
                      GModelAssociation.hpp \
                      GModelAssociations.hpp \
