@@ -28,6 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <cstdio>            // std::fopen, std::fgets, std::fclose, etc...
 #include "GPulsar.hpp"
 #include "GFits.hpp"
 #include "GGti.hpp"
