@@ -28,6 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <cstdlib>                 // std::getenv
 #include "testinst/GTestLib.hpp"
 #include "test_GObservation.hpp"
 
