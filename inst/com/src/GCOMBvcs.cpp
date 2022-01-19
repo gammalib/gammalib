@@ -28,6 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <cstdlib>          // for std::abs(int)
 #include "GException.hpp"
 #include "GMath.hpp"
 #include "GFits.hpp"
