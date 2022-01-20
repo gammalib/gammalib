@@ -93,6 +93,7 @@ int gammalib::com_tjd(const GTime& time)
     // Set MJD in UTC of clock correction
     const double mjd_of_clockcor = 48798.04166666666424134746;
     const double clockcor_days   = 2.042144 * gammalib::sec2day;
+    const int    tics_in_day     = 691200000;
 
     // Compute MJD, applying the CGRO clock correction before 8798:28800000
     // (1992-06-25T01:00:00)
@@ -102,7 +103,17 @@ int gammalib::com_tjd(const GTime& time)
     }
 
     // Compute TJD
-    int tjd = int(mjd - 40000.0);
+    int tjd  = int(mjd - 40000.0);
+
+    // Compute number of tics, rounding to nearest int
+    int tics = int((mjd - double(int(mjd))) * tics_in_day + 0.5);
+
+    // If number of tics exceeds number of tics in one day then decrement
+    // number of tics and increment TJD
+    while (tics > tics_in_day) {
+        tjd  += 1;
+        tics -= tics_in_day;
+    }
 
     // Return TJD
     return tjd;
@@ -126,9 +137,7 @@ int gammalib::com_tics(const GTime& time)
     // Set MJD in UTC of clock correction
     const double mjd_of_clockcor = 48798.04166666666424134746;
     const double clockcor_days   = 2.042144 * gammalib::sec2day;
-
-    // Set number of tics in one day
-    const double tics_in_day = 8000.0 * gammalib::sec_in_day;
+    const int    tics_in_day     = 691200000;
 
     // Compute MJD, applying the CGRO clock correction before 8798:28800000
     // (1992-06-25T01:00:00)
@@ -139,6 +148,12 @@ int gammalib::com_tics(const GTime& time)
 
     // Compute number of tics, rounding to nearest int
     int tics = int((mjd - double(int(mjd))) * tics_in_day + 0.5);
+
+    // If number of tics exceeds number of tics in one day then decrement
+    // number of tics
+    while (tics > tics_in_day) {
+        tics -= tics_in_day;
+    }
 
     // Return tics
     return tics;
