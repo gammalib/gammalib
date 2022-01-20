@@ -141,7 +141,7 @@ int gammalib::com_tics(const GTime& time)
 
     // If number of tics exceeds number of tics in one day then decrement
     // number of tics
-    while (tics > tics_in_day) {
+    while (tics >= tics_in_day) {
         tics -= tics_in_day;
     }
 
