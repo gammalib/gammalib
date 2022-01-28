@@ -94,11 +94,40 @@ caldb_irfs = caldb/data/cgro/comptel/bcf/module_status.fits.gz \
              caldb/data/cgro/comptel/bcf/m10371_sda.fits.gz \
              caldb/data/cgro/comptel/bcf/m10564_sdb.fits.gz \
              caldb/data/cgro/comptel/bcf/r00004_ict.fits.gz \
+             caldb/data/cgro/comptel/bcf/u09517_iaq.fits.gz \
              caldb/data/cgro/comptel/bcf/u47512_iaq.fits.gz \
              caldb/data/cgro/comptel/bcf/u47569_iaq.fits.gz \
              caldb/data/cgro/comptel/bcf/u47741_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/u47857_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/u47979_iaq.fits.gz \
              caldb/data/cgro/comptel/bcf/u48091_iaq.fits.gz \
-             caldb/data/cgro/comptel/bcf/u09517_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/u48173_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/u48174_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/u48175_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/u48176_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/u48177_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/u48178_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/u48179_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/u48180_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/u48181_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/u48182_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/u48183_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/u48184_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/u48185_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/u48186_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/u48187_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/u48188_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/u48189_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/u48190_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/u48191_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/u48192_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/u48193_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/u48194_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/u48195_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/u48196_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/u48197_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/u48198_iaq.fits.gz \
+             caldb/data/cgro/comptel/bcf/u48199_iaq.fits.gz \
              caldb/data/cgro/comptel/bcf/m16845_iaq.fits.gz \
              caldb/data/cgro/comptel/bcf/plaw2_0.75-1MeV_iaq.fits.gz \
              caldb/data/cgro/comptel/bcf/plaw2_1-3MeV_iaq.fits.gz \
