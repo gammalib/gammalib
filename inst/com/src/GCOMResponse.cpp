@@ -827,6 +827,7 @@ void GCOMResponse::free_members(void)
  *            Event is not a COMPTEL event bin.
  * @exception GException::invalid_value
  *            Response not initialised with a valid IAQ
+ *            Incompatible IAQ encountered
  *
  * Returns the instrument response to a point source for all events in the
  * observations.
@@ -877,6 +878,15 @@ GVector GCOMResponse::irf_ptsrc(const GModelSky&    model,
     int npix    = cube->naxis(0) * cube->naxis(1);
     int nphibar = cube->naxis(2);
     int nevents = cube->size();
+
+    // Throw an exception if the number of Phibar bins does not match the
+    // response
+    if (nphibar != m_phibar_bins) {
+        std::string msg = "DRE has "+gammalib::str(nphibar)+" Phibar layers "
+                          "but IAQ has "+gammalib::str(m_phibar_bins)+" Phibar "
+                          "bins. Please specify a compatible IAQ.";
+        throw GException::invalid_value(G_IRF_PTSRC, msg);
+    }
 
     // Initialise result
     GVector irfs(nevents);
@@ -984,6 +994,13 @@ GVector GCOMResponse::irf_ptsrc(const GModelSky&    model,
  * @return Instrument response to radial source  for all events in
  *         observation (\f$cm^2\f$).
  *
+ * @exception GException::invalid_argument
+ *            Observation is not a COMPTEL observation.
+ *            Event is not a COMPTEL event bin.
+ * @exception GException::invalid_value
+ *            Response not initialised with a valid IAQ
+ *            Incompatible IAQ encountered
+ *
  * Returns the instrument response to a radial source for all events in
  * the observations. See GCOMResponse::irf_extended for more information.
  ***************************************************************************/
@@ -1041,6 +1058,15 @@ GVector GCOMResponse::irf_radial(const GModelSky&    model,
     int npix    = cube->naxis(0) * cube->naxis(1);
     int nphibar = cube->naxis(2);
     int nevents = cube->size();
+
+    // Throw an exception if the number of Phibar bins does not match the
+    // response
+    if (nphibar != m_phibar_bins) {
+        std::string msg = "DRE has "+gammalib::str(nphibar)+" Phibar layers "
+                          "but IAQ has "+gammalib::str(m_phibar_bins)+" Phibar "
+                          "bins. Please specify a compatible IAQ.";
+        throw GException::invalid_value(G_IRF_RADIAL, msg);
+    }
 
     // Initialise result
     GVector irfs(nevents);
@@ -1139,6 +1165,13 @@ GVector GCOMResponse::irf_radial(const GModelSky&    model,
  * @return Instrument response to elliptical source for all events in
  *         observation (\f$cm^2\f$).
  *
+ * @exception GException::invalid_argument
+ *            Observation is not a COMPTEL observation.
+ *            Event is not a COMPTEL event bin.
+ * @exception GException::invalid_value
+ *            Response not initialised with a valid IAQ
+ *            Incompatible IAQ encountered
+ *
  * Returns the instrument response to an elliptical source for all events in
  * the observations. See GCOMResponse::irf_extended for more information.
  ***************************************************************************/
@@ -1194,6 +1227,15 @@ GVector GCOMResponse::irf_elliptical(const GModelSky&    model,
     int npix    = cube->naxis(0) * cube->naxis(1);
     int nphibar = cube->naxis(2);
     int nevents = cube->size();
+
+    // Throw an exception if the number of Phibar bins does not match the
+    // response
+    if (nphibar != m_phibar_bins) {
+        std::string msg = "DRE has "+gammalib::str(nphibar)+" Phibar layers "
+                          "but IAQ has "+gammalib::str(m_phibar_bins)+" Phibar "
+                          "bins. Please specify a compatible IAQ.";
+        throw GException::invalid_value(G_IRF_ELLIPTICAL, msg);
+    }
 
     // Initialise result
     GVector irfs(nevents);
@@ -1296,6 +1338,7 @@ GVector GCOMResponse::irf_elliptical(const GModelSky&    model,
  *            Observation is not a COMPTEL observation.
  * @exception GException::invalid_value
  *            Response not initialised with a valid IAQ
+ *            Incompatible IAQ encountered
  *
  * Returns the instrument response to a diffuse source for all events in
  * the observations. The diffuse source may be energy dependent.
@@ -1353,6 +1396,15 @@ GVector GCOMResponse::irf_diffuse(const GModelSky&    model,
     int npix    = cube->naxis(0) * cube->naxis(1);
     int nphibar = cube->naxis(2);
     int nevents = cube->size();
+
+    // Throw an exception if the number of Phibar bins does not match the
+    // response
+    if (nphibar != m_phibar_bins) {
+        std::string msg = "DRE has "+gammalib::str(nphibar)+" Phibar layers "
+                          "but IAQ has "+gammalib::str(m_phibar_bins)+" Phibar "
+                          "bins. Please specify a compatible IAQ.";
+        throw GException::invalid_value(G_IRF_DIFFUSE, msg);
+    }
 
     // Initialise result
     GVector irfs(nevents);
