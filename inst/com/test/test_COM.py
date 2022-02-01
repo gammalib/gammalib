@@ -156,7 +156,7 @@ class Test(gammalib.GPythonTestSuite):
         test_support.pickeling(self, gammalib.GCOMBvc(bvc))
         test_support.pickeling(self, gammalib.GCOMBvcs(bvcs))
         test_support.pickeling(self, gammalib.GCOMObservation(obs[0]))
-        test_support.pickeling(self, gammalib.GCOMResponse(caldb, 'UNH(1.0-3.0)MeV'))
+        test_support.pickeling(self, gammalib.GCOMResponse(caldb, 'SIM2(1.00-3.00)MeV(2)deg'))
         test_support.pickeling(self, gammalib.GCOMRoi(instdir, 10.0, 1.0, 5.0))
         #test_support.pickeling(self, gammalib.GCOMSelection())
         #test_support.pickeling(self, gammalib.GCOMStatus())
