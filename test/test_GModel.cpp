@@ -1210,9 +1210,19 @@ void TestGModel::test_radial_disk(void)
     GSkyDir dir1;
     dir1.radec_deg(83.6331, +22.0145);
     GModelSpatialRadialDisk model2(dir1, 3.0);
-    test_value(model2.ra(), 83.6331);
-    test_value(model2.dec(), 22.0145);
-    test_value(model2.radius(), 3.0);
+    test_value(model2.dir().ra_deg(),  83.6331,   "Test Right Ascension for celestial sky direction constructor");
+    test_value(model2.dir().dec_deg(), 22.0145,   "Test Declination for celestial sky direction constructor");
+    test_value(model2.dir().l_deg(),  184.557460, "Test Galactic longitude for celestial sky direction constructor");
+    test_value(model2.dir().b_deg(),   -5.784346, "Test Galactic latitude for celestial sky direction constructor");
+    test_value(model2.radius(), 3.0,              "Test radius for celestial sky direction constructor");
+
+    // Test Galactic sky direction constructor
+    GModelSpatialRadialDisk model2g(dir1, 3.0, "GAL");
+    test_value(model2g.dir().ra_deg(),   83.6331,   "Test Right Ascension for Galactic sky direction constructor");
+    test_value(model2g.dir().dec_deg(), +22.0145,   "Test Declination for Galactic sky direction constructor");
+    test_value(model2g.dir().l_deg(),   184.557460, "Test Galactic longitude for Galactic sky direction constructor");
+    test_value(model2g.dir().b_deg(),    -5.784346, "Test Galactic latitude for Galactic sky direction constructor");
+    test_value(model2g.radius(), 3.0,               "Test radius for Galactic sky direction constructor");
 
     // Test XML constructor
     GXml         xml(m_xml_model_radial_disk);
@@ -1220,17 +1230,9 @@ void TestGModel::test_radial_disk(void)
     GModelSpatialRadialDisk model3(*element);
     test_value(model3.size(), 3);
     test_value(model3.type(), "RadialDisk");
-    test_value(model3.ra(), 83.6331);
-    test_value(model3.dec(), 22.0145);
+    test_value(model3.dir().ra_deg(),  83.6331, "Test Right Ascension for celestial XML constructor");
+    test_value(model3.dir().dec_deg(), 22.0145, "Test Declination for celestial XML constructor");
     test_value(model3.radius(), 0.45);
-
-    // Test ra method
-    model3.ra(100.0);
-    test_value(model3.ra(), 100.0);
-
-    // Test dec method
-    model3.dec(10.0);
-    test_value(model3.dec(), 10.0);
 
     // Test dir method
     GSkyDir dir2;
@@ -1278,11 +1280,22 @@ void TestGModel::test_radial_ring(void)
     // Test value constructor
     GSkyDir dir1;
     dir1.radec_deg(83.6331, +22.0145);
-    GModelSpatialRadialRing model2(dir1, 3.0,1.0);
-    test_value(model2.ra(), 83.6331);
-    test_value(model2.dec(), 22.0145);
-    test_value(model2.radius(), 3.0);
-    test_value(model2.width(), 1.0);
+    GModelSpatialRadialRing model2(dir1, 3.0, 1.0);
+    test_value(model2.dir().ra_deg(),  83.6331,   "Test Right Ascension for celestial sky direction constructor");
+    test_value(model2.dir().dec_deg(), 22.0145,   "Test Declination for celestial sky direction constructor");
+    test_value(model2.dir().l_deg(),  184.557460, "Test Galactic longitude for celestial sky direction constructor");
+    test_value(model2.dir().b_deg(),   -5.784346, "Test Galactic latitude for celestial sky direction constructor");
+    test_value(model2.radius(), 3.0,              "Test radius for celestial sky direction constructor");
+    test_value(model2.width(),  1.0,              "Test width for celestial sky direction constructor");
+
+    // Test Galactic sky direction constructor
+    GModelSpatialRadialRing model2g(dir1, 3.0, 1.0, "GAL");
+    test_value(model2g.dir().ra_deg(),   83.6331,   "Test Right Ascension for Galactic sky direction constructor");
+    test_value(model2g.dir().dec_deg(), +22.0145,   "Test Declination for Galactic sky direction constructor");
+    test_value(model2g.dir().l_deg(),   184.557460, "Test Galactic longitude for Galactic sky direction constructor");
+    test_value(model2g.dir().b_deg(),    -5.784346, "Test Galactic latitude for Galactic sky direction constructor");
+    test_value(model2g.radius(), 3.0,               "Test radius for Galactic sky direction constructor");
+    test_value(model2g.width(),  1.0,               "Test width for Galactic sky direction constructor");
 
     // Test XML constructor
     GXml         xml(m_xml_model_radial_ring);
@@ -1290,18 +1303,10 @@ void TestGModel::test_radial_ring(void)
     GModelSpatialRadialRing model3(*element);
     test_value(model3.size(), 4);
     test_value(model3.type(), "RadialRing");
-    test_value(model3.ra(), 83.6331);
-    test_value(model3.dec(), 22.0145);
+    test_value(model3.dir().ra_deg(),  83.6331,   "Test Right Ascension for celestial XML constructor");
+    test_value(model3.dir().dec_deg(), 22.0145,   "Test Declination for celestial XML constructor");
     test_value(model3.radius(), 0.45);
     test_value(model3.width(), 0.15);
-
-    // Test ra method
-    model3.ra(100.0);
-    test_value(model3.ra(), 100.0);
-
-    // Test dec method
-    model3.dec(10.0);
-    test_value(model3.dec(), 10.0);
 
     // Test dir method
     GSkyDir dir2;
@@ -1361,9 +1366,19 @@ void TestGModel::test_radial_gauss(void)
     GSkyDir dir1;
     dir1.radec_deg(83.6331, +22.0145);
     GModelSpatialRadialGauss model2(dir1, 3.0);
-    test_value(model2.ra(), 83.6331);
-    test_value(model2.dec(), 22.0145);
-    test_value(model2.sigma(), 3.0);
+    test_value(model2.dir().ra_deg(),  83.6331,   "Test Right Ascension for celestial sky direction constructor");
+    test_value(model2.dir().dec_deg(), 22.0145,   "Test Declination for celestial sky direction constructor");
+    test_value(model2.dir().l_deg(),  184.557460, "Test Galactic longitude for celestial sky direction constructor");
+    test_value(model2.dir().b_deg(),   -5.784346, "Test Galactic latitude for celestial sky direction constructor");
+    test_value(model2.sigma(), 3.0,               "Test sigma for celestial sky direction constructor");
+
+    // Test Galactic sky direction constructor
+    GModelSpatialRadialGauss model2g(dir1, 3.0, "GAL");
+    test_value(model2g.dir().ra_deg(),   83.6331,   "Test Right Ascension for Galactic sky direction constructor");
+    test_value(model2g.dir().dec_deg(), +22.0145,   "Test Declination for Galactic sky direction constructor");
+    test_value(model2g.dir().l_deg(),   184.557460, "Test Galactic longitude for Galactic sky direction constructor");
+    test_value(model2g.dir().b_deg(),    -5.784346, "Test Galactic latitude for Galactic sky direction constructor");
+    test_value(model2g.sigma(), 3.0,                "Test sigma for Galactic sky direction constructor");
 
     // Test XML constructor
     GXml         xml(m_xml_model_radial_gauss);
@@ -1371,17 +1386,9 @@ void TestGModel::test_radial_gauss(void)
     GModelSpatialRadialGauss model3(*element);
     test_value(model3.size(), 3);
     test_value(model3.type(), "RadialGaussian");
-    test_value(model3.ra(), 83.6331);
-    test_value(model3.dec(), 22.0145);
+    test_value(model3.dir().ra_deg(),  83.6331,   "Test Right Ascension for celestial XML constructor");
+    test_value(model3.dir().dec_deg(), 22.0145,   "Test Declination for celestial XML constructor");
     test_value(model3.sigma(), 0.20);
-
-    // Test ra method
-    model3.ra(100.0);
-    test_value(model3.ra(), 100.0);
-
-    // Test dec method
-    model3.dec(10.0);
-    test_value(model3.dec(), 10.0);
 
     // Test dir method
     GSkyDir dir2;
@@ -1429,10 +1436,21 @@ void TestGModel::test_radial_general_gauss(void)
     GSkyDir dir1;
     dir1.radec_deg(83.6331, +22.0145);
     GModelSpatialRadialGeneralGauss model2(dir1, 3.0, 0.5);
-    test_value(model2.ra(), 83.6331);
-    test_value(model2.dec(), 22.0145);
-    test_value(model2.radius(), 3.0);
-    test_value(model2.ridx(), 0.5);
+    test_value(model2.dir().ra_deg(),  83.6331,   "Test Right Ascension for celestial sky direction constructor");
+    test_value(model2.dir().dec_deg(), 22.0145,   "Test Declination for celestial sky direction constructor");
+    test_value(model2.dir().l_deg(),  184.557460, "Test Galactic longitude for celestial sky direction constructor");
+    test_value(model2.dir().b_deg(),   -5.784346, "Test Galactic latitude for celestial sky direction constructor");
+    test_value(model2.radius(), 3.0,              "Test radius for celestial sky direction constructor");
+    test_value(model2.ridx(),   0.5,              "Test radial index for celestial sky direction constructor");
+
+    // Test Galactic sky direction constructor
+    GModelSpatialRadialGeneralGauss model2g(dir1, 3.0, 0.5, "GAL");
+    test_value(model2g.dir().ra_deg(),   83.6331,   "Test Right Ascension for Galactic sky direction constructor");
+    test_value(model2g.dir().dec_deg(), +22.0145,   "Test Declination for Galactic sky direction constructor");
+    test_value(model2g.dir().l_deg(),   184.557460, "Test Galactic longitude for Galactic sky direction constructor");
+    test_value(model2g.dir().b_deg(),    -5.784346, "Test Galactic latitude for Galactic sky direction constructor");
+    test_value(model2g.radius(), 3.0,               "Test radius for Galactic sky direction constructor");
+    test_value(model2g.ridx(),   0.5,               "Test radial index for Galactic sky direction constructor");
 
     // Test XML constructor
     GXml         xml(m_xml_model_radial_general_gauss);
@@ -1440,18 +1458,10 @@ void TestGModel::test_radial_general_gauss(void)
     GModelSpatialRadialGeneralGauss model3(*element);
     test_value(model3.size(), 4);
     test_value(model3.type(), "RadialGeneralGaussian");
-    test_value(model3.ra(), 83.6331);
-    test_value(model3.dec(), 22.0145);
+    test_value(model3.dir().ra_deg(),  83.6331,   "Test Right Ascension for celestial XML constructor");
+    test_value(model3.dir().dec_deg(), 22.0145,   "Test Declination for celestial XML constructor");
     test_value(model3.radius(), 0.20);
     test_value(model3.ridx(), 0.3);
-
-    // Test ra method
-    model3.ra(100.0);
-    test_value(model3.ra(), 100.0);
-
-    // Test dec method
-    model3.dec(10.0);
-    test_value(model3.dec(), 10.0);
 
     // Test dir method
     GSkyDir dir2;
@@ -1504,10 +1514,21 @@ void TestGModel::test_radial_shell(void)
     GSkyDir dir1;
     dir1.radec_deg(83.6331, +22.0145);
     GModelSpatialRadialShell model2(dir1, 3.0, 1.0);
-    test_value(model2.ra(), 83.6331);
-    test_value(model2.dec(), 22.0145);
-    test_value(model2.radius(), 3.0);
-    test_value(model2.width(), 1.0);
+    test_value(model2.dir().ra_deg(),  83.6331,   "Test Right Ascension for celestial sky direction constructor");
+    test_value(model2.dir().dec_deg(), 22.0145,   "Test Declination for celestial sky direction constructor");
+    test_value(model2.dir().l_deg(),  184.557460, "Test Galactic longitude for celestial sky direction constructor");
+    test_value(model2.dir().b_deg(),   -5.784346, "Test Galactic latitude for celestial sky direction constructor");
+    test_value(model2.radius(), 3.0,              "Test radius for celestial sky direction constructor");
+    test_value(model2.width(),  1.0,              "Test width for celestial sky direction constructor");
+
+    // Test Galactic sky direction constructor
+    GModelSpatialRadialShell model2g(dir1, 3.0, 1.0, "GAL");
+    test_value(model2g.dir().ra_deg(),   83.6331,   "Test Right Ascension for Galactic sky direction constructor");
+    test_value(model2g.dir().dec_deg(), +22.0145,   "Test Declination for Galactic sky direction constructor");
+    test_value(model2g.dir().l_deg(),   184.557460, "Test Galactic longitude for Galactic sky direction constructor");
+    test_value(model2g.dir().b_deg(),    -5.784346, "Test Galactic latitude for Galactic sky direction constructor");
+    test_value(model2g.radius(), 3.0,               "Test radius for Galactic sky direction constructor");
+    test_value(model2g.width(),  1.0,               "Test width for Galactic sky direction constructor");
 
     // Test XML constructor
     GXml         xml(m_xml_model_radial_shell);
@@ -1515,18 +1536,10 @@ void TestGModel::test_radial_shell(void)
     GModelSpatialRadialShell model3(*element);
     test_value(model3.size(), 4);
     test_value(model3.type(), "RadialShell");
-    test_value(model3.ra(), 83.6331);
-    test_value(model3.dec(), 22.0145);
+    test_value(model3.dir().ra_deg(),  83.6331,   "Test Right Ascension for celestial XML constructor");
+    test_value(model3.dir().dec_deg(), 22.0145,   "Test Declination for celestial XML constructor");
     test_value(model3.radius(), 0.30);
     test_value(model3.width(), 0.10);
-
-    // Test ra method
-    model3.ra(100.0);
-    test_value(model3.ra(), 100.0);
-
-    // Test dec method
-    model3.dec(10.0);
-    test_value(model3.dec(), 10.0);
 
     // Test dir method
     GSkyDir dir2;
@@ -1581,8 +1594,8 @@ void TestGModel::test_profile_dmburkert(void)
     GModelSpatialRadialProfileDMBurkert model3(*element);
     test_value(model3.size(),          8);
     test_value(model3.type(),          "DMBurkertProfile");
-    test_value(model3.ra(),            83.6331);
-    test_value(model3.dec(),           22.0145);
+    test_value(model3.dir().ra_deg(),  83.6331,   "Test Right Ascension for celestial XML constructor");
+    test_value(model3.dir().dec_deg(), 22.0145,   "Test Declination for celestial XML constructor");
     test_value(model3.scale_radius(),  21.5);
     test_value(model3.scale_density(), 0.2);
     test_value(model3.halo_distance(), 7.94);
@@ -1607,8 +1620,8 @@ void TestGModel::test_profile_dmeinasto(void)
     GModelSpatialRadialProfileDMEinasto model3(*element);
     test_value(model3.size(),          9);
     test_value(model3.type(),          "DMEinastoProfile");
-    test_value(model3.ra(),            83.6331);
-    test_value(model3.dec(),           22.0145);
+    test_value(model3.dir().ra_deg(),  83.6331,   "Test Right Ascension for celestial XML constructor");
+    test_value(model3.dir().dec_deg(), 22.0145,   "Test Declination for celestial XML constructor");
     test_value(model3.scale_radius(),  21.5);
     test_value(model3.scale_density(), 0.2);
     test_value(model3.halo_distance(), 7.94);
@@ -1634,8 +1647,8 @@ void TestGModel::test_profile_dmzhao(void)
     GModelSpatialRadialProfileDMZhao model3(*element);
     test_value(model3.size(),          11);
     test_value(model3.type(),          "DMZhaoProfile");
-    test_value(model3.ra(),            83.6331);
-    test_value(model3.dec(),           22.0145);
+    test_value(model3.dir().ra_deg(),  83.6331,   "Test Right Ascension for celestial XML constructor");
+    test_value(model3.dir().dec_deg(), 22.0145,   "Test Declination for celestial XML constructor");
     test_value(model3.scale_radius(),  21.5);
     test_value(model3.scale_density(), 0.2);
     test_value(model3.halo_distance(), 7.94);
@@ -1661,8 +1674,10 @@ void TestGModel::test_elliptical_disk(void)
     GSkyDir dir1;
     dir1.radec_deg(83.6331, +22.0145);
     GModelSpatialEllipticalDisk model2(dir1, 3.0, 2.0, 45.0);
-    test_value(model2.ra(), 83.6331);
-    test_value(model2.dec(), 22.0145);
+    test_value(model2.dir().ra_deg(),  83.6331,   "Test Right Ascension for celestial sky direction constructor");
+    test_value(model2.dir().dec_deg(), 22.0145,   "Test Declination for celestial sky direction constructor");
+    test_value(model2.dir().l_deg(),  184.557460, "Test Galactic longitude for celestial sky direction constructor");
+    test_value(model2.dir().b_deg(),   -5.784346, "Test Galactic latitude for celestial sky direction constructor");
     test_value(model2.posangle(), 45.0);
     test_value(model2.semimajor(), 3.0);
     test_value(model2.semiminor(), 2.0);
@@ -1673,8 +1688,8 @@ void TestGModel::test_elliptical_disk(void)
     GModelSpatialEllipticalDisk model3(*element);
     test_value(model3.size(), 5);
     test_value(model3.type(), "EllipticalDisk");
-    test_value(model3.ra(), 83.6331);
-    test_value(model3.dec(), 22.0145);
+    test_value(model3.dir().ra_deg(),  83.6331,   "Test Right Ascension for celestial XML constructor");
+    test_value(model3.dir().dec_deg(), 22.0145,   "Test Declination for celestial XML constructor");
     test_value(model3.posangle(), 45.0);
     test_value(model3.semimajor(), 2.0);
     test_value(model3.semiminor(), 0.5);
@@ -1741,8 +1756,10 @@ void TestGModel::test_elliptical_gauss(void)
     GSkyDir dir1;
     dir1.radec_deg(83.6331, +22.0145);
     GModelSpatialEllipticalGauss model2(dir1, 3.0, 2.0, 45.0);
-    test_value(model2.ra(), 83.6331);
-    test_value(model2.dec(), 22.0145);
+    test_value(model2.dir().ra_deg(),  83.6331,   "Test Right Ascension for celestial sky direction constructor");
+    test_value(model2.dir().dec_deg(), 22.0145,   "Test Declination for celestial sky direction constructor");
+    test_value(model2.dir().l_deg(),  184.557460, "Test Galactic longitude for celestial sky direction constructor");
+    test_value(model2.dir().b_deg(),   -5.784346, "Test Galactic latitude for celestial sky direction constructor");
     test_value(model2.posangle(), 45.0);
     test_value(model2.semimajor(), 3.0);
     test_value(model2.semiminor(), 2.0);
@@ -1753,8 +1770,8 @@ void TestGModel::test_elliptical_gauss(void)
     GModelSpatialEllipticalGauss model3(*element);
     test_value(model3.size(), 5);
     test_value(model3.type(), "EllipticalGaussian");
-    test_value(model3.ra(), 83.6331);
-    test_value(model3.dec(), 22.0145);
+    test_value(model3.dir().ra_deg(),  83.6331,   "Test Right Ascension for celestial XML constructor");
+    test_value(model3.dir().dec_deg(), 22.0145,   "Test Declination for celestial XML constructor");
     test_value(model3.posangle(), 45.0);
     test_value(model3.semimajor(), 0.3);
     test_value(model3.semiminor(), 0.1);
@@ -1821,8 +1838,10 @@ void TestGModel::test_elliptical_general_gauss(void)
     GSkyDir dir1;
     dir1.radec_deg(83.6331, +22.0145);
     GModelSpatialEllipticalGeneralGauss model2(dir1, 3.0, 2.0, 45.0,0.5);
-    test_value(model2.ra(), 83.6331);
-    test_value(model2.dec(), 22.0145);
+    test_value(model2.dir().ra_deg(),  83.6331,   "Test Right Ascension for celestial sky direction constructor");
+    test_value(model2.dir().dec_deg(), 22.0145,   "Test Declination for celestial sky direction constructor");
+    test_value(model2.dir().l_deg(),  184.557460, "Test Galactic longitude for celestial sky direction constructor");
+    test_value(model2.dir().b_deg(),   -5.784346, "Test Galactic latitude for celestial sky direction constructor");
     test_value(model2.posangle(), 45.0);
     test_value(model2.semimajor(), 3.0);
     test_value(model2.semiminor(), 2.0);
@@ -1835,8 +1854,8 @@ void TestGModel::test_elliptical_general_gauss(void)
     GModelSpatialEllipticalGeneralGauss model3(*element);
     test_value(model3.size(), 6);
     test_value(model3.type(), "EllipticalGeneralGaussian");
-    test_value(model3.ra(), 83.6331);
-    test_value(model3.dec(), 22.0145);
+    test_value(model3.dir().ra_deg(),  83.6331,   "Test Right Ascension for celestial XML constructor");
+    test_value(model3.dir().dec_deg(), 22.0145,   "Test Declination for celestial XML constructor");
     test_value(model3.posangle(), 45.0);
     test_value(model3.semimajor(), 0.3);
     test_value(model3.semiminor(), 0.1);
@@ -3913,8 +3932,8 @@ void TestGModel::test_legacy_model_radial_disk(void)
 
     // Test model values
     test_value(spatial->type(), "DiskFunction", "Check model type");
-    test_value(spatial->ra(), 83.6331, 1.0e-7, "Check Right Ascension");
-    test_value(spatial->dec(), 22.0145, 1.0e-7, "Check Declination");
+    test_value(spatial->dir().ra_deg(), 83.6331, 1.0e-7, "Check Right Ascension");
+    test_value(spatial->dir().dec_deg(), 22.0145, 1.0e-7, "Check Declination");
     test_value(spatial->radius(), 0.45, 1.0e-7, "Check radius");
 
     // Save file to disk and reload file (tests the proper saving and loading)
@@ -3928,8 +3947,8 @@ void TestGModel::test_legacy_model_radial_disk(void)
 
     // Re-test model values
     test_value(spatial->type(), "DiskFunction", "Check model type");
-    test_value(spatial->ra(), 83.6331, 1.0e-7, "Check Right Ascension");
-    test_value(spatial->dec(), 22.0145, 1.0e-7, "Check Declination");
+    test_value(spatial->dir().ra_deg(), 83.6331, 1.0e-7, "Check Right Ascension");
+    test_value(spatial->dir().dec_deg(), 22.0145, 1.0e-7, "Check Declination");
     test_value(spatial->radius(), 0.45, 1.0e-7, "Check radius");
 
     // Exit test
@@ -3952,8 +3971,8 @@ void TestGModel::test_legacy_model_radial_gauss(void)
 
     // Test model values
     test_value(spatial->type(), "GaussFunction", "Check model type");
-    test_value(spatial->ra(), 83.6331, 1.0e-7, "Check Right Ascension");
-    test_value(spatial->dec(), 22.0145, 1.0e-7, "Check Declination");
+    test_value(spatial->dir().ra_deg(), 83.6331, 1.0e-7, "Check Right Ascension");
+    test_value(spatial->dir().dec_deg(), 22.0145, 1.0e-7, "Check Declination");
     test_value(spatial->sigma(), 0.20, 1.0e-7, "Check Sigma");
 
     // Save file to disk and reload file (tests the proper saving and loading)
@@ -3967,8 +3986,8 @@ void TestGModel::test_legacy_model_radial_gauss(void)
 
     // Re-test model values
     test_value(spatial->type(), "GaussFunction", "Check model type");
-    test_value(spatial->ra(), 83.6331, 1.0e-7, "Check Right Ascension");
-    test_value(spatial->dec(), 22.0145, 1.0e-7, "Check Declination");
+    test_value(spatial->dir().ra_deg(), 83.6331, 1.0e-7, "Check Right Ascension");
+    test_value(spatial->dir().dec_deg(), 22.0145, 1.0e-7, "Check Declination");
     test_value(spatial->sigma(), 0.20, 1.0e-7, "Check Sigma");
 
     // Exit test
@@ -3991,8 +4010,8 @@ void TestGModel::test_legacy_model_radial_shell(void)
 
     // Test model values
     test_value(spatial->type(), "ShellFunction", "Check model type");
-    test_value(spatial->ra(), 83.6331, 1.0e-7, "Check Right Ascension");
-    test_value(spatial->dec(), 22.0145, 1.0e-7, "Check Declination");
+    test_value(spatial->dir().ra_deg(), 83.6331, 1.0e-7, "Check Right Ascension");
+    test_value(spatial->dir().dec_deg(), 22.0145, 1.0e-7, "Check Declination");
     test_value(spatial->radius(), 0.30, 1.0e-7, "Check radius");
     test_value(spatial->width(), 0.10, 1.0e-7, "Check width");
 
@@ -4007,8 +4026,8 @@ void TestGModel::test_legacy_model_radial_shell(void)
 
     // Re-test model values
     test_value(spatial->type(), "ShellFunction", "Check model type");
-    test_value(spatial->ra(), 83.6331, 1.0e-7, "Check Right Ascension");
-    test_value(spatial->dec(), 22.0145, 1.0e-7, "Check Declination");
+    test_value(spatial->dir().ra_deg(), 83.6331, 1.0e-7, "Check Right Ascension");
+    test_value(spatial->dir().dec_deg(), 22.0145, 1.0e-7, "Check Declination");
     test_value(spatial->radius(), 0.30, 1.0e-7, "Check radius");
     test_value(spatial->width(), 0.10, 1.0e-7, "Check width");
 
@@ -4032,8 +4051,8 @@ void TestGModel::test_legacy_model_elliptical_gauss(void)
 
     // Test model values
     test_value(spatial->type(), "EllipticalGauss", "Check model type");
-    test_value(spatial->ra(), 83.6331, 1.0e-7, "Check Right Ascension");
-    test_value(spatial->dec(), 22.0145, 1.0e-7, "Check Declination");
+    test_value(spatial->dir().ra_deg(), 83.6331, 1.0e-7, "Check Right Ascension");
+    test_value(spatial->dir().dec_deg(), 22.0145, 1.0e-7, "Check Declination");
     test_value(spatial->posangle(), 45.0, 1.0e-7, "Check position angle");
     test_value(spatial->semimajor(), 0.3, 1.0e-7, "Check semi major axis");
     test_value(spatial->semiminor(), 0.1, 1.0e-7, "Check semi minor axis");
@@ -4049,8 +4068,8 @@ void TestGModel::test_legacy_model_elliptical_gauss(void)
 
     // Re-test model values
     test_value(spatial->type(), "EllipticalGauss", "Check model type");
-    test_value(spatial->ra(), 83.6331, 1.0e-7, "Check Right Ascension");
-    test_value(spatial->dec(), 22.0145, 1.0e-7, "Check Declination");
+    test_value(spatial->dir().ra_deg(), 83.6331, 1.0e-7, "Check Right Ascension");
+    test_value(spatial->dir().dec_deg(), 22.0145, 1.0e-7, "Check Declination");
     test_value(spatial->posangle(), 45.0, 1.0e-7, "Check position angle");
     test_value(spatial->semimajor(), 0.3, 1.0e-7, "Check semi major axis");
     test_value(spatial->semiminor(), 0.1, 1.0e-7, "Check semi minor axis");

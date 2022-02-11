@@ -1,7 +1,7 @@
 /***************************************************************************
  *              CTA helper classes for stacked vector response             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2020 by Juergen Knoedlseder                              *
+ *  copyright (C) 2020-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -63,8 +63,9 @@ public:
 protected:
     const GCTAResponseCube*    m_rsp;            //!< Response cube
     const GModelSpatialRadial* m_model;          //!< Radial model
-    GModelPar*                 m_par_ra;         //!< Right Ascension parameter
-    GModelPar*                 m_par_dec;        //!< Declination parameter
+    GModelPar*                 m_par_lon;        //!< Longitude parameter
+    GModelPar*                 m_par_lat;        //!< Latitude parameter
+    bool                       m_par_cel;        //!< Celestial or galactic coordinates
     GSkyDir                    m_obsDir;         //!< Reconstructed event direction
     GEnergies                  m_srcEngs;        //!< True photon energies
     double                     m_zeta;           //!< Distance of model from Psf

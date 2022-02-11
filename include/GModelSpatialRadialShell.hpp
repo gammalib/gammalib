@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelSpatialRadialShell.hpp - Radial shell source model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2020 by Christoph Deil                              *
+ *  copyright (C) 2011-2022 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,9 +31,15 @@
 #include <string>
 #include "GModelSpatialRadial.hpp"
 #include "GModelPar.hpp"
-#include "GSkyDir.hpp"
-#include "GSkyRegionCircle.hpp"
-#include "GXmlElement.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GEnergy;
+class GTime;
+class GPhoton;
+class GRan;
+class GSkyDir;
+class GSkyRegion;
+class GXmlElement;
 
 
 /**************************************************************************
@@ -61,9 +67,10 @@ public:
     // Constructors and destructors
     GModelSpatialRadialShell(void);
     GModelSpatialRadialShell(const bool& dummy, const std::string& type);
-    GModelSpatialRadialShell(const GSkyDir& dir,
-                             const double&  radius,
-                             const double&  width);
+    GModelSpatialRadialShell(const GSkyDir&     dir,
+                             const double&      radius,
+                             const double&      width,
+                             const std::string& coordsys = "CEL");
     explicit GModelSpatialRadialShell(const GXmlElement& xml);
     GModelSpatialRadialShell(const GModelSpatialRadialShell& model);
     virtual ~GModelSpatialRadialShell(void);
@@ -110,13 +117,13 @@ protected:
     GModelPar m_width;  //!< Shell thickness (deg)
 
     // Cached members used for pre-computations
-    mutable double  m_last_radius;   //!< Last shell radius (deg)
-    mutable double  m_last_width;    //!< Last shell width (deg)
-    mutable double  m_theta_in;      //!< Inner shell radius (rad)
-    mutable double  m_x_in;          //!< sin(m_theta_in)^2
-    mutable double  m_theta_out;     //!< Outer shell radius (rad)
-    mutable double  m_x_out;         //!< sin(m_theta_out)^2
-    mutable double  m_norm;          //!< Shell normalization
+    mutable double m_last_radius;   //!< Last shell radius (deg)
+    mutable double m_last_width;    //!< Last shell width (deg)
+    mutable double m_theta_in;      //!< Inner shell radius (rad)
+    mutable double m_x_in;          //!< sin(m_theta_in)^2
+    mutable double m_theta_out;     //!< Outer shell radius (rad)
+    mutable double m_x_out;         //!< sin(m_theta_out)^2
+    mutable double m_norm;          //!< Shell normalization
 };
 
 

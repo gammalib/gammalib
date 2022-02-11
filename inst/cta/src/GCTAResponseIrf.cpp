@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAResponseIrf.cpp - CTA instrument response function class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -3042,8 +3042,8 @@ double GCTAResponseIrf::nroi_radial(const GModelSky&    model,
         // given by (rho,omega), into celestial coordinates.
         GMatrix ry;
         GMatrix rz;
-        ry.eulery(spatial->dec() - 90.0);
-        rz.eulerz(-spatial->ra());
+        ry.eulery(spatial->dir().dec_deg() - 90.0);
+        rz.eulerz(-spatial->dir().ra_deg());
         GMatrix rot = (ry * rz).transpose();
 
         // Compute position angle of ROI centre with respect to model
@@ -3266,8 +3266,8 @@ double GCTAResponseIrf::nroi_elliptical(const GModelSky&    model,
         // given by (rho,omega), into celestial coordinates.
         GMatrix ry;
         GMatrix rz;
-        ry.eulery(spatial->dec() - 90.0);
-        rz.eulerz(-spatial->ra());
+        ry.eulery(spatial->dir().dec_deg() - 90.0);
+        rz.eulerz(-spatial->dir().ra_deg());
         GMatrix rot = (ry * rz).transpose();
 
         // Compute position angle of ROI centre with respect to model

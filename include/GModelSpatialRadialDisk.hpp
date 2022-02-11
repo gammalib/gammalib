@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelSpatialRadialDisk.hpp - Radial disk source model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2020 by Christoph Deil                              *
+ *  copyright (C) 2011-2022 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,9 +31,15 @@
 #include <string>
 #include "GModelSpatialRadial.hpp"
 #include "GModelPar.hpp"
-#include "GSkyDir.hpp"
-#include "GSkyRegionCircle.hpp"
-#include "GXmlElement.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GEnergy;
+class GTime;
+class GPhoton;
+class GRan;
+class GSkyDir;
+class GSkyRegion;
+class GXmlElement;
 
 
 /**************************************************************************
@@ -51,7 +57,9 @@ public:
     // Constructors and destructors
     GModelSpatialRadialDisk(void);
     GModelSpatialRadialDisk(const bool& dummy, const std::string& type);
-    GModelSpatialRadialDisk(const GSkyDir& dir, const double& radius);
+    GModelSpatialRadialDisk(const GSkyDir&     dir,
+                            const double&      radius,
+                            const std::string& coordsys = "CEL");
     explicit GModelSpatialRadialDisk(const GXmlElement& xml);
     GModelSpatialRadialDisk(const GModelSpatialRadialDisk& model);
     virtual ~GModelSpatialRadialDisk(void);

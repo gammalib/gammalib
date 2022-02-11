@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpatialRadialGauss.i - Radial Gaussian source model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,7 +39,9 @@ class GModelSpatialRadialGauss : public GModelSpatialRadial {
 public:
     // Constructors and destructors
     GModelSpatialRadialGauss(void);
-    GModelSpatialRadialGauss(const GSkyDir& dir, const double& sigma);
+    GModelSpatialRadialGauss(const GSkyDir&     dir,
+                             const double&      sigma,
+                             const std::string& coordsys = "CEL");
     explicit GModelSpatialRadialGauss(const GXmlElement& xml);
     GModelSpatialRadialGauss(const GModelSpatialRadialGauss& model);
     virtual ~GModelSpatialRadialGauss(void);

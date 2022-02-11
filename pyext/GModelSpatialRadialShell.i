@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpatialRadialShell.i - Radial spatial shell source model class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2020 by Christoph Deil                              *
+ *  copyright (C) 2011-2022 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,9 +38,10 @@ class GModelSpatialRadialShell : public GModelSpatialRadial {
 public:
     // Constructors and destructors
     GModelSpatialRadialShell(void);
-    GModelSpatialRadialShell(const GSkyDir& dir,
-                             const double&  radius,
-                             const double&  width);
+    GModelSpatialRadialShell(const GSkyDir&     dir,
+                             const double&      radius,
+                             const double&      width,
+                             const std::string& coordsys = "CEL");
     explicit GModelSpatialRadialShell(const GXmlElement& xml);
     GModelSpatialRadialShell(const GModelSpatialRadialShell& model);
     virtual ~GModelSpatialRadialShell(void);

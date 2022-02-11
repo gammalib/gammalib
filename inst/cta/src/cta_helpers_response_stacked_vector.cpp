@@ -1,7 +1,7 @@
 /***************************************************************************
  *              CTA helper classes for stacked vector response             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2020 by Juergen Knoedlseder                              *
+ *  copyright (C) 2020-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -113,9 +113,18 @@ cta_psf_radial_kerns_delta::cta_psf_radial_kerns_delta(const GCTAResponseCube*  
     m_sin_zeta      = std::sin(zeta);
     m_cos_theta_max = std::cos(theta_max);
 
-    // Store references to Right Ascension and Declination parameters
-    m_par_ra  = &((*(const_cast<GModelSpatialRadial*>(model)))["RA"]);
-    m_par_dec = &((*(const_cast<GModelSpatialRadial*>(model)))["DEC"]);
+    // Set coordinate system
+    m_par_cel = (model->coordsys() == "CEL");
+
+    // Store references to longitude and latitude parameters
+    if (m_par_cel) {
+        m_par_lon = &((*(const_cast<GModelSpatialRadial*>(model)))["RA"]);
+        m_par_lat = &((*(const_cast<GModelSpatialRadial*>(model)))["DEC"]);
+    }
+    else {
+        m_par_lon = &((*(const_cast<GModelSpatialRadial*>(model)))["GLON"]);
+        m_par_lat = &((*(const_cast<GModelSpatialRadial*>(model)))["GLAT"]);
+    }
 
     // Pre-compute constants needed for gradient computation. The following
     // exceptions need to be handled
@@ -123,10 +132,10 @@ cta_psf_radial_kerns_delta::cta_psf_radial_kerns_delta(const GCTAResponseCube*  
     // * m_sin_zeta = 0
     // * denom = 0
     if (grad) {
-        double alpha_0        = model->ra()  * gammalib::deg2rad;
-        double beta_0         = model->dec() * gammalib::deg2rad;
-        double alpha_reco     = obsDir.ra();
-        double beta_reco      = obsDir.dec();
+        double alpha_0        = m_par_cel ? model->dir().ra()  : model->dir().l();
+        double beta_0         = m_par_cel ? model->dir().dec() : model->dir().b();
+        double alpha_reco     = m_par_cel ? obsDir.ra()        : obsDir.l();
+        double beta_reco      = m_par_cel ? obsDir.dec()       : obsDir.b();
         double sin_beta_0     = std::sin(beta_0);
         double cos_beta_0     = std::cos(beta_0);
         double tan_beta_0     = std::tan(beta_0); // Exception: beta_0 = 90 deg
@@ -396,8 +405,8 @@ GVector cta_psf_radial_kerns_phi::eval(const double& phi)
     // into the respective factor gradients so that the
     // GModelSpatialRadial::eval() method can use the information.
     if (m_outer->m_grad) {
-        double g_ra  = 0.0;
-        double g_dec = 0.0;
+        double g_lon = 0.0;
+        double g_lat = 0.0;
         if (theta > 0.0) {
 
             // Compute sin(theta) by avoiding to use a call to sine
@@ -413,19 +422,19 @@ GVector cta_psf_radial_kerns_phi::eval(const double& phi)
                 double dtheta_dphi  = (m_sin_delta_sin_zeta * sin_phi) *
                                        norm;
                 if (m_outer->m_zeta != 0.0) {
-                    g_ra  = dtheta_dzeta * m_outer->m_dzeta_dalpha_0 +
+                    g_lon = dtheta_dzeta * m_outer->m_dzeta_dalpha_0 +
                             dtheta_dphi  * m_outer->m_dphi_dalpha_0;
-                    g_dec = dtheta_dzeta * m_outer->m_dzeta_dbeta_0  +
+                    g_lat = dtheta_dzeta * m_outer->m_dzeta_dbeta_0  +
                             dtheta_dphi  * m_outer->m_dphi_dbeta_0;
                 }
                 else {
-                    g_ra  =  0.0;    //TODO: Set correct value
-                    g_dec = -cos_phi;
+                    g_lon =  0.0;    //TODO: Set correct value
+                    g_lat = -cos_phi;
                 }
             }
         }
-        m_outer->m_par_ra->factor_gradient(g_ra);
-        m_outer->m_par_dec->factor_gradient(g_dec);
+        m_outer->m_par_lon->factor_gradient(g_lon);
+        m_outer->m_par_lat->factor_gradient(g_lat);
     }
 
     // Compute model value and optionally model parameter gradients

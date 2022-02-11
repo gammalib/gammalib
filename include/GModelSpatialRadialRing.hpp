@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelSpatialRadialRing.hpp - Radial ring source model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2020 by Pierrick Martin                                  *
+ *  copyright (C) 2020-2022 by Pierrick Martin                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,9 +31,15 @@
 #include <string>
 #include "GModelSpatialRadial.hpp"
 #include "GModelPar.hpp"
-#include "GSkyDir.hpp"
-#include "GSkyRegionCircle.hpp"
-#include "GXmlElement.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GEnergy;
+class GTime;
+class GPhoton;
+class GRan;
+class GSkyDir;
+class GSkyRegion;
+class GXmlElement;
 
 
 /**************************************************************************
@@ -50,7 +56,10 @@ class GModelSpatialRadialRing : public GModelSpatialRadial {
 public:
     // Constructors and destructors
     GModelSpatialRadialRing(void);
-    GModelSpatialRadialRing(const GSkyDir& dir, const double& radius, const double& width);
+    GModelSpatialRadialRing(const GSkyDir&     dir,
+                            const double&      radius,
+                            const double&      width,
+                            const std::string& coordsys = "CEL");
     explicit GModelSpatialRadialRing(const GXmlElement& xml);
     GModelSpatialRadialRing(const GModelSpatialRadialRing& model);
     virtual ~GModelSpatialRadialRing(void);

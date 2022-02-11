@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpatialRadial.i - Abstract radial spatial model base class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -68,12 +68,9 @@ public:
     virtual void   write(GXmlElement& xml) const;
 
     // Other methods
-    double  ra(void) const;
-    double  dec(void) const;
-    void    ra(const double& ra);
-    void    dec(const double& dec);
-    GSkyDir dir(void) const;
-    void    dir(const GSkyDir& dir);
+    std::string    coordsys(void) const;
+    const GSkyDir& dir(void) const;
+    void           dir(const GSkyDir& dir);
 };
 
 

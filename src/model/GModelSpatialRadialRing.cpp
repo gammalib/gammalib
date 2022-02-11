@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelSpatialRadialRing.cpp - Radial ring source model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2020-2021 by Pierrick Martin                             *
+ *  copyright (C) 2020-2022 by Pierrick Martin                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -41,6 +41,8 @@ const GModelSpatialRadialRing g_radial_ring_seed;
 const GModelSpatialRegistry   g_radial_ring_registry(&g_radial_ring_seed);
 
 /* __ Method name definitions ____________________________________________ */
+#define G_CONSTRUCTOR     "GModelSpatialRadialRing::GModelSpatialRadialRing("\
+                                  "GSkyDir&, double&, double&, std::string&)"
 #define G_READ                  "GModelSpatialRadialRing::read(GXmlElement&)"
 #define G_WRITE                "GModelSpatialRadialRing::write(GXmlElement&)"
 
@@ -78,18 +80,42 @@ GModelSpatialRadialRing::GModelSpatialRadialRing(void) : GModelSpatialRadial()
  * @param[in] dir Sky position of ring centre.
  * @param[in] radius Ring inner radius (degrees).
  * @param[in] width Ring width (degrees).
+ * @param[in] coordsys Coordinate system (either "CEL" or "GAL")
+ *
+ * @exception GException::invalid_argument
+ *            Invalid @p coordsys argument specified.
  *
  * Constructs radial ring model from the sky position of the ring centre
  * (@p dir) and the ring inner radius (@p radius) and width (@p width) in
- * degrees.
+ * degrees. The @p coordsys parameter specifies whether the sky direction
+ * should be interpreted in the celestial or Galactic coordinate system.
  ***************************************************************************/
-GModelSpatialRadialRing::GModelSpatialRadialRing(const GSkyDir& dir,
-                                                 const double&  radius,
-                                                 const double&  width) :
+GModelSpatialRadialRing::GModelSpatialRadialRing(const GSkyDir&     dir,
+                                                 const double&      radius,
+                                                 const double&      width,
+                                                 const std::string& coordsys) :
                          GModelSpatialRadial()
 {
+    // Throw an exception if the coordinate system is invalid
+    if ((coordsys != "CEL") && (coordsys != "GAL")) {
+        std::string msg = "Invalid coordinate system \""+coordsys+"\" "
+                          "specified. Please specify either \"CEL\" or "
+                          "\"GAL\".";
+        throw GException::invalid_argument(G_CONSTRUCTOR, msg);
+    }
+
     // Initialise members
     init_members();
+
+    // Set parameter names
+    if (coordsys == "CEL") {
+        m_lon.name("RA");
+        m_lat.name("DEC");
+    }
+    else {
+        m_lon.name("GLON");
+        m_lat.name("GLAT");
+    }
 
     // Assign center location, radius and width
     this->dir(dir);
@@ -635,7 +661,7 @@ void GModelSpatialRadialRing::set_region(void) const
 {
     // Set sky region circle (maximum Gaussian sigma times a scaling
     // factor (actually 3))
-    GSkyRegionCircle region(m_ra.value(), m_dec.value(), radius()+width());
+    GSkyRegionCircle region(dir(), radius()+width());
 
     // Set region (circumvent const correctness)
     const_cast<GModelSpatialRadialRing*>(this)->m_region = region;

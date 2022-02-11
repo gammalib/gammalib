@@ -40,9 +40,10 @@ class GModelSpatialRadialGeneralGauss : public GModelSpatialRadial {
 public:
     // Constructors and destructors
     GModelSpatialRadialGeneralGauss(void);
-    GModelSpatialRadialGeneralGauss(const GSkyDir& dir,
-                                    const double&  radius,
-                                    const double&  ridx);
+    GModelSpatialRadialGeneralGauss(const GSkyDir&     dir,
+                                    const double&      radius,
+                                    const double&      ridx,
+                                    const std::string& coordsys = "CEL");
     explicit GModelSpatialRadialGeneralGauss(const GXmlElement& xml);
     GModelSpatialRadialGeneralGauss(const GModelSpatialRadialGeneralGauss& model);
     virtual ~GModelSpatialRadialGeneralGauss(void);

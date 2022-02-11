@@ -115,8 +115,8 @@ GModelSpatialPointSource::GModelSpatialPointSource(const bool&        dummy,
  *            Invalid @p coordsys argument specified.
  *
  * Construct a point source spatial model from a sky direction. The
- * @p coordsys parameter specified whether the sky direction should be
- * interpreted in the celestial or Galactic coordinata system.
+ * @p coordsys parameter specifies whether the sky direction should be
+ * interpreted in the celestial or Galactic coordinate system.
  ***************************************************************************/
 GModelSpatialPointSource::GModelSpatialPointSource(const GSkyDir&     dir,
                                                    const std::string& coordsys) :

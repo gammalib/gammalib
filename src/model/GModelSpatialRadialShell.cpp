@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelSpatialRadialShell.cpp - Radial shell source model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2021 by Christoph Deil                              *
+ *  copyright (C) 2011-2022 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -45,6 +45,8 @@ const GModelSpatialRegistry    g_radial_shell_legacy_registry(&g_radial_shell_le
 #endif
 
 /* __ Method name definitions ____________________________________________ */
+#define G_CONSTRUCTOR   "GModelSpatialRadialShell::GModelSpatialRadialShell("\
+                                  "GSkyDir&, double&, double&, std::string&)"
 #define G_MC          "GModelSpatialRadialShell::mc(GEnergy&, GTime&, GRan&)"
 #define G_READ                 "GModelSpatialRadialShell::read(GXmlElement&)"
 #define G_WRITE               "GModelSpatialRadialShell::write(GXmlElement&)"
@@ -107,17 +109,42 @@ GModelSpatialRadialShell::GModelSpatialRadialShell(const bool&        dummy,
  * @param[in] dir Sky position of shell centre.
  * @param[in] radius Inner shell radius (degrees).
  * @param[in] width Shell width (degrees).
+ * @param[in] coordsys Coordinate system (either "CEL" or "GAL")
+ *
+ * @exception GException::invalid_argument
+ *            Invalid @p coordsys argument specified.
  *
  * Constructs the shell model from the shell centre (@p dir), the inner
- * shell @p radius, and the shell @p width.
+ * shell @p radius, and the shell @p width. The @p coordsys parameter
+ * specifies whether the sky direction should be interpreted in the celestial
+ * or Galactic coordinate system.
  ***************************************************************************/
-GModelSpatialRadialShell::GModelSpatialRadialShell(const GSkyDir& dir,
-                                                   const double&  radius,
-                                                   const double&  width) :
+GModelSpatialRadialShell::GModelSpatialRadialShell(const GSkyDir&     dir,
+                                                   const double&      radius,
+                                                   const double&      width,
+                                                   const std::string& coordsys) :
                           GModelSpatialRadial()
 {
+    // Throw an exception if the coordinate system is invalid
+    if ((coordsys != "CEL") && (coordsys != "GAL")) {
+        std::string msg = "Invalid coordinate system \""+coordsys+"\" "
+                          "specified. Please specify either \"CEL\" or "
+                          "\"GAL\".";
+        throw GException::invalid_argument(G_CONSTRUCTOR, msg);
+    }
+
     // Initialise members
     init_members();
+
+    // Set parameter names
+    if (coordsys == "CEL") {
+        m_lon.name("RA");
+        m_lat.name("DEC");
+    }
+    else {
+        m_lon.name("GLON");
+        m_lat.name("GLAT");
+    }
 
     // Assign parameters
     this->dir(dir);
@@ -758,7 +785,7 @@ void GModelSpatialRadialShell::set_region(void) const
 {
     // Set sky region circle (maximum Gaussian sigma times a scaling
     // factor (actually 3))
-    GSkyRegionCircle region(m_ra.value(), m_dec.value(), m_radius.value() + m_width.value());
+    GSkyRegionCircle region(dir(), m_radius.value() + m_width.value());
 
     // Set region (circumvent const correctness)
     const_cast<GModelSpatialRadialShell*>(this)->m_region = region;

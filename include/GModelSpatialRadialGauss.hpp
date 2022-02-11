@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpatialRadialGauss.hpp - Radial Gaussian source model class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,11 +31,15 @@
 #include <string>
 #include "GModelSpatialRadial.hpp"
 #include "GModelPar.hpp"
-#include "GSkyDir.hpp"
-#include "GSkyRegionCircle.hpp"
-#include "GEnergy.hpp"
-#include "GTime.hpp"
-#include "GXmlElement.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GEnergy;
+class GTime;
+class GPhoton;
+class GRan;
+class GSkyDir;
+class GSkyRegion;
+class GXmlElement;
 
 
 /***********************************************************************//**
@@ -52,7 +56,9 @@ public:
     // Constructors and destructors
     GModelSpatialRadialGauss(void);
     GModelSpatialRadialGauss(const bool& dummy, const std::string& type);
-    GModelSpatialRadialGauss(const GSkyDir& dir, const double& sigma);
+    GModelSpatialRadialGauss(const GSkyDir&     dir,
+                             const double&      sigma,
+                             const std::string& coordsys = "CEL");
     explicit GModelSpatialRadialGauss(const GXmlElement& xml);
     GModelSpatialRadialGauss(const GModelSpatialRadialGauss& model);
     virtual ~GModelSpatialRadialGauss(void);

@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpatialRadial.cpp - Abstract radial spatial model base class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -199,16 +199,16 @@ double GModelSpatialRadial::eval(const GPhoton& photon,
  * XML element in the following format
  *
  *     <spatialModel type="...">
- *       <parameter name="RA"  scale="1" value="83.63" min="-360" max="360" free="1"/>
- *       <parameter name="DEC" scale="1" value="22.01" min="-90"  max="90"  free="1"/>
+ *       <parameter name="RA"  scale="1" value="83.6331" min="-360" max="360" free="0" />
+ *       <parameter name="DEC" scale="1" value="22.0145" min="-90"  max="90"  free="0" />
  *       ...
  *     </spatialModel>
  *
  * or
  *
  *     <spatialModel type="...">
- *       <parameter name="GLON" scale="1" value="83.63" min="-360" max="360" free="1"/>
- *       <parameter name="GLAT" scale="1" value="22.01" min="-90"  max="90"  free="1"/>
+ *       <parameter name="GLON" scale="1" value="184.5575" min="-360" max="360" free="0" />
+ *       <parameter name="GLAT" scale="1" value="-5.7843"  min="-90"  max="90"  free="0" />
  *       ...
  *     </spatialModel>
  *
@@ -223,8 +223,8 @@ void GModelSpatialRadial::read(const GXmlElement& xml)
         const GXmlElement* dec = gammalib::xml_get_par(G_READ, xml, "DEC");
 
         // Read parameters
-        m_ra.read(*ra);
-        m_dec.read(*dec);
+        m_lon.read(*ra);
+        m_lat.read(*dec);
 
     }
 
@@ -236,18 +236,8 @@ void GModelSpatialRadial::read(const GXmlElement& xml)
         const GXmlElement* glat = gammalib::xml_get_par(G_READ, xml, "GLAT");
 
         // Read parameters
-        m_ra.read(*glon);
-        m_dec.read(*glat);
-
-        // Convert into RA/DEC
-        GSkyDir dir;
-        dir.lb_deg(ra(), dec()),
-        m_ra.value(dir.ra_deg());
-        m_dec.value(dir.dec_deg());
-
-        // Set names to RA/DEC
-        m_ra.name("RA");
-        m_dec.name("DEC");
+        m_lon.read(*glon);
+        m_lat.read(*glat);
 
     }
 
@@ -261,24 +251,23 @@ void GModelSpatialRadial::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element into which model information is written.
  *
- * @exception GException::model_invalid_spatial
- *            Existing XML element is not of type 'GaussFunction'
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
- *
- * Writes the radial source location and position angle information into an
- * XML element in the following format
+ * Depending on the coordinate system, write the radial source information
+ * into an XML element with the following format
  *
  *     <spatialModel type="...">
- *       <parameter name="RA"  scale="1" value="83.63" min="-360" max="360" free="1"/>
- *       <parameter name="DEC" scale="1" value="22.01" min="-90"  max="90"  free="1"/>
+ *       <parameter name="RA"  scale="1" value="83.6331" min="-360" max="360" free="0" />
+ *       <parameter name="DEC" scale="1" value="22.0145" min="-90"  max="90"  free="0" />
  *       ...
  *     </spatialModel>
  *
- * @todo The case that an existing spatial XML element with "GLON" and "GLAT"
- *       as coordinates is not supported.
+ * or
+ *
+ *     <spatialModel type="PointSource">
+ *       <parameter name="GLON" scale="1" value="184.5575" min="-360" max="360" free="0" />
+ *       <parameter name="GLAT" scale="1" value="-5.7843"  min="-90"  max="90"  free="0" />
+ *       ...
+ *     </spatialModel>
+ *
  ***************************************************************************/
 void GModelSpatialRadial::write(GXmlElement& xml) const
 {
@@ -286,12 +275,12 @@ void GModelSpatialRadial::write(GXmlElement& xml) const
     gammalib::xml_check_type(G_WRITE, xml, type());
 
     // Get or create parameters
-    GXmlElement* ra  = gammalib::xml_need_par(G_WRITE, xml, m_ra.name());
-    GXmlElement* dec = gammalib::xml_need_par(G_WRITE, xml, m_dec.name());
+    GXmlElement* lon = gammalib::xml_need_par(G_WRITE, xml, m_lon.name());
+    GXmlElement* lat = gammalib::xml_need_par(G_WRITE, xml, m_lat.name());
 
     // Write parameters
-    m_ra.write(*ra);
-    m_dec.write(*dec);
+    m_lon.write(*lon);
+    m_lat.write(*lat);
 
     // Return
     return;
@@ -300,28 +289,58 @@ void GModelSpatialRadial::write(GXmlElement& xml) const
 
 /***********************************************************************//**
  * @brief Return position of radial spatial model
+ *
+ * @return Radial spatial model sky direction.
+ *
+ * Returns the sky direction of the radial spatial model.
  ***************************************************************************/
-GSkyDir GModelSpatialRadial::dir(void) const
+const GSkyDir& GModelSpatialRadial::dir(void) const
 {
-    // Allocate sky direction
-    GSkyDir srcDir;
+    // Get longitude and latitude values
+    double lon = m_lon.value();
+    double lat = m_lat.value();
 
-    // Set sky direction
-    srcDir.radec_deg(ra(), dec());
+    // If longitude or latitude values have changed then update sky
+    // direction cache
+    if ((lon != m_last_lon) || (lat != m_last_lat)) {
 
-    // Return direction
-    return srcDir;
+        // Update last values
+        m_last_lon = lon;
+        m_last_lat = lat;
+
+        // Update sky direction dependent on model coordinate system
+        if (is_celestial()) {
+            m_dir.radec_deg(m_last_lon, m_last_lat);
+        }
+        else {
+            m_dir.lb_deg(m_last_lon, m_last_lat);
+        }
+
+    } // endif: update of sky direction cache required
+
+    // Return sky direction
+    return (m_dir);
 }
 
 
 /***********************************************************************//**
  * @brief Set position of radial spatial model
+ *
+ * @param[in] dir Sky direction of radial spatial model.
+ *
+ * Sets the sky direction of the radial spatial model.
  ***************************************************************************/
 void GModelSpatialRadial::dir(const GSkyDir& dir)
 {
-    // Assign Right Ascension and Declination
-    m_ra.value(dir.ra_deg());
-    m_dec.value(dir.dec_deg());
+    // Assign sky direction depending on the model coordinate system
+    if (is_celestial()) {
+        m_lon.value(dir.ra_deg());
+        m_lat.value(dir.dec_deg());
+    }
+    else {
+        m_lon.value(dir.l_deg());
+        m_lat.value(dir.b_deg());
+    }
 
     // Return
     return;
@@ -340,27 +359,32 @@ void GModelSpatialRadial::dir(const GSkyDir& dir)
 void GModelSpatialRadial::init_members(void)
 {
     // Initialise Right Ascension
-    m_ra.clear();
-    m_ra.name("RA");
-    m_ra.unit("deg");
-    m_ra.fix();
-    m_ra.scale(1.0);
-    m_ra.gradient(0.0);
-    m_ra.has_grad(false);
+    m_lon.clear();
+    m_lon.name("RA");
+    m_lon.unit("deg");
+    m_lon.fix();
+    m_lon.scale(1.0);
+    m_lon.gradient(0.0);
+    m_lon.has_grad(false);
 
     // Initialise Declination
-    m_dec.clear();
-    m_dec.name("DEC");
-    m_dec.unit("deg");
-    m_dec.fix();
-    m_dec.scale(1.0);
-    m_dec.gradient(0.0);
-    m_dec.has_grad(false);
+    m_lat.clear();
+    m_lat.name("DEC");
+    m_lat.unit("deg");
+    m_lat.fix();
+    m_lat.scale(1.0);
+    m_lat.gradient(0.0);
+    m_lat.has_grad(false);
 
     // Set parameter pointer(s)
     m_pars.clear();
-    m_pars.push_back(&m_ra);
-    m_pars.push_back(&m_dec);
+    m_pars.push_back(&m_lon);
+    m_pars.push_back(&m_lat);
+
+    // Initialise cache
+    m_dir.clear();
+    m_last_lon = -9999.0;
+    m_last_lat = -9999.0;
 
     // Return
     return;
@@ -375,13 +399,18 @@ void GModelSpatialRadial::init_members(void)
 void GModelSpatialRadial::copy_members(const GModelSpatialRadial& model)
 {
     // Copy members
-    m_ra  = model.m_ra;
-    m_dec = model.m_dec;
+    m_lon = model.m_lon;
+    m_lat = model.m_lat;
 
     // Set parameter pointer(s)
     m_pars.clear();
-    m_pars.push_back(&m_ra);
-    m_pars.push_back(&m_dec);
+    m_pars.push_back(&m_lon);
+    m_pars.push_back(&m_lat);
+
+    // Copy cache
+    m_dir      = model.m_dir;
+    m_last_lon = model.m_last_lon;
+    m_last_lat = model.m_last_lat;
 
     // Return
     return;

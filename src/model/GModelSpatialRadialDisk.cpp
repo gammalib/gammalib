@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelSpatialRadialDisk.cpp - Radial disk source model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2021 by Christoph Deil                              *
+ *  copyright (C) 2011-2022 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -45,6 +45,8 @@ const GModelSpatialRegistry   g_radial_disk_legacy_registry(&g_radial_disk_legac
 #endif
 
 /* __ Method name definitions ____________________________________________ */
+#define G_CONSTRUCTOR     "GModelSpatialRadialDisk::GModelSpatialRadialDisk("\
+                                           "GSkyDir&, double&, std::string&)"
 #define G_READ                  "GModelSpatialRadialDisk::read(GXmlElement&)"
 #define G_WRITE                "GModelSpatialRadialDisk::write(GXmlElement&)"
 
@@ -104,16 +106,41 @@ GModelSpatialRadialDisk::GModelSpatialRadialDisk(const bool&        dummy,
  *
  * @param[in] dir Sky position of disk centre.
  * @param[in] radius Disk radius (degrees).
+ * @param[in] coordsys Coordinate system (either "CEL" or "GAL")
+ *
+ * @exception GException::invalid_argument
+ *            Invalid @p coordsys argument specified.
  *
  * Constructs radial disk model from the sky position of the disk centre
- * (@p dir) and the disk @p radius in degrees.
+ * (@p dir) and the disk @p radius in degrees. The @p coordsys parameter
+ * specifies whether the sky direction should be interpreted in the
+ * celestial or Galactic coordinate system.
  ***************************************************************************/
-GModelSpatialRadialDisk::GModelSpatialRadialDisk(const GSkyDir& dir,
-                                                 const double&  radius) :
+GModelSpatialRadialDisk::GModelSpatialRadialDisk(const GSkyDir&     dir,
+                                                 const double&      radius,
+                                                 const std::string& coordsys) :
                          GModelSpatialRadial()
 {
+    // Throw an exception if the coordinate system is invalid
+    if ((coordsys != "CEL") && (coordsys != "GAL")) {
+        std::string msg = "Invalid coordinate system \""+coordsys+"\" "
+                          "specified. Please specify either \"CEL\" or "
+                          "\"GAL\".";
+        throw GException::invalid_argument(G_CONSTRUCTOR, msg);
+    }
+
     // Initialise members
     init_members();
+
+    // Set parameter names
+    if (coordsys == "CEL") {
+        m_lon.name("RA");
+        m_lat.name("DEC");
+    }
+    else {
+        m_lon.name("GLON");
+        m_lat.name("GLAT");
+    }
 
     // Assign parameters
     this->dir(dir);
@@ -382,11 +409,6 @@ double GModelSpatialRadialDisk::theta_max(void) const
  *
  * @param[in] xml XML element.
  *
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
- *
  * Reads the radial disk model information from an XML element. The XML
  * element shall have either the format 
  *
@@ -611,7 +633,7 @@ void GModelSpatialRadialDisk::update() const
 void GModelSpatialRadialDisk::set_region(void) const
 {
     // Set sky region circle
-    GSkyRegionCircle region(m_ra.value(), m_dec.value(), m_radius.value());
+    GSkyRegionCircle region(dir(), m_radius.value());
 
     // Set region (circumvent const correctness)
     const_cast<GModelSpatialRadialDisk*>(this)->m_region = region;

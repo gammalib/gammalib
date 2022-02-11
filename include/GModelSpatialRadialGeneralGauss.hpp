@@ -32,11 +32,15 @@
 #include <string>
 #include "GModelSpatialRadial.hpp"
 #include "GModelPar.hpp"
-#include "GSkyDir.hpp"
-#include "GSkyRegionCircle.hpp"
-#include "GEnergy.hpp"
-#include "GTime.hpp"
-#include "GXmlElement.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GEnergy;
+class GTime;
+class GPhoton;
+class GRan;
+class GSkyDir;
+class GSkyRegion;
+class GXmlElement;
 
 
 /***********************************************************************//**
@@ -52,9 +56,10 @@ class GModelSpatialRadialGeneralGauss : public GModelSpatialRadial {
 public:
     // Constructors and destructors
     GModelSpatialRadialGeneralGauss(void);
-    GModelSpatialRadialGeneralGauss(const GSkyDir& dir,
-                                    const double&  radius,
-                                    const double&  ridx);
+    GModelSpatialRadialGeneralGauss(const GSkyDir&     dir,
+                                    const double&      radius,
+                                    const double&      ridx,
+                                    const std::string& coordsys = "CEL");
     explicit GModelSpatialRadialGeneralGauss(const GXmlElement& xml);
     GModelSpatialRadialGeneralGauss(const GModelSpatialRadialGeneralGauss& model);
     virtual ~GModelSpatialRadialGeneralGauss(void);

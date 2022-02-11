@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpatialRadialGauss.cpp - Radial Gaussian source model class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -45,6 +45,8 @@ const GModelSpatialRegistry    g_radial_gauss_legacy_registry(&g_radial_gauss_le
 #endif
 
 /* __ Method name definitions ____________________________________________ */
+#define G_CONSTRUCTOR   "GModelSpatialRadialGauss::GModelSpatialRadialGauss("\
+                                           "GSkyDir&, double&, std::string&)"
 #define G_EVAL   "GModelSpatialRadialGauss::eval(double&, GEnergy&, GTime&, "\
                                                                      "bool&)"
 #define G_READ                 "GModelSpatialRadialGauss::read(GXmlElement&)"
@@ -106,16 +108,41 @@ GModelSpatialRadialGauss::GModelSpatialRadialGauss(const bool&        dummy,
  *
  * @param[in] dir Sky position of Gaussian.
  * @param[in] sigma Width of Gaussian (in degrees).
+ * @param[in] coordsys Coordinate system (either "CEL" or "GAL")
+ *
+ * @exception GException::invalid_argument
+ *            Invalid @p coordsys argument specified.
  *
  * Constructs a Gaussian spatial model using a sky direction (@p dir) and
- * a Gaussian width parameter @p sigma in degrees.
+ * a Gaussian width parameter @p sigma in degrees. The @p coordsys parameter
+ * specifies whether the sky direction should be interpreted in the
+ * celestial or Galactic coordinate system.
  ***************************************************************************/
-GModelSpatialRadialGauss::GModelSpatialRadialGauss(const GSkyDir& dir,
-                                                   const double&  sigma) :
+GModelSpatialRadialGauss::GModelSpatialRadialGauss(const GSkyDir&     dir,
+                                                   const double&      sigma,
+                                                   const std::string& coordsys) :
                           GModelSpatialRadial()
 {
+    // Throw an exception if the coordinate system is invalid
+    if ((coordsys != "CEL") && (coordsys != "GAL")) {
+        std::string msg = "Invalid coordinate system \""+coordsys+"\" "
+                          "specified. Please specify either \"CEL\" or "
+                          "\"GAL\".";
+        throw GException::invalid_argument(G_CONSTRUCTOR, msg);
+    }
+
     // Initialise members
     init_members();
+
+    // Set parameter names
+    if (coordsys == "CEL") {
+        m_lon.name("RA");
+        m_lat.name("DEC");
+    }
+    else {
+        m_lon.name("GLON");
+        m_lat.name("GLAT");
+    }
 
     // Assign direction and sigma
     this->dir(dir);
@@ -312,7 +339,7 @@ GModelSpatialRadialGauss* GModelSpatialRadialGauss::clone(void) const
  * centre relies on the computation of the partial derivatives
  * \f$\frac{\partial \theta}{\partial \alpha_0}\f$ and
  * \f$\frac{\partial \theta}{\partial \beta_0}\f$ which are assumed to
- * be stored in `m_ra.factor_gradient()` and `m_dec.factor_gradient()`
+ * be stored in `m_lon.factor_gradient()` and `m_lat.factor_gradient()`
  * when the method is entered. No check is performed whether these values
  * are actually available and valid.
  *
@@ -336,22 +363,23 @@ double GModelSpatialRadialGauss::eval(const double&  theta,
     if (gradients) {
 
         // Evaluate position gradients. Note that this requires that the
-        // partial derivatives of theta with respect to Right Ascension
-        // and Declination are preset in the m_ra.factor_gradient() and
-        // m_dec.factor_gradient() members.
-        double g_ra  = 0.0;
-        double g_dec = 0.0;
-        if (m_ra.is_free() || m_dec.is_free()) {
+        // partial derivatives of theta with respect to longitude and
+        // latitude are preset in the m_lon.factor_gradient() and
+        // m_lat.factor_gradient() members. An example where these values
+        // are set is the cta_psf_radial_kerns_phi::eval() method.
+        double g_lon = 0.0;
+        double g_lat = 0.0;
+        if (m_lon.is_free() || m_lat.is_free()) {
             double g_theta = -theta * m_g_theta_norm * value;
-            if (m_ra.is_free()) {
-                g_ra = g_theta * m_ra.factor_gradient() * m_ra.scale();
+            if (m_lon.is_free()) {
+                g_lon = g_theta * m_lon.factor_gradient() * m_lon.scale();
             }
-            if (m_dec.is_free()) {
-                g_dec = g_theta * m_dec.factor_gradient() * m_dec.scale();
+            if (m_lat.is_free()) {
+                g_lat = g_theta * m_lat.factor_gradient() * m_lat.scale();
             }
         }
-        m_ra.factor_gradient(g_ra);
-        m_dec.factor_gradient(g_dec);
+        m_lon.factor_gradient(g_lon);
+        m_lat.factor_gradient(g_lat);
 
         // Evaluate sigma gradient
         double g_sigma = 0.0;
@@ -578,8 +606,8 @@ void GModelSpatialRadialGauss::init_members(void)
     m_sigma.gradient(0.0);
 
     // Signal that this model provides analytical parameter gradients
-    m_ra.has_grad(true);
-    m_dec.has_grad(true);
+    m_lon.has_grad(true);
+    m_lat.has_grad(true);
     m_sigma.has_grad(true);
 
     // Set parameter pointer(s)
@@ -678,7 +706,7 @@ void GModelSpatialRadialGauss::update(const bool& gradients) const
 void GModelSpatialRadialGauss::set_region(void) const
 {
     // Set sky region circle (5 times Gaussian sigma)
-    GSkyRegionCircle region(m_ra.value(), m_dec.value(), m_sigma.value() * 5.0);
+    GSkyRegionCircle region(dir(), m_sigma.value() * 5.0);
 
     // Set region (circumvent const correctness)
     const_cast<GModelSpatialRadialGauss*>(this)->m_region = region;

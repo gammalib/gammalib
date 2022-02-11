@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpatialRadialProfile.cpp - Radial profile source model class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2016-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -441,7 +441,7 @@ int GModelSpatialRadialProfile::cache_index(void) const
 void GModelSpatialRadialProfile::set_region(void) const
 {
     // Set sky region circle
-    GSkyRegionCircle region(m_ra.value(), m_dec.value(), theta_max()*gammalib::rad2deg);
+    GSkyRegionCircle region(dir(), theta_max()*gammalib::rad2deg);
 
     // Set region (circumvent const correctness)
     const_cast<GModelSpatialRadialProfile*>(this)->m_region = region;

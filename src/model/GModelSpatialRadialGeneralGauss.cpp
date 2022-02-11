@@ -42,6 +42,8 @@ const GModelSpatialRadialGeneralGauss g_radial_general_gauss_seed;
 const GModelSpatialRegistry           g_radial_general_gauss_registry(&g_radial_general_gauss_seed);
 
 /* __ Method name definitions ____________________________________________ */
+#define G_CONSTRUCTOR                     "GModelSpatialRadialGeneralGauss::"\
+  "GModelSpatialRadialGeneralGauss(GSkyDir&, double&, double&, std::string&)"
 #define G_EVAL    "GModelSpatialRadialGeneralGauss::eval(double&, GEnergy&, "\
                                                              "GTime&, bool&)"
 #define G_READ          "GModelSpatialRadialGeneralGauss::read(GXmlElement&)"
@@ -83,18 +85,35 @@ GModelSpatialRadialGeneralGauss::GModelSpatialRadialGeneralGauss(void) :
  * @param[in] dir Sky position of Gaussian.
  * @param[in] radius Width of generalised Gaussian (deg).
  * @param[in] ridx Reciprocal of exponential index of radial profile.
+ * @param[in] coordsys Coordinate system (either "CEL" or "GAL")
+ *
+ * @exception GException::invalid_argument
+ *            Invalid @p coordsys argument specified.
  *
  * Constructs a generalised Gaussian spatial model using a sky direction
  * (@p dir), a Gaussian width parameter @p radius in degrees and a reciprocal
- * of the exponential index @p ridx.
+ * of the exponential index @p ridx. The @p coordsys parameter specifies
+ * whether the sky direction should be interpreted in the celestial or
+ * Galactic coordinate system.
  ***************************************************************************/
-GModelSpatialRadialGeneralGauss::GModelSpatialRadialGeneralGauss(const GSkyDir& dir,
-                                                                 const double&  radius,
-						                                         const double&  ridx) :
+GModelSpatialRadialGeneralGauss::GModelSpatialRadialGeneralGauss(const GSkyDir&     dir,
+                                                                 const double&      radius,
+						                                         const double&      ridx,
+                                                                 const std::string& coordsys) :
                                  GModelSpatialRadial()
 {
     // Initialise members
     init_members();
+
+    // Set parameter names
+    if (coordsys == "CEL") {
+        m_lon.name("RA");
+        m_lat.name("DEC");
+    }
+    else {
+        m_lon.name("GLON");
+        m_lat.name("GLAT");
+    }
 
     // Assign direction and radius
     this->dir(dir);
@@ -634,7 +653,7 @@ void GModelSpatialRadialGeneralGauss::update() const
 void GModelSpatialRadialGeneralGauss::set_region(void) const
 {
     // Set sky region circle (5 times radius)
-    GSkyRegionCircle region(m_ra.value(), m_dec.value(), m_radius.value() * 5.0);
+    GSkyRegionCircle region(dir(), m_radius.value() * 5.0);
 
     // Set region (circumvent const correctness)
     const_cast<GModelSpatialRadialGeneralGauss*>(this)->m_region = region;
