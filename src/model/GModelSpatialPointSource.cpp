@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpatialPointSource.cpp - Spatial point source model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -47,6 +47,10 @@ const GModelSpatialRegistry    g_spatial_ptsrc_legacy_registry(&g_spatial_ptsrc_
 #endif
 
 /* __ Method name definitions ____________________________________________ */
+#define G_CONSTRUCTOR1  "GModelSpatialPointSource::GModelSpatialPointSource("\
+                                                    "GSkyDir&, std::string&)"
+#define G_CONSTRUCTOR2  "GModelSpatialPointSource::GModelSpatialPointSource("\
+                                            "double&, double&, std::string&)"
 #define G_READ                 "GModelSpatialPointSource::read(GXmlElement&)"
 #define G_WRITE               "GModelSpatialPointSource::write(GXmlElement&)"
 
@@ -105,14 +109,39 @@ GModelSpatialPointSource::GModelSpatialPointSource(const bool&        dummy,
  * @brief Sky direction constructor
  *
  * @param[in] dir Sky direction.
+ * @param[in] coordsys Coordinate system (either "CEL" or "GAL")
  *
- * Construct a point source spatial model from a sky direction.
+ * @exception GException::invalid_argument
+ *            Invalid @p coordsys argument specified.
+ *
+ * Construct a point source spatial model from a sky direction. The
+ * @p coordsys parameter specified whether the sky direction should be
+ * interpreted in the celestial or Galactic coordinata system.
  ***************************************************************************/
-GModelSpatialPointSource::GModelSpatialPointSource(const GSkyDir& dir) :
+GModelSpatialPointSource::GModelSpatialPointSource(const GSkyDir&     dir,
+                                                   const std::string& coordsys) :
                           GModelSpatial()
 {
+    // Throw an exception if the coordinate system is invalid
+    if ((coordsys != "CEL") && (coordsys != "GAL")) {
+        std::string msg = "Invalid coordinate system \""+coordsys+"\" "
+                          "specified. Please specify either \"CEL\" or "
+                          "\"GAL\".";
+        throw GException::invalid_argument(G_CONSTRUCTOR1, msg);
+    }
+
     // Initialise members
     init_members();
+
+    // Set parameter names
+    if (coordsys == "CEL") {
+        m_lon.name("RA");
+        m_lat.name("DEC");
+    }
+    else {
+        m_lon.name("GLON");
+        m_lat.name("GLAT");
+    }
 
     // Assign direction
     this->dir(dir);
@@ -125,22 +154,49 @@ GModelSpatialPointSource::GModelSpatialPointSource(const GSkyDir& dir) :
 /***********************************************************************//**
  * @brief Value constructor
  *
- * @param[in] ra Right Ascencion of model centre.
- * @param[in] dec Declination of model centre.
+ * @param[in] lon Longitude of point source (deg).
+ * @param[in] lat Latitude of point source (deg).
+ * @param[in] coordsys Coordinate system (either "CEL" or "GAL")
  *
- * Construct a point source spatial model from the Right Ascension and
- * Declination of the model centre.
+ * @exception GException::invalid_argument
+ *            Invalid @p coordsys argument specified.
+ *
+ * Construct a point source spatial model from the longitude and latitude
+ * of a point source. The @p coordsys parameter specifies the coordinate
+ * system in which @p lon and @p lat are provided. By default a celestial
+ * coordinate system is assumed, which means that @p lon and @p lat are
+ * taken as Right Ascension and Declination. If "GAL" is specified, @p lon
+ * and @p lat are taken as Galactic longitude and latitude.
  ***************************************************************************/
-GModelSpatialPointSource::GModelSpatialPointSource(const double& ra,
-                                                   const double& dec) :
+GModelSpatialPointSource::GModelSpatialPointSource(const double&      lon,
+                                                   const double&      lat,
+                                                   const std::string& coordsys) :
                           GModelSpatial()
 {
+    // Throw an exception if the coordinate system is invalid
+    if ((coordsys != "CEL") && (coordsys != "GAL")) {
+        std::string msg = "Invalid coordinate system \""+coordsys+"\" "
+                          "specified. Please specify either \"CEL\" or "
+                          "\"GAL\".";
+        throw GException::invalid_argument(G_CONSTRUCTOR2, msg);
+    }
+
     // Initialise members
     init_members();
 
+    // Set parameter names
+    if (coordsys == "CEL") {
+        m_lon.name("RA");
+        m_lat.name("DEC");
+    }
+    else {
+        m_lon.name("GLON");
+        m_lat.name("GLAT");
+    }
+
     // Set values
-    m_ra.value(ra);
-    m_dec.value(dec);
+    m_lon.value(lon);
+    m_lat.value(lat);
 
     // Return
     return;
@@ -352,15 +408,15 @@ bool GModelSpatialPointSource::contains(const GSkyDir& dir,
  * format
  *
  *     <spatialModel type="PointSource">
- *       <parameter free="0" max="360" min="-360" name="RA" scale="1" value="83.6331" />
- *       <parameter free="0" max="90" min="-90" name="DEC" scale="1" value="22.0145" />
+ *       <parameter name="RA"  scale="1" value="83.6331" min="-360" max="360" free="0" />
+ *       <parameter name="DEC" scale="1" value="22.0145" min="-90"  max="90"  free="0" />
  *     </spatialModel>
  *
  * or
  *
  *     <spatialModel type="PointSource">
- *       <parameter free="0" max="360" min="-360" name="GLON" scale="1" value="83.6331" />
- *       <parameter free="0" max="90" min="-90" name="GLAT" scale="1" value="22.0145" />
+ *       <parameter name="GLON" scale="1" value="184.5575" min="-360" max="360" free="0" />
+ *       <parameter name="GLAT" scale="1" value="-5.7843"  min="-90"  max="90"  free="0" />
  *     </spatialModel>
  *
  ***************************************************************************/
@@ -377,8 +433,8 @@ void GModelSpatialPointSource::read(const GXmlElement& xml)
         const GXmlElement* dec = gammalib::xml_get_par(G_READ, xml, "DEC");
 
         // Read parameters
-        m_ra.read(*ra);
-        m_dec.read(*dec);
+        m_lon.read(*ra);
+        m_lat.read(*dec);
 
     }
 
@@ -390,18 +446,8 @@ void GModelSpatialPointSource::read(const GXmlElement& xml)
         const GXmlElement* glat = gammalib::xml_get_par(G_READ, xml, "GLAT");
 
         // Read parameters
-        m_ra.read(*glon);
-        m_dec.read(*glat);
-
-        // Convert into RA/DEC
-        GSkyDir dir;
-        dir.lb_deg(ra(), dec()),
-        m_ra.value(dir.ra_deg());
-        m_dec.value(dir.dec_deg());
-
-        // Set names to RA/DEC
-        m_ra.name("RA");
-        m_dec.name("DEC");
+        m_lon.read(*glon);
+        m_lat.read(*glat);
 
     }
 
@@ -415,16 +461,21 @@ void GModelSpatialPointSource::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element into which model information is written.
  *
- * Write the point source information into an XML element with the following
- * format
+ * Depending on the coordinate system, write the point source information
+ * into an XML element with the following format
  *
  *     <spatialModel type="PointSource">
- *       <parameter free="0" max="360" min="-360" name="RA" scale="1" value="83.6331" />
- *       <parameter free="0" max="90" min="-90" name="DEC" scale="1" value="22.0145" />
+ *       <parameter name="RA"  scale="1" value="83.6331" min="-360" max="360" free="0" />
+ *       <parameter name="DEC" scale="1" value="22.0145" min="-90"  max="90"  free="0" />
  *     </spatialModel>
  *
- * @todo The case that an existing spatial XML element with "GLON" and "GLAT"
- *       as coordinates is not supported.
+ * or
+ *
+ *     <spatialModel type="PointSource">
+ *       <parameter name="GLON" scale="1" value="184.5575" min="-360" max="360" free="0" />
+ *       <parameter name="GLAT" scale="1" value="-5.7843"  min="-90"  max="90"  free="0" />
+ *     </spatialModel>
+ *
  ***************************************************************************/
 void GModelSpatialPointSource::write(GXmlElement& xml) const
 {
@@ -432,12 +483,12 @@ void GModelSpatialPointSource::write(GXmlElement& xml) const
     gammalib::xml_check_type(G_WRITE, xml, type());
 
     // Get or create parameters
-    GXmlElement* ra  = gammalib::xml_need_par(G_WRITE, xml, m_ra.name());
-    GXmlElement* dec = gammalib::xml_need_par(G_WRITE, xml, m_dec.name());
+    GXmlElement* lon = gammalib::xml_need_par(G_WRITE, xml, m_lon.name());
+    GXmlElement* lat = gammalib::xml_need_par(G_WRITE, xml, m_lat.name());
 
     // Write parameters
-    m_ra.write(*ra);
-    m_dec.write(*dec);
+    m_lon.write(*lon);
+    m_lat.write(*lat);
 
     // Return
     return;
@@ -511,29 +562,53 @@ std::string GModelSpatialPointSource::print(const GChatter& chatter) const
  *
  * Returns the sky direction of the point source.
  ***************************************************************************/
-GSkyDir GModelSpatialPointSource::dir(void) const
+const GSkyDir& GModelSpatialPointSource::dir(void) const
 {
-    // Allocate sky direction
-    GSkyDir srcDir;
+    // Get longitude and latitude values
+    double lon = m_lon.value();
+    double lat = m_lat.value();
 
-    // Set sky direction
-    srcDir.radec_deg(ra(), dec());
+    // If longitude or latitude values have changed then update sky
+    // direction cache
+    if ((lon != m_last_lon) || (lat != m_last_lat)) {
 
-    // Return direction
-    return srcDir;
+        // Update last values
+        m_last_lon = lon;
+        m_last_lat = lat;
+
+        // Update sky direction dependent on model coordinate system
+        if (is_celestial()) {
+            m_dir.radec_deg(m_last_lon, m_last_lat);
+        }
+        else {
+            m_dir.lb_deg(m_last_lon, m_last_lat);
+        }
+
+    } // endif: update of sky direction cache required
+
+    // Return sky direction
+    return (m_dir);
 }
 
 
 /***********************************************************************//**
  * @brief Set position of point source
  *
+ * @param[in] dir Sky direction of point source.
+ *
  * Sets the sky direction of the point source.
  ***************************************************************************/
 void GModelSpatialPointSource::dir(const GSkyDir& dir)
 {
-    // Assign Right Ascension and Declination
-    m_ra.value(dir.ra_deg());
-    m_dec.value(dir.dec_deg());
+    // Assign sky direction depending on the model coordinate system
+    if (is_celestial()) {
+        m_lon.value(dir.ra_deg());
+        m_lat.value(dir.dec_deg());
+    }
+    else {
+        m_lon.value(dir.l_deg());
+        m_lat.value(dir.b_deg());
+    }
 
     // Return
     return;
@@ -555,27 +630,32 @@ void GModelSpatialPointSource::init_members(void)
     m_type = "PointSource";
 
     // Initialise Right Ascension
-    m_ra.clear();
-    m_ra.name("RA");
-    m_ra.unit("deg");
-    m_ra.fix();
-    m_ra.scale(1.0);
-    m_ra.gradient(0.0);
-    m_ra.has_grad(false);
+    m_lon.clear();
+    m_lon.name("RA");
+    m_lon.unit("deg");
+    m_lon.fix();
+    m_lon.scale(1.0);
+    m_lon.gradient(0.0);
+    m_lon.has_grad(false);
 
     // Initialise Declination
-    m_dec.clear();
-    m_dec.name("DEC");
-    m_dec.unit("deg");
-    m_dec.fix();
-    m_dec.scale(1.0);
-    m_dec.gradient(0.0);
-    m_dec.has_grad(false);
+    m_lat.clear();
+    m_lat.name("DEC");
+    m_lat.unit("deg");
+    m_lat.fix();
+    m_lat.scale(1.0);
+    m_lat.gradient(0.0);
+    m_lat.has_grad(false);
 
     // Set parameter pointer(s)
     m_pars.clear();
-    m_pars.push_back(&m_ra);
-    m_pars.push_back(&m_dec);
+    m_pars.push_back(&m_lon);
+    m_pars.push_back(&m_lat);
+
+    // Initialise cache
+    m_dir.clear();
+    m_last_lon = -9999.0;
+    m_last_lat = -9999.0;
 
     // Return
     return;
@@ -591,13 +671,18 @@ void GModelSpatialPointSource::copy_members(const GModelSpatialPointSource& mode
 {
     // Copy members
     m_type = model.m_type;   // Needed to conserve model type
-    m_ra   = model.m_ra;
-    m_dec  = model.m_dec;
+    m_lon  = model.m_lon;
+    m_lat  = model.m_lat;
 
     // Set parameter pointer(s)
     m_pars.clear();
-    m_pars.push_back(&m_ra);
-    m_pars.push_back(&m_dec);
+    m_pars.push_back(&m_lon);
+    m_pars.push_back(&m_lat);
+
+    // Copy cache
+    m_dir      = model.m_dir;
+    m_last_lon = model.m_last_lon;
+    m_last_lat = model.m_last_lat;
 
     // Return
     return;
@@ -620,7 +705,7 @@ void GModelSpatialPointSource::free_members(void)
 void GModelSpatialPointSource::set_region(void) const
 {
     // Set sky region circle
-    GSkyRegionCircle region(m_ra.value(), m_dec.value(), 0.0);
+    GSkyRegionCircle region(dir(), 0.0);
 
     // Set region (circumvent const correctness)
     const_cast<GModelSpatialPointSource*>(this)->m_region = region;

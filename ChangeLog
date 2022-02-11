@@ -1,8 +1,9 @@
-2022-01-19
+2022-02-11
 
         * Version 2.0.0 released
         ========================
 
+        Support Galactic coordinates in spatial models (#3988)
         Implement CGRO clock correction (#3973)
         Add support for COMPTEL pulsar analysis (#3973)
         Add GCOMObservation::tim() and GCOMObservation::oads() setter methods

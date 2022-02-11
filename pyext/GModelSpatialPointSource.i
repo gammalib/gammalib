@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GModelSpatialPointSource.i - Spatial point source model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,8 +39,11 @@ class GModelSpatialPointSource  : public GModelSpatial {
 public:
     // Constructors and destructors
     GModelSpatialPointSource(void);
-    explicit GModelSpatialPointSource(const GSkyDir& dir);
-    GModelSpatialPointSource(const double& ra, const double& dec);
+    GModelSpatialPointSource(const GSkyDir&     dir,
+                             const std::string& coordsys = "CEL");
+    GModelSpatialPointSource(const double&      lon,
+                             const double&      lat,
+                             const std::string& coordsys = "CEL");
     explicit GModelSpatialPointSource(const GXmlElement& xml);
     GModelSpatialPointSource(const GModelSpatialPointSource& model);
     virtual ~GModelSpatialPointSource(void);
@@ -67,12 +70,9 @@ public:
                         const GTime&      srcTime = GTime()) const;
 
     // Other methods
-    double  ra(void) const;
-    double  dec(void) const;
-    void    ra(const double& ra);
-    void    dec(const double& dec);
-    GSkyDir dir(void) const;
-    void    dir(const GSkyDir& dir);
+    std::string    coordsys(void) const;
+    const GSkyDir& dir(void) const;
+    void           dir(const GSkyDir& dir);
 };
 
 
@@ -85,12 +85,10 @@ public:
     }
 %pythoncode {
     def __getstate__(self):
-        state = self.type(), self[0], self[1]
+        state = {'type': self.type(), 'dir': self.dir(), 'coordsys': self.coordsys()}
         return state
     def __setstate__(self, state):
-        self.__init__()
-        self.type(state[0])
-        self[0] = state[1]
-        self[1] = state[2]
+        self.__init__(state['dir'],state['coordsys'])
+        self.type(state['type'])
 }
 };

@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpatialPointSource.hpp - Spatial point source model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,8 +32,14 @@
 #include "GModelSpatial.hpp"
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
-#include "GSkyRegionCircle.hpp"
-#include "GXmlElement.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GEnergy;
+class GTime;
+class GPhoton;
+class GRan;
+class GSkyRegion;
+class GXmlElement;
 
 
 /***********************************************************************//**
@@ -42,8 +48,11 @@
  * @brief Point source spatial model
  *
  * This class implements a point source as the spatial component of the
- * factorised source model. The point source has two parameters: the Right
- * Ascension and Declination of the point source location.
+ * factorised source model. The point source has two parameters: the
+ * longitude and latitude of the point source location. The parameters may
+ * either be specified in celestial or Galactic coordinates. For celestial
+ * coordinates the parameter names are "RA" and "DEC", for Galactic
+ * coordinates the parameter names are "GLON" and "GLAT".
  ***************************************************************************/
 class GModelSpatialPointSource : public GModelSpatial {
 
@@ -51,8 +60,11 @@ public:
     // Constructors and destructors
     GModelSpatialPointSource(void);
     GModelSpatialPointSource(const bool& dummy, const std::string& type);
-    explicit GModelSpatialPointSource(const GSkyDir& dir);
-    GModelSpatialPointSource(const double& ra, const double& dec);
+    GModelSpatialPointSource(const GSkyDir&     dir,
+                             const std::string& coordsys = "CEL");
+    GModelSpatialPointSource(const double&      lon,
+                             const double&      lat,
+                             const std::string& coordsys = "CEL");
     explicit GModelSpatialPointSource(const GXmlElement& xml);
     GModelSpatialPointSource(const GModelSpatialPointSource& model);
     virtual ~GModelSpatialPointSource(void);
@@ -84,23 +96,26 @@ public:
                         const GTime&      srcTime = GTime()) const;
 
     // Other methods
-    double  ra(void) const;
-    double  dec(void) const;
-    void    ra(const double& ra);
-    void    dec(const double& dec);
-    GSkyDir dir(void) const;
-    void    dir(const GSkyDir& dir);
+    std::string    coordsys(void) const;
+    const GSkyDir& dir(void) const;
+    void           dir(const GSkyDir& dir);
 
 protected:
     // Protected methods
     void         init_members(void);
     void         copy_members(const GModelSpatialPointSource& model);
     void         free_members(void);
+    bool         is_celestial(void) const;
     virtual void set_region(void) const;
 
     // Protected members
-    GModelPar m_ra;     //!< Right Ascension (deg)
-    GModelPar m_dec;    //!< Declination (deg)
+    GModelPar m_lon;    //!< Right Ascension or Galactic longitude (deg)
+    GModelPar m_lat;    //!< Declination or Galactic latitude (deg)
+
+    // Cached members for sky direction handling
+    mutable GSkyDir m_dir;      //!< Sky direction representing parameters
+    mutable double  m_last_lon; //!< Last longitude
+    mutable double  m_last_lat; //!< Last latitude
 };
 
 
@@ -131,64 +146,6 @@ GClassCode GModelSpatialPointSource::code(void) const
 
 
 /***********************************************************************//**
- * @brief Return Right Ascencion of model centre
- *
- * @return Right Ascencion of model centre (degrees).
- *
- * Returns the Right Ascension of the model centre in degrees.
- ***************************************************************************/
-inline
-double GModelSpatialPointSource::ra(void) const
-{
-    return (m_ra.value());
-}
-
-
-/***********************************************************************//**
- * @brief Set Right Ascencion of model centre
- *
- * @param[in] ra Right Ascencion of model centre.
- *
- * Sets the Right Ascencion of model centre.
- ***************************************************************************/
-inline
-void GModelSpatialPointSource::ra(const double& ra)
-{
-    m_ra.value(ra);
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Return Declination of model centre
- *
- * @return Declination of model centre (degrees).
- *
- * Returns the Declination of the model centre in degrees.
- ***************************************************************************/
-inline
-double GModelSpatialPointSource::dec(void) const
-{
-    return (m_dec.value());
-}
-
-
-/***********************************************************************//**
- * @brief Set Declination of model centre
- *
- * @param[in] dec Declination of model centre.
- *
- * Sets the Declination of model centre.
- ***************************************************************************/
-inline
-void GModelSpatialPointSource::dec(const double& dec)
-{
-    m_dec.value(dec);
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Return normalization of point source for Monte Carlo simulations
  *
  * @param[in] dir Centre of simulation cone.
@@ -205,6 +162,33 @@ double GModelSpatialPointSource::mc_norm(const GSkyDir& dir,
 {
     double norm = (dir.dist_deg(this->dir()) <= radius) ? 1.0 : 0.0;
     return (norm);
+}
+
+
+/***********************************************************************//**
+ * @brief Return coordinate system
+ *
+ * @return Coordinate system of point source model.
+ *
+ * Returns "CEL" for a celestial coordinate system and "GAL" for a Galactic
+ * coordinate system.
+ ***************************************************************************/
+inline
+std::string GModelSpatialPointSource::coordsys(void) const
+{
+    return (is_celestial() ? "CEL" : "GAL");
+}
+
+
+/***********************************************************************//**
+ * @brief Check if model holds celestial coordinates
+ *
+ * @return True if model holds celestial coordinates, false otherwise.
+ ***************************************************************************/
+inline
+bool GModelSpatialPointSource::is_celestial(void) const
+{
+    return (m_lon.name() == "RA");
 }
 
 #endif /* GMODELSPATIALPOINTSOURCE_HPP */

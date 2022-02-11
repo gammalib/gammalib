@@ -882,78 +882,90 @@ void TestGModel::test_point_source(void)
     GModelSpatialPointSource model1;
     test_value(model1.type(), "PointSource");
 
-    // Test sky direction constructor
+    // Test celestial sky direction constructor
     GSkyDir dir1;
     dir1.radec_deg(83.6331, +22.0145);
     GModelSpatialPointSource model2(dir1);
-    test_value(model2.ra(), 83.6331);
-    test_value(model2.dec(), +22.0145);
+    test_value(model2.dir().ra_deg(),   83.6331,   "Test Right Ascension for celestial sky direction constructor");
+    test_value(model2.dir().dec_deg(), +22.0145,   "Test Declination for celestial sky direction constructor");
+    test_value(model2.dir().l_deg(),   184.557460, "Test Galactic longitude for celestial sky direction constructor");
+    test_value(model2.dir().b_deg(),    -5.784346, "Test Galactic latitude for celestial sky direction constructor");
 
-    // Test value constructor
-    GModelSpatialPointSource model3(83.6331, +22.0145);
-    test_value(model3.ra(), 83.6331);
-    test_value(model3.dec(), +22.0145);
+    // Test Galactic sky direction constructor
+    GModelSpatialPointSource model3(dir1, "GAL");
+    test_value(model3.dir().ra_deg(),   83.6331,   "Test Right Ascension for Galactic sky direction constructor");
+    test_value(model3.dir().dec_deg(), +22.0145,   "Test Declination for Galactic sky direction constructor");
+    test_value(model3.dir().l_deg(),   184.557460, "Test Galactic longitude for Galactic sky direction constructor");
+    test_value(model3.dir().b_deg(),    -5.784346, "Test Galactic latitude for Galactic sky direction constructor");
+
+    // Test celestial value constructor
+    GModelSpatialPointSource model4(83.6331, +22.0145);
+    test_value(model4.dir().ra_deg(),   83.6331,   "Test Right Ascension for celestial value constructor");
+    test_value(model4.dir().dec_deg(), +22.0145,   "Test Declination for celestial value constructor");
+    test_value(model4.dir().l_deg(),   184.557460, "Test Galactic longitude for celestial value constructor");
+    test_value(model4.dir().b_deg(),    -5.784346, "Test Galactic latitude for celestial value constructor");
+
+    // Test Galactic value constructor
+    GModelSpatialPointSource model5(184.5575, -5.7843, "GAL");
+    test_value(model5.dir().ra_deg(),   83.633165, "Test Right Ascension for Galactic value constructor");
+    test_value(model5.dir().dec_deg(), +22.014491, "Test Declination for Galactic value constructor");
+    test_value(model5.dir().l_deg(),   184.5575,   "Test Galactic longitude for Galactic value constructor");
+    test_value(model5.dir().b_deg(),    -5.7843,   "Test Galactic latitude for Galactic value constructor");
 
     // Test XML constructor
     GXml         xml(m_xml_model_point_plaw);
     GXmlElement* element = xml.element(0)->element(0)->element("spatialModel", 0);
-    GModelSpatialPointSource model4(*element);
-    test_value(model4.size(), 2);
-    test_value(model4.type(), "PointSource");
-    test_value(model4.ra(), 83.6331);
-    test_value(model4.dec(), +22.0145);
-
-    // Test ra method
-    model4.ra(3.9);
-    test_value(model4.ra(), 3.9);
-
-    // Test dec method
-    model4.dec(3.9);
-    test_value(model4.dec(), 3.9);
+    GModelSpatialPointSource model6(*element);
+    test_value(model6.size(), 2);
+    test_value(model6.type(), "PointSource");
+    test_value(model6.dir().ra_deg(),   83.6331,   "Test Right Ascension for celestial XML constructor");
+    test_value(model6.dir().dec_deg(), +22.0145,   "Test Declination for celestial XML constructor");
+    test_value(model6.dir().l_deg(),   184.557460, "Test Galactic longitude for celestial XML constructor");
+    test_value(model6.dir().b_deg(),    -5.784346, "Test Galactic latitude for celestial XML constructor");
 
     // Test region method
     GSkyDir dir2;
-    dir2.radec_deg(3.9, 3.9);
-    test_assert(model4.region()->contains(dir2), "Test region() method (inside)");
-    dir2.radec_deg(4.9, 3.9);
-    test_assert(!model4.region()->contains(dir2), "Test region() method (outside)");
+    dir2.radec_deg(83.6331, +22.0145);
+    test_assert(model6.region()->contains(dir2), "Test region() method (inside)");
+    dir2.radec_deg(84.6331, +22.0145);
+    test_assert(!model6.region()->contains(dir2), "Test region() method (outside)");
 
     // Test operator access
     const char* strarray[] = {"RA", "DEC"};
     for (int i = 0; i < 2; ++i) {
         std::string keyname(strarray[i]);
-        model4[keyname].value(2.1);
-        model4[keyname].error(1.9);
-        model4[keyname].gradient(0.8);
-        test_value(model4[keyname].value(), 2.1);
-        test_value(model4[keyname].error(), 1.9);
-        test_value(model4[keyname].gradient(), 0.8);
+        model6[keyname].value(2.1);
+        model6[keyname].error(1.9);
+        model6[keyname].gradient(0.8);
+        test_value(model6[keyname].value(), 2.1);
+        test_value(model6[keyname].error(), 1.9);
+        test_value(model6[keyname].gradient(), 0.8);
     }
 
     // Test size() method
-    GModelSpatialPointSource model5;
-    test_value(model5.size(), 2, "Test size() method.");
+    GModelSpatialPointSource model7;
+    test_value(model7.size(), 2, "Test size() method.");
 
     // Test has_par() method
-    test_assert(model5.has_par("RA"), "Test has_par() method for \"RA\"");
-    test_assert(model5.has_par("DEC"), "Test has_par() method for \"DEC\"");
-    test_assert(!model5.has_par("XXX"), "Test has_par() method for \"XXX\"");
+    test_assert(model7.has_par("RA"), "Test has_par() method for \"RA\"");
+    test_assert(model7.has_par("DEC"), "Test has_par() method for \"DEC\"");
+    test_assert(!model7.has_par("XXX"), "Test has_par() method for \"XXX\"");
 
     // Test has_free_pars() method
-    model5["RA"].fix();
-    model5["DEC"].fix();
-    test_assert(!model5.has_free_pars(), "Test has_free_pars() method for fixed parameters");
-    model5["DEC"].free();
-    test_assert(model5.has_free_pars(), "Test has_free_pars() method for free parameters");
+    model7["RA"].fix();
+    model7["DEC"].fix();
+    test_assert(!model7.has_free_pars(), "Test has_free_pars() method for fixed parameters");
+    model7["DEC"].free();
+    test_assert(model7.has_free_pars(), "Test has_free_pars() method for free parameters");
 
     // Test autoscale() method
-    model5["RA"].value(180.0);
-    model5["DEC"].value(-30.0);
-    model5.autoscale();
-    test_value(model5["RA"].scale(), 180.0, "Test autoscale() method (\"RA\" scale).");
-    test_value(model5["DEC"].scale(), -30.0, "Test autoscale() method (\"DEC\" scale).");
-    test_value(model5["RA"].factor_value(), 1.0, "Test autoscale() method (\"RA\" factor).");
-    test_value(model5["DEC"].factor_value(), 1.0, "Test autoscale() method (\"DEC\" factor).");
+    model7["RA"].value(180.0);
+    model7["DEC"].value(-30.0);
+    model7.autoscale();
+    test_value(model7["RA"].scale(), 180.0, "Test autoscale() method (\"RA\" scale).");
+    test_value(model7["DEC"].scale(), -30.0, "Test autoscale() method (\"DEC\" scale).");
+    test_value(model7["RA"].factor_value(), 1.0, "Test autoscale() method (\"RA\" factor).");
+    test_value(model7["DEC"].factor_value(), 1.0, "Test autoscale() method (\"DEC\" factor).");
 
     // Exit test
     return;
@@ -4173,8 +4185,8 @@ void TestGModel::test_legacy_model_point_const(void)
 
     // Test model values
     test_value(spatial->type(), "SkyDirFunction", "Check spatial model type");
-    test_value(spatial->ra(), 83.6331, 1.0e-7, "Check Right Ascension");
-    test_value(spatial->dec(), 22.0145, 1.0e-7, "Check Declination");
+    test_value(spatial->dir().ra_deg(), 83.6331, 1.0e-7, "Check Right Ascension");
+    test_value(spatial->dir().dec_deg(), 22.0145, 1.0e-7, "Check Declination");
     test_value(spectral->type(), "ConstantValue", "Check spectral model type");
     test_value(spectral->value(), 5.7e-16, 1.0e-7, "Check constant value");
 
@@ -4193,8 +4205,8 @@ void TestGModel::test_legacy_model_point_const(void)
 
     // Re-test model values
     test_value(spatial->type(), "SkyDirFunction", "Check spatial model type");
-    test_value(spatial->ra(), 83.6331, 1.0e-7, "Check Right Ascension");
-    test_value(spatial->dec(), 22.0145, 1.0e-7, "Check Declination");
+    test_value(spatial->dir().ra_deg(), 83.6331, 1.0e-7, "Check Right Ascension");
+    test_value(spatial->dir().dec_deg(), 22.0145, 1.0e-7, "Check Declination");
     test_value(spectral->type(), "ConstantValue", "Check spectral model type");
     test_value(spectral->value(), 5.7e-16, 1.0e-7, "Check constant value");
 

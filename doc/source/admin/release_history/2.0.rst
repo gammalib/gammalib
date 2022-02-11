@@ -1,7 +1,7 @@
 .. _2.0:
 
-GammaLib 2.0 release (19 January 2022)
-======================================
+GammaLib 2.0 release (11 February 2022)
+=======================================
 
 Overview
 --------
@@ -14,6 +14,7 @@ In particular, this release provides:
 * full support of all spatial models for COMPTEL
 * support for pulsar analysis
 * vectorised response computation
+* support Galactic coordinates in spatial models
 
 
 Bug fixes
@@ -40,6 +41,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`3988 <https://cta-redmine.irap.omp.eu/issues/3988>`_] -
+  Support Galactic coordinates in spatial models
 * Add ``GCOMObservation::tim()`` and ``GCOMObservation::oads()`` setter methods
 * [`3917 <https://cta-redmine.irap.omp.eu/issues/3913>`_] -
   Add ``GCOMSelection::fpmtflag()``, ``GCOMSelection::use_d1()`` and ``GCOMSelection::use_d2()`` methods

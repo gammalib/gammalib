@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-19 January 2022
+11 February 2022
 
 
 1. Introduction
@@ -78,6 +78,7 @@ The following methods have been added:
 - GModelSpatialDiffuseCube::flux(GSkyRegion&, GEnergy&, GTime&)
 - GModelSpatialDiffuseMap::flux(GSkyRegion&, GEnergy&, GTime&)
 - GModelSpatialPointSource::flux(GSkyRegion&, GEnergy&, GTime&)
+- GModelSpatialPointSource::coordsys()
 - GModelSpatialRadial::is_energy_dependent()
 - GModelSpatialRadial::is_time_dependent()
 - GModelSpectralFunc(GModelSpectral&, GEnergies&)
@@ -148,6 +149,8 @@ The following methods have been added:
 
 The following methods have been removed:
 - GFitsTableCol::scale()
+- GModelSpatialPointSource::ra()
+- GModelSpatialPointSource::dec()
 - GCOMObservation::drm(GModelSky&)
 - GCOMResponse::irf_spatial()
 - GCOMSelection::zeta_min()
@@ -160,6 +163,10 @@ The following methods have been renamed:
 The arguments for the following methods have been changed:
 - GModelSpatial::flux(GSkyRegion&, GEnergy&, GTime&) was
   GModelSpatial::flux(GSkyRegion*, GEnergy&, GTime&)
+- GModelSpatialPointSource::GModelSpatialPointSource(GSkyDir&, std::string&) was
+  GModelSpatialPointSource::GModelSpatialPointSource(GSkyDir&)
+- GModelSpatialPointSource::GModelSpatialPointSource(double&, double&, std::string&) was
+  GModelSpatialPointSource::GModelSpatialPointSource(double&, double&)
 - GCOMObservation::drm(GSkyModel&) was GCOMObservation::drm(GSource&)
 
 The return value of the following methods has been changed:
@@ -228,6 +235,12 @@ Implemented GMatrixSparse::row() and GMatrixSparse::add_to_row() methods.
 
 9. Model module
 ---------------
+Added support for Galactic coordinates in spatial models. The ra() and dec()
+methods have been removed for spatial models, access to the coordinates is now
+only supported via the dir() method. Models with celestial coordinates have
+the parameters "RA" and "DEC", models with Galactic coordinates have the 
+parameters "GLON" and "GLAT" (#3988).
+
 Added GModelSpatialRadialGeneralGauss and GModelSpatialEllipticalGeneralGauss
 classes to model general Gaussian functions as spatial components (#3924).
 
