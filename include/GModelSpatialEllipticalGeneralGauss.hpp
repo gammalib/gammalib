@@ -32,9 +32,15 @@
 #include <string>
 #include "GModelSpatialElliptical.hpp"
 #include "GModelPar.hpp"
-#include "GSkyDir.hpp"
-#include "GSkyRegionCircle.hpp"
-#include "GXmlElement.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GEnergy;
+class GTime;
+class GPhoton;
+class GRan;
+class GSkyDir;
+class GSkyRegion;
+class GXmlElement;
 
 
 /**************************************************************************
@@ -51,11 +57,12 @@ class GModelSpatialEllipticalGeneralGauss : public GModelSpatialElliptical {
 public:
     // Constructors and destructors
     GModelSpatialEllipticalGeneralGauss(void);
-    GModelSpatialEllipticalGeneralGauss(const GSkyDir& dir,
-                                        const double&  major,
-                                        const double&  minor,
-                                        const double&  posangle,
-                                        const double&  ridx);
+    GModelSpatialEllipticalGeneralGauss(const GSkyDir&     dir,
+                                        const double&      major,
+                                        const double&      minor,
+                                        const double&      posangle,
+                                        const double&      ridx,
+                                        const std::string& coordsys = "CEL");
     explicit GModelSpatialEllipticalGeneralGauss(const GXmlElement& xml);
     GModelSpatialEllipticalGeneralGauss(const GModelSpatialEllipticalGeneralGauss& model);
     virtual ~GModelSpatialEllipticalGeneralGauss(void);

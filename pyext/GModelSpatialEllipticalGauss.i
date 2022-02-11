@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpatialEllipticalGauss.i - Elliptical gauss source model class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015-2018 by Michael Mayer                               *
+ *  copyright (C) 2015-2022 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,10 +39,11 @@ class GModelSpatialEllipticalGauss : public GModelSpatialElliptical {
 public:
     // Constructors and destructors
     GModelSpatialEllipticalGauss(void);
-    GModelSpatialEllipticalGauss(const GSkyDir& dir,
-                                 const double&  semiminor,
-                                 const double&  semimajor,
-                                 const double&  posangle);
+    GModelSpatialEllipticalGauss(const GSkyDir&     dir,
+                                 const double&      semiminor,
+                                 const double&      semimajor,
+                                 const double&      posangle,
+                                 const std::string& coordsys = "CEL");
     explicit GModelSpatialEllipticalGauss(const GXmlElement& xml);
     GModelSpatialEllipticalGauss(const GModelSpatialEllipticalGauss& model);
     virtual ~GModelSpatialEllipticalGauss(void);

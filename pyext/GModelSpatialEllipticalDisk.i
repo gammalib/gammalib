@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpatialEllipticalDisk.i - Elliptical disk source model class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2020 by Michael Mayer                               *
+ *  copyright (C) 2013-2022 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,10 +39,11 @@ class GModelSpatialEllipticalDisk : public GModelSpatialElliptical {
 public:
     // Constructors and destructors
     GModelSpatialEllipticalDisk(void);
-    GModelSpatialEllipticalDisk(const GSkyDir& dir,
-                                const double&  semiminor,
-                                const double&  semimajor,
-                                const double&  posangle);
+    GModelSpatialEllipticalDisk(const GSkyDir&     dir,
+                                const double&      semimajor,
+                                const double&      semiminor,
+                                const double&      posangle,
+                                const std::string& coordsys = "CEL");
     explicit GModelSpatialEllipticalDisk(const GXmlElement& xml);
     GModelSpatialEllipticalDisk(const GModelSpatialEllipticalDisk& model);
     virtual ~GModelSpatialEllipticalDisk(void);

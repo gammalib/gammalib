@@ -40,11 +40,12 @@ class GModelSpatialEllipticalGeneralGauss : public GModelSpatialElliptical {
 public:
     // Constructors and destructors
     GModelSpatialEllipticalGeneralGauss(void);
-    GModelSpatialEllipticalGeneralGauss(const GSkyDir& dir,
-                                        const double&  major,
-                                        const double&  minor,
-                                        const double&  posangle,
-                                        const double&  ridx);
+    GModelSpatialEllipticalGeneralGauss(const GSkyDir&     dir,
+                                        const double&      major,
+                                        const double&      minor,
+                                        const double&      posangle,
+                                        const double&      ridx,
+                                        const std::string& coordsys = "CEL");
     explicit GModelSpatialEllipticalGeneralGauss(const GXmlElement& xml);
     GModelSpatialEllipticalGeneralGauss(const GModelSpatialEllipticalGeneralGauss& model);
     virtual ~GModelSpatialEllipticalGeneralGauss(void);

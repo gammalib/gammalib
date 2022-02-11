@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GModelSpatialElliptical.hpp - Abstract elliptical spatial model class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,11 +33,14 @@
 #include "GModelSpatial.hpp"
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
-#include "GEnergy.hpp"
-#include "GTime.hpp"
-#include "GPhoton.hpp"
-#include "GXmlElement.hpp"
-#include "GRan.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GEnergy;
+class GTime;
+class GPhoton;
+class GRan;
+class GSkyRegion;
+class GXmlElement;
 
 
 /***********************************************************************//**
@@ -87,32 +90,35 @@ public:
     virtual void       write(GXmlElement& xml) const;
 
     // Other methods
-    double  ra(void) const;
-    double  dec(void) const;
-    void    ra(const double& ra);
-    void    dec(const double& dec);
-    double  posangle(void) const;
-    void    posangle(const double& posangle);
-    double  semiminor(void) const;
-    double  semimajor(void) const;
-    void    semiminor(const double& semiminor);
-    void    semimajor(const double& semimajor);
-    GSkyDir dir(void) const;
-    void    dir(const GSkyDir& dir);
+    std::string    coordsys(void) const;
+    const GSkyDir& dir(void) const;
+    void           dir(const GSkyDir& dir);
+    double         posangle(void) const;
+    void           posangle(const double& posangle);
+    double         semiminor(void) const;
+    double         semimajor(void) const;
+    void           semiminor(const double& semiminor);
+    void           semimajor(const double& semimajor);
 
 protected:
     // Protected methods
     void         init_members(void);
     void         copy_members(const GModelSpatialElliptical& model);
     void         free_members(void);
+    bool         is_celestial(void) const;
     virtual void set_region(void) const = 0;
 
     // Protected members
-    GModelPar m_ra;        //!< Right Ascension (deg)
-    GModelPar m_dec;       //!< Declination (deg)
+    GModelPar m_lon;       //!< Right Ascension or Galactic longitude (deg)
+    GModelPar m_lat;       //!< Declination or Galactic latitude (deg)
     GModelPar m_posangle;  //!< Position angle from North, counterclockwise (deg)
     GModelPar m_semiminor; //!< Semi-minor axis of ellipse (deg)
     GModelPar m_semimajor; //!< Semi-major axis of ellipse (deg)
+    
+    // Cached members for sky direction handling
+    mutable GSkyDir m_dir;      //!< Sky direction representing parameters
+    mutable double  m_last_lon; //!< Last longitude
+    mutable double  m_last_lat; //!< Last latitude
 };
 
 
@@ -127,64 +133,6 @@ inline
 GClassCode GModelSpatialElliptical::code(void) const
 {
     return GMODEL_SPATIAL_ELLIPTICAL;
-}
-
-
-/***********************************************************************//**
- * @brief Return Right Ascencion of model centre
- *
- * @return Right Ascencion of model centre (degrees).
- *
- * Returns the Right Ascension of the model centre in degrees.
- ***************************************************************************/
-inline
-double GModelSpatialElliptical::ra(void) const
-{
-    return (m_ra.value());
-}
-
-
-/***********************************************************************//**
- * @brief Set Right Ascencion of model centre
- *
- * @param[in] ra Right Ascension (degrees).
- *
- * Sets the Right Ascension of the model centre in degrees.
- ***************************************************************************/
-inline
-void GModelSpatialElliptical::ra(const double& ra)
-{
-    m_ra.value(ra);
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Return Declination of model centre
- *
- * @return Declination of model centre (degrees).
- *
- * Returns the Declination of the model centre in degrees.
- ***************************************************************************/
-inline
-double GModelSpatialElliptical::dec(void) const
-{
-    return (m_dec.value());
-}
-
-
-/***********************************************************************//**
- * @brief Set Declination of model centre
- *
- * @param[in] dec Declination (degrees).
- *
- * Sets the Declination of the model centre in degrees.
- ***************************************************************************/
-inline
-void GModelSpatialElliptical::dec(const double& dec)
-{
-    m_dec.value(dec);
-    return;
 }
 
 
@@ -295,6 +243,33 @@ double GModelSpatialElliptical::mc_norm(const GSkyDir& dir,
 {
     double norm = (dir.dist_deg(this->dir()) <= radius+theta_max()) ? 1.0 : 0.0;
     return (norm);
+}
+
+
+/***********************************************************************//**
+ * @brief Return coordinate system
+ *
+ * @return Coordinate system of point source model.
+ *
+ * Returns "CEL" for a celestial coordinate system and "GAL" for a Galactic
+ * coordinate system.
+ ***************************************************************************/
+inline
+std::string GModelSpatialElliptical::coordsys(void) const
+{
+    return (is_celestial() ? "CEL" : "GAL");
+}
+
+
+/***********************************************************************//**
+ * @brief Check if model holds celestial coordinates
+ *
+ * @return True if model holds celestial coordinates, false otherwise.
+ ***************************************************************************/
+inline
+bool GModelSpatialElliptical::is_celestial(void) const
+{
+    return (m_lon.name() == "RA");
 }
 
 #endif /* GMODELSPATIALELLIPTICAL_HPP */

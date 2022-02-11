@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpatialEllipticalDisk.cpp - Elliptical disk source model class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2021 by Michael Mayer                               *
+ *  copyright (C) 2013-2022 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -42,6 +42,9 @@ const GModelSpatialEllipticalDisk g_elliptical_disk_seed;
 const GModelSpatialRegistry       g_elliptical_disk_registry(&g_elliptical_disk_seed);
 
 /* __ Method name definitions ____________________________________________ */
+#define G_CONSTRUCTOR                         "GModelSpatialEllipticalDisk::"\
+                   "GModelSpatialEllipticalDisk(GSkyDir&, double&, double&, "\
+                                                     "double&, std::string&)"
 #define G_READ              "GModelSpatialEllipticalDisk::read(GXmlElement&)"
 #define G_WRITE            "GModelSpatialEllipticalDisk::write(GXmlElement&)"
 
@@ -79,19 +82,44 @@ GModelSpatialEllipticalDisk::GModelSpatialEllipticalDisk(void) :
  * @param[in] semimajor Semi-major axis (degrees).
  * @param[in] semiminor Semi-minor axis (degrees).
  * @param[in] posangle Position angle of semi-major axis (degrees).
+ * @param[in] coordsys Coordinate system (either "CEL" or "GAL")
+ *
+ * @exception GException::invalid_argument
+ *            Invalid @p coordsys argument specified.
  *
  * Construct elliptical disk model from sky position of the ellipse centre
  * (@p dir), the @p semimajor and @p semiminor axes, and the position
- * angle (@p posangle).
+ * angle (@p posangle). The @p coordsys parameter specifies whether the sky
+ * direction should be interpreted in the celestial or Galactic coordinate
+ * system.
  ***************************************************************************/
-GModelSpatialEllipticalDisk::GModelSpatialEllipticalDisk(const GSkyDir& dir,
-                                                         const double&  semimajor,
-                                                         const double&  semiminor,
-                                                         const double&  posangle) :
+GModelSpatialEllipticalDisk::GModelSpatialEllipticalDisk(const GSkyDir&     dir,
+                                                         const double&      semimajor,
+                                                         const double&      semiminor,
+                                                         const double&      posangle,
+                                                         const std::string& coordsys) :
                              GModelSpatialElliptical()
 {
+    // Throw an exception if the coordinate system is invalid
+    if ((coordsys != "CEL") && (coordsys != "GAL")) {
+        std::string msg = "Invalid coordinate system \""+coordsys+"\" "
+                          "specified. Please specify either \"CEL\" or "
+                          "\"GAL\".";
+        throw GException::invalid_argument(G_CONSTRUCTOR, msg);
+    }
+
     // Initialise members
     init_members();
+
+    // Set parameter names
+    if (coordsys == "CEL") {
+        m_lon.name("RA");
+        m_lat.name("DEC");
+    }
+    else {
+        m_lon.name("GLON");
+        m_lat.name("GLAT");
+    }
 
     // Assign parameters
     this->dir(dir);
@@ -655,7 +683,7 @@ void GModelSpatialEllipticalDisk::set_region(void) const
     double max_radius = (semimajor() > semiminor()) ? semimajor() : semiminor();
 
     // Set sky region circle
-    GSkyRegionCircle region(m_ra.value(), m_dec.value(), max_radius);
+    GSkyRegionCircle region(dir(), max_radius);
 
     // Set region (circumvent const correctness)
     const_cast<GModelSpatialEllipticalDisk*>(this)->m_region = region;

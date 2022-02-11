@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GModelSpatialEllipticalGauss.cpp - Elliptical gauss source model class *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015-2021 by Michael Mayer                               *
+ *  copyright (C) 2015-2022 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -51,6 +51,9 @@ const GModelSpatialRegistry        g_elliptical_gauss_legacy_registry(&g_ellipti
 #endif
 
 /* __ Method name definitions ____________________________________________ */
+#define G_CONSTRUCTOR                        "GModelSpatialEllipticalGauss::"\
+                  "GModelSpatialEllipticalGauss(GSkyDir&, double&, double&, "\
+                                                     "double&, std::string&)"
 #define G_READ             "GModelSpatialEllipticalGauss::read(GXmlElement&)"
 #define G_WRITE           "GModelSpatialEllipticalGauss::write(GXmlElement&)"
 
@@ -112,19 +115,44 @@ GModelSpatialEllipticalGauss::GModelSpatialEllipticalGauss(const bool&        du
  * @param[in] semimajor Semi-major axis (degrees).
  * @param[in] semiminor Semi-minor axis (degrees).
  * @param[in] posangle Position angle of semi-major axis (degrees).
+ * @param[in] coordsys Coordinate system (either "CEL" or "GAL")
+ *
+ * @exception GException::invalid_argument
+ *            Invalid @p coordsys argument specified.
  *
  * Construct elliptical Gaussian model from the ellipse centre direction
  * (@p dir), the @p semimajor and @p semiminor axes, and the position
- * angle (@p posangle).
+ * angle (@p posangle). The @p coordsys parameter specifies whether the sky
+ * direction should be interpreted in the celestial or Galactic coordinate
+ * system.
  ***************************************************************************/
-GModelSpatialEllipticalGauss::GModelSpatialEllipticalGauss(const GSkyDir& dir,
-                                                           const double&  semimajor,
-                                                           const double&  semiminor,
-                                                           const double&  posangle) :
+GModelSpatialEllipticalGauss::GModelSpatialEllipticalGauss(const GSkyDir&     dir,
+                                                           const double&      semimajor,
+                                                           const double&      semiminor,
+                                                           const double&      posangle,
+                                                           const std::string& coordsys) :
                               GModelSpatialElliptical()
 {
+    // Throw an exception if the coordinate system is invalid
+    if ((coordsys != "CEL") && (coordsys != "GAL")) {
+        std::string msg = "Invalid coordinate system \""+coordsys+"\" "
+                          "specified. Please specify either \"CEL\" or "
+                          "\"GAL\".";
+        throw GException::invalid_argument(G_CONSTRUCTOR, msg);
+    }
+
     // Initialise members
     init_members();
+
+    // Set parameter names
+    if (coordsys == "CEL") {
+        m_lon.name("RA");
+        m_lat.name("DEC");
+    }
+    else {
+        m_lon.name("GLON");
+        m_lat.name("GLAT");
+    }
 
     // Assign parameters
     this->dir(dir);
@@ -785,7 +813,7 @@ void GModelSpatialEllipticalGauss::set_region(void) const
 
     // Set sky region circle (maximum Gaussian sigma times a scaling
     // factor (actually 3))
-    GSkyRegionCircle region(m_ra.value(), m_dec.value(), max_radius * c_theta_max);
+    GSkyRegionCircle region(dir(), max_radius * c_theta_max);
 
     // Set region (circumvent const correctness)
     const_cast<GModelSpatialEllipticalGauss*>(this)->m_region = region;

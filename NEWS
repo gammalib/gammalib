@@ -82,6 +82,7 @@ The following methods have been added:
 - GModelSpatialRadial::is_energy_dependent()
 - GModelSpatialRadial::is_time_dependent()
 - GModelSpatialRadial::coordsys()
+- GModelSpatialElliptical::coordsys()
 - GModelSpectralFunc(GModelSpectral&, GEnergies&)
 - GModelSpectralFunc::nodes()
 - GModelSpectralFunc::is_empty()
@@ -154,6 +155,8 @@ The following methods have been removed:
 - GModelSpatialPointSource::dec()
 - GModelSpatialRadial::ra()
 - GModelSpatialRadial::dec()
+- GModelSpatialElliptical::ra()
+- GModelSpatialElliptical::dec()
 - GCOMObservation::drm(GModelSky&)
 - GCOMResponse::irf_spatial()
 - GCOMSelection::zeta_min()
@@ -170,6 +173,22 @@ The arguments for the following methods have been changed:
   GModelSpatialPointSource::GModelSpatialPointSource(GSkyDir&)
 - GModelSpatialPointSource::GModelSpatialPointSource(double&, double&, std::string&) was
   GModelSpatialPointSource::GModelSpatialPointSource(double&, double&)
+- GModelSpatialRadialDisk::GModelSpatialRadialDisk(GSkyDir&, double&, std::string&) was
+  GModelSpatialRadialDisk::GModelSpatialRadialDisk(GSkyDir&, double&)
+- GModelSpatialRadialGauss::GModelSpatialRadialGauss(GSkyDir&, double&, std::string&) was
+  GModelSpatialRadialGauss::GModelSpatialRadialGauss(GSkyDir&, double&)
+- GModelSpatialRadialGeneralGauss::GModelSpatialRadialGeneralGauss(GSkyDir&, double&, double&, std::string&) was
+  GModelSpatialRadialGeneralGauss::GModelSpatialRadialGeneralGauss(GSkyDir&, double&, double&)
+- GModelSpatialRadialRing::GModelSpatialRadialRing(GSkyDir&, double&, double&, std::string&) was
+  GModelSpatialRadialRing::GModelSpatialRadialRing(GSkyDir&, double&, double&)
+- GModelSpatialRadialShell::GModelSpatialRadialShell(GSkyDir&, double&, double&, std::string&) was
+  GModelSpatialRadialShell::GModelSpatialRadialShell(GSkyDir&, double&, double&)
+- GModelSpatialEllipticalDisk::GModelSpatialEllipticalDisk(GSkyDir&, double&, double&, double&, std::string&) was
+  GModelSpatialEllipticalDisk::GModelSpatialEllipticalDisk(GSkyDir&, double&, double&, double&)
+- GModelSpatialEllipticalGauss::GModelSpatialEllipticalGauss(GSkyDir&, double&, double&, double&, std::string&) was
+  GModelSpatialEllipticalGauss::GModelSpatialEllipticalGauss(GSkyDir&, double&, double&, double&)
+- GModelSpatialEllipticalGeneralGauss::GModelSpatialEllipticalGeneralGauss(GSkyDir&, double&, double&, double&, double&, std::string&) was
+  GModelSpatialEllipticalGeneralGauss::GModelSpatialEllipticalGeneralGauss(GSkyDir&, double&, double&, double&, double&)
 - GCOMObservation::drm(GSkyModel&) was GCOMObservation::drm(GSource&)
 
 The return value of the following methods has been changed:
