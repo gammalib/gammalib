@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GOptimizerLM.cpp - Levenberg Marquardt optimizer            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -629,7 +629,7 @@ void GOptimizerLM::init_members(void)
     m_lambda_inc   = 10.0;
     m_lambda_dec   = 0.1;
     m_eps          = 5.0e-3;  //!< Changed on 30/10/2014 from 1.0e-6
-    m_accept_dec   = 2.0;     //!< Allow to decrease by 2.0
+    m_accept_dec   = 0.0;     //!< Do not allow to decrease
     m_max_iter     = 100;     //!< Changed on 30/10/2014 from 1000
     m_max_stall    = 10;
     m_max_hit      = 3;       //!< Maximum successive boundary hits before freeze

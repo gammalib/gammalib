@@ -1,6 +1,6 @@
 .. _2.0:
 
-GammaLib 2.0 release (11 February 2022)
+GammaLib 2.0 release (14 February 2022)
 =======================================
 
 Overview
@@ -41,6 +41,7 @@ Bug fixes
 Improvements
 ------------
 
+* By default, do not allow log-likelihood decrease in LM optimiser
 * [`3988 <https://cta-redmine.irap.omp.eu/issues/3988>`_] -
   Support Galactic coordinates in spatial models
 * Add ``GCOMObservation::tim()`` and ``GCOMObservation::oads()`` setter methods

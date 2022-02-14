@@ -1,8 +1,9 @@
-2022-02-11
+2022-02-14
 
         * Version 2.0.0 released
         ========================
 
+        By default, do not allow log-likelihood decrease in LM optimiser
         Support Galactic coordinates in spatial models (#3988)
         Implement CGRO clock correction (#3973)
         Add support for COMPTEL pulsar analysis (#3973)
