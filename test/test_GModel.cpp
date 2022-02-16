@@ -927,6 +927,7 @@ void TestGModel::test_point_source(void)
     GSkyDir dir2;
     dir2.radec_deg(83.6331, +22.0145);
     //test_assert(model6.region()->contains(dir2), "Test region() method (inside)"); // 32 bit precision problem
+    dir2.radec_deg(84.6331, +22.0145);
     test_assert(!model6.region()->contains(dir2), "Test region() method (outside)");
 
     // Test operator access
