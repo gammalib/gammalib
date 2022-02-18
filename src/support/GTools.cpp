@@ -2208,8 +2208,8 @@ std::string gammalib::http_query(const std::string& host, const std::string& que
     // Initialise buffers
     char message[1024];
     char response[4096];
-    bzero(message, sizeof(message));
-    bzero(response, sizeof(response));
+    memset(message, 0, sizeof(message));
+    memset(response, 0, sizeof(response));
 
     // Build message string
     sprintf(message, "GET /%s HTTP/1.1\r\nHost: %s\r\n\r\n", query.c_str(), host.c_str());
@@ -2230,9 +2230,9 @@ std::string gammalib::http_query(const std::string& host, const std::string& que
 
     // Fill in structure
     struct sockaddr_in serveraddr;
-    bzero((char *) &serveraddr, sizeof(serveraddr));
+    memset(&serveraddr, 0, sizeof(serveraddr));
     serveraddr.sin_family = AF_INET;
-    bcopy((char *)server->h_addr, (char*)&serveraddr.sin_addr.s_addr, server->h_length);
+    memcpy(&serveraddr.sin_addr.s_addr, server->h_addr, server->h_length);
     serveraddr.sin_port   = htons(portno);
 
     // Connect the socket
