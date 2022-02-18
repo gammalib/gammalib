@@ -55,6 +55,7 @@ namespace gammalib {
     std::string              filepath(const std::string& pathname,
                                       const std::string& filename);
     std::string              tmpnam(void);
+    std::string              strdate(void);
     std::string              toupper(const std::string& s);
     std::string              tolower(const std::string& s);
     std::vector<std::string> split(const std::string& s, const std::string& sep);
@@ -114,4 +115,6 @@ namespace gammalib {
     bool                     compare(const double& a,
                                      const double& b,
                                      const double& tol);
+    std::string              http_query(const std::string& host,
+                                        const std::string& query);
 }

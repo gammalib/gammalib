@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-14 February 2022
+18 February 2022
 
 
 1. Introduction
@@ -142,6 +142,7 @@ The following methods have been added:
 - GCOMSelection::use_d1()
 - GCOMSelection::use_d2()
 - gammalib::tmpnam()
+- gammalib::strdate()
 - gammalib::compare()
 - gammalib::xml_check_parnum()
 - gammalib::xml_check_type()
@@ -215,7 +216,9 @@ is written is the CREATOR keyword (#3662).
 
 Add GApplication::eCO2() method to estimate the carbon footprint if the elapsed
 CPU time. The carbon footprint estimation is also added to the trailer text of
-an application to raise awareness (#3592).
+an application to raise awareness. In addition, an ASCII file is maintained in
+the $HOME/.gamma folder that contains statistics on application usage, including
+carbon footprint information (#3592).
 
 Corrected the computation of the elapsed CPU time in an application in case
 that OpenMP is enabled (#3417).
@@ -407,6 +410,9 @@ were added to compute the total solid angle within specified sky region(s) (#178
 
 14. Support module
 ------------------
+Added gammalib::strdate() method that returns a string of the current date and
+time (#3592).
+
 Added gammalib::compare() function to compare two floating point numbers with a
 relative tolerance (#3552).
 

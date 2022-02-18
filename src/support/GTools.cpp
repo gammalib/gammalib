@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GTools.cpp - GammaLib tools                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -35,12 +35,15 @@
 #include <sys/select.h>    // select() function
 #include <sys/types.h>
 #include <sys/socket.h>    // recv() function
+#include <netinet/in.h>    // struct sockaddr_in, struct sockaddr
+#include <netdb.h>         // struct hostent, gethostbyname
 #include <pwd.h>
 #include <cmath>
 #include <cfloat>
 #include <cctype>
+#include <ctime>
 #include <cstdlib>         // std::getenv() function
-#include <cstring>         // std::strlen() function
+#include <cstring>         // std::strlen() and std::memcpy functions
 #include <iostream>
 #include <sstream>
 #include <algorithm>
@@ -60,6 +63,7 @@
 
 /* __ Function name definitions __________________________________________ */
 #define G_XML2STRING                     "gammalib::xml2string(std::string&)"
+#define G_HTTP_QUERY       "gammalib::http_query(str::string&, std::string&)"
 
 /* __ Coding definitions _________________________________________________ */
 #define G_PARFORMAT_LENGTH 29
@@ -686,6 +690,42 @@ std::string gammalib::str(const std::complex<double>& value,
     return result;
 }
 
+
+/***********************************************************************//**
+ * @brief Return current date
+ *
+ * Returns the current date as string in the format yyyy-mm-ddThh:mm:ss.
+ ***************************************************************************/
+std::string gammalib::strdate(void)
+{
+    // Allocate variables
+    struct std::tm timeStruct;
+    std::time_t    now;
+    char           buffer[100];
+
+    // Get time
+    now = std::time(NULL);
+    #ifdef HAVE_GMTIME_R
+    std::gmtime_r(&now, &timeStruct);
+    #else
+    std::memcpy(&timeStruct, gmtime(&now), sizeof(struct tm));
+    #endif
+
+    // Write message type, time and task name to buffer
+    std::sprintf(buffer, "%04d-%02d-%02dT%02d:%02d:%02d",
+                         timeStruct.tm_year + 1900,
+                         timeStruct.tm_mon + 1,
+                         timeStruct.tm_mday,
+                         timeStruct.tm_hour,
+                         timeStruct.tm_min,
+                         timeStruct.tm_sec);
+
+    // Build string from buffer
+    std::string date = buffer;
+
+    // Return date
+    return date;
+}
 
 
 /***********************************************************************//**
@@ -2141,4 +2181,110 @@ bool gammalib::compare(const double& a, const double& b, const double& tol)
 
     // Return identity
     return identity;
+}
+
+
+/***********************************************************************//**
+ * @brief Return response to a HTTP query
+ *
+ * @param[in] host Host address.
+ * @param[in] query Query string.
+ * @return Response to a HTTP query.
+ *
+ * @exception GException::runtime_error
+ *            Unable to open, to connect, to write message to or to read
+ *            response from socket.
+ * @exception GException::invalid_argument
+ *            Host not found.
+ *
+ * Returns response to a HTTP query. Be aware that this method will not
+ * work for https servers.
+ ***************************************************************************/
+std::string gammalib::http_query(const std::string& host, const std::string& query)
+{
+    // Set constants
+    const int portno = 80;
+
+    // Initialise buffers
+    char message[1024];
+    char response[4096];
+    bzero(message, sizeof(message));
+    bzero(response, sizeof(response));
+
+    // Build message string
+    sprintf(message, "GET /%s HTTP/1.1\r\nHost: %s\r\n\r\n", query.c_str(), host.c_str());
+
+    // Create the socket
+    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd < 0) {
+        std::string msg = "Unable to open socket.";
+        throw GException::runtime_error(G_HTTP_QUERY, msg);
+    }
+
+    // Lookup IP address
+    struct hostent* server = gethostbyname(host.c_str());
+    if (server == NULL) {
+        std::string msg = "Unable to find host \""+host+"\".";
+        throw GException::invalid_argument(G_HTTP_QUERY, msg);
+    }
+
+    // Fill in structure
+    struct sockaddr_in serveraddr;
+    bzero((char *) &serveraddr, sizeof(serveraddr));
+    serveraddr.sin_family = AF_INET;
+    bcopy((char *)server->h_addr, (char*)&serveraddr.sin_addr.s_addr, server->h_length);
+    serveraddr.sin_port   = htons(portno);
+
+    // Connect the socket
+    if (connect(sockfd, (struct sockaddr*)&serveraddr, sizeof(serveraddr)) < 0) {
+        std::string msg = "Unable to connect to socket for host \""+host+"\".";
+        throw GException::runtime_error(G_HTTP_QUERY, msg);
+    }
+
+    // Send request
+    int total = strlen(message);
+    int sent  = 0;
+    do {
+        int bytes = write(sockfd, message+sent, total-sent);
+        if (bytes < 0) {
+            std::string msg = "Unable to write query message \""+query+
+                              "\" to socket for host \""+host+"\".";
+            throw GException::runtime_error(G_HTTP_QUERY, msg);
+        }
+        if (bytes == 0) {
+            break;
+        }
+        sent += bytes;
+    } while (sent < total);
+
+    // Receive response
+    total        = sizeof(response) - 1;
+    int received = 0;
+    do {
+        int bytes = read(sockfd, response+received, total-received);
+        if (bytes < 0) {
+            std::string msg = "Unable to receive response from socket for "
+                              "host \""+host+"\".";
+            throw GException::runtime_error(G_HTTP_QUERY, msg);
+        }
+        if (bytes == 0) {
+            break;
+        }
+        received += bytes;
+    } while (received < total);
+
+    // If the number of received bytes is the total size of the array then we
+    // have run out of space to store the response and it hasn't all arrived
+    // yet - so that's a bad thing
+    if (received == total) {
+        std::string msg = "Unable to store complete response from socket for "
+                          "host \""+host+"\".";
+        throw GException::runtime_error(G_HTTP_QUERY, msg);
+    }
+
+    // Close socket
+    close(sockfd);
+
+    // Return response
+    return std::string(response);
 }

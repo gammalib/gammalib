@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GApplication.hpp - GammaLib application base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -130,11 +130,13 @@ public:
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GApplication& app);
-    void free_members(void);
-    void set_log_chatter(void);
-    void set_log_filename(void);
+    void        init_members(void);
+    void        copy_members(const GApplication& app);
+    void        free_members(void);
+    void        set_log_chatter(void);
+    void        set_log_filename(void);
+    void        write_statistics(void);
+    std::string strdate(void) const;
 
     // Protected data members
     std::string              m_name;        //!< Application name

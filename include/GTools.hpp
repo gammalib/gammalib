@@ -79,6 +79,7 @@ namespace gammalib {
     std::string              str(const double& value, const int& precision = 0);
     std::string              str(const std::complex<double>& value,
                                  const int& precision = 0);
+    std::string              strdate(void);
     char*                    tochar(const std::string& arg);
     short                    toshort(const std::string& arg);
     unsigned short           toushort(const std::string& arg);
@@ -161,6 +162,8 @@ namespace gammalib {
     bool                     compare(const double& a,
                                      const double& b,
                                      const double& tol);
+    std::string              http_query(const std::string& host,
+                                        const std::string& query);
 }
 
 

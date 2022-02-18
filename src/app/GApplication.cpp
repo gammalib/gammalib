@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GApplication.cpp - GammaLib application base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,6 +28,10 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <pwd.h>           // user/passwd function
+#include <fcntl.h>         // for file locking
+#include <unistd.h>        // access() function
+#include <cstdio>          // std::fopen(), etc. functions
 #include "GApplication.hpp"
 #include "GTools.hpp"
 #include "GFits.hpp"
@@ -1083,6 +1087,9 @@ void GApplication::free_members(void)
     // Close log file
     logFileClose();
 
+    // Write statistics
+    write_statistics();
+
     // Return
     return;
 }
@@ -1135,6 +1142,94 @@ void GApplication::set_log_filename(void)
         }
 
     }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write application statistics
+ *
+ * Write application statistics in a global ASCII file.
+ ***************************************************************************/
+void GApplication::write_statistics(void)
+{
+    // Initialise ASCII file name
+    std::string filename;
+
+    // Get ASCII file name. Make sure that ASCII file exists and that it
+    // contains a header line
+    uid_t uid         = geteuid();
+    struct passwd* pw = getpwuid(uid);
+    if (pw != NULL) {
+        filename = std::string(pw->pw_dir) + "/.gamma/statistics.csv";
+        if (access(filename.c_str(), R_OK) != 0) {
+
+            // OpenMP critical zone to write header in case that the file
+            // does not yet exist
+            #pragma omp critical(GApplication_write_statistics)
+            {
+
+                // Open statistics file, and in case of success, write
+                // header line
+                FILE* fptr = fopen(filename.c_str(), "w");
+                if (fptr != NULL) {
+                    fprintf(fptr, "Date,"
+                                  "GammaLib version,"
+                                  "Country,"
+                                  "Application,"
+                                  "Version,"
+                                  "Wall clock seconds,"
+                                  "CPU seconds,"
+                                  "g eCO2\n");
+                    fclose(fptr);
+                }
+
+            } // end of OMP critial zone
+
+        } // endif: no statistics file existed
+
+    } // endif: managed to get user ID
+
+    // OpenMP critical zone to write statitics
+    #pragma omp critical(GApplication_write_statistics)
+    {
+
+        // Get file lock. Continue only in case of success
+        struct flock lock;
+        lock.l_type   = F_WRLCK;  // Want a write lock
+        lock.l_whence = SEEK_SET; // Want beginning of file
+        lock.l_start  = 0;        // No offset, lock entire file ...
+        lock.l_len    = 0;        // ... to the end
+        lock.l_pid    = getpid(); // Current process ID
+        int fd        = open(filename.c_str(), O_WRONLY);
+        if (fd != -1) {
+
+            // Lock file
+            fcntl(fd, F_SETLKW, &lock);
+
+            // Open statistics file, and in case of success, write
+            // statistics
+            FILE* fptr = fopen(filename.c_str(), "a");
+            if (fptr != NULL) {
+                fprintf(fptr, "%s,%s,FR,%s,%s,%e,%e,%e\n",
+                              gammalib::strdate().c_str(), VERSION,
+                              name().c_str(), version().c_str(),
+                              telapse(), celapse(), eCO2());
+                fclose(fptr);
+            }
+
+            // Unlock file
+            lock.l_type = F_UNLCK;
+            fcntl(fd, F_SETLK, &lock);
+
+            // Close file
+            close(fd);
+            
+        } // endif: file locking successful
+
+    } // end of OMP critial zone
 
     // Return
     return;

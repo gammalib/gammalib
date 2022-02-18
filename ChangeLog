@@ -1,4 +1,4 @@
-2022-02-14
+2022-02-18
 
         * Version 2.0.0 released
         ========================
@@ -25,7 +25,8 @@
         Add ASCL shield to "About" page (#3630)
         Add GModelSpectralFunc spectral constructor (#3626)
         Add GModelSpectralBins class (#3606)
-        Add carbon footprint estimation to GApplication (#3592)
+        Add carbon footprint estimation and application statistic logging to
+          GApplication (#3592)
         Add phase selection to GCOMSelection and GCOMDri (#3564)
         Fix incompatibility in GMatrixSparse::mix_column_prepare() method (#3563)
         Add missing members to GOptimizerLM::copy_members() method

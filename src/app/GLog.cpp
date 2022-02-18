@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GLog.cpp - Information logger                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2019 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,10 +28,10 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <ctime>
+//#include <ctime>
 #include <cstdarg>      // for std::va_list type
 #include <cstdio>       // std::fopen, std::fgets, std::fclose, etc...
-#include <cstring>      // std::memcpy
+//#include <cstring>      // std::memcpy
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -765,43 +765,6 @@ void GLog::header(const std::string& arg, int level)
 
 
 /***********************************************************************//**
- * @brief Return current date
- *
- * Returns the current date as string in the format yyyy-mm-ddThh:mm:ss.
- ***************************************************************************/
-std::string GLog::strdate(void) const
-{
-    // Allocate variables
-    struct std::tm timeStruct;
-    std::time_t    now;
-    char           buffer[100];
-
-    // Get time
-    now = std::time(NULL);
-    #ifdef HAVE_GMTIME_R   
-    std::gmtime_r(&now, &timeStruct);
-    #else
-    std::memcpy(&timeStruct, gmtime(&now), sizeof(struct tm));
-    #endif
-
-    // Write message type, time and task name to buffer
-    std::sprintf(buffer, "%04d-%02d-%02dT%02d:%02d:%02d",
-                         timeStruct.tm_year + 1900,
-                         timeStruct.tm_mon + 1,
-                         timeStruct.tm_mday,
-                         timeStruct.tm_hour,
-                         timeStruct.tm_min,
-                         timeStruct.tm_sec);
-
-    // Build string from buffer
-    std::string date = buffer;
-
-    // Return date
-    return date;
-}
-
-
-/***********************************************************************//**
  * @brief Return prefix
  *
  * Returns the prefix for each line.
@@ -813,7 +776,7 @@ std::string GLog::prefix(void) const
 
     // Add date if requested
     if (m_use_date){
-        prefix.append(strdate());
+        prefix.append(gammalib::strdate());
     }
 
     // Add name if requested

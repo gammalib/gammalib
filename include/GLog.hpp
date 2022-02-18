@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GLog.hpp - Information logger                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -120,7 +120,6 @@ protected:
     void        copy_members(const GLog& log);
     void        free_members(void);
     void        header(const std::string& arg, int level);
-    std::string strdate(void) const;
     std::string prefix(void) const;
     void        append(const std::string& string);
 

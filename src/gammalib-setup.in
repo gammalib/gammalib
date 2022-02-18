@@ -38,6 +38,17 @@ man_dir="@datadir@/doc/gammalib/man"
 caldb_dir="@datadir@/caldb"
 
 #
+# Make sure that $HOME/.gamma directory exists
+# ============================================
+if [ ! -w $HOME/.gamma/. ]; then
+  mkdir $HOME/.gamma
+  if [ $? -ne 0 ]; then
+    echo "$gammalib_error cannot create .gamma directory $HOME/.gamma" >&2
+    exit 3
+  fi
+fi
+
+#
 # Make pfiles available
 # =====================
 if [ -d $prefix/syspfiles/. ]; then
