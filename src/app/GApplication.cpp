@@ -541,7 +541,9 @@ double GApplication::gCO2e(const std::string& country) const
                 int size = code.size();
                 for (int i = 0; i < size; ++i) {
                     if (code[i] == country) {
-                        val_ef = ef[i];
+                        val_ef    = ef[i];
+                        last_code = code[i];
+                        last_ef   = val_ef;
                         break;
                     }
                 }
