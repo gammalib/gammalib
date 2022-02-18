@@ -874,7 +874,6 @@ void GPulsar::load_psrtime(const GFilename& filename, const std::string& name)
  * @brief Load Pulsar from ephemeris par file
  *
  * @param[in] filename Name of pulsar ephemeris par file
- * @param[in] name Pulsar name
  *
  * @exception GException::file_error
  *            Could not open ephemeris ASCII file

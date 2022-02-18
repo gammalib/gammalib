@@ -398,10 +398,13 @@ double GApplication::celapse(void) const
  * @return Application equivalent CO2 footprint (g CO2e).
  *
  * The method returns the equivalent CO2 footprint in grams after the
- * currently elpased CPU time as returned by celapse(). The method assumes
+ * currently elpased CPU time, as returned by celapse(). The method assumes
  * an emission factor of 4.68 g CO2e / CPU hour as estimated by Berthoud et
- * al. (2020) (https://hal.archives-ouvertes.fr/hal-02549565v4/document).
- * The emission factor includes
+ * al. (2020) (https://hal.archives-ouvertes.fr/hal-02549565v4/document),
+ * where 2.43 g CO2e / CPU hour are due to electricity use and 2.25
+ * g CO2e / CPU hour are due to fabrication and personnel. Specifically
+ * the footprint estimated includes
+ *
  * * server fabrication
  * * server environment
  * * server usage (electricity)
@@ -410,23 +413,165 @@ double GApplication::celapse(void) const
  * * personnel equipment
  * * personnel energy
  *
- * The emission factor is based on an estimate done for the DAHU cluster
- * of the UMS GRICAD in 2019. Note that the footprint of electricity was
- * computed assuming 108 g eCO2 / kWh consumed, and about 50% of the total
- * footprint was due to electricity consumption. For countries with a more
- * carbon intensive electricity production, the CO2 imprint will be
- * accordingly larger.
+ * The emission factors are based on an estimate done for the DAHU cluster
+ * of the UMS GRICAD in 2019. Note that the electricity footprint a carbon
+ * intensity of 108 g eCO2 / kWh was assumed.
  *
- * @todo Implement carbon footprint for other countries than France
+ * The method tries to determine the appropriate carbon intensity from the
+ * two-digit country code and then computes the applicable emission factor
+ * \f$EF\f$ in units of g CO2e / CPU hour using
+ *
+ * \f[
+ *    EF = 2.25 + 2.43 \frac{CI}{108}
+ * \f]
+ *
+ * where \f$CI\f$ is the country specific carbon intensity of electricity
+ * generation, given in units of g eCO2 / kWh.
+ *
+ * The equivalent CO2 footprint is then computed by multiplying \f$EF\f$
+ * by the number of CPU hours.
+ *
+ * Country specific carbon intensities are specified by the file
+ * @p share/refdata/emission-factors.fits.
  ***************************************************************************/
 double GApplication::gCO2e(const std::string& country) const
 {
-    // Get elapsed time in CPU jours
-    double cpu_hours = celapse() / 3600.0;
+    // Initialise constants
+    const double ef_total       = 4.68;
+    const double ef_electricity = 2.43;
+    const double ef_other       = ef_total - ef_electricity;
+    const double ef_kWh         = 108.0;
 
-    // Convert into g eCO2
-    double gCO2e = 4.68 * cpu_hours;
+    // Initialise vectors of country codes and emission factors
+    static bool                     has_data = true;
+    static std::vector<std::string> code;
+    static std::vector<double>      ef;
+    static std::string              last_code = "";
+    static double                   last_ef   = 0.0;
 
+    // Initialise equivalent CO2 footprint
+    double gCO2e = 0.0;
+
+    // If there is a country code then try to find the country specific
+    // equivalent CO2 footprint
+    if (!country.empty()) {
+
+        // If there are data but no country codes then load the country
+        // codes and emission factors from the FITS file. This is only
+        // attempted once, and if it fails the has_data flag will be set
+        // "false"
+        if (has_data && code.empty()) {
+
+            // Signal that we attempted loading the data
+            has_data = false;
+
+            // Initialise filename
+            GFilename filename("$GAMMALIB/share/refdata/emission-factors.fits");
+
+            // If file does not exist then it may not yet be installed,
+            // possibly because a unit test is performed. Therefore try to
+            // get file in the source directory.
+            if (!filename.is_fits()) {
+                filename = GFilename("$TEST_SRCDIR/refdata/emission-factors.fits");
+            }
+
+            // If file exists then load the data
+            if (filename.is_fits()) {
+
+                // Open FITS file
+                GFits fits(filename);
+
+                // Get first table
+                const GFitsTable* table = fits.table(1);
+
+                // Extract number of rows in FITS file
+                int num = table->nrows();
+
+                // Continue if there are data
+                if (num > 0) {
+
+                    // Reserve data
+                    code.reserve(num);
+                    ef.reserve(num);
+
+                    // Get column pointers
+                    const GFitsTableCol* ptr_code = (*table)["CODE"];
+                    const GFitsTableCol* ptr_ef   = (*table)["EF"];
+
+                    // Extract data
+                    for (int i = 0; i < num; ++i) {
+                    
+                        // Get code and emission factor
+                        std::string val_code = ptr_code->string(i,0);
+                        double      val_ef   = ptr_ef->real(i,0);
+                        
+                        // Store code and emission factor
+                        code.push_back(val_code);
+                        ef.push_back(val_ef);
+
+                        // Update last code and emission factor
+                        if (val_code == country) {
+                            last_code = val_code;
+                            last_ef   = val_ef;
+                        }
+
+                    } // endfor: extracted data
+
+                } // endif: loaded data
+
+            } // endif: FITS file existed
+
+        } // endif: loaded emission data
+
+        // If there are data then try to find the country dependent
+        // equivalent CO2 footprint
+        if (!code.empty()) {
+
+            // Initialise Berthoud et al. (2020) emission factor
+            double val_ef = ef_kWh;
+
+            // If country is identical to last code then get the last
+            // emission factor
+            if (country == last_code) {
+                val_ef = last_ef;
+            }
+
+            // ... otherwise search emission factor in table
+            else {
+                int size = code.size();
+                for (int i = 0; i < size; ++i) {
+                    if (code[i] == country) {
+                        val_ef = ef[i];
+                        break;
+                    }
+                }
+            }
+
+            // Get elapsed time in CPU jours
+            double cpu_hours = celapse() / 3600.0;
+
+            // Compute effective emission factor
+            double eff_ef = ef_other + ef_electricity * val_ef / ef_kWh;
+
+            // Convert into g eCO2
+            gCO2e = eff_ef * cpu_hours;
+
+        } // endif: there were codes
+    
+    } // endif: country code specified
+
+    // If equivalent CO2 footprint is not yet set then use the emission
+    // factor of Berthoud et al. (2020)
+    if (gCO2e == 0.0) {
+
+        // Get elapsed time in CPU jours
+        double cpu_hours = celapse() / 3600.0;
+
+        // Convert into g eCO2
+        gCO2e = ef_total * cpu_hours;
+
+    }
+ 
     // Return equivalent CO2 footprint
     return gCO2e;
 }

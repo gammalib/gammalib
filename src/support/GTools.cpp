@@ -2291,33 +2291,42 @@ std::string gammalib::http_query(const std::string& host, const std::string& que
 
 
 /***********************************************************************//**
- * @brief Return host country
+ * @brief Return two-digit host country code
  *
- * @return Host country.
+ * @return Host two-digit host country code.
  *
- * Returns host country using a curl query to http://api.hostip.info/. If
- * the country could not be determined an empty string is returned.
+ * Returns two-digit host country code using curl query
+ *
+ *                   http://ip-api.com/line/?fields=countryCode.
+ *
+ * The result is saved in a static variable, hence once the country code is
+ * retrieved no queries will be executed anymore.
  ***************************************************************************/
 std::string gammalib::host_country(void)
 {
-    // Initialise country
-    std::string country;
+    // Initialise country as static variable
+    static std::string country;
 
-    // Setup curl command
-    char command[256];
-    sprintf(command, "curl --silent http://api.hostip.info/country.php?ip=");
+    // Continue only if the country code is not set
+    if (country.empty()) {
 
-    // Open the process with given 'command' for reading
-    FILE* file = popen(command, "r");
+        // Setup curl command
+        char command[256];
+        sprintf(command, "curl --silent http://ip-api.com/line/?fields=countryCode");
 
-    // Retrieve curl output
-    char output[1024];
-    if (fgets(output, sizeof(output)-1, file) != NULL) {
-        country = std::string(output);
-    }
+        // Open the process with given 'command' for reading
+        FILE* file = popen(command, "r");
 
-    // Close process
-    pclose(file);
+        // Retrieve curl output
+        char output[1024];
+        if (fgets(output, sizeof(output)-1, file) != NULL) {
+            country = strip_chars(std::string(output), "\n");
+        }
+
+        // Close process
+        pclose(file);
+
+    } // endif: country code was set
 
     // Return country
     return country;

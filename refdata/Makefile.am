@@ -20,7 +20,8 @@
 #############################################################################
 
 # Models to install
-refdata = ephem_jpl_de200.fits
+refdata = emission-factors.fits \
+          ephem_jpl_de200.fits
 
 # Install models
 refdatadir   = $(datadir)/refdata
