@@ -392,15 +392,16 @@ double GApplication::celapse(void) const
 
 
 /***********************************************************************//**
- * @brief Return application equivalent CO2 imprint (units: g)
+ * @brief Return application equivalent CO2 footprint (units: g CO2e)
  *
- * @return Application equivalent CO2 imprint (g).
+ * @param[in] country Country where computation is performed.
+ * @return Application equivalent CO2 footprint (g CO2e).
  *
- * The method returns the equivalent CO2 imprint in grams after the currently
- * elpased CPU time as returned by celapse(). The method assumes an imprint
- * of 4.68 g eCO2 / CPU hour as estimated by Berthoud et al. (2020)
- * (see page 10 of https://hal.archives-ouvertes.fr/hal-02549565v4/document).
- * The imprint factor includes
+ * The method returns the equivalent CO2 footprint in grams after the
+ * currently elpased CPU time as returned by celapse(). The method assumes
+ * an emission factor of 4.68 g CO2e / CPU hour as estimated by Berthoud et
+ * al. (2020) (https://hal.archives-ouvertes.fr/hal-02549565v4/document).
+ * The emission factor includes
  * * server fabrication
  * * server environment
  * * server usage (electricity)
@@ -409,23 +410,25 @@ double GApplication::celapse(void) const
  * * personnel equipment
  * * personnel energy
  *
- * The imprint factor is based on an estimate done for the DAHU cluster
- * of the UMS GRICAD in 2019. Note that the impact of electricity was
+ * The emission factor is based on an estimate done for the DAHU cluster
+ * of the UMS GRICAD in 2019. Note that the footprint of electricity was
  * computed assuming 108 g eCO2 / kWh consumed, and about 50% of the total
- * imprint was due to electricity consumption. For countries with a more
+ * footprint was due to electricity consumption. For countries with a more
  * carbon intensive electricity production, the CO2 imprint will be
  * accordingly larger.
+ *
+ * @todo Implement carbon footprint for other countries than France
  ***************************************************************************/
-double GApplication::eCO2(void) const
+double GApplication::gCO2e(const std::string& country) const
 {
     // Get elapsed time in CPU jours
     double cpu_hours = celapse() / 3600.0;
 
     // Convert into g eCO2
-    double eCO2 = 4.68 * cpu_hours;
+    double gCO2e = 4.68 * cpu_hours;
 
-    // Return equivalent CO2 imprint
-    return eCO2;
+    // Return equivalent CO2 footprint
+    return gCO2e;
 }
 
 
@@ -633,14 +636,14 @@ void GApplication::log_trailer(void)
     // Get application statistics
     double telapse = this->telapse();
     double celapse = this->celapse();
-    double eCO2    = this->eCO2();
+    double gCO2e   = this->gCO2e(gammalib::host_country());
 
     // Dump trailer
     log << "Application \"" << m_name << "\" terminated after ";
     log << telapse << " wall clock seconds, consuming ";
     log << celapse << " seconds of CPU time and generating a carbon";
-    log << " footprint of " << eCO2 << " g eCO2.";
-    if (eCO2 >= 1000.0) {
+    log << " footprint of " << gCO2e << " g eCO2.";
+    if (gCO2e >= 1000.0) {
         log << " Please watch your carbon footprint.";
     }
     if (telapse < 0.1) {
@@ -1213,10 +1216,18 @@ void GApplication::write_statistics(void)
             // statistics
             FILE* fptr = fopen(filename.c_str(), "a");
             if (fptr != NULL) {
-                fprintf(fptr, "%s,%s,FR,%s,%s,%e,%e,%e\n",
+
+                // Get host country
+                std::string country = gammalib::host_country();
+
+                // Write statistics string
+                fprintf(fptr, "%s,%s,%s,%s,%s,%e,%e,%e\n",
                               gammalib::strdate().c_str(), VERSION,
+                              country.c_str(),
                               name().c_str(), version().c_str(),
-                              telapse(), celapse(), eCO2());
+                              telapse(), celapse(), gCO2e(country));
+
+                // Close file
                 fclose(fptr);
             }
 

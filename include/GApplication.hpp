@@ -83,7 +83,7 @@ public:
     const std::string&              version(void) const;
     double                          telapse(void) const;
     double                          celapse(void) const;
-    double                          eCO2(void) const;
+    double                          gCO2e(const std::string& country) const;
     void                            logFileOpen(const bool& clobber = true);
     void                            logFileClose(void);
     bool                            logTerse(void) const;

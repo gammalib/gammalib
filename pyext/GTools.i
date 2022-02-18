@@ -117,4 +117,5 @@ namespace gammalib {
                                      const double& tol);
     std::string              http_query(const std::string& host,
                                         const std::string& query);
+    std::string              host_country(void);
 }

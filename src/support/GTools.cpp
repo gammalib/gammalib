@@ -2288,3 +2288,37 @@ std::string gammalib::http_query(const std::string& host, const std::string& que
     // Return response
     return std::string(response);
 }
+
+
+/***********************************************************************//**
+ * @brief Return host country
+ *
+ * @return Host country.
+ *
+ * Returns host country using a curl query to http://api.hostip.info/. If
+ * the country could not be determined an empty string is returned.
+ ***************************************************************************/
+std::string gammalib::host_country(void)
+{
+    // Initialise country
+    std::string country;
+
+    // Setup curl command
+    char command[256];
+    sprintf(command, "curl --silent http://api.hostip.info/country.php?ip=");
+
+    // Open the process with given 'command' for reading
+    FILE* file = popen(command, "r");
+
+    // Retrieve curl output
+    char output[1024];
+    if (fgets(output, sizeof(output)-1, file) != NULL) {
+        country = std::string(output);
+    }
+
+    // Close process
+    pclose(file);
+
+    // Return country
+    return country;
+}

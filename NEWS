@@ -44,7 +44,7 @@ The following classes have been renamed:
 - none
 
 The following methods have been added:
-- GApplication::eCO2()
+- GApplication::gCO2e()
 - GApplication::stamp(GFitsHdu&)
 - GApplication::stamp(GFits&)
 - GApplication::stamp(GFilename&)
@@ -146,6 +146,8 @@ The following methods have been added:
 - gammalib::compare()
 - gammalib::xml_check_parnum()
 - gammalib::xml_check_type()
+- gammalib::host_country()
+- gammalib::http_query()
 - gammalib::check_energy_interval()
 - gammalib::check_prj_x2s_status()
 - gammalib::check_prj_s2x_status()
@@ -214,7 +216,7 @@ Add GApplication::stamp() methods to write provenance information into a FITS
 HDU, a FITS object or a FITS file. So far the only provenance information that
 is written is the CREATOR keyword (#3662).
 
-Add GApplication::eCO2() method to estimate the carbon footprint if the elapsed
+Add GApplication::gCO2e() method to estimate the carbon footprint if the elapsed
 CPU time. The carbon footprint estimation is also added to the trailer text of
 an application to raise awareness. In addition, an ASCII file is maintained in
 the $HOME/.gamma folder that contains statistics on application usage, including
@@ -410,6 +412,11 @@ were added to compute the total solid angle within specified sky region(s) (#178
 
 14. Support module
 ------------------
+Added gammalib::host_country() method that returns the host country on which the code
+is executed.
+
+Added gammalib::http_query() method to get the response of a HTTP query.
+
 Added gammalib::strdate() method that returns a string of the current date and
 time (#3592).
 
