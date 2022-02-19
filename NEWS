@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-18 February 2022
+19 February 2022
 
 
 1. Introduction
@@ -14,6 +14,7 @@ made since the last release of GammaLib.
 The following classes have been added:
 - GFunctions
 - GIntegrals
+- GDaemon
 - GResponseVectorCache
 - GPulsar
 - GPulsarEphemeris
@@ -148,6 +149,7 @@ The following methods have been added:
 - gammalib::xml_check_type()
 - gammalib::host_country()
 - gammalib::http_query()
+- gammalib::gamma_filename()
 - gammalib::check_energy_interval()
 - gammalib::check_prj_x2s_status()
 - gammalib::check_prj_s2x_status()
@@ -412,6 +414,14 @@ were added to compute the total solid angle within specified sky region(s) (#178
 
 14. Support module
 ------------------
+Added GDaemon class that implements the GammaLib daemon. The GammaLib daemon collects
+on a regular basis low-level application statistics and generates from this information
+high-level statistics on a daily basis. This avoids that the low-level statistics
+file becomes too large (#3592).
+
+Added gammalib::gamma_filename() method that returns the full path for a filename in
+the users's .gamma directory.
+
 Added gammalib::host_country() method that returns the host country on which the code
 is executed.
 

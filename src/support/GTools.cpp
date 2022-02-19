@@ -28,7 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <unistd.h>        // access() functions
+#include <unistd.h>        // geteuid(), access() functions
 #include <fcntl.h>         // fcntl() functions
 #include <sys/stat.h>
 #include <sys/time.h>      // timeval
@@ -37,7 +37,7 @@
 #include <sys/socket.h>    // recv() function
 #include <netinet/in.h>    // struct sockaddr_in, struct sockaddr
 #include <netdb.h>         // struct hostent, gethostbyname
-#include <pwd.h>
+#include <pwd.h>           // getpwuid()
 #include <cmath>
 #include <cfloat>
 #include <cctype>
@@ -2330,4 +2330,44 @@ std::string gammalib::host_country(void)
 
     // Return country
     return country;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns filename in .gamma directory
+ *
+ * @param[in] name Name of file in .gamma directory.
+ * @return Filename in .gamma directory.
+ *
+ * Returns the filename of the name of a file in the .gamma directory.
+ ***************************************************************************/
+GFilename gammalib::gamma_filename(const std::string& name)
+{
+    // Initialise lock filename
+    GFilename filename;
+
+    // First try accessing the user ID to get the home directory
+    uid_t uid         = geteuid();
+    struct passwd* pw = getpwuid(uid);
+    if (pw != NULL) {
+        filename = std::string(pw->pw_dir) + "/.gamma/" + name;
+    }
+
+    // ... otherwise try using the $HOME environment variable
+    else {
+
+        // First attempt fetching $HOME environment variable
+        char* home_ptr = std::getenv("HOME");
+        if (home_ptr != NULL) {
+            filename = std::string(home_ptr) + "/.gamma/" + name;
+        }
+        
+        // ... otherwise use ~ as home directory
+        else {
+            filename = "~/.gamma/" + name;
+        }
+    }
+
+    // Return filename
+    return filename;
 }

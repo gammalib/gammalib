@@ -136,7 +136,7 @@ protected:
     void        set_log_chatter(void);
     void        set_log_filename(void);
     void        write_statistics(void);
-    std::string strdate(void) const;
+    void        start_daemon(void) const;
 
     // Protected data members
     std::string              m_name;        //!< Application name

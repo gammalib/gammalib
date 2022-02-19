@@ -28,7 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <pwd.h>           // user/passwd function
+//#include <pwd.h>           // user/passwd function
 #include <fcntl.h>         // for file locking
 #include <unistd.h>        // access() function
 #include <cstdio>          // std::fopen(), etc. functions
@@ -37,6 +37,7 @@
 #include "GFits.hpp"
 #include "GFitsHDU.hpp"
 #include "GFilename.hpp"
+#include "GDaemon.hpp"
 
 /* __ OpenMP section _____________________________________________________ */
 #ifdef _OPENMP
@@ -1190,6 +1191,9 @@ void GApplication::init_members(void)
     m_cstart = double(clock());
     #endif
 
+    // Start daemon
+    start_daemon();
+
     // Return
     return;
 }
@@ -1305,42 +1309,35 @@ void GApplication::set_log_filename(void)
  ***************************************************************************/
 void GApplication::write_statistics(void)
 {
-    // Initialise ASCII file name
-    std::string filename;
+    // Get statistics ASCII file name
+    GFilename filename = gammalib::gamma_filename("statistics.csv");
 
-    // Get ASCII file name. Make sure that ASCII file exists and that it
-    // contains a header line
-    uid_t uid         = geteuid();
-    struct passwd* pw = getpwuid(uid);
-    if (pw != NULL) {
-        filename = std::string(pw->pw_dir) + "/.gamma/statistics.csv";
-        if (access(filename.c_str(), R_OK) != 0) {
+    // Make sure that file exists and that it contains a header line
+    if (access(filename.url().c_str(), R_OK) != 0) {
 
-            // OpenMP critical zone to write header in case that the file
-            // does not yet exist
-            #pragma omp critical(GApplication_write_statistics)
-            {
+        // OpenMP critical zone to write header in case that the file does
+        // not yet exist
+        #pragma omp critical(GApplication_write_statistics)
+        {
 
-                // Open statistics file, and in case of success, write
-                // header line
-                FILE* fptr = fopen(filename.c_str(), "w");
-                if (fptr != NULL) {
-                    fprintf(fptr, "Date,"
-                                  "GammaLib version,"
-                                  "Country,"
-                                  "Application,"
-                                  "Version,"
-                                  "Wall clock seconds,"
-                                  "CPU seconds,"
-                                  "g eCO2\n");
-                    fclose(fptr);
-                }
+            // Open statistics file, and in case of success, write header
+            // line
+            FILE* fptr = fopen(filename.url().c_str(), "w");
+            if (fptr != NULL) {
+                fprintf(fptr, "Date,"
+                              "GammaLib version,"
+                              "Country,"
+                              "Application,"
+                              "Version,"
+                              "Wall clock seconds,"
+                              "CPU seconds,"
+                              "g eCO2\n");
+                fclose(fptr);
+            }
 
-            } // end of OMP critial zone
+        } // end of OMP critial zone
 
-        } // endif: no statistics file existed
-
-    } // endif: managed to get user ID
+    } // endif: no statistics file existed
 
     // OpenMP critical zone to write statitics
     #pragma omp critical(GApplication_write_statistics)
@@ -1353,7 +1350,7 @@ void GApplication::write_statistics(void)
         lock.l_start  = 0;        // No offset, lock entire file ...
         lock.l_len    = 0;        // ... to the end
         lock.l_pid    = getpid(); // Current process ID
-        int fd        = open(filename.c_str(), O_WRONLY);
+        int fd        = open(filename.url().c_str(), O_WRONLY);
         if (fd != -1) {
 
             // Lock file
@@ -1361,7 +1358,7 @@ void GApplication::write_statistics(void)
 
             // Open statistics file, and in case of success, write
             // statistics
-            FILE* fptr = fopen(filename.c_str(), "a");
+            FILE* fptr = fopen(filename.url().c_str(), "a");
             if (fptr != NULL) {
 
                 // Get host country
@@ -1388,6 +1385,43 @@ void GApplication::write_statistics(void)
         } // endif: file locking successful
 
     } // end of OMP critial zone
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Start GammaLib daemon
+ *
+ * Starts GammaLib daemon. The GammaLib daemon becomes an independent child
+ * process, hence it will not affect the application that originally launched
+ * the daemon.
+ ***************************************************************************/
+void GApplication::start_daemon(void) const
+{
+    // Initialise daemon
+    GDaemon daemon;
+
+    // If daemon is not alive then create instance
+    if (!daemon.alive()) {
+    
+        // Create child process to start the daemon. Do nothing if child
+        // process creation fails.
+        int pid = fork();
+        if (pid >= 0) {
+
+            // If we have a PID of 0 we are in the child process. In this
+            // case we create and start the daemon ...
+            if (pid == 0) {
+                GDaemon daemon;
+                daemon.start();
+                exit(0);
+            }
+
+        } // endif: child proces created
+
+    } // endif: daemon
 
     // Return
     return;

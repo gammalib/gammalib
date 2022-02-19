@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for support module                                            #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016-2021 Juergen Knoedlseder                               #
+# Copyright (C) 2016-2022 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -36,7 +36,9 @@ sources = GException.cpp \
           GUrl.cpp \
           GUrlFile.cpp \
           GUrlString.cpp \
-          GFilename.cpp
+          GFilename.cpp \
+          GDaemon.cpp
+
 
 # Build libtool library
 noinst_LTLIBRARIES = libsupport.la

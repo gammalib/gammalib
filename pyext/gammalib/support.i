@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      support.i - Support module                         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2020 by Jurgen Knodlseder                           *
+ *  copyright (C) 2011-2022 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -82,3 +82,4 @@
 %include "GUrlFile.i"
 %include "GUrlString.i"
 %include "GFilename.i"
+%include "GDaemon.i"

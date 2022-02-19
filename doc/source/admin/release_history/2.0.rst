@@ -1,6 +1,6 @@
 .. _2.0:
 
-GammaLib 2.0 release (14 February 2022)
+GammaLib 2.0 release (19 February 2022)
 =======================================
 
 Overview
@@ -10,11 +10,11 @@ GammaLib 2.0 is a major release that adds significant functionality.
 
 In particular, this release provides:
 
-* extended support for COMPTEL data analysis
-* full support of all spatial models for COMPTEL
+* full support for COMPTEL data analysis
 * support for pulsar analysis
 * vectorised response computation
 * support Galactic coordinates in spatial models
+* provision of carbon footprint information and statistics
 
 
 Bug fixes
@@ -103,19 +103,18 @@ Improvements
 New features
 ------------
 
-<<<<<<< HEAD
-* [`3924 <https://cta-redmine.irap.omp.eu/issues/3924>`_] -
-  Add ``GModelSpatialRadialGeneralGauss`` and ``GModelSpatialEllipticalGeneralGauss`` classes
-=======
 * [`3973 <https://cta-redmine.irap.omp.eu/issues/3973>`_] -
   Add ``GCOMBvc`` and ``GCOMBvcs`` classes to support COMPTEL pulsar analysis, revise
   ``GCOMSelection`` interface to support both orbital and pulsar phase selection,
   extend ``GCOMObservation`` interface to handle Solar System Barycentre Data
->>>>>>> 3973-add-pulsar-analysis
+* [`3924 <https://cta-redmine.irap.omp.eu/issues/3924>`_] -
+  Add ``GModelSpatialRadialGeneralGauss`` and ``GModelSpatialEllipticalGeneralGauss`` classes
 * [`3910 <https://cta-redmine.irap.omp.eu/issues/3910>`_] -
   Add ``GCOMModelDRM`` class
 * [`3606 <https://cta-redmine.irap.omp.eu/issues/3606>`_] -
   Add ``GModelSpectralBins`` class
+* [`3592 <https://cta-redmine.irap.omp.eu/issues/3592>`_] -
+  Add GammaLib daemon for application statistics management
 * [`3527 <https://cta-redmine.irap.omp.eu/issues/3527>`_] -
   Add ``GCTABackground2D`` class
 * [`3469 <https://cta-redmine.irap.omp.eu/issues/3469>`_] -

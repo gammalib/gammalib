@@ -50,6 +50,7 @@
 #include "GUrlFile.hpp"
 #include "GUrlString.hpp"
 #include "GFilename.hpp"
+#include "GDaemon.hpp"
 
 /* __ Linear algebra module ______________________________________________ */
 #include "GVector.hpp"
