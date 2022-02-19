@@ -28,9 +28,9 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#include <pwd.h>           // user/passwd function
 #include <fcntl.h>         // for file locking
 #include <unistd.h>        // access() function
+#include <cstdlib>         // exit() function
 #include <cstdio>          // std::fopen(), etc. functions
 #include "GApplication.hpp"
 #include "GTools.hpp"
