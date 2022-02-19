@@ -267,7 +267,7 @@ std::string GDaemon::print(const GChatter& chatter) const
 
         // Append information
         result.append("\n"+gammalib::parformat("Process ID"));
-        result.append(gammalib::str(m_pid));
+        result.append(gammalib::str((int)(m_pid)));
         result.append("\n"+gammalib::parformat("Wake up period (s)"));
         result.append(gammalib::str(m_period));
         result.append("\n"+gammalib::parformat("Logger chatter level"));
@@ -293,7 +293,7 @@ void GDaemon::init_members(void)
 {
     // Initialise members
     m_pid     = 0;       //!< No process ID
-    m_period  = 3600.0;  //!< Wake-up daemon every hour
+    m_period  = 3600;    //!< Wake-up daemon every hour
     m_log.clear();
     m_chatter = NORMAL;  //!< NORMAL chatter level
     
@@ -353,14 +353,14 @@ void GDaemon::create_lock_file(void)
         m_pid = getpid();
 
         // Write process ID into lockfile
-        fprintf(fptr, "%d\n", m_pid);
+        fprintf(fptr, "%d\n", (int)(m_pid));
 
         // Close lockfile
         fclose(fptr);
 
         // Log creation of lock file
         m_log << "Created lock file \"" << lockfile.url();
-        m_log << "\" for PID " << m_pid << std::endl;
+        m_log << "\" for PID " << (int)(m_pid) << std::endl;
 
     } // endif: Lock file opened successfully
 
