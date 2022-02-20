@@ -619,23 +619,38 @@ void GDaemon::update_dates(GXml& xml, const GCsv& statistics)
 
     // Update modified time in header
     GXmlNode* modified = header->element("dates > modified");
-    static_cast<GXmlText*>((*modified)[0])->text(now.utc());
+    if (modified->is_empty()) {
+        modified->append(GXmlText(now.utc()));
+    }
+    else {
+        static_cast<GXmlText*>((*modified)[0])->text(now.utc());
+    }
 
     // Update first and last time in header
     std::string start;
     std::string stop;
     if (statistics.nrows() > 1) {
-        start                     = statistics.string(1,0);
-        stop                      = statistics.string(statistics.nrows()-1,0);
-        GXmlNode*   n_start       = header->element("dates > start");
-        GXmlNode*   n_stop        = header->element("dates > stop");
-        std::string current_start = static_cast<GXmlText*>((*n_start)[0])->text();
-        std::string current_stop  = static_cast<GXmlText*>((*n_stop)[0])->text();
-        if (current_start.empty() || (start < current_start)) {
-            static_cast<GXmlText*>((*n_start)[0])->text(start);
+        start                = statistics.string(1,0);
+        stop                 = statistics.string(statistics.nrows()-1,0);
+        GXmlNode* start_node = header->element("dates > start");
+        GXmlNode* stop_node  = header->element("dates > stop");
+        if (start_node->is_empty()) {
+            start_node->append(GXmlText(start));
         }
-        if (current_stop.empty() || (stop > current_stop)) {
-            static_cast<GXmlText*>((*n_stop)[0])->text(stop);
+        else {
+            std::string current_start = static_cast<GXmlText*>((*start_node)[0])->text();
+            if (current_start.empty() || (start < current_start)) {
+                static_cast<GXmlText*>((*start_node)[0])->text(start);
+            }
+        }
+        if (stop_node->is_empty()) {
+            stop_node->append(GXmlText(stop));
+        }
+        else {
+            std::string current_stop  = static_cast<GXmlText*>((*stop_node)[0])->text();
+            if (current_stop.empty() || (stop > current_stop)) {
+                static_cast<GXmlText*>((*stop_node)[0])->text(stop);
+            }
         }
     }
 
@@ -799,6 +814,11 @@ void GDaemon::update_versions_data(GXml& xml, const GCsv& statistics)
         double      wall    = statistics.real(i,5);
         double      cpu     = statistics.real(i,6);
         double      gCO2e   = statistics.real(i,7);
+
+        // If version is empty then set version to "unknown"
+        if (version.empty()) {
+            version = "unknown";
+        }
 
         // Get pointer to relevant "version" element. If no "version"
         // element exists that corresponds to the version of the tool then
