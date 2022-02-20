@@ -684,6 +684,11 @@ void GDaemon::update_countries_header(GXml& xml, const GCsv& statistics)
         // Extract relevant attributes
         std::string country = statistics.string(i,2);
 
+        // If country is empty then set country to "??"
+        if (country.empty()) {
+            country = "??";
+        }
+
         // Update list of countries in header
         int ncountries = countries->elements("country");
         if (ncountries == 0) {
