@@ -439,8 +439,6 @@ pid_t GDaemon::lock_pid(void) const
  *
  * Update application statistics in the @p statistics.xml file by scanning
  * the low-level file @p statistics.csv.
- *
- * @todo Delete low-level file if scan was successful.
  ***************************************************************************/
 void GDaemon::update_statistics(void)
 {
@@ -471,7 +469,7 @@ void GDaemon::update_statistics(void)
                 GCsv statistics(filename, ",");
 
                 // Update high-level statistics
-                update_high_level_statistics(statistics);
+                update_xml(statistics);
 
                 // Remove low-level statistics file
                 std::remove(filename.url().c_str());
@@ -501,191 +499,123 @@ void GDaemon::update_statistics(void)
  * The high-level statistics is written out as XML file. If no XML file
  * exists a new one is created, otherwise an existing file is updated.
  ***************************************************************************/
-void GDaemon::update_high_level_statistics(const GCsv& statistics)
+void GDaemon::update_xml(const GCsv& statistics)
 {
     // Log updating of high-level statistics
     m_log << "Update high-level statistics" << std::endl;
 
+    // Set high-level statistics filename
+    GFilename filename = gammalib::gamma_filename("statistics.xml");
+
+    // If no high-level statistics file exists then create one
+    if (!filename.exists()) {
+        create_xml(filename);
+    }
+
+    // Load high-level statistics file. If an exception occurs during this
+    // process the input file is probably corrupt, and a failure message
+    // is written into the log file. Processing only continues if no
+    // exception occured.
+    GXml xml;
+    try {
+        xml.load(filename);
+    }
+    catch (...) {
+        xml.clear();
+        m_log << "*** Failure occured in loading high-level statistics ";
+        m_log << "XML file \"" << filename.url() << "\"" << std::endl;
+    }
+
+    // Update file only if XML document is not empty
+    if (!xml.is_empty()) {
+
+        // Update dates in header
+        update_dates(xml, statistics);
+        
+        // Update countries in header and data
+        update_countries_header(xml, statistics);
+        update_countries_data(xml, statistics);
+
+        // Update versions in data
+        update_versions_data(xml, statistics);
+
+        // Update daily information
+        update_daily(xml, statistics);
+
+        // Save updated high-level statistics XML file
+        xml.save(filename);
+
+    } // endif: XML document was not empty
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Create high-level statistics XML file
+ *
+ * @param[in] filename File name.
+ *
+ * Creates an empty high-level statistics XML file with the specified
+ * @p filename. This method overwrites any existing XML file.
+ ***************************************************************************/
+void GDaemon::create_xml(const GFilename& filename)
+{
+    // Initialise high-level statistics XML object
+    GXml xml;
+
+    // Append base node
+    GXmlNode* base = xml.append(GXmlElement("statistics title=\"High-level statistics\""));
+
+    // Append header
+    GXmlNode* header    = base->append("header");
+    GXmlNode* dates     = header->append("dates");
+    GXmlNode* countries = header->append("countries");
+    GXmlNode* d1        = dates->append("creation");
+    d1->append(GXmlText(""));
+    GXmlNode* d2 = dates->append("modified");
+    d2->append(GXmlText(""));
+    GXmlNode* d3 = dates->append("start");
+    d3->append(GXmlText(""));
+    GXmlNode* d4 = dates->append("stop");
+    d4->append(GXmlText(""));
+
+    // Append data
+    GXmlNode* data  = base->append("data");
+    data->append("countries");
+    data->append("versions");
+    data->append("daily");
+
+    // Log creation of high-level statistics file
+    m_log << "Created high-level statistics XML file \"";
+    m_log << filename.url() << "\"" << std::endl;
+
+    // Save high-level statistics XML file
+    xml.save(filename);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Update dates in high-level statistics header.
+ *
+ * @param[in,out] xml High-level statistics XML object.
+ * @param[in] statistics Low-level statistics CSV object.
+ *
+ * Updates dates in the high-level statistics header.
+ ***************************************************************************/
+void GDaemon::update_dates(GXml& xml, const GCsv& statistics)
+{
     // Set current time
     GTime now;
     now.now();
 
-    // Set high-level statistics filename
-    GFilename filename = gammalib::gamma_filename("statistics.xml");
-
-    // Initialise high-level statistics
-    GXml xml;
-
-    // If a high-level statistics file exists already then load information
-    // from the file
-    if (filename.exists()) {
-        xml.load(filename);
-    }
-
-    // ... otherwise create empty high-level statistics file
-    else {
-
-        // Append base
-        GXmlNode* base = xml.append(GXmlElement("statistics title=\"High-level statistics\""));
-
-        // Append header
-        GXmlNode* header    = base->append("header");
-        GXmlNode* dates     = header->append("dates");
-        GXmlNode* countries = header->append("countries");
-        GXmlNode* d1        = dates->append("creation");
-        d1->append(GXmlText(now.utc()));
-        GXmlNode* d2 = dates->append("modified");
-        d2->append(GXmlText(now.utc()));
-        GXmlNode* d3 = dates->append("start");
-        d3->append(GXmlText(""));
-        GXmlNode* d4 = dates->append("stop");
-        d4->append(GXmlText(""));
-
-        // Append data
-        GXmlNode* data  = base->append("data");
-        GXmlNode* daily = data->append("daily");
-
-        // Log creation of high-level statistics file
-        m_log << "Created high-level statistics XML file \"";
-        m_log << filename.url() << "\"" << std::endl;
-
-    } // endelse: created empty high-level statistics file
-
-    // Get some useful pointers
+    // Get pointer to "header" node
     GXmlNode* base   = xml.element("statistics",0);
     GXmlNode* header = base->element("header",0);
-    GXmlNode* data   = base->element("data",0);
-    GXmlNode* daily  = data->element("daily",0);
-
-    // Compatibility code: Make sure that a "countries" element exist
-    if (header->elements("countries") == 0) {
-        header->append("countries");
-    }
-
-    // Get more useful pointers
-    GXmlNode* countries = header->element("countries",0);
-
-    // Loop over statistics
-    for (int i = 0; i < statistics.nrows(); ++i) {
-
-        // Skip header row
-        if (i == 0) {
-            continue;
-        }
-
-        // Extract relevant attributes
-        std::string date    = statistics.string(i,0).substr(0,10);
-        std::string country = statistics.string(i,2);
-        std::string tool    = statistics.string(i,3);
-        std::string version = statistics.string(i,4);
-        double      wall    = statistics.real(i,5);
-        double      cpu     = statistics.real(i,6);
-        double      gCO2e   = statistics.real(i,7);
-
-        // Skip tools without name
-        if (tool.empty()) {
-            continue;
-        }
-
-        // Update list of countries
-        int ncountries = countries->elements("country");
-        if (ncountries == 0) {
-            GXmlNode* n = countries->append("country");
-            n->append(GXmlText(country));
-        }
-        else {
-            bool found = false;
-            for (int k = 0; k < ncountries; ++k) {
-                if (countries->element("country", k)->value() == country) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                GXmlNode* n = countries->append("country");
-                n->append(GXmlText(country));
-            }
-        }
-
-        // Get pointer to relevant date element. If no date element exists
-        // that corresponds to the date of the statistics then append an
-        // element
-        GXmlNode* n_date = NULL;
-        int ndates = daily->elements("date");
-        if (ndates == 0) {
-            n_date = daily->append("date");
-            n_date->append(GXmlElement("value", date));
-        }
-        else {
-            for (int k = 0; k < ndates; ++k) {
-                GXmlElement* n = daily->element("date", k);
-                if (daily->element("date", k)->element("value",0)->value() == date) {
-                    n_date = n;
-                    break;
-                }
-            }
-            if (n_date == NULL) {
-                n_date = daily->append("date");
-                n_date->append(GXmlElement("value", date));
-            }
-        }
-
-        // Get pointer to "tools" node. If no such node exists then append
-        // one
-        GXmlNode* n_tools = NULL;
-        if (n_date->elements("tools") == 0) {
-            n_tools = n_date->append("tools");
-        }
-        else {
-            n_tools = n_date->element("tools",0);
-        }
-
-        // Get pointer to relevant tool element. If no tool element exists
-        // that corresponds to the relevant tool then append an element
-        GXmlElement* n_tool = NULL;
-        int ntools = n_tools->elements();
-        if (ntools == 0) {
-            n_tool = n_tools->append(tool);
-        }
-        else {
-            for (int k = 0; k < ntools; ++k) {
-                GXmlElement* n = n_tools->element(k);
-                if (n->name() == tool) {
-                    n_tool = n;
-                    break;
-                }
-            }
-            if (n_tool == NULL) {
-                n_tool = n_tools->append(tool);
-            }
-        }
-
-        // Set or update attributes
-        int calls = 1;
-        if (!n_tool->has_attribute("version")) {
-            n_tool->attribute("version", version);
-        }
-        if (!n_tool->has_attribute("country")) {
-            n_tool->attribute("country", country);
-        }
-        if (n_tool->has_attribute("calls")) {
-            calls += gammalib::toint(n_tool->attribute("calls"));
-        }
-        if (n_tool->has_attribute("wall")) {
-            wall += gammalib::todouble(n_tool->attribute("wall"));
-        }
-        if (n_tool->has_attribute("cpu")) {
-            cpu += gammalib::todouble(n_tool->attribute("cpu"));
-        }
-        if (n_tool->has_attribute("gCO2e")) {
-            gCO2e += gammalib::todouble(n_tool->attribute("gCO2e"));
-        }
-        n_tool->attribute("calls",  gammalib::str(calls));
-        n_tool->attribute("wall",   gammalib::str(wall));
-        n_tool->attribute("cpu",    gammalib::str(cpu));
-        n_tool->attribute("gCO2e",  gammalib::str(gCO2e));
-
-    } // endfor: looped over statistics
 
     // Update modified time in header
     GXmlNode* modified = header->element("dates > modified");
@@ -709,8 +639,332 @@ void GDaemon::update_high_level_statistics(const GCsv& statistics)
         }
     }
 
-    // Save high-level statistics file
-    xml.save(filename);
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Update countries in high-level statistics header.
+ *
+ * @param[in,out] xml High-level statistics XML object.
+ * @param[in] statistics Low-level statistics CSV object.
+ *
+ * Update country statistics in header block.
+ ***************************************************************************/
+void GDaemon::update_countries_header(GXml& xml, const GCsv& statistics)
+{
+    // Get pointer to "countries" node in "header" node. In case that no
+    // "countries" node exists in "header" node then append one.
+    GXmlNode* base   = xml.element("statistics",0);
+    GXmlNode* header = base->element("header",0);
+    if (header->elements("countries") == 0) {
+        header->append("countries");
+    }
+    GXmlNode* countries = header->element("countries",0);
+
+    // Loop over statistics
+    for (int i = 1; i < statistics.nrows(); ++i) {
+
+        // Extract relevant attributes
+        std::string country = statistics.string(i,2);
+
+        // Update list of countries in header
+        int ncountries = countries->elements("country");
+        if (ncountries == 0) {
+            GXmlNode* n = countries->append("country");
+            n->append(GXmlText(country));
+        }
+        else {
+            bool found = false;
+            for (int k = 0; k < ncountries; ++k) {
+                if (countries->element("country", k)->value() == country) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                GXmlNode* n = countries->append("country");
+                n->append(GXmlText(country));
+            }
+        }
+
+    } // endfor: looped over statistics
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Update countries in high-level statistics data.
+ *
+ * @param[in,out] xml High-level statistics XML object.
+ * @param[in] statistics Low-level statistics CSV object.
+ *
+ * Update country statistics in data block.
+ ***************************************************************************/
+void GDaemon::update_countries_data(GXml& xml, const GCsv& statistics)
+{
+    // Get pointer to "countries" node. In case that no "countries" node
+    // exists in "data" node then append one.
+    GXmlNode* base = xml.element("statistics",0);
+    GXmlNode* data = base->element("data",0);
+    if (data->elements("countries") == 0) {
+        data->append("countries");
+    }
+    GXmlNode* countries = data->element("countries",0);
+
+    // Loop over statistics
+    for (int i = 1; i < statistics.nrows(); ++i) {
+
+        // Extract relevant attributes
+        std::string country = statistics.string(i,2);
+        double      wall    = statistics.real(i,5);
+        double      cpu     = statistics.real(i,6);
+        double      gCO2e   = statistics.real(i,7);
+
+        // Get pointer to relevant "country" element. If no "country"
+        // element exists that corresponds to the country of the tool then
+        // append a new element
+        GXmlElement* country_element = NULL;
+        int ncountries = countries->elements();
+        if (ncountries == 0) {
+            country_element = countries->append(country);
+        }
+        else {
+            for (int k = 0; k < ncountries; ++k) {
+                GXmlElement* element = countries->element(k);
+                if (element->name() == country) {
+                    country_element = element;
+                    break;
+                }
+            }
+            if (country_element == NULL) {
+                country_element = countries->append(country);
+            }
+        }
+
+        // Now we have the relevant "country" element and we can update the
+        // statistics
+        int calls = 1;
+        if (country_element->has_attribute("calls")) {
+            calls += gammalib::toint(country_element->attribute("calls"));
+        }
+        if (country_element->has_attribute("wall")) {
+            wall += gammalib::todouble(country_element->attribute("wall"));
+        }
+        if (country_element->has_attribute("cpu")) {
+            cpu += gammalib::todouble(country_element->attribute("cpu"));
+        }
+        if (country_element->has_attribute("gCO2e")) {
+            gCO2e += gammalib::todouble(country_element->attribute("gCO2e"));
+        }
+        country_element->attribute("calls",  gammalib::str(calls));
+        country_element->attribute("wall",   gammalib::str(wall));
+        country_element->attribute("cpu",    gammalib::str(cpu));
+        country_element->attribute("gCO2e",  gammalib::str(gCO2e));
+
+    } // endfor: looped over statistics
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Update versions in high-level statistics data.
+ *
+ * @param[in,out] xml High-level statistics XML object.
+ * @param[in] statistics Low-level statistics CSV object.
+ *
+ * Update version statistics in data block.
+ ***************************************************************************/
+void GDaemon::update_versions_data(GXml& xml, const GCsv& statistics)
+{
+    // Get pointer to "versions" node. In case that no "versions" node exists
+    // in "data" node then append one.
+    GXmlNode* base = xml.element("statistics",0);
+    GXmlNode* data = base->element("data",0);
+    if (data->elements("versions") == 0) {
+        data->append("versions");
+    }
+    GXmlNode* versions = data->element("versions",0);
+
+    // Loop over statistics
+    for (int i = 1; i < statistics.nrows(); ++i) {
+
+        // Extract relevant attributes
+        std::string version = statistics.string(i,4);
+        double      wall    = statistics.real(i,5);
+        double      cpu     = statistics.real(i,6);
+        double      gCO2e   = statistics.real(i,7);
+
+        // Get pointer to relevant "version" element. If no "version"
+        // element exists that corresponds to the version of the tool then
+        // append a new element
+        GXmlElement* version_element = NULL;
+        int nversion = versions->elements();
+        if (nversion == 0) {
+            version_element = versions->append(version);
+        }
+        else {
+            for (int k = 0; k < nversion; ++k) {
+                GXmlElement* element = versions->element(k);
+                if (element->name() == version) {
+                    version_element = element;
+                    break;
+                }
+            }
+            if (version_element == NULL) {
+                version_element = versions->append(version);
+            }
+        }
+
+        // Now we have the relevant "version" element and we can update the
+        // statistics
+        int calls = 1;
+        if (version_element->has_attribute("calls")) {
+            calls += gammalib::toint(version_element->attribute("calls"));
+        }
+        if (version_element->has_attribute("wall")) {
+            wall += gammalib::todouble(version_element->attribute("wall"));
+        }
+        if (version_element->has_attribute("cpu")) {
+            cpu += gammalib::todouble(version_element->attribute("cpu"));
+        }
+        if (version_element->has_attribute("gCO2e")) {
+            gCO2e += gammalib::todouble(version_element->attribute("gCO2e"));
+        }
+        version_element->attribute("calls",  gammalib::str(calls));
+        version_element->attribute("wall",   gammalib::str(wall));
+        version_element->attribute("cpu",    gammalib::str(cpu));
+        version_element->attribute("gCO2e",  gammalib::str(gCO2e));
+
+    } // endfor: looped over statistics
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Update daily statistics
+ *
+ * @param[in,out] xml High-level statistics XML object.
+ * @param[in] statistics Low-level statistics CSV object.
+ *
+ * Update daily statistics in data block.
+ ***************************************************************************/
+void GDaemon::update_daily(GXml& xml, const GCsv& statistics)
+{
+    // Get pointer to "daily" node. In case that no "daily" node exists
+    // in "data" node then append one.
+    GXmlNode* base = xml.element("statistics",0);
+    GXmlNode* data = base->element("data",0);
+    if (data->elements("daily") == 0) {
+        data->append("daily");
+    }
+    GXmlNode* daily = data->element("daily",0);
+
+    // Loop over statistics
+    for (int i = 1; i < statistics.nrows(); ++i) {
+
+        // Extract relevant attributes
+        std::string date    = statistics.string(i,0).substr(0,10);
+        std::string country = statistics.string(i,2);
+        std::string tool    = statistics.string(i,3);
+        std::string version = statistics.string(i,4);
+        double      wall    = statistics.real(i,5);
+        double      cpu     = statistics.real(i,6);
+        double      gCO2e   = statistics.real(i,7);
+
+        // If tool name is empty then set tool name to "unknown"
+        if (tool.empty()) {
+            tool = "unknown";
+        }
+
+        // Get pointer to relevant "date" node. If no "date" node exists
+        // that corresponds to the date of the statistics then append an
+        // "date" node for the required date.
+        GXmlNode* date_node = NULL;
+        int ndates = daily->elements("date");
+        if (ndates == 0) {
+            date_node = daily->append("date");
+            date_node->append(GXmlElement("value", date));
+        }
+        else {
+            for (int k = 0; k < ndates; ++k) {
+                GXmlElement* element = daily->element("date", k);
+                if (element->element("value",0)->value() == date) {
+                    date_node = element;
+                    break;
+                }
+            }
+            if (date_node == NULL) {
+                date_node = daily->append("date");
+                date_node->append(GXmlElement("value", date));
+            }
+        }
+
+        // Get pointer to "tools" node. If no such node exists then append
+        // one
+        GXmlNode* tools = NULL;
+        if (date_node->elements("tools") == 0) {
+            tools = date_node->append("tools");
+        }
+        else {
+            tools = date_node->element("tools",0);
+        }
+
+        // Get pointer to relevant "tool" element. If no "tool" element
+        // exists that corresponds to the name of the tool then append
+        // a new element
+        GXmlElement* tool_element = NULL;
+        int ntools = tools->elements();
+        if (ntools == 0) {
+            tool_element = tools->append(tool);
+        }
+        else {
+            for (int k = 0; k < ntools; ++k) {
+                GXmlElement* element = tools->element(k);
+                if (element->name() == tool) {
+                    tool_element = element;
+                    break;
+                }
+            }
+            if (tool_element == NULL) {
+                tool_element = tools->append(tool);
+            }
+        }
+
+        // Now we have the relevant "tool" element and we can update the
+        // statistics
+        int calls = 1;
+        if (!tool_element->has_attribute("version")) {
+            tool_element->attribute("version", version);
+        }
+        if (!tool_element->has_attribute("country")) {
+            tool_element->attribute("country", country);
+        }
+        if (tool_element->has_attribute("calls")) {
+            calls += gammalib::toint(tool_element->attribute("calls"));
+        }
+        if (tool_element->has_attribute("wall")) {
+            wall += gammalib::todouble(tool_element->attribute("wall"));
+        }
+        if (tool_element->has_attribute("cpu")) {
+            cpu += gammalib::todouble(tool_element->attribute("cpu"));
+        }
+        if (tool_element->has_attribute("gCO2e")) {
+            gCO2e += gammalib::todouble(tool_element->attribute("gCO2e"));
+        }
+        tool_element->attribute("calls",  gammalib::str(calls));
+        tool_element->attribute("wall",   gammalib::str(wall));
+        tool_element->attribute("cpu",    gammalib::str(cpu));
+        tool_element->attribute("gCO2e",  gammalib::str(gCO2e));
+
+    } // endfor: looped over statistics
 
     // Return
     return;

@@ -36,6 +36,7 @@
 
 /* __ Forward declarations _______________________________________________ */
 class GCsv;
+class GXml;
 
 /* __ Constants __________________________________________________________ */
 
@@ -79,7 +80,13 @@ protected:
     GFilename statistics_filename(void) const;
     pid_t     lock_pid(void) const;
     void      update_statistics(void);
-    void      update_high_level_statistics(const GCsv& statistics);
+    void      update_xml(const GCsv& statistics);
+    void      create_xml(const GFilename& filename);
+    void      update_dates(GXml& xml, const GCsv& statistics);
+    void      update_countries_header(GXml& xml, const GCsv& statistics);
+    void      update_countries_data(GXml& xml, const GCsv& statistics);
+    void      update_versions_data(GXml& xml, const GCsv& statistics);
+    void      update_daily(GXml& xml, const GCsv& statistics);
 
     // Protected members
     pid_t    m_pid;     //!< Process ID
