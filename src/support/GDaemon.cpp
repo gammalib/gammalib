@@ -296,7 +296,7 @@ void GDaemon::init_members(void)
     m_period  = 3600;    //!< Wake-up daemon every hour
     m_log.clear();
     m_chatter = NORMAL;  //!< NORMAL chatter level
-    
+
     // Return
     return;
 }
@@ -380,7 +380,7 @@ void GDaemon::delete_lock_file(void) const
     // If process ID in lock file is the ID of the current process then
     // delete the lock file
     if (lock_pid() == getpid()) {
-    
+
         // Get lock filename
         GFilename lockfile = lock_filename();
 
@@ -531,7 +531,7 @@ void GDaemon::update_xml(const GCsv& statistics)
 
         // Update dates in header
         update_dates(xml, statistics);
-        
+
         // Update countries in header and data
         update_countries_header(xml, statistics);
         update_countries_data(xml, statistics);
@@ -688,9 +688,9 @@ void GDaemon::update_countries_header(GXml& xml, const GCsv& statistics)
         // Extract relevant attributes
         std::string country = statistics.string(i,2);
 
-        // If country is empty then set country to "??"
+        // If country is empty then set country to "unknown"
         if (country.empty()) {
-            country = "??";
+            country = "unknown";
         }
 
         // Update list of countries in header
@@ -747,6 +747,11 @@ void GDaemon::update_countries_data(GXml& xml, const GCsv& statistics)
         double      wall    = statistics.real(i,5);
         double      cpu     = statistics.real(i,6);
         double      gCO2e   = statistics.real(i,7);
+
+        // If country is empty then set country to "unknown"
+        if (country.empty()) {
+            country = "unknown";
+        }
 
         // Get pointer to relevant "country" element. If no "country"
         // element exists that corresponds to the country of the tool then
