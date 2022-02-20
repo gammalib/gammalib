@@ -526,18 +526,19 @@ void GDaemon::update_high_level_statistics(const GCsv& statistics)
     else {
 
         // Append base
-        GXmlNode* base = xml.append(GXmlElement("statistics title=\"High-level statistic\""));
+        GXmlNode* base = xml.append(GXmlElement("statistics title=\"High-level statistics\""));
 
         // Append header
-        GXmlNode* header = base->append("header");
-        GXmlNode* dates  = header->append("dates");
-        GXmlNode* d1     = dates->append("creation");
+        GXmlNode* header    = base->append("header");
+        GXmlNode* dates     = header->append("dates");
+        GXmlNode* countries = header->append("countries");
+        GXmlNode* d1        = dates->append("creation");
         d1->append(GXmlText(now.utc()));
-        GXmlNode* d2     = dates->append("modified");
+        GXmlNode* d2 = dates->append("modified");
         d2->append(GXmlText(now.utc()));
-        GXmlNode* d3     = dates->append("start");
+        GXmlNode* d3 = dates->append("start");
         d3->append(GXmlText(""));
-        GXmlNode* d4     = dates->append("stop");
+        GXmlNode* d4 = dates->append("stop");
         d4->append(GXmlText(""));
 
         // Append data
@@ -556,6 +557,14 @@ void GDaemon::update_high_level_statistics(const GCsv& statistics)
     GXmlNode* data   = base->element("data",0);
     GXmlNode* daily  = data->element("daily",0);
 
+    // Compatibility code: Make sure that a "countries" element exist
+    if (header->elements("countries") == 0) {
+        header->append("countries");
+    }
+
+    // Get more useful pointers
+    GXmlNode* countries = header->element("countries",0);
+
     // Loop over statistics
     for (int i = 0; i < statistics.nrows(); ++i) {
 
@@ -566,6 +575,7 @@ void GDaemon::update_high_level_statistics(const GCsv& statistics)
 
         // Extract relevant attributes
         std::string date    = statistics.string(i,0).substr(0,10);
+        std::string country = statistics.string(i,2);
         std::string tool    = statistics.string(i,3);
         std::string version = statistics.string(i,4);
         double      wall    = statistics.real(i,5);
@@ -575,6 +585,26 @@ void GDaemon::update_high_level_statistics(const GCsv& statistics)
         // Skip tools without name
         if (tool.empty()) {
             continue;
+        }
+
+        // Update list of countries
+        int ncountries = countries->elements("country");
+        if (ncountries == 0) {
+            GXmlNode* n = countries->append("country");
+            n->append(GXmlText(country));
+        }
+        else {
+            bool found = false;
+            for (int k = 0; k < ncountries; ++k) {
+                if (countries->element("country", k)->value() == country) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                GXmlNode* n = countries->append("country");
+                n->append(GXmlText(country));
+            }
         }
 
         // Get pointer to relevant date element. If no date element exists
@@ -634,6 +664,9 @@ void GDaemon::update_high_level_statistics(const GCsv& statistics)
         int calls = 1;
         if (!n_tool->has_attribute("version")) {
             n_tool->attribute("version", version);
+        }
+        if (!n_tool->has_attribute("country")) {
+            n_tool->attribute("country", country);
         }
         if (n_tool->has_attribute("calls")) {
             calls += gammalib::toint(n_tool->attribute("calls"));
