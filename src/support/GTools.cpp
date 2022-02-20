@@ -2312,7 +2312,7 @@ std::string gammalib::host_country(void)
 
         // Setup curl command
         char command[256];
-        sprintf(command, "curl --silent http://ip-api.com/line/?fields=countryCode");
+        sprintf(command, "curl --silent http://ip-api.com/line/?fields=countryCode 2>/dev/null");
 
         // Open the process with given 'command' for reading
         FILE* file = popen(command, "r");
