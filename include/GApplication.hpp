@@ -84,6 +84,7 @@ public:
     double                          telapse(void) const;
     double                          celapse(void) const;
     double                          gCO2e(const std::string& country) const;
+    void                            add_celapse(const double& celapse);
     void                            logFileOpen(const bool& clobber = true);
     void                            logFileClose(void);
     bool                            logTerse(void) const;
@@ -117,6 +118,8 @@ public:
                                                 const std::string& header);
     void                            log_parameters(const GChatter& chatter);
     const bool&                     need_help(void) const;
+    void                            statistics(const bool& statistics);
+    const bool&                     statistics(void) const;
     const GApplicationPars&         pars(void) const;
     void                            pars(const GApplicationPars& pars);
     const std::vector<std::string>& args(void) const;
@@ -130,13 +133,14 @@ public:
 
 protected:
     // Protected methods
-    void        init_members(void);
-    void        copy_members(const GApplication& app);
-    void        free_members(void);
-    void        set_log_chatter(void);
-    void        set_log_filename(void);
-    void        write_statistics(void);
-    void        start_daemon(void) const;
+    void init_members(void);
+    void copy_members(const GApplication& app);
+    void free_members(void);
+    void set_statistics(void);
+    void set_log_chatter(void);
+    void set_log_filename(void);
+    void write_statistics(void);
+    void start_daemon(void) const;
 
     // Protected data members
     std::string              m_name;        //!< Application name
@@ -146,9 +150,11 @@ protected:
     std::vector<std::string> m_args;        //!< Command line arguments
     std::time_t              m_tstart;      //!< Calendar start time of execution
     double                   m_cstart;      //!< Clock start time of execution
+    double                   m_celapse;     //!< Internal CPU seconds counter
     GApplicationPars         m_pars;        //!< Application parameters
     bool                     m_pars_loaded; //!< Application parameters loaded
     bool                     m_need_help;   //!< --help specified
+    bool                     m_statistics;  //!< Enable writing of statistics
 };
 
 
@@ -252,6 +258,21 @@ const std::string& GApplication::version(void) const
 
 
 /***********************************************************************//**
+ * @brief Add CPU seconds to internal counter
+ *
+ * @param[in] celapse CPU seconds.
+ *
+ * Adds the @p celapse CPU seconds to the internal CPU seconds counter.
+ ***************************************************************************/
+inline
+void GApplication::add_celapse(const double& celapse)
+{
+    m_celapse += celapse;
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Signal if specified parameter exists
  *
  * @param[in] name Parameter name.
@@ -303,6 +324,32 @@ const bool& GApplication::need_help(void) const
 {
     // Return
     return (m_need_help);
+}
+
+
+/***********************************************************************//**
+ * @brief Set if statistics will be written
+ *
+ * @param[in] Write statistics?
+ ***************************************************************************/
+inline
+void GApplication::statistics(const bool& statistics)
+{
+    m_statistics = statistics;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Signals if statistics will be written
+ *
+ * @return True if statistics will be written.
+ ***************************************************************************/
+inline
+const bool& GApplication::statistics(void) const
+{
+    // Return
+    return (m_statistics);
 }
 
 

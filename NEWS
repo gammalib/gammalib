@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-19 February 2022
+20 February 2022
 
 
 1. Introduction
@@ -45,6 +45,8 @@ The following classes have been renamed:
 - none
 
 The following methods have been added:
+- GApplication::statistics()
+- GApplication::add_celapse()
 - GApplication::gCO2e()
 - GApplication::stamp(GFitsHdu&)
 - GApplication::stamp(GFits&)
@@ -222,7 +224,10 @@ Add GApplication::gCO2e() method to estimate the carbon footprint if the elapsed
 CPU time. The carbon footprint estimation is also added to the trailer text of
 an application to raise awareness. In addition, an ASCII file is maintained in
 the $HOME/.gamma folder that contains statistics on application usage, including
-carbon footprint information (#3592).
+carbon footprint information. The methods GApplication::statistics() were added
+to enable/disable writing of statistics. The method GApplication::add_celapse()
+was added to allow adding of additional CPU seconds of child processes in
+Python multi-processing (#3592).
 
 Corrected the computation of the elapsed CPU time in an application in case
 that OpenMP is enabled (#3417).

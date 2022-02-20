@@ -71,6 +71,7 @@ public:
     %ignore                 classname;
     %rename(_name)          name;
     %rename(_version)       version;
+    %rename(_add_celapse)   add_celapse;
     %rename(_logTerse)      logTerse;
     %rename(_logNormal)     logNormal;
     %rename(_logExplicit)   logExplicit;
@@ -82,6 +83,7 @@ public:
     %rename(_log_header)    log_header;
     %rename(_log_trailer)   log_trailer;
     %rename(_need_help)     need_help;
+    %rename(_statistics)    statistics;
     %rename(_args)          args;
     %rename(_stamp)         stamp;
     %rename(_log)           log;
@@ -92,6 +94,10 @@ public:
     std::string                     classname(void) const;
     const std::string&              name(void) const;
     const std::string&              version(void) const;
+    double                          telapse(void) const;
+    double                          celapse(void) const;
+    double                          gCO2e(const std::string& country) const;
+    void                            add_celapse(const double& celapse);
     bool                            logTerse(void) const;
     bool                            logNormal(void) const;
     bool                            logExplicit(void) const;
@@ -104,6 +110,8 @@ public:
     void                            log_header(void);
     void                            log_trailer(void);
     const bool&                     need_help(void) const;
+    void                            statistics(const bool& statistics);
+    const bool&                     statistics(void) const;
     const GApplicationPars&         pars(void) const;
     void                            pars(const GApplicationPars& pars);
     void                            stamp(GFitsHDU& hdu) const;

@@ -44,12 +44,16 @@
 #include <omp.h>
 #endif
 
+/* __ Constants __________________________________________________________ */
+
+/* __ Globals ____________________________________________________________ */
+bool g_is_parent = true;       //!< Signals if application is parent or child
+
 /* __ Method name definitions ____________________________________________ */
 
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-const int header_width = 80;                                //!< Header width
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -69,6 +73,9 @@ GApplication::GApplication(void)
 {
     // Initialise members
     init_members();
+
+    // Set statistics
+    set_statistics();
 
     // Return
     return;
@@ -113,6 +120,9 @@ GApplication::GApplication(const std::string& name, const std::string& version)
     // Set log filename and chattiness
     set_log_filename();
     set_log_chatter();
+
+    // Set statistics
+    set_statistics();
 
     // Return
     return;
@@ -160,6 +170,9 @@ GApplication::GApplication(const std::string&      name,
     // Set log filename and chattiness
     set_log_filename();
     set_log_chatter();
+
+    // Set statistics
+    set_statistics();
 
     // Return
     return;
@@ -228,6 +241,9 @@ GApplication::GApplication(const std::string& name,
 
     } // endif: no --help option specified
 
+    // Set statistics
+    set_statistics();
+
     // Return
     return;
 }
@@ -245,6 +261,9 @@ GApplication::GApplication(const GApplication& app)
 
     // Copy members
     copy_members(app);
+
+    // Set statistics
+    set_statistics();
 
     // Return
     return;
@@ -289,6 +308,9 @@ GApplication& GApplication::operator=(const GApplication& app)
 
         // Copy members
         copy_members(app);
+
+        // Set statistics
+        set_statistics();
 
     } // endif: object was not identical
 
@@ -377,6 +399,11 @@ double GApplication::telapse(void) const
  * @brief Return application elapsed time in CPU seconds
  *
  * @return Application elapsed time in CPU seconds.
+ *
+ * Returns the CPU seconds that were consumed by the application. The
+ * content of @p m_celapse is added to the measurement which allows tracking
+ * of additional CPU seconds from child processes that are not properly
+ * tracked otherwise.
  ***************************************************************************/
 double GApplication::celapse(void) const
 {
@@ -386,6 +413,9 @@ double GApplication::celapse(void) const
     #else
     double celapse = (double(clock()) - m_cstart) / (double)CLOCKS_PER_SEC;
     #endif
+
+    // Add CPU seconds of internal counter
+    celapse += m_celapse;
 
     // Return elapsed time
     return celapse;
@@ -755,6 +785,9 @@ bool GApplication::clobber(void) const
  ***************************************************************************/
 void GApplication::log_header(void)
 {
+    // Set header width
+    const int header_width = 80;
+
     // Reset any indentation
     log.indent(0);
 
@@ -1180,6 +1213,7 @@ void GApplication::init_members(void)
     m_pars.clear();
     m_pars_loaded = false;
     m_need_help   = false;
+    m_statistics  = true;
 
     // Save the execution calendar start time
     std::time(&m_tstart);
@@ -1190,6 +1224,9 @@ void GApplication::init_members(void)
     #else
     m_cstart = double(clock());
     #endif
+
+    // Initialise internal CPU seconds counter
+    m_celapse = 0.0;
 
     // Start daemon
     start_daemon();
@@ -1219,9 +1256,11 @@ void GApplication::copy_members(const GApplication& app)
     m_args        = app.m_args;
     m_tstart      = app.m_tstart;
     m_cstart      = app.m_cstart;
+    m_celapse     = app.m_celapse;
     m_pars        = app.m_pars;
     m_pars_loaded = app.m_pars_loaded;
     m_need_help   = app.m_need_help;
+    m_statistics  = app.m_statistics;
 
     // Return
     return;
@@ -1244,6 +1283,28 @@ void GApplication::free_members(void)
     // Write statistics
     write_statistics();
 
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set statistics according to parent child status
+ *
+ * Makes sure than application statistics are only written for the parent
+ * which is the first application that is instantiated. All instances that
+ * are subsequenty instantiated are considered as children, and no statistics
+ * will be written for them since their statistics are included in those of
+ * the parent.
+ ***************************************************************************/
+void GApplication::set_statistics(void)
+{
+    // Enable statistics only for parents
+    statistics(g_is_parent);
+
+    // Make sure that next application is a child
+    g_is_parent = false;
+    
     // Return
     return;
 }
@@ -1309,16 +1370,19 @@ void GApplication::set_log_filename(void)
  ***************************************************************************/
 void GApplication::write_statistics(void)
 {
-    // Get statistics ASCII file name
-    GFilename filename = gammalib::gamma_filename("statistics.csv");
+    // Continue only if statistics should be written
+    if (m_statistics) {
 
-    // Make sure that file exists and that it contains a header line
-    if (access(filename.url().c_str(), R_OK) != 0) {
+        // Get statistics ASCII file name
+        GFilename filename = gammalib::gamma_filename("statistics.csv");
 
-        // OpenMP critical zone to write header in case that the file does
-        // not yet exist
-        #pragma omp critical(GApplication_write_statistics)
-        {
+        // Make sure that file exists and that it contains a header line
+        if (access(filename.url().c_str(), R_OK) != 0) {
+
+            // OpenMP critical zone to write header in case that the file
+            // does not yet exist
+            #pragma omp critical(GApplication_write_statistics)
+            {
 
             // Open statistics file, and in case of success, write header
             // line
@@ -1335,13 +1399,13 @@ void GApplication::write_statistics(void)
                 fclose(fptr);
             }
 
-        } // end of OMP critial zone
+            } // end of OMP critial zone
 
-    } // endif: no statistics file existed
+        } // endif: no statistics file existed
 
-    // OpenMP critical zone to write statitics
-    #pragma omp critical(GApplication_write_statistics)
-    {
+        // OpenMP critical zone to write statitics
+        #pragma omp critical(GApplication_write_statistics)
+        {
 
         // Get file lock. Continue only in case of success
         struct flock lock;
@@ -1384,7 +1448,9 @@ void GApplication::write_statistics(void)
             
         } // endif: file locking successful
 
-    } // end of OMP critial zone
+        } // end of OMP critial zone
+
+    } // endif: statistics should be written
 
     // Return
     return;

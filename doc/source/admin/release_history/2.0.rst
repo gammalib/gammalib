@@ -1,6 +1,6 @@
 .. _2.0:
 
-GammaLib 2.0 release (19 February 2022)
+GammaLib 2.0 release (20 February 2022)
 =======================================
 
 Overview
@@ -62,7 +62,8 @@ Improvements
 * [`3626 <https://cta-redmine.irap.omp.eu/issues/3626>`_] -
   Add ``GModelSpectralFunc`` spectral constructor
 * [`3592 <https://cta-redmine.irap.omp.eu/issues/3592>`_] -
-  Add carbon footprint estimation to ``GApplication``
+  Add carbon footprint estimation to ``GApplication``.
+  Added ``GApplication::statistics()`` and ``GApplication::add_celapse()`` methods
 * [`3564 <https://cta-redmine.irap.omp.eu/issues/3564>`_] -
   Add phase selection to ``GCOMSelection`` and ``GCOMDri``
 * [`3558 <https://cta-redmine.irap.omp.eu/issues/3558>`_] -

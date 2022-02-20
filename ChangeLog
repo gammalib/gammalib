@@ -1,9 +1,8 @@
-2022-02-19
+2022-02-20
 
         * Version 2.0.0 released
         ========================
 
-        Add GammaLib daemon for application statistics management (#3592)
         By default, do not allow log-likelihood decrease in LM optimiser
         Support Galactic coordinates in spatial models (#3988)
         Implement CGRO clock correction (#3973)
@@ -26,6 +25,8 @@
         Add ASCL shield to "About" page (#3630)
         Add GModelSpectralFunc spectral constructor (#3626)
         Add GModelSpectralBins class (#3606)
+        Added GApplication statistics() and add_celapse() methods (#3592)
+        Add GammaLib daemon for application statistics management (#3592)
         Add carbon footprint estimation and application statistic logging to
           GApplication (#3592)
         Add phase selection to GCOMSelection and GCOMDri (#3564)
