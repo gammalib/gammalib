@@ -49,6 +49,14 @@ if [ ! -w $HOME/.gamma/. ]; then
 fi
 
 #
+# Kill a running GammaLib daemon to make sure than a fresh one is started
+# =======================================================================
+if [ -f $HOME/.gamma/daemon.lock ]; then
+  kill -9 `cat $HOME/.gamma/daemon.lock` > /dev/null 2>&1
+  rm -rf $HOME/.gamma/daemon.lock > /dev/null 2>&1
+fi
+
+#
 # Make pfiles available
 # =====================
 if [ -d $prefix/syspfiles/. ]; then
