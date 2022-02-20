@@ -562,6 +562,10 @@ void GDaemon::update_xml(const GCsv& statistics)
  ***************************************************************************/
 void GDaemon::create_xml(const GFilename& filename)
 {
+    // Set current time
+    GTime now;
+    now.now();
+
     // Initialise high-level statistics XML object
     GXml xml;
 
@@ -573,7 +577,7 @@ void GDaemon::create_xml(const GFilename& filename)
     GXmlNode* dates     = header->append("dates");
     GXmlNode* countries = header->append("countries");
     GXmlNode* d1        = dates->append("creation");
-    d1->append(GXmlText(""));
+    d1->append(GXmlText(GXmlText(now.utc())));
     GXmlNode* d2 = dates->append("modified");
     d2->append(GXmlText(""));
     GXmlNode* d3 = dates->append("start");
