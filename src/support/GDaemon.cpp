@@ -191,7 +191,7 @@ void GDaemon::start(void)
     create_lock_file();
 
     // Main event handling loop
-    while (1) {
+    while (true) {
 
         // Put all activities into try-catch block
         try {
@@ -212,6 +212,9 @@ void GDaemon::start(void)
         sleep(m_period);
 
     } // endwhile: main event loop
+
+    // Log termination of event loop
+    m_log << "Terminated event loop for unknown reason." << std::endl;
 
     // Delete lock file
     delete_lock_file();
@@ -384,7 +387,7 @@ void GDaemon::create_lock_file(void)
  * Deletes the daemon lock file on disk if the process ID in the lock file
  * corresponds to the process ID of the instance.
  ***************************************************************************/
-void GDaemon::delete_lock_file(void) const
+void GDaemon::delete_lock_file(void)
 {
     // If process ID in lock file is the ID of the current process then
     // delete the lock file
@@ -395,6 +398,10 @@ void GDaemon::delete_lock_file(void) const
 
         // Delete lock file
         std::remove(lockfile.url().c_str());
+
+        // Log removal of lock file
+        m_log << "Removal of lock file \"" << lockfile.url();
+        m_log << "\" for PID " << (int)(m_pid) << std::endl;
 
     }
 

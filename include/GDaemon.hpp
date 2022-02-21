@@ -75,7 +75,7 @@ protected:
     void      copy_members(const GDaemon& daemon);
     void      free_members(void);
     void      create_lock_file(void);
-    void      delete_lock_file(void) const;
+    void      delete_lock_file(void);
     GFilename lock_filename(void) const;
     GFilename statistics_filename(void) const;
     pid_t     lock_pid(void) const;

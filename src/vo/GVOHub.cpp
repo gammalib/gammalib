@@ -323,7 +323,7 @@ void GVOHub::start_hub(void)
     socklen_t clilen = sizeof(cli_addr);
 
     // Main event handling loop
-    while (1) {
+    while (true) {
 
         // Accept connection from the client 
     	int socket = accept(m_socket, (struct sockaddr *)&cli_addr, &clilen);
