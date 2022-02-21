@@ -330,7 +330,7 @@ const bool& GApplication::need_help(void) const
 /***********************************************************************//**
  * @brief Set if statistics will be written
  *
- * @param[in] Write statistics?
+ * @param[in] statistics Write statistics?
  ***************************************************************************/
 inline
 void GApplication::statistics(const bool& statistics)

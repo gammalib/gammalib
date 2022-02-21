@@ -60,6 +60,7 @@
 
 /* __ Compile options ____________________________________________________ */
 //#define G_CHECK_FOR_NAN
+//#define G_USE_CURL      //!< Use curl in host_country()
 
 /* __ Function name definitions __________________________________________ */
 #define G_XML2STRING                     "gammalib::xml2string(std::string&)"
@@ -2192,8 +2193,7 @@ bool gammalib::compare(const double& a, const double& b, const double& tol)
  * @return Response to a HTTP query.
  *
  * @exception GException::runtime_error
- *            Unable to open, to connect, to write message to or to read
- *            response from socket.
+ *            Unable to open or to connect to socket.
  * @exception GException::invalid_argument
  *            Host not found.
  *
@@ -2242,45 +2242,10 @@ std::string gammalib::http_query(const std::string& host, const std::string& que
     }
 
     // Send request
-    int total = strlen(message);
-    int sent  = 0;
-    do {
-        int bytes = write(sockfd, message+sent, total-sent);
-        if (bytes < 0) {
-            std::string msg = "Unable to write query message \""+query+
-                              "\" to socket for host \""+host+"\".";
-            throw GException::runtime_error(G_HTTP_QUERY, msg);
-        }
-        if (bytes == 0) {
-            break;
-        }
-        sent += bytes;
-    } while (sent < total);
+    write(sockfd, message, strlen(message));
 
     // Receive response
-    total        = sizeof(response) - 1;
-    int received = 0;
-    do {
-        int bytes = read(sockfd, response+received, total-received);
-        if (bytes < 0) {
-            std::string msg = "Unable to receive response from socket for "
-                              "host \""+host+"\".";
-            throw GException::runtime_error(G_HTTP_QUERY, msg);
-        }
-        if (bytes == 0) {
-            break;
-        }
-        received += bytes;
-    } while (received < total);
-
-    // If the number of received bytes is the total size of the array then we
-    // have run out of space to store the response and it hasn't all arrived
-    // yet - so that's a bad thing
-    if (received == total) {
-        std::string msg = "Unable to store complete response from socket for "
-                          "host \""+host+"\".";
-        throw GException::runtime_error(G_HTTP_QUERY, msg);
-    }
+    read(sockfd, response, sizeof(response)-1);
 
     // Close socket
     close(sockfd);
@@ -2290,28 +2255,44 @@ std::string gammalib::http_query(const std::string& host, const std::string& que
 }
 
 
+#if defined(G_USE_CURL)
 /***********************************************************************//**
  * @brief Return two-digit host country code
  *
  * @return Host two-digit host country code.
  *
- * Returns two-digit host country code using curl query
- *
- *                   http://ip-api.com/line/?fields=countryCode.
+ * Returns two-digit host country code using the http query
+ * http://ip-api.com/line/?fields=countryCode.
  *
  * The result is saved in a static variable, hence once the country code is
- * retrieved no queries will be executed anymore. A time out of one second
- * is set on the query, and if the query does not respond in time the
- * country code determined during compilation of the code will be used. The
- * same will hold in case that curl is not available on your system.
+ * retrieved no queries will be executed anymore. The http query is issued
+ * using the curl tool with a timeout of one second. If the query fails,
+ * or the curl tool is not available, the method returns an empty string.
  ***************************************************************************/
+#else
+/***********************************************************************//**
+ * @brief Return two-digit host country code
+ *
+ * @return Host two-digit host country code.
+ *
+ * Returns two-digit host country code using the http query
+ * http://ip-api.com/line/?fields=countryCode.
+ *
+ * The result is saved in a static variable, hence once the country code is
+ * retrieved no queries will be executed anymore. The http query is issued
+ * using the http_query() method. If the query fails the method returns an
+ * empty string.
+ ***************************************************************************/
+#endif
 std::string gammalib::host_country(void)
 {
     // Initialise country as static variable
     static std::string country;
 
-    // If curl tool is available and the country code is not set then
-    // determine the country code from a geolocalisation web site
+    // If curl should be used, the curl tool is available and the country
+    // code is not set then determine the country code from a geolocalisation
+    // web site
+    #if defined(G_USE_CURL)
     #if defined(G_HAS_CURL)
     if (country.empty()) {
 
@@ -2346,11 +2327,23 @@ std::string gammalib::host_country(void)
     } // endif: country code was empty
     #endif
 
-    // If country code is still not set then use country code that is available
-    // from compile time
+    // ... otherwise use the http_query method
+    #else
     if (country.empty()) {
-        country = G_COUNTRY_CODE;
-    }
+        std::string response = http_query("ip-api.com", "line/?fields=countryCode");
+        std::vector<std::string> lines = split(response, "\n");
+        bool body = false;
+        for (int i = 0; i < lines.size(); ++i) {
+            if (body) {
+                country = lines[i];
+                break;
+            }
+            if ((lines[i] == "\n") || (lines[i] == "\r") || (lines[i] == " ")) {
+                body = true;
+            }
+        }
+    } // endif: country code was empty
+    #endif
 
     // Return country
     return country;
