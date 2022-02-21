@@ -2300,19 +2300,36 @@ std::string gammalib::http_query(const std::string& host, const std::string& que
  *                   http://ip-api.com/line/?fields=countryCode.
  *
  * The result is saved in a static variable, hence once the country code is
- * retrieved no queries will be executed anymore.
+ * retrieved no queries will be executed anymore. A time out of one second
+ * is set on the query, and if the query does not respond in time the
+ * country code determined during compilation of the code will be used. The
+ * same will hold in case that curl is not available on your system.
  ***************************************************************************/
 std::string gammalib::host_country(void)
 {
     // Initialise country as static variable
     static std::string country;
 
-    // Continue only if the country code is not set
+    // If curl tool is available and the country code is not set then
+    // determine the country code from a geolocalisation web site
+    #if defined(G_HAS_CURL)
     if (country.empty()) {
 
-        // Setup curl command
+        // If curl is available then use curl to infer the country code
         char command[256];
-        sprintf(command, "curl --silent http://ip-api.com/line/?fields=countryCode 2>/dev/null");
+
+        // Setup curl command with timeout if possible to avoid lock up
+        #if defined(G_HAS_PERL)
+        sprintf(command, "a=$(perl -e 'alarm shift; exec \"curl --silent"
+                         " http://ip-api.com/line/?fields=countryCode"
+                         " 2>/dev/null\"' \"1\";);echo $a");
+        #elif defined(G_HAS_TIMEOUT)
+        sprintf(command, "timeout 1s curl --silent http://ip-api.com/line/"
+                         "?fields=countryCode 2>/dev/null");
+        #else
+        sprintf(command, "curl --silent http://ip-api.com/line/?fields=countryCode"
+                         " 2>/dev/null");
+        #endif
 
         // Open the process with given 'command' for reading
         FILE* file = popen(command, "r");
@@ -2326,7 +2343,14 @@ std::string gammalib::host_country(void)
         // Close process
         pclose(file);
 
-    } // endif: country code was set
+    } // endif: country code was empty
+    #endif
+
+    // If country code is still not set then use country code that is available
+    // from compile time
+    if (country.empty()) {
+        country = G_COUNTRY_CODE;
+    }
 
     // Return country
     return country;
@@ -2361,7 +2385,7 @@ GFilename gammalib::gamma_filename(const std::string& name)
         if (home_ptr != NULL) {
             filename = std::string(home_ptr) + "/.gamma/" + name;
         }
-        
+
         // ... otherwise use ~ as home directory
         else {
             filename = "~/.gamma/" + name;

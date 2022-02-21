@@ -531,11 +531,11 @@ double GApplication::gCO2e(const std::string& country) const
 
                     // Extract data
                     for (int i = 0; i < num; ++i) {
-                    
+
                         // Get code and emission factor
                         std::string val_code = ptr_code->string(i,0);
                         double      val_ef   = ptr_ef->real(i,0);
-                        
+
                         // Store code and emission factor
                         code.push_back(val_code);
                         ef.push_back(val_ef);
@@ -590,7 +590,7 @@ double GApplication::gCO2e(const std::string& country) const
             gCO2e = eff_ef * cpu_hours;
 
         } // endif: there were codes
-    
+
     } // endif: country code specified
 
     // If equivalent CO2 footprint is not yet set then use the emission
@@ -657,7 +657,7 @@ void GApplication::logFileClose(void)
 
         // Write line feed before trailer into logger
         log << std::endl;
-            
+
         // Write trailer into logger
         log_trailer();
 
@@ -1304,7 +1304,7 @@ void GApplication::set_statistics(void)
 
     // Make sure that next application is a child
     g_is_parent = false;
-    
+
     // Return
     return;
 }
@@ -1445,7 +1445,7 @@ void GApplication::write_statistics(void)
 
             // Close file
             close(fd);
-            
+
         } // endif: file locking successful
 
         } // end of OMP critial zone
@@ -1471,7 +1471,7 @@ void GApplication::start_daemon(void) const
 
     // If daemon is not alive then create instance
     if (!daemon.alive()) {
-    
+
         // Create child process to start the daemon. Do nothing if child
         // process creation fails.
         int pid = fork();

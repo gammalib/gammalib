@@ -193,8 +193,17 @@ void GDaemon::start(void)
     // Main event handling loop
     while (1) {
 
-        // Update application statistics
-        update_statistics();
+        // Put all activities into try-catch block
+        try {
+
+            // Update application statistics
+            update_statistics();
+
+        }
+        catch (const std::exception &except) {
+            m_log << "*** Exception catched by daemon:" << std::endl;
+            m_log << except.what() << std::endl;
+        }
 
         // Force logger flushing
         m_log.flush(true);
@@ -520,10 +529,11 @@ void GDaemon::update_xml(const GCsv& statistics)
     try {
         xml.load(filename);
     }
-    catch (...) {
+    catch (const std::exception &except) {
         xml.clear();
         m_log << "*** Failure occured in loading high-level statistics ";
         m_log << "XML file \"" << filename.url() << "\"" << std::endl;
+        m_log << except.what() << std::endl;
     }
 
     // Update file only if XML document is not empty
