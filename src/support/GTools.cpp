@@ -289,7 +289,7 @@ std::string gammalib::expand_env(const std::string& arg)
 
             // If termination delimiter has been found then expand the
             // environment variable
-            if (i_end < result.length() || delim_idx == 4 || delim_idx == 5) {
+            if (i_end < result.length() || delim_idx == 4) {
 
                 // Extract environment variable name
                 std::string name        = result.substr(i_start, i_end-i_start);
