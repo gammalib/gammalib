@@ -615,7 +615,7 @@ void GDaemon::update_statistics(void)
 
                 // Set high-level statistics filename
                 GFilename filename_work = gammalib::gamma_filename("statistics.xml");
-                GFilename filename_copy = gammalib::gamma_filename("statistics.xml~");
+                GFilename filename_copy = gammalib::gamma_filename("statistics.xml.copy");
 
                 // Load high-level statistics file
                 GXml xml;
@@ -678,7 +678,7 @@ void GDaemon::update_statistics(void)
  * If none of the files @p statistics.xml and @p statistics.xml.copy exists
  * the method will create a new XML file using the create_xml() method.
  *
- * If only the copy @p statistics.xml~ exists there was a problem during
+ * If only the copy @p statistics.xml.copy exists there was a problem during
  * writing the working file, hence the @p statistics.xml.copy file is copied
  * into @p statistics.xml. In case that @p statistics.xml.copy is corrupt a
  * new XML file is created.
