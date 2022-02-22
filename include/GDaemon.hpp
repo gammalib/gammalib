@@ -82,7 +82,7 @@ protected:
     GFilename statistics_filename(void) const;
     pid_t     lock_pid(void) const;
     void      update_statistics(void);
-    void      update_xml(const GCsv& statistics);
+    void      recover_valid_xml(void);
     void      create_xml(const GFilename& filename);
     void      update_dates(GXml& xml, const GCsv& statistics);
     void      update_countries_header(GXml& xml, const GCsv& statistics);

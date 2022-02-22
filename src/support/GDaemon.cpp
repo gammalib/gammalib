@@ -48,7 +48,7 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-#define G_APPEND_LOG //!< Append output to log file
+#define G_APPEND_LOG //!< Append output to any existing log file
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -273,8 +273,8 @@ void GDaemon::start(void)
  * the heartbeat period the daemon is considered alive.
  *
  * This method can be used by a client to check whether a daemon is alive.
- * The method does not ealy on any process ID so that it works even over
- * multiple machines accessing the same disk space.
+ * The method does not rely on any process ID and works even over multiple
+ * machines that share the same disk space.
  ***************************************************************************/
 bool GDaemon::alive(void) const
 {
@@ -600,17 +600,56 @@ void GDaemon::update_statistics(void)
             int fd        = open(filename.url().c_str(), O_RDONLY);
             if (fd != -1) {
 
+                // Log updating of high-level statistics
+                m_log << "[" << (int)(m_pid) << "] ";
+                m_log << "Update high-level statistics" << std::endl;
+
                 // Lock file
                 fcntl(fd, F_SETLKW, &lock);
 
                 // Load CSV file
                 GCsv statistics(filename, ",");
 
-                // Update high-level statistics
-                update_xml(statistics);
+                // Recover valid "statistics.xml" file
+                recover_valid_xml();
 
-                // Remove low-level statistics file
-                std::remove(filename.url().c_str());
+                // Set high-level statistics filename
+                GFilename filename_work = gammalib::gamma_filename("statistics.xml");
+                GFilename filename_copy = gammalib::gamma_filename("statistics.xml~");
+
+                // Load high-level statistics file
+                GXml xml;
+                xml.load(filename_work);
+
+                // Update file only if XML document is not empty
+                if (!xml.is_empty()) {
+
+                    // Save XML file into a copy
+                    xml.save(filename_copy);
+
+                    // Update dates in header
+                    update_dates(xml, statistics);
+
+                    // Update countries in header and data
+                    update_countries_header(xml, statistics);
+                    update_countries_data(xml, statistics);
+
+                    // Update versions in data
+                    update_versions_data(xml, statistics);
+
+                    // Update daily information
+                    update_daily(xml, statistics);
+
+                    // Save updated high-level statistics XML file
+                    xml.save(filename_work);
+
+                    // Now get rid of the copy
+                    std::remove(filename_copy.url().c_str());
+
+                    // And finally get rid of the low-level statistics file
+                    std::remove(filename.url().c_str());
+
+                } // endif: XML document was not empty
 
                 // Unlock file
                 lock.l_type = F_UNLCK;
@@ -631,62 +670,135 @@ void GDaemon::update_statistics(void)
 
 
 /***********************************************************************//**
- * @brief Update high-level statistics
+ * @brief Recovers a valid XML file
  *
- * Update high-level statistics by scanning the low-level statistics file.
- * The high-level statistics is written out as XML file. If no XML file
- * exists a new one is created, otherwise an existing file is updated.
+ * This method recovers a valid XML file in @p statistics.xml. Several cases
+ * are covered.
+ *
+ * If none of the files @p statistics.xml and @p statistics.xml~ exists the
+ * method will create a new XML file using the create_xml() method.
+ *
+ * If only the copy @p statistics.xml~ exists there was a problem during
+ * writing the working file, hence the @p statistics.xml~ file is copied into
+ * @p statistics.xml. In case that @p statistics.xml~ is corrupt a new XML
+ * file is created.
+ *
+ * If both files exist, the integrity of both files is checked. If only
+ * @p statistics.xml is corrupted, @p statistics.xml~ will be copied into
+ * @p statistics.xml. If only @p statistics.xml~ is corrupted it is ignored.
+ * If both files are corrupted they are secured and a new XML file will be
+ * created using the create_xml() method. If both files are okay, the
+ * file @p statistics.xml is secured and @p statistics.xml~ is copied into
+ * @p statistics.xml.
+ *
+ * Before existing, any @p statistics.xml~ file is removed.
  ***************************************************************************/
-void GDaemon::update_xml(const GCsv& statistics)
+void GDaemon::recover_valid_xml(void)
 {
-    // Log updating of high-level statistics
-    m_log << "[" << (int)(m_pid) << "] ";
-    m_log << "Update high-level statistics" << std::endl;
+    // Set filenames
+    GFilename filename_work = gammalib::gamma_filename("statistics.xml");
+    GFilename filename_copy = gammalib::gamma_filename("statistics.xml~");
 
-    // Set high-level statistics filename
-    GFilename filename = gammalib::gamma_filename("statistics.xml");
-
-    // If no high-level statistics file exists then create one
-    if (!filename.exists()) {
-        create_xml(filename);
+    // If none of the files exist then create a new working file
+    if (!filename_work.exists() && !filename_copy.exists()) {
+        create_xml(filename_work);
     }
 
-    // Load high-level statistics file. If an exception occurs during this
-    // process the input file is probably corrupt, and a failure message
-    // is written into the log file. Processing only continues if no
-    // exception occured.
-    GXml xml;
-    try {
-        xml.load(filename);
+    // ... else if only the copy exists and if the copy is okay, then use it.
+    // Otherwise create a new XML file
+    else if (!filename_work.exists() && filename_copy.exists()) {
+        GXml xml_copy;
+        try {
+            xml_copy.load(filename_copy);
+            xml_copy.save(filename_work);
+            m_log << "[" << (int)(m_pid) << "] ";
+            m_log << "No \"statistics.xml\" file found, use copy ";
+            m_log << "\"statistics.xml~\"" << std::endl;
+        }
+        catch (const std::exception &except) {
+            m_log << "[" << (int)(m_pid) << "] ";
+            m_log << "No \"statistics.xml\" file found and corrupt ";
+            m_log << "\"statistics.xml~\" file encountered, secure ";
+            m_log << "it and create new XML file" << std::endl;
+            GTime now;
+            now.now();
+            std::string newcopy = filename_work.url() + "." + now.utc() + "~";
+            std::rename(filename_copy.url().c_str(), newcopy.c_str());
+            create_xml(filename_work);
+        }
     }
-    catch (const std::exception &except) {
-        xml.clear();
-        m_log << "[" << (int)(m_pid) << "] ";
-        m_log << "Failure occured in loading high-level statistics ";
-        m_log << "XML file \"" << filename.url() << "\"" << std::endl;
-        m_log << except.what() << std::endl;
-    }
 
-    // Update file only if XML document is not empty
-    if (!xml.is_empty()) {
+    // ... else if both of the files exist then an issue occured in writing
+    // the working file (otherwise the copy would have been removed)
+    else if (filename_work.exists() && filename_copy.exists()) {
 
-        // Update dates in header
-        update_dates(xml, statistics);
+        // Check integrity of working file and copy
+        bool integrity_work = true;
+        bool integrity_copy = true;
+        GXml xml_work;
+        GXml xml_copy;
+        try {
+            xml_work.load(filename_work);
+            integrity_work = true;
+        }
+        catch (const std::exception &except) {
+            integrity_work = false;
+        }
+        try {
+            xml_copy.load(filename_copy);
+            integrity_copy = true;
+        }
+        catch (const std::exception &except) {
+            integrity_copy = false;
+        }
 
-        // Update countries in header and data
-        update_countries_header(xml, statistics);
-        update_countries_data(xml, statistics);
+        // If only the copy is okay but the working file is corrupt the
+        // situation is clear: the working file got corrupted. In that
+        // case save copy as working file.
+        if (integrity_copy && !integrity_work) {
+            m_log << "[" << (int)(m_pid) << "] ";
+            m_log << "Corrupt \"statistics.xml\" file encountered, ";
+            m_log << "use copy \"statistics.xml~\"" << std::endl;
+            xml_copy.save(filename_work);
+        }
 
-        // Update versions in data
-        update_versions_data(xml, statistics);
+        // ... otherwise if both files are corrupted then rename the
+        // working file and create a new fresh high-level statistics.
+        // This case should actually never happen!
+        else if (!integrity_copy && !integrity_work) {
+            m_log << "[" << (int)(m_pid) << "] ";
+            m_log << "Corrupt \"statistics.xml\" and \"statistics.xml~\" ";
+            m_log << "files encountered, secure them and create new ";
+            m_log << "file" << std::endl;
+            GTime now;
+            now.now();
+            std::string newwork = filename_work.url() + "." + now.utc();
+            std::string newcopy = filename_work.url() + "." + now.utc() + "~";
+            std::rename(filename_work.url().c_str(), newwork.c_str());
+            std::rename(filename_copy.url().c_str(), newcopy.c_str());
+            create_xml(filename_work);
+        }
 
-        // Update daily information
-        update_daily(xml, statistics);
+        // ... otherwise if both files are okay, then the working file is
+        // secured and the copy is used, as in normal workings it is not
+        // expected that a copy exists, so some issue happend during the
+        // last update. This case should actually never happen!
+        else if (integrity_copy && integrity_work) {
+            m_log << "[" << (int)(m_pid) << "] ";
+            m_log << "Unexpected \"statistics.xml\" file encountered, ";
+            m_log << "secure file and use copy \"statistics.xml~\"";
+            m_log << std::endl;
+            GTime now;
+            now.now();
+            std::string newwork = filename_work.url() + "." + now.utc();
+            std::rename(filename_work.url().c_str(), newwork.c_str());
+            xml_copy.save(filename_work);
+        }
 
-        // Save updated high-level statistics XML file
-        xml.save(filename);
+    } // endelse: both files existed
 
-    } // endif: XML document was not empty
+    // Make sure we get rid of any copy
+    std::remove(filename_copy.url().c_str());
 
     // Return
     return;
