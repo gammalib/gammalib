@@ -32,6 +32,7 @@
 #include <unistd.h>        // access() function
 #include <cstdlib>         // exit() function
 #include <cstdio>          // std::fopen(), etc. functions
+#include <signal.h>        // signal() function
 #include "GApplication.hpp"
 #include "GTools.hpp"
 #include "GFits.hpp"
@@ -47,7 +48,6 @@
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-bool g_is_parent = true;       //!< Signals if application is parent or child
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -88,7 +88,7 @@ GApplication::GApplication(void)
  * @param[in] name Application name.
  * @param[in] version Application version.
  *
- * Constructs an application from an application @p name and @p version. The 
+ * Constructs an application from an application @p name and @p version. The
  * constructor will set the parameter filename to "<name>.par" and the log
  * filename to "<name>".log. The parameters will be loaded from the parameter
  * file.
@@ -136,7 +136,7 @@ GApplication::GApplication(const std::string& name, const std::string& version)
  * @param[in] version Application version.
  * @param[in] pars Application parameters.
  *
- * Constructs an application from an application @p name and @p version. The 
+ * Constructs an application from an application @p name and @p version. The
  * constructor will set the parameter filename to "<name>.par" and the log
  * filename to "<name>".log. The parameters will be loaded from the parameter
  * file.
@@ -675,7 +675,7 @@ void GApplication::logFileClose(void)
  * @brief Signal terse logging
  *
  * @return True if at least terse logging is requested.
- * 
+ *
  * The terse level is used for the most crucial application information that
  * should be logged in all cases (chatter >= 1).
  ***************************************************************************/
@@ -693,7 +693,7 @@ bool GApplication::logTerse(void) const
  * @brief Signal normal logging
  *
  * @return True if at least normal logging is requested.
- * 
+ *
  * The normal level is used for standard application information that should
  * be logged in normal operations (chatter >= 2).
  ***************************************************************************/
@@ -711,7 +711,7 @@ bool GApplication::logNormal(void) const
  * @brief Signal explicit logging
  *
  * @return True if at least explicit logging is requested.
- * 
+ *
  * The explicit level is used for detailed application information that
  * should be logged in detailed studies (chatter >= 3).
  ***************************************************************************/
@@ -729,7 +729,7 @@ bool GApplication::logExplicit(void) const
  * @brief Signal verbose logging
  *
  * @return True if verbose logging is requested.
- * 
+ *
  * The verbose level is used for full application information (chatter >= 4).
  ***************************************************************************/
 bool GApplication::logVerbose(void) const
@@ -746,7 +746,7 @@ bool GApplication::logVerbose(void) const
  * @brief Signal debug logging
  *
  * @return True if the debugging mode has been selected.
- * 
+ *
  * The debug level is used for application debugging.
  ***************************************************************************/
 bool GApplication::logDebug(void) const
@@ -763,7 +763,7 @@ bool GApplication::logDebug(void) const
  * @brief Return clobber
  *
  * @return True if the clobber parameter is true.
- * 
+ *
  * The clobber indicates if existing files should be overwritten.
  ***************************************************************************/
 bool GApplication::clobber(void) const
@@ -1165,6 +1165,8 @@ std::string GApplication::print(const GChatter& chatter) const
         // Append application name, version and arguments
         result.append("\n"+gammalib::parformat("Name")+name());
         result.append("\n"+gammalib::parformat("Version")+version());
+        result.append("\n"+gammalib::parformat("Running instances"));
+        result.append(gammalib::str(running()));
         for (int i = 0; i < m_args.size(); ++i) {
             if (i == 0) {
                 result.append("\n"+gammalib::parformat("Command")+m_args[i]);
@@ -1291,19 +1293,18 @@ void GApplication::free_members(void)
 /***********************************************************************//**
  * @brief Set statistics according to parent child status
  *
- * Makes sure than application statistics are only written for the parent
- * which is the first application that is instantiated. All instances that
- * are subsequenty instantiated are considered as children, and no statistics
- * will be written for them since their statistics are included in those of
- * the parent.
+ * Makes sure that application statistics are only written for the parent
+ * which is the first running instances. If this instance signals that an
+ * instance is already running, this instance is a child process that was
+ * started by another running instance.
  ***************************************************************************/
 void GApplication::set_statistics(void)
 {
-    // Enable statistics only for parents
-    statistics(g_is_parent);
+    // Determine whether instance is a parent
+    bool parent = (running() < 1);
 
-    // Make sure that next application is a child
-    g_is_parent = false;
+    // Enable statistics only for parents
+    statistics(parent);
 
     // Return
     return;
@@ -1480,9 +1481,26 @@ void GApplication::start_daemon(void) const
             // If we have a PID of 0 we are in the child process. In this
             // case we create and start the daemon ...
             if (pid == 0) {
-                GDaemon daemon;
-                daemon.start();
-                exit(0);
+
+                // The child process becomes session leader
+                setsid();
+
+                // Ignore signals
+                signal(SIGCHLD, SIG_IGN); // Ignore if child has stopped
+                signal(SIGHUP,  SIG_IGN); // Ignore death of controlling process
+
+                // Fork for the second time and let the first fork
+                // process terminate
+                pid = fork();
+                if (pid == 0) {
+                    GDaemon daemon;
+                    daemon.start();
+                    exit(EXIT_SUCCESS);
+                }
+                else {
+                    exit(EXIT_SUCCESS);
+                }
+
             }
 
         } // endif: child proces created

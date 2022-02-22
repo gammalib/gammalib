@@ -32,7 +32,8 @@
 #include <cstdio>          // std::fopen()
 #include <unistd.h>        // sleep()
 #include <fcntl.h>         // for file locking
-#include <signal.h>        // kill()
+#include <signal.h>        // sigaction
+#include <string.h>        // memset
 #if defined(__linux__) || defined(__linux) || defined(linux) || defined(__gnu_linux__)
 #include <sys/prctl.h>     // prctl(), PR_SET_NAME
 #endif
@@ -47,6 +48,7 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+#define G_APPEND_LOG //!< Append output to log file
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -174,12 +176,20 @@ GDaemon* GDaemon::clone(void) const
  ***************************************************************************/
 void GDaemon::start(void)
 {
+    // Get process ID
+    m_pid = getpid();
+
     // Open logger
+    #if defined(G_APPEND_LOG)
+    m_log.open(gammalib::gamma_filename("daemon.log"), false);
+    #else
     m_log.open(gammalib::gamma_filename("daemon.log"), true);
+    #endif
     m_log.chatter((GChatter)m_chatter);
     m_log.date(true);
 
     // Log start up of daemon
+    m_log << "[" << (int)(m_pid) << "] ";
     m_log << "GammaLib daemon start up" << std::endl;
 
     // Set daemon name
@@ -190,8 +200,20 @@ void GDaemon::start(void)
     // Create lock file
     create_lock_file();
 
+    // Create heartbeat file
+    write_heartbeat();
+
     // Main event handling loop
     while (true) {
+
+        // If another daemon is running then exit this daemon
+        pid_t pid = lock_pid();
+        if ((pid != 0) && (pid != m_pid)) {
+            m_log << "[" << (int)(m_pid) << "] ";
+            m_log << "Another daemon with PID " << (int)(pid) << " is running, ";
+            m_log << "exit this daemon" << std::endl;
+            break;
+        }
 
         // Put all activities into try-catch block
         try {
@@ -201,23 +223,37 @@ void GDaemon::start(void)
 
         }
         catch (const std::exception &except) {
-            m_log << "*** Exception catched by daemon:" << std::endl;
+            m_log << "[" << (int)(m_pid) << "] ";
+            m_log << "Exception catched by daemon" << std::endl;
             m_log << except.what() << std::endl;
         }
 
         // Force logger flushing
         m_log.flush(true);
 
-        // Wait for some period
-        sleep(m_period);
+        // Determine number of heartbeat cycles before wakeup
+        int ncycle = int(double(m_period) / double(m_heartbeat) + 0.5);
+        if (ncycle < 1) {
+            ncycle = 1;
+        }
+
+        // Loop over heartbeat cycles and wait for heartbeats
+        for (int i = 0; i < ncycle; ++i) {
+            write_heartbeat();
+            sleep(m_heartbeat);
+        }
 
     } // endwhile: main event loop
 
     // Log termination of event loop
-    m_log << "Terminated event loop for unknown reason." << std::endl;
+    m_log << "[" << (int)(m_pid) << "] ";
+    m_log << "Terminated event loop" << std::endl;
 
     // Delete lock file
     delete_lock_file();
+
+    // Force logger flushing
+    m_log.flush(true);
 
     // Close log file
     m_log.close();
@@ -232,28 +268,82 @@ void GDaemon::start(void)
  *
  * @return True if daemon is alive
  *
- * Checks if the daemon is alive. The daemon is alive if a lock file exists
- * and if the process with the PID that is found in the lock file is alive.
+ * Checks if the daemon is alive by comparing the time found in the heartbeat
+ * file to the current time. If the heartbeat file is not older than twice
+ * the heartbeat period the daemon is considered alive.
  *
  * This method can be used by a client to check whether a daemon is alive.
+ * The method does not ealy on any process ID so that it works even over
+ * multiple machines accessing the same disk space.
  ***************************************************************************/
 bool GDaemon::alive(void) const
 {
     // Initialise flag
     bool alive = false;
 
-    // Get process ID in lock file
-    pid_t pid = lock_pid();
+    // Set current time
+    GTime now;
+    now.now();
 
-    // If process ID is positive then check if process is still alive
-    if (pid > 0) {
+    // Get heartbeat filename
+    GFilename filename = heartbeat_filename();
 
-        // Check if process is alive
-        if (0 == kill(pid, 0)) {
-            alive = true;
-        }
-    
-    } // endif: process ID was positive
+    // OpenMP critical zone to listen for heartbeats
+    #pragma omp critical(GDaemon_alive)
+    {
+
+        // Get file lock. Continue only in case of success.
+        struct flock lock;
+        lock.l_type   = F_RDLCK;  // Want a read lock
+        lock.l_whence = SEEK_SET; // Want beginning of file
+        lock.l_start  = 0;        // No offset, lock entire file ...
+        lock.l_len    = 0;        // ... to the end
+        lock.l_pid    = getpid(); // Current process ID
+        int fd        = open(filename.url().c_str(), O_RDONLY);
+        if (fd != -1) {
+
+            // Lock file
+            fcntl(fd, F_SETLKW, &lock);
+
+            // Open heartbeat file. Continue only if opening was successful.
+            FILE* fptr = fopen(filename.url().c_str(), "r");
+            if (fptr != NULL) {
+
+                // Allocate line buffer
+                const int n = 1000;
+                char      line[n];
+
+                // Read line
+                fgets(line, n-1, fptr);
+
+                // Close file
+                fclose(fptr);
+
+                // Extract time. Put this in a try-catch block to catch
+                // any ill-conditioned time string
+                try {
+                    GTime heartbeat;
+                    heartbeat.utc(std::string(line));
+                    if ((now - heartbeat) < 2.0 * double(m_heartbeat)) {
+                        alive = true;
+                    }
+                }
+                catch (const std::exception &except) {
+                    ;
+                }
+
+            } // endif: lock file opened successfully
+
+            // Unlock file
+            lock.l_type = F_UNLCK;
+            fcntl(fd, F_SETLK, &lock);
+
+            // Close file
+            close(fd);
+
+        } // endif: file locking successful
+
+    } // end of OMP critial zone
 
     // Return flag
     return alive;
@@ -282,6 +372,8 @@ std::string GDaemon::print(const GChatter& chatter) const
         result.append(gammalib::str((int)(m_pid)));
         result.append("\n"+gammalib::parformat("Wake up period (s)"));
         result.append(gammalib::str(m_period));
+        result.append("\n"+gammalib::parformat("Heartbeat period (s)"));
+        result.append(gammalib::str(m_heartbeat));
         result.append("\n"+gammalib::parformat("Logger chatter level"));
         result.append(gammalib::str(m_chatter));
 
@@ -304,8 +396,9 @@ std::string GDaemon::print(const GChatter& chatter) const
 void GDaemon::init_members(void)
 {
     // Initialise members
-    m_pid     = 0;       //!< No process ID
-    m_period  = 3600;    //!< Wake-up daemon every hour
+    m_pid       = 0;     //!< No process ID
+    m_period    = 3600;  //!< Wake-up daemon every hour
+    m_heartbeat = 60;    //!< One heartbeat per minute
     m_log.clear();
     m_chatter = NORMAL;  //!< NORMAL chatter level
 
@@ -322,10 +415,11 @@ void GDaemon::init_members(void)
 void GDaemon::copy_members(const GDaemon& daemon)
 {
     // Copy members
-    m_pid     = daemon.m_pid;
-    m_period  = daemon.m_period;
-    m_log     = daemon.m_log;
-    m_chatter = daemon.m_chatter;
+    m_pid       = daemon.m_pid;
+    m_period    = daemon.m_period;
+    m_heartbeat = daemon.m_heartbeat;
+    m_log       = daemon.m_log;
+    m_chatter   = daemon.m_chatter;
 
     // Return
     return;
@@ -357,12 +451,7 @@ void GDaemon::create_lock_file(void)
 
     // Open lock file. Continue only if opening was successful.
     FILE* fptr = fopen(lockfile.url().c_str(), "w");
-
-    // Successful?
     if (fptr != NULL) {
-
-        // Get process ID
-        m_pid = getpid();
 
         // Write process ID into lockfile
         fprintf(fptr, "%d\n", (int)(m_pid));
@@ -371,8 +460,9 @@ void GDaemon::create_lock_file(void)
         fclose(fptr);
 
         // Log creation of lock file
+        m_log << "[" << (int)(m_pid) << "] ";
         m_log << "Created lock file \"" << lockfile.url();
-        m_log << "\" for PID " << (int)(m_pid) << std::endl;
+        m_log << "\"" << std::endl;
 
     } // endif: Lock file opened successfully
 
@@ -400,10 +490,42 @@ void GDaemon::delete_lock_file(void)
         std::remove(lockfile.url().c_str());
 
         // Log removal of lock file
-        m_log << "Removal of lock file \"" << lockfile.url();
-        m_log << "\" for PID " << (int)(m_pid) << std::endl;
+        m_log << "[" << (int)(m_pid) << "] ";
+        m_log << "Removed lock file \"" << lockfile.url();
+        m_log << "\"" << std::endl;
 
     }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write heartbeat file
+ *
+ * Creates and updates the heartbeat file that contains the current UTC time.
+ ***************************************************************************/
+void GDaemon::write_heartbeat(void)
+{
+    // Set current time
+    GTime now;
+    now.now();
+
+    // Get heartbeat filename
+    GFilename filename = heartbeat_filename();
+
+    // Open heartbeat file. Continue only if opening was successful.
+    FILE* fptr = fopen(filename.url().c_str(), "w");
+    if (fptr != NULL) {
+
+        // Write current time into heartbeat file
+        fprintf(fptr, "%s\n", now.utc().c_str());
+
+        // Close lockfile
+        fclose(fptr);
+
+    } // endif: Heartbeat file opened successfully
 
     // Return
     return;
@@ -518,6 +640,7 @@ void GDaemon::update_statistics(void)
 void GDaemon::update_xml(const GCsv& statistics)
 {
     // Log updating of high-level statistics
+    m_log << "[" << (int)(m_pid) << "] ";
     m_log << "Update high-level statistics" << std::endl;
 
     // Set high-level statistics filename
@@ -538,7 +661,8 @@ void GDaemon::update_xml(const GCsv& statistics)
     }
     catch (const std::exception &except) {
         xml.clear();
-        m_log << "*** Failure occured in loading high-level statistics ";
+        m_log << "[" << (int)(m_pid) << "] ";
+        m_log << "Failure occured in loading high-level statistics ";
         m_log << "XML file \"" << filename.url() << "\"" << std::endl;
         m_log << except.what() << std::endl;
     }
@@ -609,6 +733,7 @@ void GDaemon::create_xml(const GFilename& filename)
     data->append("daily");
 
     // Log creation of high-level statistics file
+    m_log << "[" << (int)(m_pid) << "] ";
     m_log << "Created high-level statistics XML file \"";
     m_log << filename.url() << "\"" << std::endl;
 

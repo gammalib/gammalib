@@ -75,7 +75,7 @@ public:
     GApplicationPar&       operator[](const std::string& name);
     const GApplicationPar& operator[](const std::string& name) const;
 
-    // Methods
+    // Public methods
     void                            clear(void);
     GApplication*                   clone(void) const;
     std::string                     classname(void) const;
@@ -130,6 +130,18 @@ public:
 
     // Public members
     GLog log;   //!< Application logger
+
+#ifndef SWIG
+protected:
+#endif
+    // Returns the number of running instance of this method. The number
+    // of running instances has been implement as static method to avoid
+    // the static initialization order fiasco of static members; using
+    // static methods we follow the "construct on first use idiom")
+    static int& running() {
+        static int m_running = 0;
+        return m_running;
+    }
 
 protected:
     // Protected methods

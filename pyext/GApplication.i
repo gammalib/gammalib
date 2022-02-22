@@ -25,6 +25,7 @@
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
+#define SWIG
 #include "GApplication.hpp"
 %}
 
@@ -88,7 +89,7 @@ public:
     %rename(_stamp)         stamp;
     %rename(_log)           log;
 
-    // Methods
+    // Public methods
     void                            clear(void);
     GApplication*                   clone(void) const;
     std::string                     classname(void) const;
@@ -121,6 +122,12 @@ public:
 
     // Public members
     GLog log;   //!< Application logger
+
+    // Make methods private in Python by prepending an underscore
+    %rename(_running) running;
+
+    // Protected methods
+    static int& running();
 };
 
 
@@ -295,6 +302,14 @@ GApplication._log_value = _log_value
     }
     GApplication copy() {
         return (*self);
+    }
+    void _inc_running(void) {
+        self->running()++;
+        return;
+    }
+    void _dec_running(void) {
+        self->running()--;
+        return;
     }
 %pythoncode {
     def __getstate__(self):

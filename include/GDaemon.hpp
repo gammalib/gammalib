@@ -76,7 +76,9 @@ protected:
     void      free_members(void);
     void      create_lock_file(void);
     void      delete_lock_file(void);
+    void      write_heartbeat(void);
     GFilename lock_filename(void) const;
+    GFilename heartbeat_filename(void) const;
     GFilename statistics_filename(void) const;
     pid_t     lock_pid(void) const;
     void      update_statistics(void);
@@ -89,10 +91,11 @@ protected:
     void      update_daily(GXml& xml, const GCsv& statistics);
 
     // Protected members
-    pid_t    m_pid;     //!< Process ID
-    int      m_period;  //!< Wake-up period in seconds
-    GLog     m_log;     //!< Logger
-    GChatter m_chatter; //!< Chattiness of logger
+    pid_t    m_pid;        //!< Process ID
+    int      m_period;     //!< Wake-up period in seconds
+    int      m_heartbeat;  //!< Heartbeat period in seconds
+    GLog     m_log;        //!< Logger
+    GChatter m_chatter;    //!< Chattiness of logger
 };
 
 
@@ -109,7 +112,7 @@ std::string GDaemon::classname(void) const
 
 
 /***********************************************************************//**
- * @brief Returns daemon lock filename
+ * @brief Returns name of daemon lock file
  *
  * @return Daemon lock filename.
  ***************************************************************************/
@@ -117,6 +120,18 @@ inline
 GFilename GDaemon::lock_filename(void) const
 {
     return (gammalib::gamma_filename("daemon.lock"));
+}
+
+
+/***********************************************************************//**
+ * @brief Returns name of daemon heartbeat file
+ *
+ * @return Daemon heartbeat filename.
+ ***************************************************************************/
+inline
+GFilename GDaemon::heartbeat_filename(void) const
+{
+    return (gammalib::gamma_filename("daemon.heartbeat"));
 }
 
 #endif /* GDAEMON_HPP */
