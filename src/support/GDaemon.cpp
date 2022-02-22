@@ -615,7 +615,7 @@ void GDaemon::update_statistics(void)
 
                 // Set high-level statistics filename
                 GFilename filename_work = gammalib::gamma_filename("statistics.xml");
-                GFilename filename_copy = gammalib::gamma_filename("statistics.xml.copy");
+                GFilename filename_copy = gammalib::gamma_filename("statistics.xml~");
 
                 // Load high-level statistics file
                 GXml xml;
@@ -675,20 +675,20 @@ void GDaemon::update_statistics(void)
  * This method recovers a valid XML file in @p statistics.xml. Several cases
  * are covered.
  *
- * If none of the files @p statistics.xml and @p statistics.xml.copy exists
+ * If none of the files @p statistics.xml and @p statistics.xml~ exists
  * the method will create a new XML file using the create_xml() method.
  *
- * If only the copy @p statistics.xml.copy exists there was a problem during
- * writing the working file, hence the @p statistics.xml.copy file is copied
- * into @p statistics.xml. In case that @p statistics.xml.copy is corrupt a
+ * If only the copy @p statistics.xml~ exists there was a problem during
+ * writing the working file, hence the @p statistics.xml~ file is copied
+ * into @p statistics.xml. In case that @p statistics.xml~ is corrupt a
  * new XML file is created.
  *
  * If both files exist, the integrity of both files is checked. If only
- * @p statistics.xml is corrupted, @p statistics.xml.copy will be copied
- * into @p statistics.xml. If only @p statistics.xml.copy is corrupted it
+ * @p statistics.xml is corrupted, @p statistics.xml~ will be copied
+ * into @p statistics.xml. If only @p statistics.xml~ is corrupted it
  * is ignored. If both files are corrupted they are secured and a new XML
  * file will be created using the create_xml() method. If both files are okay,
- * the file @p statistics.xml is secured and @p statistics.xml.copy is copied
+ * the file @p statistics.xml is secured and @p statistics.xml~ is copied
  * into @p statistics.xml.
  *
  * Before existing, any @p statistics.xml.copy file is removed.
@@ -697,7 +697,7 @@ void GDaemon::recover_valid_xml(void)
 {
     // Set filenames
     GFilename filename_work = gammalib::gamma_filename("statistics.xml");
-    GFilename filename_copy = gammalib::gamma_filename("statistics.xml.copy");
+    GFilename filename_copy = gammalib::gamma_filename("statistics.xml~");
 
     // If none of the files exist then create a new working file
     if (!filename_work.exists() && !filename_copy.exists()) {
@@ -713,12 +713,12 @@ void GDaemon::recover_valid_xml(void)
             xml_copy.save(filename_work);
             m_log << "[" << (int)(m_pid) << "] ";
             m_log << "No \"statistics.xml\" file found, use copy ";
-            m_log << "\"statistics.xml.copy\"" << std::endl;
+            m_log << "\"statistics.xml~\"" << std::endl;
         }
         catch (const std::exception &except) {
             m_log << "[" << (int)(m_pid) << "] ";
             m_log << "No \"statistics.xml\" file found and corrupt ";
-            m_log << "\"statistics.xml.copy\" file encountered, secure ";
+            m_log << "\"statistics.xml~\" file encountered, secure ";
             m_log << "it and create new XML file" << std::endl;
             GTime now;
             now.now();
@@ -758,7 +758,7 @@ void GDaemon::recover_valid_xml(void)
         if (integrity_copy && !integrity_work) {
             m_log << "[" << (int)(m_pid) << "] ";
             m_log << "Corrupt \"statistics.xml\" file encountered, ";
-            m_log << "use copy \"statistics.xml.copy\"" << std::endl;
+            m_log << "use copy \"statistics.xml~\"" << std::endl;
             xml_copy.save(filename_work);
         }
 
@@ -767,7 +767,7 @@ void GDaemon::recover_valid_xml(void)
         // This case should actually never happen!
         else if (!integrity_copy && !integrity_work) {
             m_log << "[" << (int)(m_pid) << "] ";
-            m_log << "Corrupt \"statistics.xml\" and \"statistics.xml.copy\" ";
+            m_log << "Corrupt \"statistics.xml\" and \"statistics.xml~\" ";
             m_log << "files encountered, secure them and create new ";
             m_log << "file" << std::endl;
             GTime now;
@@ -786,7 +786,7 @@ void GDaemon::recover_valid_xml(void)
         else if (integrity_copy && integrity_work) {
             m_log << "[" << (int)(m_pid) << "] ";
             m_log << "Unexpected \"statistics.xml\" file encountered, ";
-            m_log << "secure file and use copy \"statistics.xml.copy\"";
+            m_log << "secure file and use copy \"statistics.xml~\"";
             m_log << std::endl;
             GTime now;
             now.now();
