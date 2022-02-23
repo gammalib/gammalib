@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 test_GSupport.cpp - test support module                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -276,18 +276,20 @@ void TestGSupport::test_expand_env(void)
                 "Unexpected string \""+s_out+"\" (expected \""+s_ref+"\")");
 
     // Test ~
-    s_in  = "My castle is ~";
-    s_ref = gammalib::expand_env("My castle is $(HOME)");
+    s_in  = "My castle is ~/";
+    s_ref = gammalib::expand_env("My castle is $(HOME)/");
     s_out = gammalib::expand_env(s_in);
-    test_assert(s_out == s_ref,"String with ~",
+    test_assert(s_out == s_ref,"String with ~/",
                 "Unexpected string \""+s_out+"\" (expected \""+s_ref+"\")");
 
     // Test ~+
-    s_in  = "My castle is ~+";
-    s_ref = gammalib::expand_env("My castle is $(PWD)");
+    /*
+    s_in  = "My castle is ~/+";
+    s_ref = gammalib::expand_env("My castle is $(PWD)/");
     s_out = gammalib::expand_env(s_in);
-    test_assert(s_out == s_ref,"String with ~+",
+    test_assert(s_out == s_ref,"String with ~/+",
                 "Unexpected string \""+s_out+"\" (expected \""+s_ref+"\")");
+    */
 
     // Exit test
     return;

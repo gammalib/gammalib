@@ -1032,13 +1032,13 @@ std::string gammalib::fill(const std::string& s, const int& n)
 /***********************************************************************//**
  * @brief Left justify string to achieve a length of n characters
  *
- * @param[in] s String to be centred.
+ * @param[in] s String to be left justified.
  * @param[in] n Requested total width.
  * @param[in] c Fill character.
  * @return Left justified string.
  *
- * Left justify string by adding whitespace to the right to achieve a length
- * of n characters.
+ * Left justify string by adding @p c to the right to achieve a length of
+ * @p n characters.
  ***************************************************************************/
 std::string gammalib::left(const std::string& s, const int& n, const char& c)
 {
@@ -1056,13 +1056,13 @@ std::string gammalib::left(const std::string& s, const int& n, const char& c)
 /***********************************************************************//**
  * @brief Right justify string to achieve a length of n characters
  *
- * @param[in] s String to be centred.
+ * @param[in] s String to be right justified.
  * @param[in] n Requested total width.
  * @param[in] c Fill character.
  * @return Right justified string.
  *
- * Right justify string by adding whitespace to the left to achieve a length
- * of n characters.
+ * Right justify string by adding @p c to the left to achieve a length of
+ * @p n characters.
  ***************************************************************************/
 std::string gammalib::right(const std::string& s, const int& n, const char& c)
 {
@@ -1082,11 +1082,11 @@ std::string gammalib::right(const std::string& s, const int& n, const char& c)
  *
  * @param[in] s String to be centred.
  * @param[in] n Requested total width.
- * @param[in] c Left fill character.
+ * @param[in] c Fill character.
  * @return Centred string.
  *
- * Centre string by adding whitespace to the left and the right to achieve a
- * length of n characters.
+ * Centre string by adding @p c to the left and the right to achieve a length
+ * of @p n characters.
  ***************************************************************************/
 std::string gammalib::centre(const std::string& s, const int& n, const char& c)
 {

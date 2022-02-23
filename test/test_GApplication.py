@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib application module
 #
-# Copyright (C) 2012-2018 Juergen Knoedlseder
+# Copyright (C) 2012-2022 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -205,11 +205,11 @@ class Test(gammalib.GPythonTestSuite):
         os.environ['PFILES'] = os.environ['TEST_DATA']
 
         # Allocate test application
-        app = gammalib.GApplication('test_GApplication', '1.1.0')
+        app = gammalib.GApplication('test_GApplication', gammalib.__version__)
 
         # Check proper allocation of test application
         self.test_value(app._name(), 'test_GApplication', 'Check application name')
-        self.test_value(app._version(), '1.1.0', 'Check application version')
+        self.test_value(app._version(), gammalib.__version__, 'Check application version')
         self.test_value(app.pars().size(), 10, 'Check number of parameters')
 
         # Check that we properly can loop over all parameters. The npars
@@ -425,7 +425,7 @@ class Test(gammalib.GPythonTestSuite):
 
         # Setup for tests
         par = gammalib.GApplicationPar('Test','r','a','1.0','0.0','2.0','Dummy text')
-        app = gammalib.GApplication('test_GApplication', '1.1.0')
+        app = gammalib.GApplication('test_GApplication', gammalib.__version__)
 
         # Perform pickeling tests of filled classes
         test_support.pickeling(self, gammalib.GApplication(app))

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            test_GApplication.cpp - test GApplication classes            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -513,11 +513,11 @@ void TestGApplication::test_GApplicationPar(void)
 void TestGApplication::test_GApplication(void)
 {
     // Allocate application
-    GApplication app1("test_GApplication", "1.0.0");
+    GApplication app1("test_GApplication", VERSION);
 
     // Test name and version
     test_value(app1.name(), "test_GApplication", "Check application name");
-    test_value(app1.version(), "1.0.0", "Check application version");
+    test_value(app1.version(), VERSION, "Check application version");
 
     // Open log file
     app1.logFileOpen();
@@ -560,6 +560,9 @@ void TestGApplication::test_GApplication(void)
     // If log file exists then check it line by line
     if (fp != NULL) {
 
+        // Set reference for line 4
+        std::string ref_line4 = gammalib::left("* Version: "VERSION, 79) + "*\n";
+
         // Test header
         fgets(line, 100, fp);
         test_value(line, "***************************************************"
@@ -574,9 +577,7 @@ void TestGApplication::test_GApplication(void)
                          "--------------------------- *\n",
                          "Check log file line 3");
         fgets(line, 100, fp);
-        test_value(line, "* Version: 1.0.0                                   "
-                         "                            *\n",
-                         "Check log file line 4");
+        test_value(line, ref_line4, "Check log file line 4");
         fgets(line, 100, fp);
         test_value(line, "***************************************************"
                          "*****************************\n",
@@ -677,7 +678,7 @@ void TestGApplication::test_GApplication(void)
     // Check stamping of FITS HDU
     GFitsBinTable table1;
     app1.stamp(table1);
-    test_value(table1.string("CREATOR"), "test_GApplication v1.0.0",
+    test_value(table1.string("CREATOR"), "test_GApplication v"VERSION,
                "Check stamping of FITS HDU");
 
     // Check stamping of FITS object
@@ -685,7 +686,7 @@ void TestGApplication::test_GApplication(void)
     GFitsBinTable table2;
     fits1.append(table2);
     app1.stamp(fits1);
-    test_value(fits1[0]->string("CREATOR"), "test_GApplication v1.0.0",
+    test_value(fits1[0]->string("CREATOR"), "test_GApplication v"VERSION,
                "Check stamping of FITS object");
 
     // Check stamping of FITS file
@@ -695,7 +696,7 @@ void TestGApplication::test_GApplication(void)
     fits2.saveto("test_application.fits", true);
     app1.stamp("test_application.fits");
     GFits fits3("test_application.fits");
-    test_value(fits3[0]->string("CREATOR"), "test_GApplication v1.0.0",
+    test_value(fits3[0]->string("CREATOR"), "test_GApplication v"VERSION,
                "Check stamping of FITS file");
 
     // Return
