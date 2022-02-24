@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for source module                                             #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016-2020 Juergen Knoedlseder                               #
+# Copyright (C) 2016-2022 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -69,6 +69,9 @@ scripts = gammalib-setup \
           gammalib-init.sh \
           gammalib-init.csh
 
+# Program name
+bin_PROGRAMS = gammalibd
+
 # Build libtool library
 lib_LTLIBRARIES = libgamma.la
 libgamma_la_SOURCES = $(sources)
@@ -93,10 +96,21 @@ libgamma_la_LIBADD = $(top_builddir)/src/base/libbase.la \
                      $(INST_COM)
 libgamma_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION) @OPENMP_LIB_LDFLAGS@
 
+# Program definition
+gammalibd_SOURCES = gammalibd.cpp
+gammalibd_LDFLAGS = @LDFLAGS@
+gammalibd_CPPFLAGS = @CPPFLAGS@
+gammalibd_LDADD = $(top_builddir)/src/libgamma.la
+gammalibd_DEPENDENCIES = libgamma.la
+
 # Distribute scripts
 EXTRA_DIST   = $(scripts)
 scriptsdir   = $(bindir)
 scripts_DATA = $(scripts)
+
+# Add rule to launch daemon prior to unit testing
+check-local:
+	nohup gammalibd </dev/null &>/dev/null &
 
 # Add hook rule to make scripts executable
 install-data-hook:

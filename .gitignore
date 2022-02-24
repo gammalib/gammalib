@@ -83,6 +83,7 @@ config.sub
 configure
 test-driver
 src/gammalib-setup
+src/gammalibd
 src/template/test_GClass
 doc/Doxyfile.bak
 testconf.sh

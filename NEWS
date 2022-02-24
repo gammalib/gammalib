@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-20 February 2022
+24 February 2022
 
 
 1. Introduction
@@ -422,7 +422,9 @@ were added to compute the total solid angle within specified sky region(s) (#178
 Added GDaemon class that implements the GammaLib daemon. The GammaLib daemon collects
 on a regular basis low-level application statistics and generates from this information
 high-level statistics on a daily basis. This avoids that the low-level statistics
-file becomes too large (#3592).
+file becomes too large. I also added a daemon launcher gammalibd to will be called
+when initialising gammalib. In addition, any instantiation of a GApplication object 
+will eventually launch the daemon (#3592).
 
 Added gammalib::gamma_filename() method that returns the full path for a filename in
 the users's .gamma directory.

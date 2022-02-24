@@ -192,3 +192,8 @@ elif [ $flavor = csh ]; then
   done
   echo "$gammalib_config$$.csh"
 fi
+
+#
+# Start gammalib daemon (will do nothing if a daemon is already running)
+# ======================================================================
+nohup gammalibd </dev/null &>/dev/null &
