@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for unit test module                                          #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016-2021 Juergen Knoedlseder                               #
+# Copyright (C) 2016-2022 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -226,6 +226,7 @@ clean-local:
 if WITH_PYTHON
 installcheck-local:
 	@export GAMMALIB=$(DESTDIR)$(prefix); \
+	export GAMMALIB_MAKE_INSTALL_CHECK=yes; \
 	. $(DESTDIR)$(prefix)/bin/gammalib-init.sh; \
 	python -c 'import gammalib; gammalib.test()'; \
 	if test "x$$?" != "x0"; then \
