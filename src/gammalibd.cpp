@@ -39,11 +39,9 @@
 /***********************************************************************//**
  * @brief GammaLib daemon launcher
  *
- * This executable launched the GammaLib daemon. The code is a copy of the
- * code implemented in the GApplication::start_daemon() method. Calling this
- * executable during the initialisation of GammaLib will launch a daemon
- * that is independent of any specific application, and that has the correct
- * process name on all platforms.
+ * This executable launched the GammaLib daemon. Calling this executable
+ * during the initialisation of GammaLib will launch a daemon that has the
+ * correct process name on all platforms.
  ***************************************************************************/
 int main(void) {
 

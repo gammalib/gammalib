@@ -108,10 +108,6 @@ EXTRA_DIST   = $(scripts)
 scriptsdir   = $(bindir)
 scripts_DATA = $(scripts)
 
-# Add rule to launch daemon prior to unit testing
-check-local:
-	nohup gammalibd </dev/null &>/dev/null &
-
 # Add hook rule to make scripts executable
 install-data-hook:
 	@list='$(scripts_DATA)';\

@@ -54,6 +54,7 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+//#define G_LAUNCH_DAEMON //!< Launch daemon when initialising application
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -1230,8 +1231,10 @@ void GApplication::init_members(void)
     // Initialise internal CPU seconds counter
     m_celapse = 0.0;
 
-    // Start daemon
+    // Optionally start daemon
+    #if defined(G_LAUNCH_DAEMON)
     start_daemon();
+    #endif
 
     // Return
     return;
