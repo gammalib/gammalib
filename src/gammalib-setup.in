@@ -196,4 +196,5 @@ fi
 #
 # Start gammalib daemon (will do nothing if a daemon is already running)
 # ======================================================================
-nohup setsid $0 $gammalib_bin/gammalibd &
+nohup gammalibd </dev/null &>/dev/null &
+

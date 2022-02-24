@@ -101,11 +101,16 @@ gammalibd_SOURCES = gammalibd.cpp
 gammalibd_LDFLAGS = @LDFLAGS@
 gammalibd_CPPFLAGS = @CPPFLAGS@
 gammalibd_LDADD = $(top_builddir)/src/libgamma.la
+gammalibd_DEPENDENCIES = libgamma.la
 
 # Distribute scripts
 EXTRA_DIST   = $(scripts)
 scriptsdir   = $(bindir)
 scripts_DATA = $(scripts)
+
+# Add rule to launch daemon prior to unit testing
+check-local:
+	nohup gammalibd </dev/null &>/dev/null &
 
 # Add hook rule to make scripts executable
 install-data-hook:

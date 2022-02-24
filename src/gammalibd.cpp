@@ -72,14 +72,13 @@ int main(void) {
                 // Fork for the second time and let the first fork
                 // process terminate
                 pid = fork();
-                if (pid == 0) {
-                    GDaemon daemon;
-                    daemon.start();
-                    exit(EXIT_SUCCESS);
-                }
-                else {
-                    exit(EXIT_SUCCESS);
-                }
+                if (pid >= 0) {
+                    if (pid == 0) {
+                        GDaemon daemon;
+                        daemon.start();
+                        exit(EXIT_SUCCESS);
+                    }
+                } // endif: child of child process created
 
             }
 
