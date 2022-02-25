@@ -3,7 +3,7 @@
 # Test GammaLib configuration script (used for continuous integration;
 # assumes that GammaLib has been installed)
 #
-# Copyright (C) 2014 Juergen Knoedlseder
+# Copyright (C) 2014-2022 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -48,6 +48,7 @@ cd "$test_dir"
 # Configure GammaLib
 # ==================
 export GAMMALIB="$prefix"
+export GAMMALIB_MAKE_INSTALL_CHECK=yes
 . $GAMMALIB/bin/gammalib-init.sh > config.log 2>&1
 output=`cat config.log`
 if [ "x$output" != x ]; then
