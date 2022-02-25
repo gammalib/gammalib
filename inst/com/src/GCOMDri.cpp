@@ -1565,8 +1565,8 @@ double GCOMDri::compute_geometry(const int&           tjd,
                 }
             } // endif: handled D2 modules with failed PMTs
 
-            // If there is total overlap (within 0.1 cm) then add 1 to the
-            // geometry factor
+            // If there is total overlap (within 0.1 cm) then add 1-overlap
+            // to the geometry factor
             if (d <= r2 - r1 + 0.1) {
                 double gmt = (1.0 > overlap) ? 1.0 - overlap : 0.0;
                 geometry  += gmt;
@@ -1699,8 +1699,8 @@ double GCOMDri::compute_surface(const double& x1, const double& y1, const double
  * @param[in] r3 Radius of dead PMT (cm).
  * @return Fractional overlap [0.0,...,1.0]
  *
- * Compute overlap between three circles, composed of projected D1 module,
- * D2 module and failed PMT exclusion circle.
+ * Compute fractional overlap between three circles, composed of projected
+ * D1 module, D2 module and failed PMT exclusion circle.
  *
  * The method is a reimplementation of the COMPASS SKYDRS17.OVERLP function.
  ***************************************************************************/
