@@ -20,8 +20,7 @@
 #############################################################################
 
 # Models to install
-refdata = comptel_db_tofIV.txt \
-          emission-factors.fits \
+refdata = emission-factors.fits \
           ephem_jpl_de200.fits
 
 # Install models
