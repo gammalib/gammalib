@@ -197,6 +197,6 @@ fi
 # Start gammalib daemon in case that we are not doing a make installcheck
 # =======================================================================
 if [ "x$GAMMALIB_MAKE_INSTALL_CHECK" = x ]; then
-  nohup gammalibd </dev/null &>/dev/null &
+  gammalibd </dev/null &>/dev/null &
 fi
 

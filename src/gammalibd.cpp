@@ -66,6 +66,7 @@ int main(void) {
                 // Ignore signals
                 signal(SIGCHLD, SIG_IGN); // Ignore if child has stopped
                 signal(SIGHUP,  SIG_IGN); // Ignore death of controlling process
+                signal(SIGTERM, SIG_IGN); // Ignore termination signal
 
                 // Fork for the second time and let the first fork
                 // process terminate
