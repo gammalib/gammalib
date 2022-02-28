@@ -1,9 +1,8 @@
 #!/bin/sh
 # =====================================================================
-# Test GammaLib configuration script (used for continuous integration;
-# assumes that GammaLib has been installed)
+# Initialise for Jenkins Continuous Integration
 #
-# Copyright (C) 2014-2022 Juergen Knoedlseder
+# Copyright (C) 2022 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,44 +18,28 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # =====================================================================
 #
-# Exit on any error
-# =================
-set -e
-
-#
-# Set fixed parameters
-# ====================
-test_dir="home"
-
-#
 # Set parameters
 # ==============
-prefix="@prefix@"
+lock="$HOME/.gamma/daemon.lock"
+heartbeat="$HOME/.gamma/daemon.heartbeat"
 
 #
-# Save current working directory
-# ==============================
-base=$PWD
-
-#
-# Create test directory
-# =====================
-@MKDIR_P@ "$test_dir"
-cd "$test_dir"
-
-#
-# Configure GammaLib
-# ==================
-export GAMMALIB="$prefix"
-. $GAMMALIB/bin/gammalib-init.sh > config.log 2>&1
-output=`cat config.log`
-if [ "x$output" != x ]; then
-  echo "*** Configuration script was not silent ***"
-  echo "$output"
-  exit 1
+# Kill daemon if it is running
+# ============================
+if [ -f "$lock" ]; then
+    pid=`cat $lock`
+    ps cax | grep gammalibd > /dev/null
+    if [ $? -eq 0 ]; then
+      kill -9 $pid
+      rm -f $lock
+      rm -f $heartbeat
+    fi
 fi
 
 #
-# Signal completion
-# =================
-echo "Configuration test successful."
+# Remove heartbeat file
+# =====================
+if [ -f "$heartbeat" ]; then
+    rm -f $heartbeat
+fi
+
