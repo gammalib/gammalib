@@ -2327,21 +2327,28 @@ std::string gammalib::host_country(void)
     } // endif: country code was empty
     #endif
 
-    // ... otherwise use the http_query method
+    // ... otherwise use the http_query method. Catch any exceptions.
     #else
     if (country.empty()) {
-        std::string response = http_query("ip-api.com", "line/?fields=countryCode");
-        std::vector<std::string> lines = split(response, "\n");
-        bool body = false;
-        for (int i = 0; i < lines.size(); ++i) {
-            if (body) {
-                country = lines[i];
-                break;
+        try {
+            std::string response = http_query("ip-api.com", "line/?fields=countryCode");
+            std::vector<std::string> lines = split(response, "\n");
+            bool body = false;
+            for (int i = 0; i < lines.size(); ++i) {
+                if (body) {
+                    country = lines[i];
+                    break;
+                }
+                if ((lines[i] == "\n") || (lines[i] == "\r") || (lines[i] == " ")) {
+                    body = true;
+                }
             }
-            if ((lines[i] == "\n") || (lines[i] == "\r") || (lines[i] == " ")) {
-                body = true;
-            }
+        } // endtry
+        catch (const std::exception& e) {
+            //
         }
+        
+        
     } // endif: country code was empty
     #endif
 
