@@ -85,10 +85,11 @@ public:
     }
 %pythoncode {
     def __getstate__(self):
-        state = {'type': self.type(), 'dir': self.dir(), 'coordsys': self.coordsys()}
+        xml = gammalib.GXmlElement()
+        self.write(xml)
+        state = {'xml': xml}
         return state
     def __setstate__(self, state):
-        self.__init__(state['dir'],state['coordsys'])
-        self.type(state['type'])
+        self.__init__(state['xml'])
 }
 };
