@@ -103,6 +103,7 @@ The following methods have been added:
 - GSkyMap::flux(GSkyRegions&, int&)
 - GSkyMap::solidangle(GSkyRegion&)
 - GSkyMap::solidangle(GSkyRegions&)
+- GSkyDir::galvector()
 - GOptimizerLM::npars()
 - GOptimizerLM::nfree()
 - GXmlElement(std::string&, int&)
@@ -395,6 +396,9 @@ Added GOptimizerLM::npars() and GOptimizerLM::nfree() methods.
 
 13. Sky module
 --------------
+Added GSkyDir::galvector() methods as equivalents to the GSkyDir::celvector()
+methods for Galactic coordinates (#3907).
+
 Added GSkyMap::correlate() method as opposed to GSkyMap::smooth(). While the later
 smoothes a map, and hence conserves the intensity in a sky map, the correlate()
 method will sum the intensities over a correlation kernel and assign the result to

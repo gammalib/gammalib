@@ -53,6 +53,8 @@ Improvements
   Add likelihood fit event selection hook
 * [`3908 <https://cta-redmine.irap.omp.eu/issues/3908>`_] -
   Add ``angle(GVector&,GVector&)`` friend function
+* [`3907 <https://cta-redmine.irap.omp.eu/issues/3907>`_] -
+  Add ``GSkyDir::galvector()`` methods
 * Make extension name check case insensitive in ``GFits::extno()``
 * Add numerical gradient step size member to ``GObservation``
 * [`3662 <https://cta-redmine.irap.omp.eu/issues/3662>`_] -

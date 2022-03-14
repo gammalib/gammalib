@@ -330,6 +330,41 @@ void GSkyDir::celvector(const GVector& vector)
 
 
 /***********************************************************************//**
+ * @brief Set sky direction from 3D vector in Galactic coordinates
+ *
+ * @param[in] vector 3D vector.
+ *
+ * Convert a 3-dimensional vector in galactic coordinates into a sky
+ * direction. The transformation is given by
+ *
+ * \f[
+ *    l = \arctan \left( \frac{x_1}{x_0} \right)
+ * \f]
+ *
+ * \f[
+ *    b = \arcsin x_2
+ * \f]
+ ***************************************************************************/
+void GSkyDir::galvector(const GVector& vector)
+{
+    // Set attributes
+    m_has_lb    = true;
+    m_has_radec = false;
+    #if defined(G_SINCOS_CACHE)
+    m_has_lb_cache    = false;
+    m_has_radec_cache = false;
+    #endif
+
+    // Convert vector into sky position
+    m_b = std::asin(vector[2]);
+    m_l = std::atan2(vector[1], vector[0]);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Rotate sky direction by zenith and azimuth angle
  *
  * @param[in] phi Azimuth angle (radians).
@@ -940,6 +975,39 @@ GVector GSkyDir::celvector(void) const
     double  cosdec = std::cos(m_dec);
     double  sindec = std::sin(m_dec);
     GVector vector(cosdec*cosra, cosdec*sinra, sindec);
+    #endif
+
+    // Return vector
+    return vector;
+}
+
+
+/***********************************************************************//**
+ * @brief Return sky direction as 3D vector in galactic coordinates
+ *
+ * @return Sky direction as 3D vector in galactic coordinates.
+ ***************************************************************************/
+GVector GSkyDir::galvector(void) const
+{
+    // If we have no galactic coordinates then get them now
+    if (m_has_radec && !m_has_lb) {
+        equ2gal();
+    }
+
+    // Compute 3D vector
+    double cosl = std::cos(m_l);
+    double sinl = std::sin(m_l);
+    #if defined(G_SINCOS_CACHE)
+    if (!m_has_lb_cache) {
+        m_has_lb_cache = true;
+        m_sin_b        = std::sin(m_b);
+        m_cos_b        = std::cos(m_b);
+    }
+    GVector vector(m_cos_b*cosl, m_cos_b*sinl, m_sin_b);
+    #else
+    double  cosb = std::cos(m_b);
+    double  sinb = std::sin(m_b);
+    GVector vector(cosb*cosl, cosb*sinl, sinb);
     #endif
 
     // Return vector

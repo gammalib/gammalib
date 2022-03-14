@@ -356,6 +356,28 @@ void TestGSky::test_GSkyDir(void)
     test_value(dir1.posang_deg(dir2, "CEL"), 31.4013337, "23. Position angle posang_deg(CEL)");
     test_value(dir1.posang_deg(dir2, "GAL"), 90.0, "24. Position angle posang_deg(GAL)");
 
+    // Test celvector methods
+    GSkyDir dir3;
+    dir3.radec_deg(83.633083, 22.0145);
+    GVector celvector3 = dir3.celvector();
+    test_value(celvector3[0], 0.102809634297936, "Test Crab position as celestial vector component 0");
+    test_value(celvector3[1], 0.921370845047427, "Test Crab position as celestial vector component 1");
+    test_value(celvector3[2], 0.374841226377402, "Test Crab position as celestial vector component 2");
+    dir3.celvector(celvector3);
+    test_value(dir3.ra_deg(),  83.633083, "Test Right Ascension of Crab from celestial vector");
+    test_value(dir3.dec_deg(), 22.0145,   "Test Declination of Crab from celestial vector");
+
+    // Test galvector methods
+    GSkyDir dir4;
+    dir4.radec_deg(83.633083, 22.0145);
+    GVector galvector4 = dir4.galvector();
+    test_value(galvector4[0], -0.991762516816136, "Test Crab position as Galactic vector component 0");
+    test_value(galvector4[1], -0.079054101852352, "Test Crab position as Galactic vector component 1");
+    test_value(galvector4[2], -0.100784717188878, "Test Crab position as Galactic vector component 2");
+    dir3.galvector(galvector4);
+    test_value(dir3.ra_deg(),  83.633083, "Test Right Ascension of Crab from Galactic vector");
+    test_value(dir3.dec_deg(), 22.0145,   "Test Declination of Crab from Galactic vector");
+
     // Return
     return;
 }

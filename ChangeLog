@@ -14,12 +14,13 @@
           methods
         Add GCOMSelection::fpmtflag(), GCOMSelection::use_d1() and 
           GCOMSelection::use_d2() methods (#3917)
-        Rename GCOMModelDRBFitting class to GCOMModelDRBPhibarNodes (#3914).
+        Rename GCOMModelDRBFitting class to GCOMModelDRBPhibarNodes (#3914)
         Add GCOMModelDRBPhibarBins class (#3913)
         Compute spectral model gradients for negative factor values
         Add likelihood fit event selection hook (#3912)
         Add GCOMModelDRM class (#3910)
         Add angle(GVector&,GVector&) friend function (#3908)
+        Add GSkyDir::galvector() methods (#3907)
         Make extension name check case insensitive in GFits::extno()
         Add numerical gradient step size member to GObservation
         Add stamp() methods to GApplication (#3662)
