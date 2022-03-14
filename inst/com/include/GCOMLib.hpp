@@ -53,5 +53,6 @@
 #include "GCOMEventList.hpp"
 #include "GCOMModelDRBPhibarBins.hpp"
 #include "GCOMModelDRBPhibarNodes.hpp"
+#include "GCOMModelDRM.hpp"
 
 #endif /* GCOMLIB_HPP */

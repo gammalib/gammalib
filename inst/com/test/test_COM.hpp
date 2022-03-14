@@ -63,6 +63,9 @@ public:
     void                test_binned_obs(void);
     void                test_event_bin(void);
     void                test_event_cube(void);
+    void                test_model_nodes(void);
+    void                test_model_bins(void);
+    void                test_model_drm(void);
     void                test_binned_optimizer(void);
 };
 

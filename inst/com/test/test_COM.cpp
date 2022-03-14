@@ -89,6 +89,12 @@ void TestGCOM::set(void)
            "GCOMObservation: Test unbinned observation");
     append(static_cast<pfunction>(&TestGCOM::test_binned_obs),
            "GCOMObservation: Test binned observation");
+    append(static_cast<pfunction>(&TestGCOM::test_model_nodes),
+           "GCOMObservation: Test Phibar nodes model");
+    append(static_cast<pfunction>(&TestGCOM::test_model_bins),
+           "GCOMObservation: Test Phibar bins model");
+    append(static_cast<pfunction>(&TestGCOM::test_model_drm),
+           "GCOMObservation: Test DRM model");
     append(static_cast<pfunction>(&TestGCOM::test_binned_optimizer),
            "GCOMObservation: Test binned optimizer");
 
@@ -830,6 +836,45 @@ void TestGCOM::test_event_cube(void)
                "Expected "+gammalib::str(cube2.number())+
                " events in cube, found "+
                gammalib::str(int(sum+0.5))+" by summing over all elements.");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Checks GCOMModelDRBPhibarNodes class
+ ***************************************************************************/
+void TestGCOM::test_model_nodes(void)
+{
+    // Model void constructor
+    GCOMModelDRBPhibarNodes model1;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Checks GCOMModelDRBPhibarBins class
+ ***************************************************************************/
+void TestGCOM::test_model_bins(void)
+{
+    // Model void constructor
+    GCOMModelDRBPhibarBins model1;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Checks GCOMModelDRM class
+ ***************************************************************************/
+void TestGCOM::test_model_drm(void)
+{
+    // Model void constructor
+    GCOMModelDRM model1;
 
     // Return
     return;
