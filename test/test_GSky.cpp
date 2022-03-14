@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  test_GSky.cpp - Test sky module                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1488,6 +1488,21 @@ void TestGSky::test_GSkyMap(void)
         sum_smooth2 += map_smooth2(pix);
     }
 	test_value(sum_smooth2, ref_smooth, "Check GAUSSIAN smoothing");
+
+    // Load map for correlation
+    GSkyMap map_correlate(sky_map);
+
+    // Correlate map using DISK kernel
+    GSkyMap map_correlate1 = map_correlate;
+    map_correlate1.correlate("DISK", 0.2);
+    map_correlate1.save("test_map_correlate_disk.fits", true);
+
+    // Compute sum of correlated sky map
+    double sum_correlate1 = 0.0;
+    for (int pix = 0; pix < map_correlate1.npix(); ++pix) {
+        sum_correlate1 += map_correlate1(pix);
+    }
+    test_value(sum_correlate1, 322194236.407357, "Check DISK correlation");
 
     // Trim the skymap based on pixels
     int startx = 2;
