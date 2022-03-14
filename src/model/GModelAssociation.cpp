@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GModelAssociation.cpp - Model association class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2020 by Juergen Knoedlseder                              *
+ *  copyright (C) 2020-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -226,7 +226,7 @@ const std::string& GModelAssociation::value(const std::string& name) const
     // Throw exception if property name was not found
     if (index == -1) {
         std::string msg = "Property \""+name+"\" not found in association.";
-        throw GException::invalid_argument(G_VALUE, name);
+        throw GException::invalid_argument(G_VALUE, msg);
     }
 
     // Return property value
@@ -253,7 +253,7 @@ const std::string& GModelAssociation::error(const std::string& name) const
     // Throw exception if property name was not found
     if (index == -1) {
         std::string msg = "Association property \""+name+"\" not found.";
-        throw GException::invalid_argument(G_ERROR, name);
+        throw GException::invalid_argument(G_ERROR, msg);
     }
 
     // Return property error
@@ -281,7 +281,7 @@ void GModelAssociation::property(const std::string& name,
     // Throw an exception if property exists already
     if (get_index(name) != -1) {
         std::string msg = "Association property \""+name+"\" exists already.";
-        throw GException::invalid_argument(G_PROPERTY, name);
+        throw GException::invalid_argument(G_PROPERTY, msg);
     }
 
     // Push name, value and error in property lists
@@ -367,9 +367,6 @@ void GModelAssociation::write(GXmlElement& xml) const
 {
     // Write association name
     xml.attribute("name", name());
-
-    // Get number of properties in XML element
-    int n = xml.elements("property");
 
     // Loop over all association properties
     for (int i = 0; i < size(); ++i) {

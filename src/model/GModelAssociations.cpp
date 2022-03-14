@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GModelAssociations.cpp - Model associations container class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2020 by Juergen Knoedlseder                              *
+ *  copyright (C) 2020-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -196,7 +196,7 @@ const GModelAssociation& GModelAssociations::operator[](const std::string& name)
     if (index == -1) {
         std::string msg = "Model association \""+name+"\" not found in "
                           "container.";
-        throw GException::invalid_argument(G_ACCESS, name);
+        throw GException::invalid_argument(G_ACCESS, msg);
     }
 
     // Return pointer
@@ -394,7 +394,7 @@ GModelAssociation& GModelAssociations::insert(const std::string&       name,
     if (index == -1) {
         std::string msg = "Model association \""+name+"\" not found in "
                           "container.";
-        throw GException::invalid_argument(G_INSERT2, name);
+        throw GException::invalid_argument(G_INSERT2, msg);
     }
 
     // Check if a model with specified name does not yet exist
@@ -464,7 +464,7 @@ void GModelAssociations::remove(const std::string& name)
     if (index == -1) {
         std::string msg = "Model association \""+name+"\" not found in "
                           "container.";
-        throw GException::invalid_argument(G_REMOVE2, name);
+        throw GException::invalid_argument(G_REMOVE2, msg);
     }
 
     // Erase model association component from container

@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GSparseNumeric.cpp - Sparse matrix numeric analysis class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -183,7 +183,7 @@ void GSparseNumeric::cholesky_numeric_analysis(const GMatrixSparse&   A,
   
     // Declare
     double lki;
-    int top, i, p, k;
+    int i, p, k;
 
     // Assign input matrix attributes
     int n = A.m_cols;
@@ -232,8 +232,8 @@ void GSparseNumeric::cholesky_numeric_analysis(const GMatrixSparse&   A,
   
         // Nonzero pattern of L(k,:).
         // Returns -1 if parent = NULL, s = NULL or c = NULL
-        top  = cs_ereach(&C, k, parent, s, c);      // find pattern of L(k,:)
-        x[k] = 0;                                   // x (0:k) is now zero
+        int top = cs_ereach(&C, k, parent, s, c);      // find pattern of L(k,:)
+        x[k]    = 0;                                   // x (0:k) is now zero
 	
         // x = full(triu(C(:,k)))
         for (p = Cp[k]; p < Cp[k+1]; p++) {
@@ -329,9 +329,8 @@ int GSparseNumeric::cs_ereach(const GMatrixSparse* A,
     CS_MARK(w, k);
   
     // Loop over elements of node
-    int i;
     for (int p = Ap[k]; p < Ap[k+1]; ++p) {
-        i = Ai[p];                  // A(i,k) is nonzero
+        int i = Ai[p];              // A(i,k) is nonzero
         if (i > k) {
             continue;               // only use upper triangular part of A
         }

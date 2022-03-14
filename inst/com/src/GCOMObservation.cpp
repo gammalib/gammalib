@@ -1418,12 +1418,9 @@ void GCOMObservation::compute_drb_bgdlixa(const GCOMDri& drm,
     int npsi    = m_drg.npsi();
     int nphibar = m_drg.nphibar();
     int npix    = nchi * npsi;
-    int nsize   = npix * nphibar;
 
     // Precompute half running average lengths
     int navgr2 = int(navgr/2);
-    int nexcl2 = int(nexcl/2);
-    int nincl2 = int(nincl/2);
 
     // Initialise DRB and scratch DRI
     for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
@@ -1772,12 +1769,9 @@ void GCOMObservation::compute_drb_bgdlixe(const GCOMDri& drm,
     int npsi    = m_drg.npsi();
     int nphibar = m_drg.nphibar();
     int npix    = nchi * npsi;
-    int nsize   = npix * nphibar;
 
     // Precompute half running average lengths
     int navgr2 = int(navgr/2);
-    int nexcl2 = int(nexcl/2);
-    int nincl2 = int(nincl/2);
 
     // Initialise DRB and scratch DRI
     for (int iphibar = 0; iphibar < nphibar; ++iphibar) {

@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GCTAResponseCube.hpp - CTA cube analysis response function class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -155,12 +155,11 @@ private:
     // New methods
     GVector irf_radial(const GModelSky&    model,
                        const GObservation& obs,
-                       //GMatrixSparse*      gradients = NULL) const;
                        GMatrix*            gradients = NULL) const;
     GVector psf_radial(const GModelSpatialRadial* model,
                        const double&              zeta,
                        const GSkyDir&             obsDir,
-                       const GEnergies            srcEngs,
+                       const GEnergies&           srcEngs,
                        const GTime&               srcTime,
                        const bool&                grad) const;
 

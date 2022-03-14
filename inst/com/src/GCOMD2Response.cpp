@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCOMD2Response.cpp - COMPTEL D2 module response class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -758,7 +758,9 @@ void GCOMD2Response::update_response_vector(const double& etrue) const
             m_rsp_values.reserve(nbin);
 
             // Initialise response vector normalisation
+            #if defined(G_NORMALISE_RESPONSE_VECTOR)
             double norm = 0.0;
+            #endif
 
             // Get start bin for convolution of Compton background
             int istart = int((etrue - 5.0 * m_sigma) / ebin);
@@ -911,7 +913,9 @@ void GCOMD2Response::update_response_vector(const double& etrue) const
                 m_rsp_values.push_back(value);
 
                 // Increment normalisation
+                #if defined(G_NORMALISE_RESPONSE_VECTOR)
                 norm += value;
+                #endif
 
             } // endfor: looped over response vector bins
 
@@ -930,7 +934,10 @@ void GCOMD2Response::update_response_vector(const double& etrue) const
             std::cout << "etrue=" << etrue;
             std::cout << " ebin=" << ebin;
             std::cout << " nbin=" << nbin;
-            std::cout << " norm=" << norm << std::endl;
+            #if defined(G_NORMALISE_RESPONSE_VECTOR)
+            std::cout << " norm=" << norm;
+            #endif
+            std::cout << std::endl;
             #endif
 
         } // endif: photo-peak position was positive
@@ -1012,15 +1019,12 @@ void GCOMD2Response::update_response_vector(const double& etrue) const
  ***************************************************************************/
 double GCOMD2Response::kn_gauss_kernel::eval(const double& e)
 {
-    // Initialise result
-    double value = 0.0;
-
     // Compute terms
     double a    = e/m_e0;
     double term = a/(1.0-a) * gammalib::mec2/m_e0 - 1.0;
 
     // Compute Klein-Nishina cross section
-    value = term * term - a + 1.0/(1.0-a);
+    double value = term * term - a + 1.0/(1.0-a);
 
     // If the incident energy is above 12.14 MeV then multiply-in the
     // high-energy correction that was introduced by Rob van Dijk

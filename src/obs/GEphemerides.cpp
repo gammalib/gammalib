@@ -362,7 +362,6 @@ double GEphemerides::geo2ssb(const GSkyDir& srcdir, const GTime& time) const
     // Set constants
     const double t_sun = 4.92549089483e-6;                  // s
     const double r_sun = 2.315;                             // light s
-    const double inv_c = 1000.0 / gammalib::speed_of_light; // s/km
 
     // Get ephemerides
     GVector rce(3);
@@ -381,7 +380,7 @@ double GEphemerides::geo2ssb(const GSkyDir& srcdir, const GTime& time) const
     // Sun (I.I. Shapiro, Phys. Rev. Lett. 13, 789 (1964))
     GVector rsa       = rce - rcs;
     double  sundis    = norm(rsa);
-    double  sunsiz    = r_sun/sundis;
+    //double  sunsiz    = r_sun/sundis;
     double  cos_theta = (dir * rsa) / sundis;
 
     // Special handling if sky direction is inside the Sun
@@ -444,7 +443,7 @@ double GEphemerides::geo2ssb(const GSkyDir& srcdir,
     // Sun (I.I. Shapiro, Phys. Rev. Lett. 13, 789 (1964))
     GVector rsa       = rca - rcs;
     double  sundis    = norm(rsa);
-    double  sunsiz    = r_sun       / sundis;
+    //double  sunsiz    = r_sun       / sundis;
     double  cos_theta = (dir * rsa) / sundis;
 
     // Special handling if sky direction is inside the Sun
