@@ -293,6 +293,9 @@ method so that intensity errors can be accessed directly (#3606).
 Added methods to GModelSpectralFunc to allow building of a file function
 in memory (#3535).
 
+Modified GModelSpectralFunc::load_nodes() method so that an empty file name now
+leads to an exception (#3474).
+
 Added GModelAssociation class to implement a model association and the
 GModelAssociations container class to hold a list of model associations.
 The GModelAssociations class was added as a member of GModel, and

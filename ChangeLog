@@ -50,6 +50,7 @@
         Add GCTABackground2D class (#3527)
         Implement vectorised response computation for COMPTEL (#3501)
         Fix response cache removal for vector cache (#3499)
+        Missing file in GModelSpectralFunc throws exception (#3474)
         Add GModelAssociation and GModelAssociations classes (#3469)
         Add GSkyMap::correlate() method (#3461)
         Add GModels::eval() vector evaluation method (#3455)

@@ -85,6 +85,8 @@ Improvements
   Add GModelSpectralFunc methods to build file function in memory
 * [`3501 <https://cta-redmine.irap.omp.eu/issues/3501>`_] -
   Implement vectorised response computation for COMPTEL
+* [`3474 <https://cta-redmine.irap.omp.eu/issues/3474>`_] -
+  Missing file in GModelSpectralFunc throws exception
 * [`3386 <https://cta-redmine.irap.omp.eu/issues/3386>`_] -
   Support spectral line fitting
 * [`3333 <https://cta-redmine.irap.omp.eu/issues/3333>`_] -

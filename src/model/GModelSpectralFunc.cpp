@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectralFunc.cpp - Spectral function model class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1160,7 +1160,9 @@ void GModelSpectralFunc::free_members(void)
  *
  * @param[in] filename File name.
  *
- * @exception GException::invalid_value
+ * @exception GException::invalid_argument
+ *            Empty @p filename specified.
+ *            GException::invalid_value
  *            Invalid file function ASCII file.
  *
  * The file function is stored as a column separated value table (CSV) in an
@@ -1181,92 +1183,95 @@ void GModelSpectralFunc::load_nodes(const GFilename& filename)
     m_lin_values.clear();
     m_log_values.clear();
 
+    // Throw an exception if the filename is empty
+    if (filename.is_empty()) {
+        std::string msg = "Empty file function ASCII file name specified. "
+                          "Please specify a valid file function ASCII file "
+                          "name.";
+        throw GException::invalid_argument(G_LOAD_NODES, msg);
+    }
+
     // Set filename
     m_filename = filename;
 
-    // Continue only if filename is not empty
-    if (!filename.is_empty()) {
+    // Load file
+    GCsv csv = GCsv(filename.url());
 
-        // Load file
-        GCsv csv = GCsv(filename.url());
+    // Check if there are at least 2 nodes
+    if (csv.nrows() < 2) {
+        std::string msg = "File function ASCII file \""+filename.url()+
+                          "\" contains "+gammalib::str(csv.nrows())+
+                          " rows but at least 2 rows are required. Please "
+                          "specify a file function ASCII file with at "
+                          "least two rows.";
+        throw GException::invalid_value(G_LOAD_NODES, msg);
+    }
 
-        // Check if there are at least 2 nodes
-        if (csv.nrows() < 2) {
-            std::string msg = "File function ASCII file \""+filename.url()+
-                              "\" contains "+gammalib::str(csv.nrows())+
-                              " rows but at least 2 rows are required. Please "
-                              "specify a file function ASCII file with at "
-                              "least two rows.";
+    // Check if there are at least 2 columns
+    if (csv.ncols() < 2) {
+        std::string msg = "File function ASCII file \""+filename.url()+
+                          "\" contains "+gammalib::str(csv.ncols())+
+                          " columns but at least 2 columns are required. "
+                          "Please specify a file function ASCII file with "
+                          "at least two columns.";
+        throw GException::invalid_value(G_LOAD_NODES, msg);
+    }
+
+    // Setup nodes
+    double last_energy = 0.0;
+    for (int i = 0; i < csv.nrows(); ++i) {
+
+        // Get log10 of node energy and value. Make sure they are valid.
+        double log10energy;
+        double log10value;
+        if (csv.real(i,0) > 0.0) {
+            log10energy = std::log10(csv.real(i,0));
+        }
+        else {
+            std::string msg = "Non-positive energy "+
+                              gammalib::str(csv.real(i,0))+" encountered "
+                              "in row "+gammalib::str(i)+" of file "
+                              "function ASCII file. Please specify only "
+                              "positive energies in file function.";
+            throw GException::invalid_value(G_LOAD_NODES, msg);
+        }
+        if (csv.real(i,1) > 0.0) {
+            log10value = std::log10(csv.real(i,1));
+        }
+        else {
+            std::string msg = "Non-positive intensity "+
+                              gammalib::str(csv.real(i,1))+" encountered "
+                              "in row "+gammalib::str(i)+" of file "
+                              "function ASCII file. Please specify only "
+                              "positive intensities in file function.";
             throw GException::invalid_value(G_LOAD_NODES, msg);
         }
 
-        // Check if there are at least 2 columns
-        if (csv.ncols() < 2) {
-            std::string msg = "File function ASCII file \""+filename.url()+
-                              "\" contains "+gammalib::str(csv.ncols())+
-                              " columns but at least 2 columns are required. "
-                              "Please specify a file function ASCII file with "
-                              "at least two columns.";
+        // Make sure that energies are increasing
+        if (csv.real(i,0) <= last_energy) {
+            std::string msg = "Energy "+gammalib::str(csv.real(i,0))+
+                              "in row "+gammalib::str(i)+" of file "
+                              "function ASCII file is equal or smaller "
+                              "than preceding energy "+
+                              gammalib::str(last_energy)+". Please specify "
+                              "monotonically increasing energies in the "
+                              "file function ASCII file.";
             throw GException::invalid_value(G_LOAD_NODES, msg);
         }
 
-        // Setup nodes
-        double last_energy = 0.0;
-        for (int i = 0; i < csv.nrows(); ++i) {
+        // Append log10 of node energy and value
+        m_lin_nodes.append(csv.real(i,0));
+        m_log_nodes.append(log10energy);
+        m_lin_values.push_back(csv.real(i,1));
+        m_log_values.push_back(log10value);
 
-            // Get log10 of node energy and value. Make sure they are valid.
-            double log10energy;
-            double log10value;
-            if (csv.real(i,0) > 0.0) {
-                log10energy = std::log10(csv.real(i,0));
-            }
-            else {
-                std::string msg = "Non-positive energy "+
-                                  gammalib::str(csv.real(i,0))+" encountered "
-                                  "in row "+gammalib::str(i)+" of file "
-                                  "function ASCII file. Please specify only "
-                                  "positive energies in file function.";
-                throw GException::invalid_value(G_LOAD_NODES, msg);
-            }
-            if (csv.real(i,1) > 0.0) {
-                log10value = std::log10(csv.real(i,1));
-            }
-            else {
-                std::string msg = "Non-positive intensity "+
-                                  gammalib::str(csv.real(i,1))+" encountered "
-                                  "in row "+gammalib::str(i)+" of file "
-                                  "function ASCII file. Please specify only "
-                                  "positive intensities in file function.";
-                throw GException::invalid_value(G_LOAD_NODES, msg);
-            }
+        // Store last energy for monotonically increasing check
+        last_energy = csv.real(i,0);
 
-            // Make sure that energies are increasing
-            if (csv.real(i,0) <= last_energy) {
-                std::string msg = "Energy "+gammalib::str(csv.real(i,0))+
-                                  "in row "+gammalib::str(i)+" of file "
-                                  "function ASCII file is equal or smaller "
-                                  "than preceding energy "+
-                                  gammalib::str(last_energy)+". Please specify "
-                                  "monotonically increasing energies in the "
-                                  "file function ASCII file.";
-                throw GException::invalid_value(G_LOAD_NODES, msg);
-            }
+    } // endfor: looped over nodes
 
-            // Append log10 of node energy and value
-            m_lin_nodes.append(csv.real(i,0));
-            m_log_nodes.append(log10energy);
-            m_lin_values.push_back(csv.real(i,1));
-            m_log_values.push_back(log10value);
-
-            // Store last energy for monotonically increasing check
-            last_energy = csv.real(i,0);
-
-        } // endfor: looped over nodes
-
-        // Set pre-computation cache
-        set_cache();
-
-    } // endif: filename was not empty
+    // Set pre-computation cache
+    set_cache();
 
     // Return
     return;
