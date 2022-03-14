@@ -1,7 +1,7 @@
 /***************************************************************************
- *        GCOMModelDRBFitting.hpp - COMPTEL DRB model fitting class        *
+ *       GCOMModelDRBPhibarNodes.hpp - COMPTEL DRB model fitting class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,13 +19,13 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCOMModelDRBFitting.hpp
- * @brief COMPTEL DRB model fitting class interface definition
+ * @file GCOMModelDRBPhibarNodes.hpp
+ * @brief COMPTEL DRB Phibar nodes model fitting class interface definition
  * @author Juergen Knoedlseder
  */
 
-#ifndef GCOMMODELDRBFITTING_HPP
-#define GCOMMODELDRBFITTING_HPP
+#ifndef GCOMMODELDRBPHIBARNODES_HPP
+#define GCOMMODELDRBPHIBARNODES_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
@@ -39,47 +39,47 @@
 
 
 /***********************************************************************//**
- * @class GCOMModelDRBFitting
+ * @class GCOMModelDRBPhibarNodes
  *
- * @brief COMPTEL DRB model fitting class
+ * @brief COMPTEL DRB Phibar nodes model fitting class
  *
  * This class implements a COMPTEL background model that is based on fitting
  * of a DRB model. The model parameters are a set of normalization parameters
  * defined for a given Phibar value, and linear interpolations are performed
  * between these values.
  ***************************************************************************/
-class GCOMModelDRBFitting : public GModelData {
+class GCOMModelDRBPhibarNodes : public GModelData {
 
 public:
     // Constructors and destructors
-    GCOMModelDRBFitting(void);
-    explicit GCOMModelDRBFitting(const GXmlElement& xml);
-    GCOMModelDRBFitting(const GCOMModelDRBFitting& model);
-    virtual ~GCOMModelDRBFitting(void);
+    GCOMModelDRBPhibarNodes(void);
+    explicit GCOMModelDRBPhibarNodes(const GXmlElement& xml);
+    GCOMModelDRBPhibarNodes(const GCOMModelDRBPhibarNodes& model);
+    virtual ~GCOMModelDRBPhibarNodes(void);
 
     // Operators
-    virtual GCOMModelDRBFitting& operator=(const GCOMModelDRBFitting& model);
+    virtual GCOMModelDRBPhibarNodes& operator=(const GCOMModelDRBPhibarNodes& model);
 
     // Implemented pure virtual methods
-    virtual void                 clear(void);
-    virtual GCOMModelDRBFitting* clone(void) const;
-    virtual std::string          classname(void) const;
-    virtual std::string          type(void) const;
-    virtual bool                 is_constant(void) const;
-    virtual double               eval(const GEvent& event,
-                                      const GObservation& obs,
-                                      const bool& gradients = false) const;
-    virtual double               npred(const GEnergy& obsEng, const GTime& obsTime,
-                                       const GObservation& obs) const;
-    virtual GCOMEventCube*       mc(const GObservation& obs, GRan& ran) const;
-    virtual void                 read(const GXmlElement& xml);
-    virtual void                 write(GXmlElement& xml) const;
-    virtual std::string          print(const GChatter& chatter = NORMAL) const;
+    virtual void                     clear(void);
+    virtual GCOMModelDRBPhibarNodes* clone(void) const;
+    virtual std::string              classname(void) const;
+    virtual std::string              type(void) const;
+    virtual bool                     is_constant(void) const;
+    virtual double                   eval(const GEvent& event,
+                                          const GObservation& obs,
+                                          const bool& gradients = false) const;
+    virtual double                   npred(const GEnergy& obsEng, const GTime& obsTime,
+                                           const GObservation& obs) const;
+    virtual GCOMEventCube*           mc(const GObservation& obs, GRan& ran) const;
+    virtual void                     read(const GXmlElement& xml);
+    virtual void                     write(GXmlElement& xml) const;
+    virtual std::string              print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods
     void init_members(void);
-    void copy_members(const GCOMModelDRBFitting& model);
+    void copy_members(const GCOMModelDRBPhibarNodes& model);
     void free_members(void);
     void set_pointers(void);
     void set_cache(void) const;
@@ -100,12 +100,12 @@ protected:
 /***********************************************************************//**
  * @brief Return class name
  *
- * @return String containing the class name ("GCOMModelDRBFitting").
+ * @return String containing the class name ("GCOMModelDRBPhibarNodes").
  ***************************************************************************/
 inline
-std::string GCOMModelDRBFitting::classname(void) const
+std::string GCOMModelDRBPhibarNodes::classname(void) const
 {
-    return ("GCOMModelDRBFitting");
+    return ("GCOMModelDRBPhibarNodes");
 }
 
 
@@ -115,12 +115,12 @@ std::string GCOMModelDRBFitting::classname(void) const
  * @return Model type.
  *
  * Returns the type of the model. The type for a DRB fitting model is
- * "DRBFitting".
+ * "DRBPhibarNodes".
  ***************************************************************************/
 inline
-std::string GCOMModelDRBFitting::type(void) const
+std::string GCOMModelDRBPhibarNodes::type(void) const
 {
-    return ("DRBFitting");
+    return ("DRBPhibarNodes");
 }
 
 
@@ -133,9 +133,9 @@ std::string GCOMModelDRBFitting::type(void) const
  * model is always temporally constant.
  ***************************************************************************/
 inline
-bool GCOMModelDRBFitting::is_constant(void) const
+bool GCOMModelDRBPhibarNodes::is_constant(void) const
 {
     return (true);
 }
 
-#endif /* GCOMMODELDRBFITTING_HPP */
+#endif /* GCOMMODELDRBPHIBARNODES_HPP */

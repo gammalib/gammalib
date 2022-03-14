@@ -1,4 +1,4 @@
-2022-02-24
+2022-02-14
 
         * Version 2.0.0 released
         ========================
@@ -14,6 +14,7 @@
           methods
         Add GCOMSelection::fpmtflag(), GCOMSelection::use_d1() and 
           GCOMSelection::use_d2() methods (#3917)
+        Rename GCOMModelDRBFitting class to GCOMModelDRBPhibarNodes (#3914).
         Add GCOMModelDRBPhibarBins class (#3913)
         Compute spectral model gradients for negative factor values
         Add likelihood fit event selection hook (#3912)

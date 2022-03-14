@@ -101,4 +101,14 @@ public:
     GCOMSelection copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        table = gammalib.GFitsBinTable()
+        self.write(table)
+        state = {'hdu': table}
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+        self.read(state['hdu'])
+}
 };

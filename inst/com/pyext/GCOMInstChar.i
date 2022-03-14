@@ -70,4 +70,12 @@ public:
     GCOMInstChars copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = {'caldb': self.caldb()}
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+        self.caldb(state['caldb'])
+}
 };

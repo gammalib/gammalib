@@ -113,7 +113,7 @@
 %include "GCOMD2Response.i"
 %include "GCOMInstChar.i"
 %include "GCOMIaq.i"
-%include "GCOMModelDRBFitting.i"
+%include "GCOMModelDRBPhibarNodes.i"
 %include "GCOMModelDRBPhibarBins.i"
 %include "GCOMModelDRM.i"
 %include "GCOMTim.i"

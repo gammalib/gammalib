@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-24 February 2022
+14 Mars 2022
 
 
 1. Introduction
@@ -42,7 +42,7 @@ The following classes have been removed:
 - GMWLException
 
 The following classes have been renamed:
-- none
+- GCOMModelDRBFitting to GCOMModelDRBPhibarNodes
 
 The following methods have been added:
 - GApplication::statistics()
@@ -497,6 +497,8 @@ spatial model gradients (#3203).
 
 22. COMPTEL interface
 ---------------------
+Renamed GCOMModelDRBFitting class to GCOMModelDRBPhibarNodes (#3914).
+
 Implement a 2.042144 seconds clock correction before TJD 8798 and tics 28800000 
 (1992-06-25T01:00:00) to provide accurate times for pulsar analysis (#3973).
 

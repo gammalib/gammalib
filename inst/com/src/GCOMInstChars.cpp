@@ -92,7 +92,7 @@ GCOMInstChars::GCOMInstChars(const GCOMInstChars& ict)
  * @param[in] caldb Calibration database.
  * @param[in] ictname ICT response name.
  *
- * Create COMPTEL instrument characteristics by loading an SDA file from a
+ * Create COMPTEL instrument characteristics by loading an ICT file from a
  * calibration database.
  ***************************************************************************/
 GCOMInstChars::GCOMInstChars(const GCaldb& caldb, const std::string& ictname)

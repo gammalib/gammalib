@@ -57,7 +57,7 @@ sources = src/com_helpers_response_vector.cpp \
           src/GCOMInstChars.cpp \
           src/GCOMIaq.cpp \
           src/GCOMObservation.cpp \
-          src/GCOMModelDRBFitting.cpp \
+          src/GCOMModelDRBPhibarNodes.cpp \
           src/GCOMModelDRBPhibarBins.cpp \
           src/GCOMModelDRM.cpp
 
@@ -83,7 +83,7 @@ pkginclude_HEADERS = include/GCOMTools.hpp \
                      include/GCOMInstChars.hpp \
                      include/GCOMIaq.hpp \
                      include/GCOMObservation.hpp \
-                     include/GCOMModelDRBFitting.hpp \
+                     include/GCOMModelDRBPhibarNodes.hpp \
                      include/GCOMModelDRBPhibarBins.hpp \
                      include/GCOMModelDRM.hpp \
                      include/GCOMLib.hpp

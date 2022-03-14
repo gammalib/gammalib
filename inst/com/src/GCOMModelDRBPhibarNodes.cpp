@@ -1,7 +1,7 @@
 /***************************************************************************
- *        GCOMModelDRBFitting.cpp - COMPTEL DRB model fitting class        *
+ *       GCOMModelDRBPhibarNodes.cpp - COMPTEL DRB model fitting class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,8 +19,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCOMModelDRBFitting.cpp
- * @brief COMPTEL DRB model fitting class implementation
+ * @file GCOMModelDRBPhibarNodes.cpp
+ * @brief COMPTEL DRB Phibar nodes model fitting class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -32,22 +32,23 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GModelRegistry.hpp"
-#include "GCOMModelDRBFitting.hpp"
+#include "GCOMModelDRBPhibarNodes.hpp"
 #include "GCOMObservation.hpp"
 #include "GCOMEventBin.hpp"
 
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GCOMModelDRBFitting g_com_drb_fitting_seed;
-const GModelRegistry      g_com_drb_fitting_registry(&g_com_drb_fitting_seed);
+const GCOMModelDRBPhibarNodes g_com_drb_fitting_seed;
+const GModelRegistry          g_com_drb_fitting_registry(&g_com_drb_fitting_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_EVAL     "GCOMModelDRBFitting::eval(GEvent&, GObservation&, bool&)"
-#define G_NRED  "GCOMModelDRBFitting::npred(GEnergy&, GTime&, GObservation&)"
-#define G_MC                  "GCOMModelDRBFitting::mc(GObservation&, GRan&)"
-#define G_READ                      "GCOMModelDRBFitting::read(GXmlElement&)"
-#define G_WRITE                    "GCOMModelDRBFitting::write(GXmlElement&)"
+#define G_EVAL "GCOMModelDRBPhibarNodes::eval(GEvent&, GObservation&, bool&)"
+#define G_NRED            "GCOMModelDRBPhibarNodes::npred(GEnergy&, GTime&, "\
+                                                             "GObservation&)"
+#define G_MC              "GCOMModelDRBPhibarNodes::mc(GObservation&, GRan&)"
+#define G_READ                  "GCOMModelDRBPhibarNodes::read(GXmlElement&)"
+#define G_WRITE                "GCOMModelDRBPhibarNodes::write(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -67,7 +68,7 @@ const GModelRegistry      g_com_drb_fitting_registry(&g_com_drb_fitting_seed);
  *
  * Constructs an empty COMPTEL DRB fitting model.
  ***************************************************************************/
-GCOMModelDRBFitting::GCOMModelDRBFitting(void) : GModelData()
+GCOMModelDRBPhibarNodes::GCOMModelDRBPhibarNodes(void) : GModelData()
 {
     // Initialise members
     init_members();
@@ -83,11 +84,11 @@ GCOMModelDRBFitting::GCOMModelDRBFitting(void) : GModelData()
  * @param[in] xml XML element.
  *
  * Constructs a COMPTEL DRB fitting model from the information that is found
- * in an XML element. Please refer to the method GCOMModelDRBFitting::read
+ * in an XML element. Please refer to the method GCOMModelDRBPhibarNodes::read
  * to learn more about the information that is expected in the XML element.
  ***************************************************************************/
-GCOMModelDRBFitting::GCOMModelDRBFitting(const GXmlElement& xml) :
-                     GModelData(xml)
+GCOMModelDRBPhibarNodes::GCOMModelDRBPhibarNodes(const GXmlElement& xml) :
+                         GModelData(xml)
 {
     // Initialise members
     init_members();
@@ -109,8 +110,8 @@ GCOMModelDRBFitting::GCOMModelDRBFitting(const GXmlElement& xml) :
  * existing model. Note that the copy is a deep copy, so the original object
  * can be destroyed after the copy without any loss of information.
  ***************************************************************************/
-GCOMModelDRBFitting::GCOMModelDRBFitting(const GCOMModelDRBFitting& model) :
-                     GModelData(model)
+GCOMModelDRBPhibarNodes::GCOMModelDRBPhibarNodes(const GCOMModelDRBPhibarNodes& model) :
+                         GModelData(model)
 {
     // Initialise private members for clean destruction
     init_members();
@@ -128,7 +129,7 @@ GCOMModelDRBFitting::GCOMModelDRBFitting(const GCOMModelDRBFitting& model) :
  *
  * Destroys a COMPTEL DRB fitting model.
  ***************************************************************************/
-GCOMModelDRBFitting::~GCOMModelDRBFitting(void)
+GCOMModelDRBPhibarNodes::~GCOMModelDRBPhibarNodes(void)
 {
     // Free members
     free_members();
@@ -155,7 +156,7 @@ GCOMModelDRBFitting::~GCOMModelDRBFitting(void)
  * original object can be destroyed after the assignment without any loss of
  * information.
  ***************************************************************************/
-GCOMModelDRBFitting& GCOMModelDRBFitting::operator=(const GCOMModelDRBFitting& model)
+GCOMModelDRBPhibarNodes& GCOMModelDRBPhibarNodes::operator=(const GCOMModelDRBPhibarNodes& model)
 {
     // Execute only if object is not identical
     if (this != &model) {
@@ -191,7 +192,7 @@ GCOMModelDRBFitting& GCOMModelDRBFitting::operator=(const GCOMModelDRBFitting& m
  * Resets the object to a clean initial state. All information that resided
  * in the object will be lost.
  ***************************************************************************/
-void GCOMModelDRBFitting::clear(void)
+void GCOMModelDRBPhibarNodes::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
@@ -217,9 +218,9 @@ void GCOMModelDRBFitting::clear(void)
  * information, so the original object can be destroyed after cloning without
  * any loss of information.
  ***************************************************************************/
-GCOMModelDRBFitting* GCOMModelDRBFitting::clone(void) const
+GCOMModelDRBPhibarNodes* GCOMModelDRBPhibarNodes::clone(void) const
 {
-    return new GCOMModelDRBFitting(*this);
+    return new GCOMModelDRBPhibarNodes(*this);
 }
 
 
@@ -237,9 +238,9 @@ GCOMModelDRBFitting* GCOMModelDRBFitting::clone(void) const
  *
  * Evaluates the COMPTEL DRB fitting model.
  ***************************************************************************/
-double GCOMModelDRBFitting::eval(const GEvent&       event,
-                                 const GObservation& obs,
-                                 const bool&         gradients) const
+double GCOMModelDRBPhibarNodes::eval(const GEvent&       event,
+                                     const GObservation& obs,
+                                     const bool&         gradients) const
 {
     // Extract COMPTEL observation
     const GCOMObservation* observation = dynamic_cast<const GCOMObservation*>(&obs);
@@ -353,7 +354,7 @@ double GCOMModelDRBFitting::eval(const GEvent&       event,
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
         if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-            std::cout << "*** ERROR: GCOMModelDRBFitting::eval";
+            std::cout << "*** ERROR: GCOMModelDRBPhibarNodes::eval";
             std::cout << "(index=" << index << "):";
             std::cout << " NaN/Inf encountered";
             std::cout << " (value=" << value;
@@ -385,9 +386,9 @@ double GCOMModelDRBFitting::eval(const GEvent&       event,
  *
  * @todo Implement method.
  ***************************************************************************/
-double GCOMModelDRBFitting::npred(const GEnergy&      obsEng,
-                                  const GTime&        obsTime,
-                                  const GObservation& obs) const
+double GCOMModelDRBPhibarNodes::npred(const GEnergy&      obsEng,
+                                      const GTime&        obsTime,
+                                      const GObservation& obs) const
 {
     // Initialise result
     double npred = 0.0;
@@ -416,8 +417,8 @@ double GCOMModelDRBFitting::npred(const GEnergy&      obsEng,
  *
  * @todo Implement method.
  ***************************************************************************/
-GCOMEventCube* GCOMModelDRBFitting::mc(const GObservation& obs, 
-                                       GRan&               ran) const
+GCOMEventCube* GCOMModelDRBPhibarNodes::mc(const GObservation& obs,
+                                           GRan&               ran) const
 {
     // Initialise new event cube
     GCOMEventCube* cube = new GCOMEventCube;
@@ -444,7 +445,7 @@ GCOMEventCube* GCOMModelDRBFitting::mc(const GObservation& obs,
  * The model is composed of nodes that define the normalization value as
  * function of Phibar value. The following XML file syntax is expected:
  *
- *     <source name="Background" type="DRBFitting" instrument="COM">
+ *     <source name="Background" type="DRBPhibarNodes" instrument="COM">
  *       <node>
  *         <parameter name="Phibar"        .../>
  *         <parameter name="Normalization" .../>
@@ -456,7 +457,7 @@ GCOMEventCube* GCOMModelDRBFitting::mc(const GObservation& obs,
  *       </node>
  *     </source>
  ***************************************************************************/
-void GCOMModelDRBFitting::read(const GXmlElement& xml)
+void GCOMModelDRBPhibarNodes::read(const GXmlElement& xml)
 {
     // Free space for nodes
     m_phibars.clear();
@@ -541,7 +542,7 @@ void GCOMModelDRBFitting::read(const GXmlElement& xml)
  * The model is composed of nodes that define the normalization value as
  * function of Phibar value. The following XML file syntax is expected:
  *
- *     <source name="Background" type="DRBFitting" instrument="COM">
+ *     <source name="Background" type="DRBPhibarNodes" instrument="COM">
  *       <node>
  *         <parameter name="Phibar"        .../>
  *         <parameter name="Normalization" .../>
@@ -553,7 +554,7 @@ void GCOMModelDRBFitting::read(const GXmlElement& xml)
  *       </node>
  *     </source>
  ***************************************************************************/
-void GCOMModelDRBFitting::write(GXmlElement& xml) const
+void GCOMModelDRBPhibarNodes::write(GXmlElement& xml) const
 {
     // Initialise pointer on source
     GXmlElement* src = NULL;
@@ -637,10 +638,10 @@ void GCOMModelDRBFitting::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print model information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing model information.
  ***************************************************************************/
-std::string GCOMModelDRBFitting::print(const GChatter& chatter) const
+std::string GCOMModelDRBPhibarNodes::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
@@ -649,7 +650,7 @@ std::string GCOMModelDRBFitting::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append header
-        result.append("=== GCOMModelDRBFitting ===");
+        result.append("=== GCOMModelDRBPhibarNodes ===");
 
         // Append attributes
         result.append("\n"+print_attributes());
@@ -679,7 +680,7 @@ std::string GCOMModelDRBFitting::print(const GChatter& chatter) const
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GCOMModelDRBFitting::init_members(void)
+void GCOMModelDRBPhibarNodes::init_members(void)
 {
     // Initialise members
     m_phibars.clear();
@@ -690,7 +691,7 @@ void GCOMModelDRBFitting::init_members(void)
     m_fixed = true;
     m_old_phibars.clear();
     m_nodes.clear();
-    
+
     // Return
     return;
 }
@@ -701,7 +702,7 @@ void GCOMModelDRBFitting::init_members(void)
  *
  * @param[in] model Model.
  ***************************************************************************/
-void GCOMModelDRBFitting::copy_members(const GCOMModelDRBFitting& model)
+void GCOMModelDRBPhibarNodes::copy_members(const GCOMModelDRBPhibarNodes& model)
 {
     // Copy members
     m_phibars = model.m_phibars;
@@ -724,7 +725,7 @@ void GCOMModelDRBFitting::copy_members(const GCOMModelDRBFitting& model)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GCOMModelDRBFitting::free_members(void)
+void GCOMModelDRBPhibarNodes::free_members(void)
 {
     // Return
     return;
@@ -737,7 +738,7 @@ void GCOMModelDRBFitting::free_members(void)
  * Set pointers to all model parameters. The pointers are stored in a vector
  * that is member of the GModel base class.
  ***************************************************************************/
-void GCOMModelDRBFitting::set_pointers(void)
+void GCOMModelDRBPhibarNodes::set_pointers(void)
 {
     // Clear parameter pointer(s)
     m_pars.clear();
@@ -773,7 +774,7 @@ void GCOMModelDRBFitting::set_pointers(void)
  * cache is only filled if at least 2 nodes are available. If only a single
  * node is available, the model is considered as a simple scaling factor.
  ***************************************************************************/
-void GCOMModelDRBFitting::set_cache(void) const
+void GCOMModelDRBPhibarNodes::set_cache(void) const
 {
     // Clear any existing values
     m_old_phibars.clear();
@@ -813,7 +814,7 @@ void GCOMModelDRBFitting::set_cache(void) const
  * Updates the evaluation cache by computing the 
  * changed.
  ***************************************************************************/
-void GCOMModelDRBFitting::update_cache(void) const
+void GCOMModelDRBPhibarNodes::update_cache(void) const
 {
     // Determine number of parameters
     int num = m_phibars.size();

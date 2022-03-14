@@ -51,6 +51,7 @@
 #include "GCOMRoi.hpp"
 #include "GCOMEventAtom.hpp"
 #include "GCOMEventList.hpp"
-#include "GCOMModelDRBFitting.hpp"
+#include "GCOMModelDRBPhibarBins.hpp"
+#include "GCOMModelDRBPhibarNodes.hpp"
 
 #endif /* GCOMLIB_HPP */

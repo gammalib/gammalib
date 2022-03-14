@@ -11,7 +11,7 @@
       <parameter name="DEC" scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
     </spatialModel>
   </source>
-  <source name="Background" type="DRBFitting" instrument="COM">
+  <source name="Background" type="DRBPhibarNodes" instrument="COM">
     <node>
       <parameter name="Phibar"        scale="1.0" value="1.0"  min="0.0" max="50.0"   free="0"/>
       <parameter name="Normalization" scale="1.0" value="0.0"  min="0.0" max="1000.0" free="1"/>

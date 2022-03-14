@@ -1,7 +1,7 @@
 .. _2.0:
 
-GammaLib 2.0 release (20 February 2022)
-=======================================
+GammaLib 2.0 release (14 Mars 2022)
+===================================
 
 Overview
 --------
@@ -147,6 +147,8 @@ New features
 Clean up
 --------
 
+* [`3914 <https://cta-redmine.irap.omp.eu/issues/3914>`_] -
+  Rename ``GCOMModelDRBFitting`` class to ``GCOMModelDRBPhibarNodes``
 * Remove ``GCOMSelection::zeta_min()`` and ``GCOMSelection::zeta_max()`` methods
 * [`3560 <https://cta-redmine.irap.omp.eu/issues/3560>`_] -
   Store DRB, DRG and DRX as instances of ``GCOMDri`` instead of ``GSkyMap`` in ``GCOMObservation``

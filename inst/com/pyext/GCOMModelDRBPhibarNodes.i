@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GCOMModelDRBFitting.i - COMPTEL DRB model fitting class         *
+ *        GCOMModelDRBPhibarNodes.i - COMPTEL DRB model fitting class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2018 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,51 +19,51 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCOMModelDRBFitting.hpp
- * @brief COMPTEL DRB model fitting class interface definition
+ * @file GCOMModelDRBPhibarNodes.hpp
+ * @brief COMPTEL DRB Phibar nodes model fitting class interface definition
  * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GCOMModelDRBFitting.hpp"
+#include "GCOMModelDRBPhibarNodes.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GCOMModelDRBFitting
+ * @class GCOMModelDRBPhibarNodes
  *
  * @brief COMPTEL DRB model fitting class
  ***************************************************************************/
-class GCOMModelDRBFitting : public GModelData {
+class GCOMModelDRBPhibarNodes : public GModelData {
 public:
     // Constructors and destructors
-    GCOMModelDRBFitting(void);
-    explicit GCOMModelDRBFitting(const GXmlElement& xml);
-    GCOMModelDRBFitting(const GCOMModelDRBFitting& model);
-    virtual ~GCOMModelDRBFitting(void);
+    GCOMModelDRBPhibarNodes(void);
+    explicit GCOMModelDRBPhibarNodes(const GXmlElement& xml);
+    GCOMModelDRBPhibarNodes(const GCOMModelDRBPhibarNodes& model);
+    virtual ~GCOMModelDRBPhibarNodes(void);
 
     // Implemented pure virtual methods
-    virtual void                 clear(void);
-    virtual GCOMModelDRBFitting* clone(void) const;
-    virtual std::string          classname(void) const;
-    virtual std::string          type(void) const;
-    virtual bool                 is_constant(void) const;
-    virtual double               eval(const GEvent& event,
-                                      const GObservation& obs,
-                                      const bool& gradients = false) const;
-    virtual double               npred(const GEnergy& obsEng, const GTime& obsTime,
-                                       const GObservation& obs) const;
-    virtual GCOMEventCube*       mc(const GObservation& obs, GRan& ran) const;
-    virtual void                 read(const GXmlElement& xml);
-    virtual void                 write(GXmlElement& xml) const;
+    virtual void                     clear(void);
+    virtual GCOMModelDRBPhibarNodes* clone(void) const;
+    virtual std::string              classname(void) const;
+    virtual std::string              type(void) const;
+    virtual bool                     is_constant(void) const;
+    virtual double                   eval(const GEvent& event,
+                                          const GObservation& obs,
+                                          const bool& gradients = false) const;
+    virtual double                   npred(const GEnergy& obsEng, const GTime& obsTime,
+                                           const GObservation& obs) const;
+    virtual GCOMEventCube*           mc(const GObservation& obs, GRan& ran) const;
+    virtual void                     read(const GXmlElement& xml);
+    virtual void                     write(GXmlElement& xml) const;
 };
 
 
 /***********************************************************************//**
- * @brief GCOMModelDRBFitting class extension
+ * @brief GCOMModelDRBPhibarNodes class extension
  ***************************************************************************/
-%extend GCOMModelDRBFitting {
-    GCOMModelDRBFitting copy() {
+%extend GCOMModelDRBPhibarNodes {
+    GCOMModelDRBPhibarNodes copy() {
         return (*self);
     }
 %pythoncode {

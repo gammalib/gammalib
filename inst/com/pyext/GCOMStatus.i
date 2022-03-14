@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCOMStatus.i - COMPTEL instrument status class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017 by Juergen Knoedlseder                              *
+ *  copyright (C) 2017-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -61,4 +61,11 @@ public:
     GCOMStatus copy() {
         return (*self);
     }
+%pythoncode {
+    def __getstate__(self):
+        state = {'void': 0}
+        return state
+    def __setstate__(self, state):
+        self.__init__()
+}
 };
