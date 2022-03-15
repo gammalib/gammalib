@@ -1,10 +1,11 @@
-2022-02-14
+2022-02-15
 
         * Version 2.0.0 released
         ========================
 
         By default, do not allow log-likelihood decrease in LM optimiser
         Support Galactic coordinates in spatial models (#3988)
+        Correctly return UTC times before 1972 (#3974)
         Implement CGRO clock correction (#3973)
         Add support for COMPTEL pulsar analysis (#3973)
         Add GCOMObservation::tim() and GCOMObservation::oads() setter methods

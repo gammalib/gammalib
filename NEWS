@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-14 Mars 2022
+15 Mars 2022
 
 
 1. Introduction
@@ -337,6 +337,9 @@ of functions (#3328).
 
 11. Observation module
 ----------------------
+Corrected the GTime::utc() method so that it returns a correct UTC string
+for times before the year 1972 (#3974).
+
 Add GEphemerides class to deal with JPL ephemerides and specifically the
 DE200 ephemerides. A JPL DE200 ephemerides file was added to a refdata
 direction, the file is installed in $GAMMALIB/share/refdata. Add further-

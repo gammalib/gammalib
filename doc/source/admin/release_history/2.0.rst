@@ -1,6 +1,6 @@
 .. _2.0:
 
-GammaLib 2.0 release (14 Mars 2022)
+GammaLib 2.0 release (15 Mars 2022)
 ===================================
 
 Overview
@@ -13,13 +13,16 @@ In particular, this release provides:
 * full support for COMPTEL data analysis
 * support for pulsar analysis
 * vectorised response computation
-* support Galactic coordinates in spatial models
+* support of Galactic coordinates in all spatial models
 * provision of carbon footprint information and statistics
+* a daemon that collects GammaLib usage statistics
 
 
 Bug fixes
 ---------
 
+* [`3974 <https://cta-redmine.irap.omp.eu/issues/3974>`_] -
+  Correctly return UTC times before 1972
 * [`3973 <https://cta-redmine.irap.omp.eu/issues/3973>`_] -
   Implement CGRO clock correction
 * Compute spectral model gradients for negative factor values

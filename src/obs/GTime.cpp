@@ -536,6 +536,11 @@ std::string GTime::utc(const int& precision) const
         year++;
         days = days_in_year(year);
     }
+    while (day < 0) {
+        year--;
+        days = days_in_year(year);
+        day += days;
+    }
 
     // Adjust number of days per month for leap years
     if (is_leap_year(year)) {
