@@ -60,7 +60,7 @@
 
 /* __ Compile options ____________________________________________________ */
 //#define G_CHECK_FOR_NAN
-//#define G_USE_CURL      //!< Use curl in host_country()
+#define G_USE_CURL      //!< Use curl in host_country()
 
 /* __ Function name definitions __________________________________________ */
 #define G_XML2STRING                     "gammalib::xml2string(std::string&)"
