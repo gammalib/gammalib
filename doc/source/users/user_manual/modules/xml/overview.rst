@@ -1,7 +1,7 @@
 Overview
 ========
 
-The followinf figure presents an overview over the C++ classes of the XML
+The following figure presents an overview over the classes of the XML
 module and their relations.
 
 .. _fig_uml_xml:

@@ -1,7 +1,7 @@
 Overview
 ========
 
-The following figure presents an overview over the C++ classes of the model
+The following figure presents an overview over the classes of the model
 module and their relations.
 
 .. _fig_uml_model:
@@ -22,4 +22,8 @@ In general, models are parametric, and model parameters are implemented by
 :doxy:`GModelPar` which derives from the abstract :doxy:`GOptimizerPar`
 base class.
 
-Model components are combined using the :doxy:`GModels` container C++ class.
+Model components are combined using the :doxy:`GModels` container class.
+
+Furthermore each model contains an association container, implemented by the
+:doxy:`GModelAssociations` container class. Each association is represented by
+an instance of the :doxy:`GModelAssociation` class.

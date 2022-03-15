@@ -31,7 +31,7 @@ are:
 * Issue tracker: https://cta-redmine.irap.omp.eu/projects/gammalib/issues
 * Documentation: http://cta.irap.omp.eu/gammalib/
 
-The present document applies to GammaLib version 1.7.
+The present document applies to GammaLib version 2.0.
 
 GammaLib is designed to compile on any POSIX compliant platform. So far, 
 GammaLib has been successfully compiled and tested on Mac OS X, OpenBSD, OpenSolaris
@@ -86,11 +86,6 @@ correspond to the folders in the source code distribution):
 
 GammaLib is developed by a team of enthousiastic gamma-ray 
 astronomers with support from engineers.
-We regularily organise
-`coding sprints <https://cta-redmine.irap.omp.eu/projects/ctools/wiki/Coding_sprints>`_
-where key developers but also newcomers meet to discuss the developments 
-and next steps, and advance with the coding of the software.
-
 The development of GammaLib has been initiated by scientists from `IRAP (Institut
 de Recherche en Astrophysique et Planetologie) <http://www.irap.omp.eu/>`_, an
 astrophysics laboratory of CNRS and of the `University Paul Sabatier 
@@ -98,7 +93,5 @@ astrophysics laboratory of CNRS and of the `University Paul Sabatier
 Toulouse, France. GammaLib is based on past experience gained in developing
 software for gamma-ray space missions, such as the COMPTEL telescope
 aboard CGRO, the SPI telescope aboard INTEGRAL, and the LAT
-telescope aboard Fermi. Today, the development of GammaLib is mainly driven
-by the needs in ground-based gamma-ray astronomy, and in particular by the
-development of the CTA observatory.
+telescope aboard Fermi.
 

@@ -116,7 +116,7 @@ version as follows:
 
 .. code-block:: bash
 
-   $ conda create -n gammalib-devel python=3.6
+   $ conda create -n gammalib-devel python=3.9
    $ source activate gammalib-devel
    $ conda install --use-local gammalib=2.0.0.dev
 
@@ -126,4 +126,4 @@ Python version you can build the conda package as follows:
 
 .. code-block:: bash
 
-   $ conda-build dev/conda.recipe --python 3.6
+   $ conda-build dev/conda.recipe --python 3.9

@@ -15,7 +15,7 @@ detectors. It uses a coded mask to image sources in a field-of-view of about
 16 deg in diameter (fully coded). The angular resolution is about 2 deg, the
 spectral resolution is about 2 keV.
 
-The following figure presents an overview over the C++ classes of the SPI
+The following figure presents an overview over the classes of the SPI
 module and their relations.
 
 .. _fig_uml_spi:

@@ -1,7 +1,7 @@
 Overview
 ========
 
-The following figure presents an overview over the C++ classes of the Xspec
+The following figure presents an overview over the classes of the Xspec
 module and their relations.
 
 .. _fig_uml_xspec:

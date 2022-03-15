@@ -1,9 +1,12 @@
 Integration and derivatives
 ===========================
 
+Scalar functions
+----------------
+
 The following code illustrates how integrations and derivatives are
-computed within GammaLib (see ``examples/cpp/numerics/numerics.cpp`` for the
-source code):
+computed within GammaLib for scalar functions (see ``examples/cpp/numerics/numerics.cpp`` for
+the source code):
 
 .. code-block:: cpp
    :linenos:
@@ -53,3 +56,24 @@ object is created in line 15 with takes a reference to the function as
 argument. Using the :doxy:`GDerivative::value` method, the derivative is computed in line
 16 for a function argument of 0. As the Gaussian has a maximum there, the
 result will be 0.
+
+
+Vector functions
+----------------
+
+GammaLib provides also support for vector functions, which are functions that
+return instead of a scalar a vector. These vector functions may be used for
+efficient response computation, where integrations are needed for vectors instead
+of scalars.
+
+Vector functions are implemented by the abstract :doxy:`GFunctions` base class for
+which the following pure virtual functions needed to be implemented
+
+.. code-block:: cpp
+
+   virtual int     size(void) const = 0;
+   virtual GVector eval(const double& x) = 0;
+
+Vector functions can be integrated using the :doxy:`GIntegrals` class which is analoguous
+to the :doxy:`GIntegral` class for scalar functions. Specifically, the integration
+methods ``romberg`` and ``trapzd`` return instances of :doxy:`GVector` instead of scalars.

@@ -1,7 +1,7 @@
 Overview
 ========
 
-The following figure presents an overview over the C++ classes of the FITS
+The following figure presents an overview over the classes of the FITS
 module and their relations.
 
 .. _fig_uml_fits:
@@ -13,7 +13,7 @@ module and their relations.
    *FITS module*
 
 The FITS module provides a high-level interface to FITS files. The module
-is based on the cfitsio library for file access. The C++ classes of the
+is based on the cfitsio library for file access. The classes of the
 module implement a logical representation of the FITS file in memory that
 can be handled independently of the file representation on disk.
 

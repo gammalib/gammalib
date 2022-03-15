@@ -1,7 +1,7 @@
 Overview
 ========
 
-The following figure presents an overview over the C++ classes of
+The following figure presents an overview over the classes of
 the linear algebra module and their relations.
 
 .. _fig_uml_linalg:

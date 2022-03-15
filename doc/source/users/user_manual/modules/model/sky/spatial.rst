@@ -1,6 +1,11 @@
 Spatial components
 ^^^^^^^^^^^^^^^^^^
 
+.. note::
+   In the following model descriptions, celestial coordinates ``RA`` and ``DEC``
+   may be replaced by Galactic coordinates ``GLON`` and ``GLAT``.
+
+
 Point source
 ============
 
@@ -20,20 +25,14 @@ units of degrees.
      </spectrum>
    </source>
 
-An alternative XML format is supported for compatibility with the Fermi/LAT XML
-format:
+where
 
-.. code-block:: xml
+* ``RA`` is the Right Ascension (degrees)
+* ``DEC`` is the Declination (degrees)
 
-   <source name="Crab" type="PointSource">
-     <spatialModel type="SkyDirFunction">
-       <parameter name="RA"  scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
-       <parameter name="DEC" scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
-     </spatialModel>
-     <spectrum type="...">
-       ...
-     </spectrum>
-   </source>
+.. note::
+   For compatibility with the Fermi/LAT ScienceTools the model type
+   ``PointSource`` can be replaced by ``SkyDirFunction``.
 
 
 Radial disk
@@ -56,13 +55,19 @@ and the disk ``Radius``. All parameters are given in units of degrees.
      </spectrum>
    </source>
 
+where
+
+* ``RA`` is the Right Ascension of the disk centre (degrees)
+* ``DEC`` is the Declination of the disk centre (degrees)
+* ``Radius`` is the disk radius (degrees)
+
 
 Radial ring
 ===========
 
 The ``RadialRing`` model specifies a uniform intensity distribution within
 a circular ring. The circular ring is defined by the celestial coordinates
-``RA`` and ``DEC`` of the ring centre, the ring **inner radius** defined by
+``RA`` and ``DEC`` of the ring centre, the ring inner radius defined by
 ``Radius`` and the ring width, defined by ``Width``. Specifically, the
 ring outer radius is given by ``Radius+Width``. All parameters are given
 in units of degrees.
@@ -80,6 +85,13 @@ in units of degrees.
        ...
      </spectrum>
    </source>
+
+where
+
+* ``RA`` is the Right Ascension of the ring centre (degrees)
+* ``DEC`` is the Declination of the ring centre (degrees)
+* ``Radius`` is the inner ring radius (degrees)
+* ``Width`` is the ring width radius (degrees)
 
 
 Radial Gaussian
@@ -103,13 +115,63 @@ in units of degrees.
      </spectrum>
    </source>
 
+and implements
+
+.. math::
+   M_{\rm spatial}(\theta) = \frac{1}{2 \pi \sigma^2} \exp
+                  \left(-\frac{1}{2}\frac{\theta^2}{\sigma^2} \right),
+
+where
+
+* ``RA`` is the Right Ascension of the Gaussian centre (degrees)
+* ``DEC`` is the Declination of the Gaussian centre (degrees)
+* :math:`\sigma` = ``Sigma`` (degrees)
+
+
+Radial general Gaussian
+=======================
+
+The ``RadialGeneralGaussian`` model specifies a generalised Gaussian intensity distribution,
+defined by the celestial coordinates ``RA`` and ``DEC`` of the generalised Gaussian centre,
+a radius ``Radius``and a radial index parameter ``R_Index``.
+
+.. code-block:: xml
+
+   <source name="Crab" type="ExtendedSource">
+     <spatialModel type="RadialGeneralGaussian">
+       <parameter name="RA"      scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
+       <parameter name="DEC"     scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
+       <parameter name="Radius"  scale="1.0" value="0.20"    min="0.01" max="10"  free="1"/>
+       <parameter name="R_Index" scale="1.0" value="0.5"     min="0.01" max="10"  free="1"/>
+     </spatialModel>
+     <spectrum type="...">
+       ...
+     </spectrum>
+   </source>
+
+and implements
+
+.. math::
+   M_{\rm spatial}(\theta) = \frac{1}{2 \pi r^2 \eta \Gamma(2\eta)} \exp
+                  \left[- \left(\frac{\theta^2}{r^2}\right)^\frac{1}{\eta} \right],
+
+where
+
+* ``RA`` is the Right Ascension of the Gaussian centre (degrees)
+* ``DEC`` is the Declination of the Gaussian centre (degrees)
+* :math:`r` = ``Radius`` (degrees)
+* :math:`\eta` = ``R_Index``
+
+The model normalisation is correct in the small angle approximation and for
+:math:`\eta` of the order of unity or smaller.
+
 
 Radial shell
 ============
 
 The ``RadialShell`` model specifies a 3-dimensional shell projected on the
 sky. The shell is defined by the celestial coordinates ``RA`` and ``DEC`` of
-the shell centre, the **inner radius** of the shell defined by ``Radius`` and
+the shell centre, the inner radius of the shell defined by ``Radius`` and
 the width of the shell, defined by ``Width``. Specifically, the outer radius
 of the shell is given by ``Radius+Width``. All parameters are given in units
 of degrees.
@@ -127,6 +189,123 @@ of degrees.
        ...
      </spectrum>
    </source>
+
+and implements
+
+.. math::
+   M_{\rm spatial}(\theta) =  n_0 \left \{
+   \begin{array}{l l}
+      \displaystyle
+      \sqrt{ \theta_{\rm out}^2 - \theta^2 } - \sqrt{ \theta_{\rm in}^2 - \theta^2 }
+      & \mbox{if $\theta \le \theta_{\rm in}$} \\
+      \\
+     \displaystyle
+      \sqrt{ \theta_{\rm out}^2 - \theta^2 }
+      & \mbox{if $\theta_{\rm in} < \theta \le \theta_{\rm out}$} \\
+      \\
+     \displaystyle
+     0 & \mbox{if $\theta > \theta_{\rm out}$}
+   \end{array}
+   \right .
+
+where
+
+* ``RA`` is the Right Ascension of the shell centre (degrees)
+* ``DEC`` is the Declination of the shell centre (degrees)
+* :math:`\theta_{\rm out}` = ``Radius`` + ``Width`` (degrees)
+* :math:`\theta_{\rm in}` = ``Radius`` (degrees)
+
+
+Radial profiles
+===============
+
+Radial profiles are defined by a arbitrary function of the radial distance from a central
+position. The following radial profiles exist:
+
+Burkert Dark matter profile
+---------------------------
+
+.. code-block:: xml
+
+  <source name="Crab" type="ExtendedSource">
+    <spatialModel type="DMBurkertProfile">
+      <parameter name="RA"           scale="1.0" value="83.6331" min="-360"    max="360"   free="1"/>
+      <parameter name="DEC"          scale="1.0" value="22.0145" min="-90"     max="90"    free="1"/>
+      <parameter name="ScaleRadius"  scale="1.0" value="21.5"    min="0.0001"  max="1000"  free="0"/>
+      <parameter name="ScaleDensity" scale="1.0" value="0.2"     min="0.0001"  max="1000"  free="0"/>
+      <parameter name="HaloDistance" scale="1.0" value="7.94"    min="0.0001"  max="1000"  free="0"/>
+      <parameter name="ThetaMin"     scale="1.0" value="1.0e-6"  min="1.0e-10" max="1000"  free="0"/>
+      <parameter name="ThetaMax"     scale="1.0" value="180.0"   min="0.0001"  max="1000"  free="0"/>
+      <parameter name="CoreRadius"   scale="1.0" value="0.5"     min="0.0001"  max="1000"  free="0"/>
+    </spatialModel>
+    <spectrum type="...">
+      ...
+    </spectrum>
+  </source>
+
+Einasto Dark matter profile
+---------------------------
+
+.. code-block:: xml
+
+  <source name="Crab" type="ExtendedSource">
+    <spatialModel type="DMEinastoProfile">
+      <parameter name="RA"           scale="1.0" value="83.6331" min="-360"    max="360"   free="1"/>
+      <parameter name="DEC"          scale="1.0" value="22.0145" min="-90"     max="90"    free="1"/>
+      <parameter name="ScaleRadius"  scale="1.0" value="21.5"    min="0.0001"  max="1000"  free="0"/>
+      <parameter name="ScaleDensity" scale="1.0" value="0.2"     min="0.0001"  max="1000"  free="0"/>
+      <parameter name="HaloDistance" scale="1.0" value="7.94"    min="0.0001"  max="1000"  free="0"/>
+      <parameter name="Alpha"        scale="1.0" value="0.17"    min="0.0001"  max="1000"  free="0"/>
+      <parameter name="ThetaMin"     scale="1.0" value="1.0e-6"  min="1.0e-10" max="1000"  free="0"/>
+      <parameter name="ThetaMax"     scale="1.0" value="180.0"   min="0.0001"  max="1000"  free="0"/>
+      <parameter name="CoreRadius"   scale="1.0" value="0.5"     min="0.0001"  max="1000"  free="0"/>
+    </spatialModel>
+    <spectrum type="...">
+      ...
+    </spectrum>
+  </source>
+
+Zhao Dark matter profile
+------------------------
+
+.. code-block:: xml
+
+  <source name="Crab" type="ExtendedSource">
+    <spatialModel type="DMZhaoProfile">
+      <parameter name="RA"           scale="1.0" value="83.6331" min="-360"    max="360"   free="1"/>
+      <parameter name="DEC"          scale="1.0" value="22.0145" min="-90"     max="90"    free="1"/>
+      <parameter name="ScaleRadius"  scale="1.0" value="21.5"    min="0.0001"  max="1000"  free="0"/>
+      <parameter name="ScaleDensity" scale="1.0" value="0.2"     min="0.0001"  max="1000"  free="0"/>
+      <parameter name="HaloDistance" scale="1.0" value="7.94"    min="0.0001"  max="1000"  free="0"/>
+      <parameter name="Alpha"        scale="1.0" value="0.17"    min="0.0001"  max="1000"  free="0"/>
+      <parameter name="Beta"         scale="1.0" value="3.00"    min="0.0001"  max="1000"  free="0"/>
+      <parameter name="Gamma"        scale="1.0" value="1.00"    min="0.0001"  max="1000"  free="0"/>
+      <parameter name="ThetaMin"     scale="1.0" value="1.0e-6"  min="1.0e-10" max="1000"  free="0"/>
+      <parameter name="ThetaMax"     scale="1.0" value="180.0"   min="0.0001"  max="1000"  free="0"/>
+      <parameter name="CoreRadius"   scale="1.0" value="0.5"     min="0.0001"  max="1000"  free="0"/>
+    </spatialModel>
+    <spectrum type="...">
+      ...
+    </spectrum>
+  </source>
+
+Gaussian profile
+----------------
+
+This profile is equivalent to ``RadialGaussian``.
+
+.. code-block:: xml
+
+  <source name="Crab" type="ExtendedSource">
+    <spatialModel type="GaussianProfile">
+      <parameter name="RA"    scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
+      <parameter name="DEC"   scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
+      <parameter name="Sigma" scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
+    </spatialModel>
+    <spectrum type="...">
+      ...
+    </spectrum>
+  </source>
 
 
 Elliptical disk
@@ -154,6 +333,14 @@ units of degrees.
      </spectrum>
    </source>
 
+where
+
+* ``RA`` is the Right Ascension (degrees)
+* ``DEC`` is the Declination (degrees)
+* ``PA`` is the position angle, counted counterclockwise from North (degrees)
+* ``MinorRadius`` is the minor radius of the ellipse (degrees)
+* ``MajorRadius`` is the major radius of the ellipse (degrees)
+
 
 Elliptical Gaussian
 ===================
@@ -179,6 +366,77 @@ units of degrees.
        ...
      </spectrum>
    </source>
+
+and implements
+
+.. math::
+   M_{\rm spatial}(\theta, \phi) = \exp \left( -\frac{\theta^2}{2 r_\mathrm{eff}^2} \right),
+
+with
+
+.. math::
+   r_\mathrm{eff} = \frac{ab} {\sqrt{\left( a \sin (\phi - \phi_0) \right)^2 +
+                    \sqrt{\left( b \cos (\phi - \phi_0) \right)^2}}}
+
+where
+
+* ``RA`` is the Right Ascension (degrees)
+* ``DEC`` is the Declination (degrees)
+* ``PA`` is the position angle, counted counterclockwise from North (degrees)
+* :math:`a` = ``MinorRadius`` (degrees)
+* :math:`b` = ``MajorRadius`` (degrees)
+* :math:`\phi_0` is the position angle of the ellipse, counted counterclockwise
+  from North
+* :math:`\phi` is the azimuth angle with respect to North.
+
+
+EllipticalGeneralGaussian
+=========================
+
+The ``EllipticalGeneralGaussian`` model describes a Gaussian intensity distribution
+
+.. code-block:: xml
+
+  <source name="Crab" type="ExtendedSource">
+    <spatialModel type="EllipticalGeneralGaussian">
+      <parameter name="RA"          scale="1.0" value="83.6331" min="-360"  max="360" free="1"/>
+      <parameter name="DEC"         scale="1.0" value="22.0145" min="-90"   max="90"  free="1"/>
+      <parameter name="PA"          scale="1.0" value="45.0"    min="-360"  max="360" free="1"/>
+      <parameter name="MinorRadius" scale="1.0" value="0.5"     min="0.001" max="10"  free="1"/>
+      <parameter name="MajorRadius" scale="1.0" value="2.0"     min="0.001" max="10"  free="1"/>
+      <parameter name="R_Index"     scale="1.0" value="0.5"     min="0.01"  max="10"  free="1"/>
+    </spatialModel>
+    <spectrum type="...">
+      ...
+    </spectrum>
+  </source>
+
+and implements
+
+.. math::
+   M_{\rm spatial}(\theta, \phi) = \frac{1}{2 \pi r^2 \eta
+   \Gamma(2\eta)} \exp \left[ -\left(\frac{\theta^2}{2 r_\mathrm{eff}^2}\right)^\frac{1}{\eta} \right],
+
+with
+
+.. math::
+   r_\mathrm{eff} = \frac{ab} {\sqrt{\left( a \sin (\phi - \phi_0) \right)^2 +
+                    \sqrt{\left( b \cos (\phi - \phi_0) \right)^2}}}
+
+where
+
+* ``RA`` is the Right Ascension (degrees)
+* ``DEC`` is the Declination (degrees)
+* ``PA`` is the position angle, counted counterclockwise from North (degrees)
+* :math:`a` = ``MinorRadius`` (degrees)
+* :math:`b` = ``MajorRadius`` (degrees)
+* :math:`\phi_0` is the position angle of the ellipse, counted counterclockwise
+  from North
+* :math:`\phi` is the azimuth angle with respect to North
+* :math:`\eta` = ``R_Index``
+
+The model normalisation is correct in the small angle approximation and for
+:math:`\eta` of the order of unity or smaller.
 
 
 Isotropic source

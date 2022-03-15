@@ -12,19 +12,16 @@ specific aspects, such as handling of data formats and response
 functions, are implemented as isolated and well defined modules sharing
 an identical abstract interface. This enables a joint multi-instrument
 analysis of data, allowing for consistent broad-band spectral fitting
-or imaging. So far, GammaLib supports analysis of data obtained with
+or imaging. GammaLib supports So far the analysis of data obtained with
 CGRO/COMPTEL, Fermi/LAT, INTEGRAL/SPI and Cherenkov telescopes (CTA, H.E.S.S.,
 MAGIC, VERITAS).
 
-Except for HEASARC's cfitsio library that is used to implement
-the FITS interface, GammaLib does not rely on any third-party 
-software. All functionalities are implemented natively.
+GammaLib does not rely on any third-party software with the exception of
+HEASARC's cfitsio library that is the basis of the FITS file interface. All
+other functionalities are implemented natively.
 
 GammaLib is developed by a team of enthousiastic gamma-ray astronomers with
-support from engineers. We regularily organise
-`coding sprints <https://cta-redmine.irap.omp.eu/projects/ctools/wiki/Coding_sprints>`_
-where key developers but also newcomers meet to discuss the developments 
-and next steps, and advance with the coding of the software.
+support from engineers.
 
 
 Acknowledging or citing GammaLib

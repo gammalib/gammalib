@@ -1,7 +1,7 @@
 Overview
 ========
 
-The following figure presents an overview over the C++ classes of the sky
+The following figure presents an overview over the classes of the sky
 module and their relations.
 
 .. _fig_uml_sky:
@@ -48,10 +48,10 @@ Transformation between both systems is handled transparently by
 Sky map pixels are implemented by the :doxy:`GSkyPixel` class.
 
 Sky regions are represented by the abstract :doxy:`GSkyRegion` base class.
-So far, a simple circular sky region and an arbitrary sky map region
-is implemented by the :doxy:`GSkyRegionCircle` and :doxy:`GSkyRegionMap`
-classes. In the latter, map pixels that different from zero define the
-sky region.
+So far, a simple circular sky region, a rectangular sky region and an
+arbitrary sky map region are implemented by the :doxy:`GSkyRegionCircle`,
+:doxy:`GSkyRegionRectangle` and :doxy:`GSkyRegionMap` classes, respectively.
+In the latter, map pixels that different from zero define the sky region.
 Sky regions are collected in the :doxy:`GSkyRegions` container class.
 
 Coordinates in the horizon system (altitude and azimuth) are implemented

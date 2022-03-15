@@ -6,7 +6,7 @@ Multi-wavelength interface
 Overview
 ~~~~~~~~
 
-The following figure presents an overview over the C++ classes of the 
+The following figure presents an overview over the classes of the 
 multi-wavelength module and their relations.
 
 .. _fig_uml_mwl:

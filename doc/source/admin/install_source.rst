@@ -10,8 +10,8 @@ the source code against your Anaconda Python installation). You also need to
 compile from source if you want to use the development version of GammaLib.
 
 .. note ::
-   These installation instructions apply to gammalib-1.7.0 and
-   later. gammalib-1.7.0 was built, installed and tested
+   These installation instructions apply to gammalib-2.0.0 and
+   later. gammalib-2.0.0 was built, installed and tested
    successfully on Debian, Ubuntu, Mandriva, OpenSUSE, Scientific Linux,
    CentOS, Mac OS X, FreeBSD, and OpenSolaris (using gcc), so
    hopefully it also installs on your distribution.
@@ -156,7 +156,7 @@ module by typing
 This will execute an extensive testing suite that should terminate with ::
 
    ============================================================================
-   Testsuite summary for gammalib 1.7.0
+   Testsuite summary for gammalib 2.0.0
    ============================================================================
    # TOTAL: 22
    # PASS:  22

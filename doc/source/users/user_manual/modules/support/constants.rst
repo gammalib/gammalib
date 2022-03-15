@@ -9,18 +9,19 @@ Constants
 
 The following constants are available:
 
-========================== ================================= =======
-Constant                   Value                             Purpose
-========================== ================================= =======
-``gammalib::MeV2erg``      :math:`1.6021765 \times 10^{-6}`  Converts MeV to erg
-``gammalib::erg2MeV``      :math:`624150.96`                 Converts erg to MeV
-``gammalib::MeV2Angstrom`` :math:`1.239841875\times 10^{-2}` Converts MeV to Angstrom
-``gammalib::pc2cm``        :math:`3.08568025 \times 10^{18}` Converts pc to cm
-``gammalib::sec_in_day``   :math:`86400.0`                   Number of seconds in one day
-``gammalib::sec2day``      :math:`1/86400`                   Converts seconds to days
-``gammalib::tai2tt``       :math:`32.184`                    Converts TAI to TT system
-``gammalib::mec2``         :math:`0.5109989461`              Electron rest mass in MeV
-========================== ================================= =======
+============================ ================================= =======
+Constant                     Value                             Purpose
+============================ ================================= =======
+``gammalib::MeV2erg``        :math:`1.6021765 \times 10^{-6}`  Converts MeV to erg
+``gammalib::erg2MeV``        :math:`624150.96`                 Converts erg to MeV
+``gammalib::MeV2Angstrom``   :math:`1.239841875\times 10^{-2}` Converts MeV to Angstrom
+``gammalib::pc2cm``          :math:`3.08568025 \times 10^{18}` Converts pc to cm
+``gammalib::sec_in_day``     :math:`86400.0`                   Number of seconds in one day
+``gammalib::sec2day``        :math:`1/86400`                   Converts seconds to days
+``gammalib::tai2tt``         :math:`32.184`                    Converts TAI to TT system
+``gammalib::mec2``           :math:`0.5109989461`              Electron rest mass in MeV
+``gammalib::speed_of_light`` :math:`299792458.0`               Vacuum speed of light in m/s
+============================ ================================= =======
 
 
 Functions
@@ -37,7 +38,9 @@ Function                              Description
 ``gammalib::replace_segment``         Replace string segment by another segment.
 ``gammalib::expand_env``              Replace any environment variables in string by its value.
 ``gammalib::filepath``                Build path from filename and path.
+``gammalib::tmpnam``                  Returns temporary file name.
 ``gammalib::str``                     Conversion of C-types to strings.
+``gammalib::strdate``                 Returns current date string.
 ``gammalib::tochar``                  Conversion of string to ``char``.
 ``gammalib::toshort``                 Conversion of string to ``short``.
 ``gammalib::toushort``                Conversion of string to ``unsigned short``.
@@ -78,4 +81,8 @@ Function                              Description
 ``gammalib::xml_get_name_value_pair`` Get name/value pair from XML node.
 ``gammalib::recv``                    Receive on socket with timeout.
 ``gammalib::roi_arclength``           Compute arc length of intersection with Region of Interest.
+``gammalib::compare``                 Compares two floating point value with a specific tolerance.
+``gammalib::http_query``              Returns result of HTTP query.
+``gammalib::host_country``            Returns host country two-digit string.
+``gammalib::gamma_filename``          Returns filename in ``$HOME/.gamma`` directory.
 ===================================== ===========

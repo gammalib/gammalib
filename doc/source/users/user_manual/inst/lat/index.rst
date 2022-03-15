@@ -6,7 +6,7 @@
 Overview
 ~~~~~~~~
 
-The following figure presents an overview over the C++ classes of the LAT
+The following figure presents an overview over the classes of the LAT
 module and their relations.
 
 .. _fig_uml_lat:
