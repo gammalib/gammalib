@@ -164,7 +164,7 @@ namespace gammalib {
                                      const double& tol);
     std::string              http_query(const std::string& host,
                                         const std::string& query);
-    std::string              host_country(void);
+    std::string              host_country(const bool& force_query = false);
     GFilename                gamma_filename(const std::string& name);
 }
 

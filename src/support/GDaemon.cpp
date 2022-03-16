@@ -679,8 +679,8 @@ void GDaemon::update_statistics(void)
  ***************************************************************************/
 void GDaemon::update_host_country(void)
 {
-    // Get host country code
-    std::string country = gammalib::host_country();
+    // Get host country code by forcing a query
+    std::string country = gammalib::host_country(true);
 
     // Continue only if host country is a two-digit code
     if (country.length() == 2) {

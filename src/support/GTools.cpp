@@ -2259,6 +2259,7 @@ std::string gammalib::http_query(const std::string& host, const std::string& que
 /***********************************************************************//**
  * @brief Return two-digit host country code
  *
+ * @param[in] force_query Force query of host country code?
  * @return Host two-digit host country code.
  *
  * Returns two-digit host country code, either by reading the code from the
@@ -2278,6 +2279,7 @@ std::string gammalib::http_query(const std::string& host, const std::string& que
 /***********************************************************************//**
  * @brief Return two-digit host country code
  *
+ * @param[in] force_query Force query of host country code?
  * @return Host two-digit host country code.
  *
  * Returns two-digit host country code, either by reading the code from the
@@ -2294,7 +2296,7 @@ std::string gammalib::http_query(const std::string& host, const std::string& que
  * country code it will write the results into a host-country file.
  ***************************************************************************/
 #endif
-std::string gammalib::host_country(void)
+std::string gammalib::host_country(const bool& force_query)
 {
     // Initialise country as static variable
     static std::string country;
@@ -2306,7 +2308,7 @@ std::string gammalib::host_country(void)
         GFilename filename = gammalib::gamma_filename("host-country");
 
         // Continue only if file exists
-        if (access(filename.url().c_str(), R_OK) == 0) {
+        if ((!force_query) && (access(filename.url().c_str(), R_OK) == 0)) {
 
             // OpenMP critical zone to read host-country file
             #pragma omp critical(GammaLib_host_country)
