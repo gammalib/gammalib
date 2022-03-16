@@ -818,8 +818,7 @@ void GApplication::log_trailer(void)
     // Get application statistics
     double telapse = this->telapse();
     double celapse = this->celapse();
-    //double gCO2e   = this->gCO2e(gammalib::host_country());
-    double gCO2e   = this->gCO2e("FR");
+    double gCO2e   = this->gCO2e(gammalib::host_country());
 
     // Dump trailer
     log << "Application \"" << m_name << "\" terminated after ";
@@ -1431,8 +1430,7 @@ void GApplication::write_statistics(void)
             if (fptr != NULL) {
 
                 // Get host country
-                //std::string country = gammalib::host_country();
-                std::string country = "FR";
+                std::string country = gammalib::host_country();
 
                 // Write statistics string
                 fprintf(fptr, "%s,%s,%s,%s,%s,%e,%e,%e\n",

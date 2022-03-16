@@ -60,7 +60,7 @@
 
 /* __ Compile options ____________________________________________________ */
 //#define G_CHECK_FOR_NAN
-#define G_USE_CURL      //!< Use curl in host_country()
+//#define G_USE_CURL      //!< Use curl in host_country()
 
 /* __ Function name definitions __________________________________________ */
 #define G_XML2STRING                     "gammalib::xml2string(std::string&)"
@@ -2261,13 +2261,18 @@ std::string gammalib::http_query(const std::string& host, const std::string& que
  *
  * @return Host two-digit host country code.
  *
- * Returns two-digit host country code using the http query
+ * Returns two-digit host country code, either by reading the code from the
+ * $HOME/.gamma/host-country file, or if the file does not exist, by using
+ * the http query
  * http://ip-api.com/line/?fields=countryCode.
  *
  * The result is saved in a static variable, hence once the country code is
  * retrieved no queries will be executed anymore. The http query is issued
  * using the curl tool with a timeout of one second. If the query fails,
  * or the curl tool is not available, the method returns an empty string.
+ *
+ * If no host-country file exists and the method retrieved a two-digit
+ * country code it will write the results into a host-country file.
  ***************************************************************************/
 #else
 /***********************************************************************//**
@@ -2275,13 +2280,18 @@ std::string gammalib::http_query(const std::string& host, const std::string& que
  *
  * @return Host two-digit host country code.
  *
- * Returns two-digit host country code using the http query
+ * Returns two-digit host country code, either by reading the code from the
+ * $HOME/.gamma/host-country file, or if the file does not exist, by using
+ * the http query
  * http://ip-api.com/line/?fields=countryCode.
  *
  * The result is saved in a static variable, hence once the country code is
  * retrieved no queries will be executed anymore. The http query is issued
  * using the http_query() method. If the query fails the method returns an
  * empty string.
+ *
+ * If no host-country file exists and the method retrieved a two-digit
+ * country code it will write the results into a host-country file.
  ***************************************************************************/
 #endif
 std::string gammalib::host_country(void)
@@ -2289,68 +2299,140 @@ std::string gammalib::host_country(void)
     // Initialise country as static variable
     static std::string country;
 
-    // If curl should be used, the curl tool is available and the country
-    // code is not set then determine the country code from a geolocalisation
-    // web site
-    #if defined(G_USE_CURL)
-    #if defined(G_HAS_CURL)
+    // Continue only if host country is empty
     if (country.empty()) {
 
-        // If curl is available then use curl to infer the country code
-        char command[256];
+        // Attempt to get host country from $HOME/.gamma/host-country file
+        GFilename filename = gammalib::gamma_filename("host-country");
 
-        // Setup curl command with timeout if possible to avoid lock up
-        #if defined(G_HAS_PERL)
-        sprintf(command, "a=$(perl -e 'alarm shift; exec \"curl --silent"
-                         " http://ip-api.com/line/?fields=countryCode"
-                         " 2>/dev/null\"' \"1\";);echo $a");
-        #elif defined(G_HAS_TIMEOUT)
-        sprintf(command, "timeout 1s curl --silent http://ip-api.com/line/"
-                         "?fields=countryCode 2>/dev/null");
-        #else
-        sprintf(command, "curl --silent http://ip-api.com/line/?fields=countryCode"
-                         " 2>/dev/null");
-        #endif
+        // Continue only if file exists
+        if (access(filename.url().c_str(), R_OK) == 0) {
 
-        // Open the process with given 'command' for reading
-        FILE* file = popen(command, "r");
+            // OpenMP critical zone to read host-country file
+            #pragma omp critical(GammaLib_host_country)
+            {
 
-        // Retrieve curl output
-        char output[1024];
-        if (fgets(output, sizeof(output)-1, file) != NULL) {
-            country = strip_chars(std::string(output), "\n");
-        }
+                // Get file lock. Continue only in case of success.
+                struct flock lock;
+                lock.l_type   = F_RDLCK;  // Want a read lock
+                lock.l_whence = SEEK_SET; // Want beginning of file
+                lock.l_start  = 0;        // No offset, lock entire file ...
+                lock.l_len    = 0;        // ... to the end
+                lock.l_pid    = getpid(); // Current process ID
+                int fd        = open(filename.url().c_str(), O_RDONLY);
+                if (fd != -1) {
 
-        // Close process
-        pclose(file);
+                    // Lock file
+                    fcntl(fd, F_SETLKW, &lock);
 
-    } // endif: country code was empty
-    #endif
+                    // Open host-country file. Continue only if opening was
+                    // successful.
+                    FILE* fptr = fopen(filename.url().c_str(), "r");
+                    if (fptr != NULL) {
 
-    // ... otherwise use the http_query method. Catch any exceptions.
-    #else
-    if (country.empty()) {
-        try {
-            std::string response = http_query("ip-api.com", "line/?fields=countryCode");
-            std::vector<std::string> lines = split(response, "\n");
-            bool body = false;
-            for (int i = 0; i < lines.size(); ++i) {
-                if (body) {
-                    country = lines[i];
-                    break;
-                }
-                if ((lines[i] == "\n") || (lines[i] == "\r") || (lines[i] == " ")) {
-                    body = true;
-                }
+                        // Allocate line buffer
+                        const int n = 1000;
+                        char      line[n];
+
+                        // Read line
+                        fgets(line, n-1, fptr);
+
+                        // Close file
+                        fclose(fptr);
+
+                        // Extract country string
+                        country = gammalib::strip_chars(std::string(line), "\n");
+
+                    } // endif: host-country file opened successfully
+
+                } // endif: file locking successful
+
+            } // end of OMP critial zone
+
+        } // endif: file existed
+
+        // ... otherwise there is no host-country file then get the
+        // information from a geolocalisation web site
+        else {
+
+            // If curl should be used, the curl tool is available and the
+            // country code is not set then determine the country code
+            // from a geolocalisation web site
+            #if defined(G_USE_CURL)
+            #if defined(G_HAS_CURL)
+            // If curl is available then use curl to infer the country code
+            char command[256];
+
+            // Setup curl command with timeout if possible to avoid lock up
+            #if defined(G_HAS_PERL)
+            sprintf(command, "a=$(perl -e 'alarm shift; exec \"curl --silent"
+                             " http://ip-api.com/line/?fields=countryCode"
+                             " 2>/dev/null\"' \"1\";);echo $a");
+            #elif defined(G_HAS_TIMEOUT)
+            sprintf(command, "timeout 1s curl --silent http://ip-api.com/line/"
+                             "?fields=countryCode 2>/dev/null");
+            #else
+            sprintf(command, "curl --silent http://ip-api.com/line/?fields=countryCode"
+                             " 2>/dev/null");
+            #endif
+
+            // Open the process with given 'command' for reading
+            FILE* file = popen(command, "r");
+
+            // Retrieve curl output
+            char output[1024];
+            if (fgets(output, sizeof(output)-1, file) != NULL) {
+                country = strip_chars(std::string(output), "\n");
             }
-        } // endtry
-        catch (const std::exception& e) {
-            //
-        }
-        
-        
-    } // endif: country code was empty
-    #endif
+
+            // Close process
+            pclose(file);
+            #endif
+
+            // ... otherwise use the http_query method. Catch any exceptions.
+            #else
+            try {
+                std::string response = http_query("ip-api.com", "line/?fields=countryCode");
+                std::vector<std::string> lines = split(response, "\n");
+                bool body = false;
+                for (int i = 0; i < lines.size(); ++i) {
+                    if (body) {
+                        country = lines[i];
+                        break;
+                    }
+                    if ((lines[i] == "\n") || (lines[i] == "\r") || (lines[i] == " ")) {
+                        body = true;
+                    }
+                }
+            } // endtry
+            catch (const std::exception& e) {
+                //
+            }
+            #endif
+
+            // If we have a two-digit country code then write the code into
+            // host-country file
+            if (country.length() == 2) {
+
+                // OpenMP critical zone to write host-country file
+                #pragma omp critical(GammaLib_host_country)
+                {
+
+                    // Open host-country file, and in case of success, write
+                    // country
+                    FILE* fptr = fopen(filename.url().c_str(), "w");
+                    if (fptr != NULL) {
+                        fprintf(fptr, "%s\n", country.c_str());
+                        fclose(fptr);
+                    }
+
+                } // end of OMP critial zone
+
+            } // endif: had no two digit country code
+
+        } // endelse: there was no host country file
+
+    } // endif: host country was empty
 
     // Return country
     return country;

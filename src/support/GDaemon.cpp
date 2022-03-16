@@ -218,6 +218,9 @@ void GDaemon::start(void)
         // Put all activities into try-catch block
         try {
 
+            // Update host-country
+            update_host_country();
+
             // Update application statistics
             update_statistics();
 
@@ -586,7 +589,7 @@ void GDaemon::update_statistics(void)
     // Continue only if file exists
     if (filename.exists()) {
 
-        // OpenMP critical zone to write statitics
+        // OpenMP critical zone to read statitics
         #pragma omp critical(GDaemon_update_statistics)
         {
 
@@ -659,10 +662,47 @@ void GDaemon::update_statistics(void)
                 close(fd);
 
             } // endif: file locking successful
-        
+
         } // end of OMP critial zone
 
     } // endif: there was a statistics ASCII file
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Update host country
+ *
+ * Update host country code in $HOME/.gamma/host-country file.
+ ***************************************************************************/
+void GDaemon::update_host_country(void)
+{
+    // Get host country code
+    std::string country = gammalib::host_country();
+
+    // Continue only if host country is a two-digit code
+    if (country.length() == 2) {
+
+        // Set host country filename
+        GFilename filename = gammalib::gamma_filename("host-country");
+
+        // OpenMP critical zone to write host country code
+        #pragma omp critical(GDaemon_update_host_country)
+        {
+
+            // Open host-country file, and in case of success, write
+            // country
+            FILE* fptr = fopen(filename.url().c_str(), "w");
+            if (fptr != NULL) {
+                fprintf(fptr, "%s\n", country.c_str());
+                fclose(fptr);
+            }
+
+        } // end of OMP critial zone
+
+    } // endif: we had a two-digit country code
 
     // Return
     return;
