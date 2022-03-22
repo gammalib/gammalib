@@ -1224,7 +1224,15 @@ bool GCOMObservation::check_dri(const GCOMDri& dri) const
                            (map.nmaps() == ref.nmaps()));
 
     // Compare projections
-    bool same_projection = (*(map.projection()) == *(ref.projection()));
+    bool                  same_projection = false;
+    const GSkyProjection* proj_ref        = ref.projection();
+    const GSkyProjection* proj_map        = map.projection();
+    if ((proj_ref == NULL) && (proj_map == NULL)) {
+        same_projection = true;
+    }
+    else if ((proj_ref != NULL) && (proj_map != NULL)) {
+        same_projection = (*proj_map == *proj_ref);
+    }
 
     // Return
     return (same_dimension && same_projection);
