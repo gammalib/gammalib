@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCOMTim.cpp - COMPTEL Good Time Intervals class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2021 by Juergen Knodlseder                          *
+ *  copyright (C) 2017-2022 by Juergen Knodlseder                          *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -317,10 +317,13 @@ void GCOMTim::read(const GFitsTable&  table,
             GTime tstop  = gammalib::com_time(ptr_tjd_end->integer(i),
                                               ptr_tic_end->integer(i));
 
-            // Append GTI
-            m_gti.append(tstart, tstop);
+            // Insert GTI to assume that the GTIs are in order
+            m_gti.insert(tstart, tstop);
 
         } // endfor: Looped over GTIs
+
+        // Merge any GTIs to remove doubles or combine adjacent intervals
+        m_gti.merge();
 
     } // endif: there was TIM information
 

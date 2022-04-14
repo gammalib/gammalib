@@ -290,8 +290,8 @@ void GGti::insert(const GTime& tstart, const GTime& tstop)
 {
     // Determine index at which GTI should be inserted
     int inx = 0;
-    for (int i = 0; i < m_num; ++i) {
-        if (tstart < m_start[i]) {
+    for (; inx < m_num; ++inx) {
+        if (tstart < m_start[inx]) {
             break;
         }
     }
@@ -342,6 +342,9 @@ void GGti::merge(void)
 
     // Update number of elements in GTI
     m_num = num;
+
+    // Update attributes
+    set_attributes();
 
     // Return
     return;
@@ -1282,14 +1285,14 @@ void GGti::set_attributes(void)
 /***********************************************************************//**
  * @brief Insert Good Time Interval
  *
- * @param[in] index Index after which interval is inserted.
+ * @param[in] index Index at which interval is inserted.
  * @param[in] tstart Start time of interval.
  * @param[in] tstop Stop time of interval.
  *
  * @exception GException::invalid_argument
  *            Start time later than stop time
  *
- * Inserts a Good Time Interval after the specified @p index in the Good
+ * Inserts a Good Time Interval at the specified @p index in the Good
  * Time Intervals. The method does not reorder the intervals by time,
  * instead the client needs to determine the approriate @p index.
  *

@@ -1,8 +1,9 @@
-2022-02-15
+2022-04-14
 
         * Version 2.0.0 released
         ========================
 
+        Fix bug in GGti::insert() and GGti::merge() methods (#4030)
         By default, do not allow log-likelihood decrease in LM optimiser
         Support Galactic coordinates in spatial models (#3988)
         Correctly return UTC times before 1972 (#3974)

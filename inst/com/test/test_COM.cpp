@@ -157,19 +157,19 @@ void TestGCOM::test_tim_class(void)
     GCOMTim tim(com_tim);
 
     // Check Good Time interval content
-    test_value(tim.gti().size(), 194, "Check that TIM contains 194 rows");
+    test_value(tim.gti().size(), 162, "Check that TIM contains 162 rows");
     test_value(tim.gti().tstart().secs(),
                gammalib::com_time(8392, 624010000).secs(),
                "Check TIM start time");
     test_value(tim.gti().tstop().secs(),
                gammalib::com_time(8406, 542890000).secs(),
                "Check TIM stop time");
-    test_value(tim.gti().tstart(14).secs(),
+    test_value(tim.gti().tstart(12).secs(),
                gammalib::com_time(8393, 684868096).secs(),
-               "Check TIM row 15 start time");
-    test_value(tim.gti().tstop(129).secs(),
+               "Check TIM row 13 start time");
+    test_value(tim.gti().tstop(107).secs(),
                gammalib::com_time(8402, 451392320).secs(),
-               "Check TIM row 130 stop time");
+               "Check TIM row 108 stop time");
 
     // Check Good Time interval contains() method
     test_assert(tim.contains(gammalib::com_time(8392, 624010000)),
@@ -515,7 +515,7 @@ void TestGCOM::test_unbinned_obs(void)
     test_assert(obs1.is_unbinned(), "Test if observation is unbinned");
     test_assert(!obs1.is_binned(), "Test if observation is not binned");
     test_value(obs1.events()->number(), 81063, "Test number of events");
-    test_value(obs1.tim().gti().size(), 194, "Test size of TIM");
+    test_value(obs1.tim().gti().size(), 162, "Test size of TIM");
     test_value(obs1.oads().size(), 5273, "Test size of OADs");
     test_value(obs1.bvcs().size(), 0, "Test size of BVC");
 
@@ -524,7 +524,7 @@ void TestGCOM::test_unbinned_obs(void)
     test_assert(obs2.is_unbinned(), "Test if observation is unbinned");
     test_assert(!obs2.is_binned(), "Test if observation is not binned");
     test_value(obs2.events()->number(), 81063, "Test number of events");
-    test_value(obs2.tim().gti().size(), 194, "Test size of TIM");
+    test_value(obs2.tim().gti().size(), 162, "Test size of TIM");
     test_value(obs2.oads().size(), 5273, "Test size of OADs");
     test_value(obs2.bvcs().size(), 10000, "Test size of BVC");
 
@@ -534,7 +534,7 @@ void TestGCOM::test_unbinned_obs(void)
     test_assert(obs3->is_unbinned(), "Test if observation is unbinned");
     test_assert(!obs3->is_binned(), "Test if observation is not binned");
     test_value(obs3->events()->number(), 81063, "Test number of events");
-    test_value(obs3->tim().gti().size(), 194, "Test size of TIM");
+    test_value(obs3->tim().gti().size(), 162, "Test size of TIM");
     test_value(obs3->oads().size(), 10545, "Test size of OADs");
     test_value(obs3->bvcs().size(), 0, "Test size of BVC");
 
@@ -544,7 +544,7 @@ void TestGCOM::test_unbinned_obs(void)
     test_assert(obs4->is_unbinned(), "Test if observation is unbinned");
     test_assert(!obs4->is_binned(), "Test if observation is not binned");
     test_value(obs4->events()->number(), 81063, "Test number of events");
-    test_value(obs4->tim().gti().size(), 194, "Test size of TIM");
+    test_value(obs4->tim().gti().size(), 162, "Test size of TIM");
     test_value(obs4->oads().size(), 10545, "Test size of OADs");
     test_value(obs4->bvcs().size(), 10000, "Test size of BVC");
 

@@ -441,6 +441,8 @@ void TestGObservation::test_gti(void)
     test_assert(gti.is_empty(), "GGti should be empty.");
     test_value(gti.tstart().secs(), 0.0, 1.0e-7, "Start time should be 0.");
     test_value(gti.tstop().secs(), 0.0, 1.0e-7, "Stop time should be 0.");
+    test_value(gti.ontime(), 0.0, 1.0e-10, "Check ontime of empty object");
+    test_value(gti.telapse(), 0.0, 1.0e-10, "Check elapsed time of empty object");
 
     // Add empty interval
     gti.append(GTime(1.0), GTime(1.0));
@@ -448,6 +450,8 @@ void TestGObservation::test_gti(void)
     test_assert(!gti.is_empty(), "GGti should not be empty.");
     test_value(gti.tstart().secs(), 1.0, 1.0e-7, "Start time should be 1.");
     test_value(gti.tstop().secs(), 1.0, 1.0e-7, "Stop time should be 1.");
+    test_value(gti.ontime(), 0.0, 1.0e-10, "Check ontime of empty interval");
+    test_value(gti.telapse(), 0.0, 1.0e-10, "Check elapsed time of empty interval");
 
     // Add one interval
     gti.append(GTime(1.0), GTime(10.0));
@@ -455,6 +459,8 @@ void TestGObservation::test_gti(void)
     test_assert(!gti.is_empty(), "GGti should not be empty.");
     test_value(gti.tstart().secs(), 1.0, 1.0e-7, "Start time should be 1.");
     test_value(gti.tstop().secs(), 10.0, 1.0e-7, "Stop time should be 10.");
+    test_value(gti.ontime(), 9.0, 1.0e-10, "Check ontime of one interval");
+    test_value(gti.telapse(), 9.0, 1.0e-10, "Check elapsed time of one interval");
 
     // Remove interval
     gti.remove(0);
@@ -463,6 +469,8 @@ void TestGObservation::test_gti(void)
     test_assert(gti.is_empty(), "GGti should be empty.");
     test_value(gti.tstart().secs(), 0.0, 1.0e-7, "Start time should be 0.");
     test_value(gti.tstop().secs(), 0.0, 1.0e-7, "Stop time should be 0.");
+    test_value(gti.ontime(), 0.0, 1.0e-10, "Check ontime after removal");
+    test_value(gti.telapse(), 0.0, 1.0e-10, "Check elapsed time after removal");
 
     // Append two overlapping intervals
     gti.append(GTime(1.0), GTime(100.0));
@@ -471,6 +479,8 @@ void TestGObservation::test_gti(void)
     test_assert(!gti.is_empty(), "GGti should not be empty.");
     test_value(gti.tstart().secs(), 1.0, 1.0e-7, "Start time should be 1.");
     test_value(gti.tstop().secs(), 1000.0, 1.0e-7, "Stop time should be 1000.");
+    test_value(gti.ontime(), 1089.0, 1.0e-10, "Check ontime of two overlapping intervals");
+    test_value(gti.telapse(), 999.0, 1.0e-10, "Check elapsed time of two overlapping intervals");
 
     // Clear object
     gti.clear();
@@ -478,6 +488,8 @@ void TestGObservation::test_gti(void)
     test_assert(gti.is_empty(), "GGti should be empty.");
     test_value(gti.tstart().secs(), 0.0, 1.0e-7, "Start time should be 0.");
     test_value(gti.tstop().secs(), 0.0, 1.0e-7, "Stop time should be 0.");
+    test_value(gti.ontime(), 0.0, 1.0e-10, "Check ontime after clear");
+    test_value(gti.telapse(), 0.0, 1.0e-10, "Check elapsed time after clear");
 
     // Append two overlapping intervals in inverse order
     gti.clear();
@@ -487,6 +499,71 @@ void TestGObservation::test_gti(void)
     test_assert(!gti.is_empty(), "GGti should not be empty.");
     test_value(gti.tstart().secs(), 1.0, 1.0e-7, "Start time should be 1.");
     test_value(gti.tstop().secs(), 1000.0, 1.0e-7, "Stop time should be 1000.");
+    test_value(gti.ontime(), 1089.0, 1.0e-10, "Check ontime of two overlapping intervals");
+    test_value(gti.telapse(), 999.0, 1.0e-10, "Check elapsed time of two overlapping intervals");
+
+    // Insert three non-overlapping intervals
+    gti.clear();
+    gti.insert(GTime(1.0), GTime(2.0));
+    gti.insert(GTime(10.0), GTime(20.0));
+    gti.insert(GTime(100.0), GTime(200.0));
+    test_value(gti.size(), 3, "GGti should have 3 intervals.");
+    test_assert(!gti.is_empty(), "GGti should not be empty.");
+    test_value(gti.tstart().secs(), 1.0, 1.0e-10, "Start time should be 1.");
+    test_value(gti.tstop().secs(), 200.0, 1.0e-10, "Stop time should be 200.");
+    test_value(gti.ontime(), 111.0, 1.0e-10, "Check ontime of 3 non-overlapping intervals");
+    test_value(gti.telapse(), 199.0, 1.0e-10, "Check elapsed time of 3 non-overlapping intervals");
+
+    // Check merging
+    gti.merge();
+    test_value(gti.size(), 3, "Check size after merging");
+    test_assert(!gti.is_empty(), "Check that GTI is not empty after merging");
+    test_value(gti.tstart().secs(), 1.0, 1.0e-10, "Check start time after merging");
+    test_value(gti.tstop().secs(), 200.0, 1.0e-10, "Check stop time after merging");
+    test_value(gti.ontime(), 111.0, 1.0e-10, "Check ontime after merging");
+    test_value(gti.telapse(), 199.0, 1.0e-10, "Check elapsed time after merging");
+
+    // Insert three non-overlapping intervals in reverse order
+    gti.clear();
+    gti.insert(GTime(100.0), GTime(200.0));
+    gti.insert(GTime(10.0), GTime(20.0));
+    gti.insert(GTime(1.0), GTime(2.0));
+    test_value(gti.size(), 3, "GGti should have 3 intervals.");
+    test_assert(!gti.is_empty(), "GGti should not be empty.");
+    test_value(gti.tstart().secs(), 1.0, 1.0e-10, "Start time should be 1.");
+    test_value(gti.tstop().secs(), 200.0, 1.0e-10, "Stop time should be 200.");
+    test_value(gti.ontime(), 111.0, 1.0e-10, "Check ontime of 3 non-overlapping intervals");
+    test_value(gti.telapse(), 199.0, 1.0e-10, "Check elapsed time of 3 non-overlapping intervals");
+
+    // Check merging
+    gti.merge();
+    test_value(gti.size(), 3, "Check size after merging");
+    test_assert(!gti.is_empty(), "Check that GTI is not empty after merging");
+    test_value(gti.tstart().secs(), 1.0, 1.0e-10, "Check start time after merging");
+    test_value(gti.tstop().secs(), 200.0, 1.0e-10, "Check stop time after merging");
+    test_value(gti.ontime(), 111.0, 1.0e-10, "Check ontime after merging");
+    test_value(gti.telapse(), 199.0, 1.0e-10, "Check elapsed time after merging");
+
+    // Insert three non-overlapping intervals in mixed order
+    gti.clear();
+    gti.insert(GTime(100.0), GTime(200.0));
+    gti.insert(GTime(1.0), GTime(2.0));
+    gti.insert(GTime(10.0), GTime(20.0));
+    test_value(gti.size(), 3, "GGti should have 3 intervals.");
+    test_assert(!gti.is_empty(), "GGti should not be empty.");
+    test_value(gti.tstart().secs(), 1.0, 1.0e-10, "Start time should be 1.");
+    test_value(gti.tstop().secs(), 200.0, 1.0e-10, "Stop time should be 200.");
+    test_value(gti.ontime(), 111.0, 1.0e-10, "Check ontime of 3 non-overlapping intervals");
+    test_value(gti.telapse(), 199.0, 1.0e-10, "Check elapsed time of 3 non-overlapping intervals");
+
+    // Check merging
+    gti.merge();
+    test_value(gti.size(), 3, "Check size after merging");
+    test_assert(!gti.is_empty(), "Check that GTI is not empty after merging");
+    test_value(gti.tstart().secs(), 1.0, 1.0e-10, "Check start time after merging");
+    test_value(gti.tstop().secs(), 200.0, 1.0e-10, "Check stop time after merging");
+    test_value(gti.ontime(), 111.0, 1.0e-10, "Check ontime after merging");
+    test_value(gti.telapse(), 199.0, 1.0e-10, "Check elapsed time after merging");
 
     // Insert two overlapping intervals
     gti.clear();
@@ -496,8 +573,19 @@ void TestGObservation::test_gti(void)
     test_assert(!gti.is_empty(), "GGti should not be empty.");
     test_value(gti.tstart().secs(), 1.0, 1.0e-10, "Start time should be 1.");
     test_value(gti.tstop().secs(), 1000.0, 1.0e-10, "Stop time should be 1000.");
+    test_value(gti.ontime(), 1089.0, 1.0e-10, "Check ontime of 2 overlapping intervals");
+    test_value(gti.telapse(), 999.0, 1.0e-10, "Check elapsed time of 2 overlapping intervals");
 
-    // Insert two overlapping intervals in inverse order
+    // Check merging
+    gti.merge();
+    test_value(gti.size(), 1, "Check size after merging");
+    test_assert(!gti.is_empty(), "Check that GTI is not empty after merging");
+    test_value(gti.tstart().secs(), 1.0, 1.0e-10, "Check start time after merging");
+    test_value(gti.tstop().secs(), 1000.0, 1.0e-10, "Check stop time after merging");
+    test_value(gti.ontime(), 999.0, 1.0e-10, "Check ontime after merging");
+    test_value(gti.telapse(), 999.0, 1.0e-10, "Check elapsed time after merging");
+
+    // Insert two overlapping intervals in reverse order
     gti.clear();
     gti.insert(GTime(10.0), GTime(1000.0));
     gti.insert(GTime(1.0), GTime(100.0));
@@ -505,6 +593,8 @@ void TestGObservation::test_gti(void)
     test_assert(!gti.is_empty(), "GGti should not be empty.");
     test_value(gti.tstart().secs(), 1.0, 1.0e-7, "Start time should be 1.");
     test_value(gti.tstop().secs(), 1000.0, 1.0e-7, "Stop time should be 1000.");
+    test_value(gti.ontime(), 1089.0, 1.0e-10, "Check ontime of 2 overlapping intervals");
+    test_value(gti.telapse(), 999.0, 1.0e-10, "Check elapsed time of 2 overlapping intervals");
 
     // Merge two overlapping intervals
     gti.clear();
@@ -514,6 +604,8 @@ void TestGObservation::test_gti(void)
     test_assert(!gti.is_empty(), "GGti should not be empty.");
     test_value(gti.tstart().secs(), 1.0, 1.0e-7, "Start time should be 1.");
     test_value(gti.tstop().secs(), 1000.0, 1.0e-7, "Stop time should be 1000.");
+    test_value(gti.ontime(), 999.0, 1.0e-10, "Check ontime of merged intervals");
+    test_value(gti.telapse(), 999.0, 1.0e-10, "Check elapsed time of merged intervals");
 
     // Merge two overlapping intervals in inverse order
     gti.clear();
@@ -523,6 +615,8 @@ void TestGObservation::test_gti(void)
     test_assert(!gti.is_empty(), "GGti should not be empty.");
     test_value(gti.tstart().secs(), 1.0, 1.0e-7, "Start time should be 1.");
     test_value(gti.tstop().secs(), 1000.0, 1.0e-7, "Stop time should be 1000.");
+    test_value(gti.ontime(), 999.0, 1.0e-10, "Check ontime of merged intervals");
+    test_value(gti.telapse(), 999.0, 1.0e-10, "Check elapsed time of merged intervals");
 
     // Check extension
     gti.clear();

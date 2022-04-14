@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-15 Mars 2022
+14 April 2022
 
 
 1. Introduction
@@ -337,6 +337,10 @@ of functions (#3328).
 
 11. Observation module
 ----------------------
+Fixed bug in GGti::insert() method that always inserted the interval at the
+beginning of the Good Time Intervals. Fixed also GGti::merge() method that 
+did not update the Good Time Interval attributes after merging (#4030).
+
 Corrected the GTime::utc() method so that it returns a correct UTC string
 for times before the year 1972 (#3974).
 

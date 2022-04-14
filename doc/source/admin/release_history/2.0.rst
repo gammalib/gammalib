@@ -1,7 +1,7 @@
 .. _2.0:
 
-GammaLib 2.0 release (15 Mars 2022)
-===================================
+GammaLib 2.0 release (14 April 2022)
+====================================
 
 Overview
 --------
@@ -21,6 +21,8 @@ In particular, this release provides:
 Bug fixes
 ---------
 
+* [`4030 <https://cta-redmine.irap.omp.eu/issues/4030>`_] -
+  Fix bug in ``GGti::insert()`` and ``GGti::merge()`` methods
 * [`3974 <https://cta-redmine.irap.omp.eu/issues/3974>`_] -
   Correctly return UTC times before 1972
 * [`3973 <https://cta-redmine.irap.omp.eu/issues/3973>`_] -
