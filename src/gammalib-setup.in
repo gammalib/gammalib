@@ -180,7 +180,7 @@ if [ $flavor = sh ]; then
             echo \"\$var=\\\"\$$var\\\"; export \$var\" >> $gammalib_config$$.sh;
           fi"
   done
-  echo "gammalibd </dev/null &>/dev/null &" >> $gammalib_config$$.sh
+  echo "(gammalibd </dev/null &>/dev/null &)" >> $gammalib_config$$.sh
   echo "$gammalib_config$$.sh"
 # C Shell version, write only for csh flavor initialization
 elif [ $flavor = csh ]; then
@@ -191,6 +191,6 @@ elif [ $flavor = csh ]; then
             echo setenv \$var \\\"\$$var\\\" >> $gammalib_config$$.csh;
           fi"
   done
-  echo "gammalibd </dev/null &>/dev/null &" >> $gammalib_config$$.csh
+  echo "(gammalibd </dev/null &>/dev/null &)" >> $gammalib_config$$.csh
   echo "$gammalib_config$$.csh"
 fi
