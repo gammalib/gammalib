@@ -1,7 +1,7 @@
 .. _2.0:
 
-GammaLib 2.0 release (14 April 2022)
-====================================
+GammaLib 2.0 release (25 May 2022)
+==================================
 
 Overview
 --------
@@ -46,6 +46,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`4058 <https://cta-redmine.irap.omp.eu/issues/4058>`_] -
+  Add ASTRI as supported instrument type for the CTA module
 * By default, do not allow log-likelihood decrease in LM optimiser
 * [`3988 <https://cta-redmine.irap.omp.eu/issues/3988>`_] -
   Support Galactic coordinates in spatial models

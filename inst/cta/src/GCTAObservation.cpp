@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAObservation.cpp - CTA Observation class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -49,10 +49,12 @@ const GCTAObservation      g_obs_cta_seed(true, "CTA");
 const GCTAObservation      g_obs_hess_seed(true, "HESS");
 const GCTAObservation      g_obs_magic_seed(true, "MAGIC");
 const GCTAObservation      g_obs_veritas_seed(true, "VERITAS");
+const GCTAObservation      g_obs_astri_seed(true, "ASTRI");
 const GObservationRegistry g_obs_cta_registry(&g_obs_cta_seed);
 const GObservationRegistry g_obs_hess_registry(&g_obs_hess_seed);
 const GObservationRegistry g_obs_magic_registry(&g_obs_magic_seed);
 const GObservationRegistry g_obs_veritas_registry(&g_obs_veritas_seed);
+const GObservationRegistry g_obs_astri_registry(&g_obs_astri_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_RESPONSE_SET                "GCTAObservation::response(GResponse&)"
@@ -107,7 +109,7 @@ GCTAObservation::GCTAObservation(void) : GObservation()
  * observation registry. By specifying explicit instrument names it is
  * possible to use the "CTA" module are for other Imaging Air Cherenkov
  * Telescopes. So far, the following instrument codes are supported:
- * "CTA", "HESS", "VERITAS", "MAGIC".
+ * "CTA", "HESS", "VERITAS", "MAGIC", "ASTRI".
  ***************************************************************************/
 GCTAObservation::GCTAObservation(const bool&        dummy,
                                  const std::string& instrument) :

@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-14 April 2022
+25 May 2022
 
 
 1. Introduction
@@ -496,6 +496,8 @@ Adapted the GLATResponse interface to the vectorised response computation (#3203
 
 21. CTA interface
 -----------------
+The module now also supports ASTRI as instrument type (#4058).
+
 Added the GCTABackground2D class that implements a two-dimensional background model
 spanned by energy and offset angle (#3527).
 

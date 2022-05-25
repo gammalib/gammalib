@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTAOnOffObservation.cpp - CTA On/Off observation class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2021 by Chia-Chun Lu & Christoph Deil               *
+ *  copyright (C) 2013-2022 by Chia-Chun Lu & Christoph Deil               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -64,10 +64,12 @@ const GCTAOnOffObservation g_onoff_obs_cta_seed(true, "CTAOnOff");
 const GCTAOnOffObservation g_onoff_obs_hess_seed(true, "HESSOnOff");
 const GCTAOnOffObservation g_onoff_obs_magic_seed(true, "MAGICOnOff");
 const GCTAOnOffObservation g_onoff_obs_veritas_seed(true, "VERITASOnOff");
+const GCTAOnOffObservation g_onoff_obs_astri_seed(true, "ASTRIOnOff");
 const GObservationRegistry g_onoff_obs_cta_registry(&g_onoff_obs_cta_seed);
 const GObservationRegistry g_onoff_obs_hess_registry(&g_onoff_obs_hess_seed);
 const GObservationRegistry g_onoff_obs_magic_registry(&g_onoff_obs_magic_seed);
 const GObservationRegistry g_onoff_obs_veritas_registry(&g_onoff_obs_veritas_seed);
+const GObservationRegistry g_onoff_obs_astri_registry(&g_onoff_obs_astri_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CONSTRUCTOR1   "GCTAOnOffObservation::GCTAOnOffObservation(GPha&, "\
@@ -142,7 +144,7 @@ GCTAOnOffObservation::GCTAOnOffObservation(void) : GObservation()
  * observation registry. By specifying explicit instrument names it is
  * possible to use the "CTA" module are for other Imaging Air Cherenkov
  * Telescopes. So far, the following instrument codes are supported:
- * "CTAOnOff", "HESSOnOff", "VERITASOnOff", "MAGICOnOff".
+ * "CTAOnOff", "HESSOnOff", "VERITASOnOff", "MAGICOnOff", "ASTRIOnOff".
  ***************************************************************************/
 GCTAOnOffObservation::GCTAOnOffObservation(const bool&        dummy,
                                            const std::string& instrument) :

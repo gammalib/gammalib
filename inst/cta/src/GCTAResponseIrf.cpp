@@ -680,12 +680,19 @@ void GCTAResponseIrf::read(const GXmlElement& xml)
         // Get parameter
         const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "Calibration");
 
+        // Get instrument name in lower case from XML file. If no instrument
+        // was specified then assume CTA
+        std::string instrument = gammalib::tolower(xml.attribute("instrument"));
+        if (instrument.empty()) {
+            instrument = "cta";
+        }
+
         // Read database and response
         std::string xml_caldb   = gammalib::strip_whitespace(par->attribute("database"));
         std::string xml_rspname = gammalib::strip_whitespace(par->attribute("response"));
 
         // Set calibration database
-        GCaldb caldb("cta", xml_caldb);
+        GCaldb caldb(instrument, xml_caldb);
         this->caldb(caldb);
 
         // Load response

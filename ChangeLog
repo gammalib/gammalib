@@ -1,8 +1,9 @@
-2022-05-11
+2022-05-25
 
         * Version 2.0.0 released
         ========================
 
+        Add ASTRI as supported instrument type for the CTA module (#4058)
         Fix bug in GGti::insert() and GGti::merge() methods (#4030)
         By default, do not allow log-likelihood decrease in LM optimiser
         Support Galactic coordinates in spatial models (#3988)
