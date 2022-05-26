@@ -201,7 +201,7 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GPha& pha_on,
 
     // Set data members
     m_on_spec  = pha_on;
-	m_off_spec = pha_off;
+    m_off_spec = pha_off;
     m_arf      = arf;
     m_rmf      = rmf;
 
@@ -834,7 +834,7 @@ void GCTAOnOffObservation::read(const GXmlElement& xml)
 
     // Load files
     m_on_spec.load(pha_on);
-	m_off_spec.load(pha_off);
+    m_off_spec.load(pha_off);
     m_arf.load(arf);
     m_rmf.load(rmf);
 
@@ -844,8 +844,8 @@ void GCTAOnOffObservation::read(const GXmlElement& xml)
     // Check consistency of On/Off observation
     check_consistency(G_READ);
 
-	// Return
-	return;
+    // Return
+    return;
 }
 
 
@@ -892,8 +892,8 @@ void GCTAOnOffObservation::write(GXmlElement& xml) const
         xml.attribute("statistic", statistic());
     }
 
-	// Return
-	return;
+    // Return
+    return;
 }
 
 
@@ -940,7 +940,6 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
 
     // Return likelihood
     return value;
-
 }
 
 
@@ -1392,11 +1391,11 @@ void GCTAOnOffObservation::set(const GCTAObservation& obs_on,
         GSkyDir              dir  = atom->dir().dir();
 
         // Fill in spectrum according to region containment
-		if (on.contains(dir)) {
-			m_on_spec.fill(atom->energy());
-		}
+        if (on.contains(dir)) {
+            m_on_spec.fill(atom->energy());
+        }
 
-	} // endfor: looped over all On events
+    } // endfor: looped over all On events
 
     // Loop over all events and fill Off spectrum
     for (int i = 0; i < events_off->size(); ++i) {
@@ -1406,11 +1405,11 @@ void GCTAOnOffObservation::set(const GCTAObservation& obs_on,
         GSkyDir              dir  = atom->dir().dir();
 
         // Fill in spectrum according to region containment
-		if (off.contains(dir)) {
-			m_off_spec.fill(atom->energy());
-		}
+        if (off.contains(dir)) {
+            m_off_spec.fill(atom->energy());
+        }
 
-	} // endfor: looped over all Off events
+    } // endfor: looped over all Off events
 
     // Store the livetime as exposures of the spectra
     m_on_spec.exposure(obs_on.livetime());
@@ -1435,16 +1434,16 @@ void GCTAOnOffObservation::set(const GCTAObservation& obs_on,
     // Get effective area radius cut
     double rad_max = arf_rad_max(obs_on, on);
 
-	// Compute response components
+    // Compute response components
     if (rad_max > 0.0) {
         compute_arf_cut(obs_on, spatial, reg_on);
     }
     else {
         compute_arf(obs_on, spatial, reg_on);
     }
-	compute_bgd(obs_off, reg_off, bkg_models, use_model_bkg);
-	compute_alpha(obs_on, obs_off, reg_on, reg_off, bkg_models, use_model_bkg);
-	compute_rmf(obs_on, reg_on);
+    compute_bgd(obs_off, reg_off, bkg_models, use_model_bkg);
+    compute_alpha(obs_on, obs_off, reg_on, reg_off, bkg_models, use_model_bkg);
+    compute_rmf(obs_on, reg_on);
 
     // Apply reconstructed energy boundaries
     apply_ebounds(obs_on);
@@ -1499,8 +1498,8 @@ void GCTAOnOffObservation::set(const GCTAObservation& obs_on,
     // Set instrument name
     m_instrument = obs_on.instrument() + "OnOff";
 
-	// Return
-	return;
+    // Return
+    return;
 }
 
 
@@ -1596,10 +1595,10 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs,
         // Put back original energy dispersion application status
         const_cast<GCTAResponseIrf&>(rsp).apply_edisp(save_edisp);
 
-	} // endif: there were energy bins
+    } // endif: there were energy bins
 
-	// Return
-	return;
+    // Return
+    return;
 }
 
 
@@ -1696,10 +1695,10 @@ void GCTAOnOffObservation::compute_arf_cut(const GCTAObservation& obs,
 
         } // endfor: looped over true energies
 
-	} // endif: there were energy bins
+    } // endif: there were energy bins
 
-	// Return
-	return;
+    // Return
+    return;
 }
 
 
@@ -1757,13 +1756,13 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs,
                                        const bool&            use_model_bkg)
 {
     // Get reconstructed energies for the background rates
-	const GEbounds& ereco = m_off_spec.ebounds();
+    const GEbounds& ereco = m_off_spec.ebounds();
     int             nreco = ereco.size();
 
     // Continue only if there are energy bins
     if (nreco > 0) {
 
-		// Initialise background rates to zero
+        // Initialise background rates to zero
         std::vector<double> background(nreco, 0.0);
 
         // Get CTA observation pointing direction
@@ -2521,10 +2520,10 @@ double GCTAOnOffObservation::N_gamma(const GModels& models,
 
         } // endfor: looped over model components
 
-	} // endif: bin number is in the range and model container is not empty
+    } // endif: bin number is in the range and model container is not empty
 
-	// Return number of gamma-ray events
-	return value;
+    // Return number of gamma-ray events
+    return value;
 }
 
 
@@ -2550,11 +2549,11 @@ double GCTAOnOffObservation::N_bgd(const GModels& models,
                                    const int&     ibin,
                                    GVector*       grad) const
 {
-	// Get total number of model parameters
-	int npars = models.npars();
+    // Get total number of model parameters
+    int npars = models.npars();
 
-	// Initialize results
-	double value = 0.0;
+    // Initialize results
+    double value = 0.0;
     for (int i = 0; i < npars; ++i) {
         (*grad)[i] = 0.0;
     }
@@ -2631,10 +2630,10 @@ double GCTAOnOffObservation::N_bgd(const GModels& models,
 
         } // endif: background rate was positive
 
-	} // endif: bin number is in the range and model container is not empty
+    } // endif: bin number is in the range and model container is not empty
 
-	// Return
-	return value;
+    // Return
+    return value;
 }
 
 
@@ -2893,7 +2892,7 @@ double GCTAOnOffObservation::likelihood_cstat(const GModels& models,
                         colvar[k] = bgd_grad[j] * sky_grad[k] * fc;
                     }
 
-					// ... else if spectral model for background component
+                    // ... else if spectral model for background component
                     // is non-zero and non-infinite then we have the
                     // curvature element of a background component
                     else if (bgd_grad[k] != 0.0  &&
@@ -2901,7 +2900,7 @@ double GCTAOnOffObservation::likelihood_cstat(const GModels& models,
                         colvar[k] = bgd_grad[j] * bgd_grad[k] * fd;
                     }
 
-					// ... else neither sky nor background
+                    // ... else neither sky nor background
                     else {
                         colvar[k] = 0.0;
                     }
@@ -2944,7 +2943,7 @@ double GCTAOnOffObservation::likelihood_cstat(const GModels& models,
     double t_elapse = (double)(clock() - t_start) / (double)CLOCKS_PER_SEC;
     #endif
     std::cout << "GCTAOnOffObservation::optimizer::likelihood_cstat: CPU usage = "
-	          << t_elapse << " sec" << std::endl;
+              << t_elapse << " sec" << std::endl;
     #endif
 
     // Return
