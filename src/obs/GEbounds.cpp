@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GEbounds.cpp - Energy boundary class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -436,7 +436,7 @@ void GEbounds::remove(const int& index)
     // Move all elements located after index forward
     for (int i = index+1; i < m_num; ++i) {
         m_min[i-1] = m_min[i];
-        m_min[i-1] = m_max[i];
+        m_max[i-1] = m_max[i];
     }
 
     // Reduce number of elements by one
