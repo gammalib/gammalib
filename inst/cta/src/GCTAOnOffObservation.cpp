@@ -65,11 +65,13 @@ const GCTAOnOffObservation g_onoff_obs_hess_seed(true, "HESSOnOff");
 const GCTAOnOffObservation g_onoff_obs_magic_seed(true, "MAGICOnOff");
 const GCTAOnOffObservation g_onoff_obs_veritas_seed(true, "VERITASOnOff");
 const GCTAOnOffObservation g_onoff_obs_astri_seed(true, "ASTRIOnOff");
+const GCTAOnOffObservation g_onoff_obs_fact_seed(true, "FACTOnOff");
 const GObservationRegistry g_onoff_obs_cta_registry(&g_onoff_obs_cta_seed);
 const GObservationRegistry g_onoff_obs_hess_registry(&g_onoff_obs_hess_seed);
 const GObservationRegistry g_onoff_obs_magic_registry(&g_onoff_obs_magic_seed);
 const GObservationRegistry g_onoff_obs_veritas_registry(&g_onoff_obs_veritas_seed);
 const GObservationRegistry g_onoff_obs_astri_registry(&g_onoff_obs_astri_seed);
+const GObservationRegistry g_onoff_obs_fact_registry(&g_onoff_obs_fact_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CONSTRUCTOR1   "GCTAOnOffObservation::GCTAOnOffObservation(GPha&, "\

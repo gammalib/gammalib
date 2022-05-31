@@ -47,7 +47,7 @@ Improvements
 ------------
 
 * [`4058 <https://cta-redmine.irap.omp.eu/issues/4058>`_] -
-  Add ASTRI as supported instrument type for the CTA module
+  Add ``ASTRI`` and ``FACT`` as supported instrument type for the CTA module
 * By default, do not allow log-likelihood decrease in LM optimiser
 * [`3988 <https://cta-redmine.irap.omp.eu/issues/3988>`_] -
   Support Galactic coordinates in spatial models

@@ -50,11 +50,13 @@ const GCTAObservation      g_obs_hess_seed(true, "HESS");
 const GCTAObservation      g_obs_magic_seed(true, "MAGIC");
 const GCTAObservation      g_obs_veritas_seed(true, "VERITAS");
 const GCTAObservation      g_obs_astri_seed(true, "ASTRI");
+const GCTAObservation      g_obs_fact_seed(true, "FACT");
 const GObservationRegistry g_obs_cta_registry(&g_obs_cta_seed);
 const GObservationRegistry g_obs_hess_registry(&g_obs_hess_seed);
 const GObservationRegistry g_obs_magic_registry(&g_obs_magic_seed);
 const GObservationRegistry g_obs_veritas_registry(&g_obs_veritas_seed);
 const GObservationRegistry g_obs_astri_registry(&g_obs_astri_seed);
+const GObservationRegistry g_obs_fact_registry(&g_obs_fact_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_RESPONSE_SET                "GCTAObservation::response(GResponse&)"
