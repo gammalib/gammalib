@@ -745,7 +745,7 @@ void GModelSpatialEllipticalGeneralGauss::update() const
         // Store last values
         m_last_minor = semiminor();
         m_last_major = semimajor();
-        m_last_ridx = ridx();
+        m_last_ridx  = ridx();
 
         // Compute axes in radians
         m_minor_rad = m_last_minor * gammalib::deg2rad;

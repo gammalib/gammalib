@@ -620,7 +620,7 @@ void GModelSpatialRadialGeneralGauss::free_members(void)
 void GModelSpatialRadialGeneralGauss::update() const
 {
     // Update if radius has changed
-    if (m_last_radius != radius() or m_last_ridx != ridx()) {
+    if (m_last_radius != radius() || m_last_ridx != ridx()) {
 
         // Store last values
         m_last_radius = radius();
@@ -628,7 +628,7 @@ void GModelSpatialRadialGeneralGauss::update() const
 
         // Compute radius in radians
         double radius_rad = radius() * gammalib::deg2rad;
-        if (radius_rad > 0.0 and ridx() > 0.0) {
+        if (radius_rad > 0.0 && ridx() > 0.0) {
             m_inv_radius_rad = 1.0 / radius_rad;
             m_inv_ridx       = 1.0 / ridx() ;
             m_value_norm     = 1.0 / (gammalib::twopi * radius_rad * radius_rad * ridx() *

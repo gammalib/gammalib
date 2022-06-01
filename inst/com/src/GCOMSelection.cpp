@@ -421,7 +421,7 @@ void GCOMSelection::fpmtflag(const int& fpmtflag)
 const bool& GCOMSelection::use_d1(const int& id1) const
 {
     // Check module validity range
-    if (id1 < 0 or id1 > 6) {
+    if (id1 < 0 || id1 > 6) {
         std::string msg = "Invalid D1 module identifier "+gammalib::str(id1)+
                           " specified. The D1 module identifier needs to be "
                           "comprised within 0 and 6.";
@@ -442,7 +442,7 @@ const bool& GCOMSelection::use_d1(const int& id1) const
 void GCOMSelection::use_d1(const int& id1, const bool& use)
 {
     // Check module validity range
-    if (id1 < 0 or id1 > 6) {
+    if (id1 < 0 || id1 > 6) {
         std::string msg = "Invalid D1 module identifier "+gammalib::str(id1)+
                           " specified. The D1 module identifier needs to be "
                           "comprised within 0 and 6.";
@@ -466,7 +466,7 @@ void GCOMSelection::use_d1(const int& id1, const bool& use)
 const bool& GCOMSelection::use_d2(const int& id2) const
 {
     // Check module validity range
-    if (id2 < 0 or id2 > 13) {
+    if (id2 < 0 || id2 > 13) {
         std::string msg = "Invalid D2 module identifier "+gammalib::str(id2)+
                           " specified. The D2 module identifier needs to be "
                           "comprised within 0 and 13.";
@@ -487,7 +487,7 @@ const bool& GCOMSelection::use_d2(const int& id2) const
 void GCOMSelection::use_d2(const int& id2, const bool& use)
 {
     // Check module validity range
-    if (id2 < 0 or id2 > 13) {
+    if (id2 < 0 || id2 > 13) {
         std::string msg = "Invalid D2 module identifier "+gammalib::str(id2)+
                           " specified. The D2 module identifier needs to be "
                           "comprised within 0 and 13.";

@@ -1675,8 +1675,8 @@ double GCOMDri::compute_surface(const double& x1, const double& y1, const double
         double beta2 = std::acos(cbeta2);
 
         // Compute surface
-        surface = (r1sq * (beta1 - sbeta1 * cbeta1) +
-                   r2sq * (beta2 - sbeta2 * cbeta2));
+        surface = r1sq * (beta1 - sbeta1 * cbeta1) +
+                  r2sq * (beta2 - sbeta2 * cbeta2);
 
     }
 
