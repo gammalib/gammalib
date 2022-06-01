@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GSPIModelDataSpace.cpp - INTEGRAL/SPI data space model         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2020-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2020-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1362,22 +1362,22 @@ void GSPIModelDataSpace::setup_evtclass(GSPIEventCube*            cube,
         int detid = cube->dir(0, idet).detid();
 
         // Set the corresponding event class flag
-        if (detid >=0 and detid < 19) {
+        if (detid >=0 && detid < 19) {
             (*indices)[idet] = 0; // SE
         }
-        else if (detid >= 19 and detid < 61) {
+        else if (detid >= 19 && detid < 61) {
             (*indices)[idet] = 1; // ME2
         }
-        else if (detid >= 61 and detid < 85) {
+        else if (detid >= 61 && detid < 85) {
             (*indices)[idet] = 2; // ME3
         }
-        else if (detid >= 85 and detid < 104) {
+        else if (detid >= 85 && detid < 104) {
             (*indices)[idet] = 3; // PEE
         }
-        else if (detid >= 104 and detid < 123) {
+        else if (detid >= 104 && detid < 123) {
             (*indices)[idet] = 4; // PES
         }
-        else if (detid >= 123 and detid < 142) {
+        else if (detid >= 123 && detid < 142) {
             (*indices)[idet] = 5; // PEM
         }
 

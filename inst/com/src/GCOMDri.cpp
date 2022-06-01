@@ -1760,7 +1760,7 @@ double GCOMDri::compute_overlap(const double& x1, const double& y1, const double
         double step   = 2.0 * r3 / double(steps-3);
         double stepsq = step * step;
         double r1sq   = r1 * r1;
-        if ((last_x2 != x2) or (last_y2 != y2) or (last_x3 != x3) or (last_y3 != y3)) {
+        if ((last_x2 != x2) || (last_y2 != y2) || (last_x3 != x3) || (last_y3 != y3)) {
 
             // Store positions
             last_x2 = x2;
