@@ -8,7 +8,7 @@ of the code which includes the latest features that will become available
 with the next stable release. Installing the development version is recommended if
 you want to use latest code features and if you cannot wait for the next
 stable release. The current GammaLib development release is
-``gammalib-2.0.0.dev``.
+``gammalib-2.1.0.dev``.
 
 Installing the development version is also necessary **if you want to contribute
 to code development. In that case please follow the instructions on**
@@ -26,7 +26,7 @@ Getting the source tarball
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Download the source tarball from the following link:
-`GammaLib <http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-2.0.0.dev.tar.gz>`_
+`GammaLib <http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-2.1.0.dev.tar.gz>`_
 
 Cloning the Git repository
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -118,7 +118,7 @@ version as follows:
 
    $ conda create -n gammalib-devel python=3.9
    $ conda activate gammalib-devel
-   $ conda install --use-local gammalib=2.0.0.dev
+   $ conda install --use-local gammalib=2.1.0.dev
 
 Note that you can choose between Python 2.7, 3.5, 3.6, 3.7, 3.8, 3.9 and 3.10
 for your conda environment.
