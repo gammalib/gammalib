@@ -219,6 +219,70 @@ void TestGObservation::test_ebounds(void)
     test_value(ebds.emin().MeV(), 1.0, 1.0e-10, "Minimum energy should be 1.");
     test_value(ebds.emax().MeV(), 1000.0, 1.0e-10, "Maximum energy should be 1000.");
 
+    // Remove fully enclosed energy interval
+    ebds.clear();
+    ebds.append(GEnergy(1.0, "MeV"), GEnergy(10.0, "MeV"));
+    ebds.append(GEnergy(10.0, "MeV"), GEnergy(100.0, "MeV"));
+    ebds.remove(GEnergy(2.0, "MeV"), GEnergy(3.0, "MeV"));
+    test_value(ebds.size(), 3, "GEbounds should have 3 element.");
+    test_value(ebds.emin(0).MeV(), 1.0, 1.0e-10, "First energy minimum should be 1.");
+    test_value(ebds.emax(0).MeV(), 2.0, 1.0e-10, "First energy maximum should be 2.");
+    test_value(ebds.emin(1).MeV(), 3.0, 1.0e-10, "Second energy minimum should be 3.");
+    test_value(ebds.emax(1).MeV(), 10.0, 1.0e-10, "Second energy minimum should be 10.");
+
+    // Remove matching energy interval
+    ebds.clear();
+    ebds.append(GEnergy(1.0, "MeV"), GEnergy(10.0, "MeV"));
+    ebds.append(GEnergy(10.0, "MeV"), GEnergy(100.0, "MeV"));
+    ebds.remove(GEnergy(1.0, "MeV"), GEnergy(10.0, "MeV"));
+    test_value(ebds.size(), 1, "GEbounds should have 1 element.");
+    test_value(ebds.emin(0).MeV(), 10.0, 1.0e-10, "First energy minimum should be 10.");
+    test_value(ebds.emax(0).MeV(), 100.0, 1.0e-10, "First energy maximum should be 100.");
+
+    // Remove overlapping energy interval
+    ebds.clear();
+    ebds.append(GEnergy(1.0, "MeV"), GEnergy(10.0, "MeV"));
+    ebds.append(GEnergy(10.0, "MeV"), GEnergy(100.0, "MeV"));
+    ebds.remove(GEnergy(8.0, "MeV"), GEnergy(12.0, "MeV"));
+    test_value(ebds.size(), 2, "GEbounds should have 2 element.");
+    test_value(ebds.emin(0).MeV(), 1.0, 1.0e-10, "First energy minimum should be 1.");
+    test_value(ebds.emax(0).MeV(), 8.0, 1.0e-10, "First energy maximum should be 8.");
+    test_value(ebds.emin(1).MeV(), 12.0, 1.0e-10, "Second energy minimum should be 12.");
+    test_value(ebds.emax(1).MeV(), 100.0, 1.0e-10, "Second energy minimum should be 100.");
+
+    // Remove partially overlapping energy interval
+    ebds.clear();
+    ebds.append(GEnergy(1.0, "MeV"), GEnergy(10.0, "MeV"));
+    ebds.append(GEnergy(10.0, "MeV"), GEnergy(100.0, "MeV"));
+    ebds.remove(GEnergy(80.0, "MeV"), GEnergy(200.0, "MeV"));
+    test_value(ebds.size(), 2, "GEbounds should have 2 element.");
+    test_value(ebds.emin(0).MeV(), 1.0, 1.0e-10, "First energy minimum should be 1.");
+    test_value(ebds.emax(0).MeV(), 10.0, 1.0e-10, "First energy maximum should be 10.");
+    test_value(ebds.emin(1).MeV(), 10.0, 1.0e-10, "Second energy minimum should be 10.");
+    test_value(ebds.emax(1).MeV(), 80.0, 1.0e-10, "Second energy minimum should be 80.");
+
+    // Remove partially overlapping energy interval
+    ebds.clear();
+    ebds.append(GEnergy(1.0, "MeV"), GEnergy(10.0, "MeV"));
+    ebds.append(GEnergy(10.0, "MeV"), GEnergy(100.0, "MeV"));
+    ebds.remove(GEnergy(0.1, "MeV"), GEnergy(2.0, "MeV"));
+    test_value(ebds.size(), 2, "GEbounds should have 2 element.");
+    test_value(ebds.emin(0).MeV(), 2.0, 1.0e-10, "First energy minimum should be 2.");
+    test_value(ebds.emax(0).MeV(), 10.0, 1.0e-10, "First energy maximum should be 10.");
+    test_value(ebds.emin(1).MeV(), 10.0, 1.0e-10, "Second energy minimum should be 10.");
+    test_value(ebds.emax(1).MeV(), 100.0, 1.0e-10, "Second energy minimum should be 100.");
+
+    // Remove non overlapping energy interval
+    ebds.clear();
+    ebds.append(GEnergy(1.0, "MeV"), GEnergy(10.0, "MeV"));
+    ebds.append(GEnergy(10.0, "MeV"), GEnergy(100.0, "MeV"));
+    ebds.remove(GEnergy(100.0, "MeV"), GEnergy(1000.0, "MeV"));
+    test_value(ebds.size(), 2, "GEbounds should have 2 element.");
+    test_value(ebds.emin(0).MeV(), 1.0, 1.0e-10, "First energy minimum should be 1.");
+    test_value(ebds.emax(0).MeV(), 10.0, 1.0e-10, "First energy maximum should be 10.");
+    test_value(ebds.emin(1).MeV(), 10.0, 1.0e-10, "Second energy minimum should be 10.");
+    test_value(ebds.emax(1).MeV(), 100.0, 1.0e-10, "Second energy minimum should be 100.");
+
     // Check linear boundaries
     ebds.clear();
     ebds.set(2, GEnergy(1.0, "MeV"), GEnergy(3.0, "MeV"), "LIN");

@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.0.0
 
-31 May 2022
+4 June 2022
 
 
 1. Introduction
@@ -57,6 +57,7 @@ The following methods have been added:
 - GObservation::model(GModels&, GMatrixSparse*)
 - GObservation::model_grad(GModel&, GModelPar&)
 - GObservation::grad_step_size()
+- GEbounds::remove(GEnergy&, GEnergy&)
 - GGti::reduce(GGti&)
 - GTime::leap_seconds()
 - GTime::utc2tt()
@@ -337,6 +338,9 @@ of functions (#3328).
 
 11. Observation module
 ----------------------
+Added GEbounds::remove(GEnergy&, GEnergy&) to remove an energy interval from
+the energy boundaries (#4062).
+
 Fixed bug in GGti::insert() method that always inserted the interval at the
 beginning of the Good Time Intervals. Fixed also GGti::merge() method that 
 did not update the Good Time Interval attributes after merging (#4030).

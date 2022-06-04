@@ -43,7 +43,8 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_READ_XML                             "GEbounds::read(GXmlElement&)"
 #define G_WRITE_XML                           "GEbounds::write(GXmlElement&)"
-#define G_REMOVE                                     "GEbounds::remove(int&)"
+#define G_REMOVE_INX                                 "GEbounds::remove(int&)"
+#define G_REMOVE_ENG                   "GEbounds::remove(GEnergy&, GEnergy&)"
 #define G_EMIN_SET                           "GEbounds::emin(int&, GEnergy&)"
 #define G_EMAX_SET                           "GEbounds::emax(int&, GEnergy&)"
 #define G_EMIN_GET                                     "GEbounds::emin(int&)"
@@ -428,7 +429,7 @@ void GEbounds::remove(const int& index)
     #if defined(G_RANGE_CHECK)
     // If index is outside boundary then throw an error
     if (index < 0 || index >= m_num) {
-        throw GException::out_of_range(G_REMOVE, "Energy interval index",
+        throw GException::out_of_range(G_REMOVE_INX, "Energy interval index",
                                        index, m_num);
     }
     #endif
@@ -441,6 +442,82 @@ void GEbounds::remove(const int& index)
 
     // Reduce number of elements by one
     m_num--;
+
+    // Update attributes
+    set_attributes();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Remove energy interval from energy boundaries
+ *
+ * @param[in] emin Minimum energy of interval.
+ * @param[in] emax Maximum energy of interval.
+ *
+ * @exception GException::invalid_argument
+ *            Minimum energy larger than maximum energy
+ *
+ * Removes an energy interval from the energy boundaries. If the energy
+ * interval is fully enclosed in an existing energy boundary, the energy
+ * boundary will be split into two, excluding the specified energy interval.
+ * If the energy interval corresponds exactly to an existing energy boundary
+ * the corresponding energy boundary will be removed. Otherwise the existing
+ * energy boundaries will be adjusted to exclude the specified energy
+ * interval.
+ ***************************************************************************/
+void GEbounds::remove(const GEnergy& emin, const GEnergy& emax)
+{
+    // Throw an exception if energy interval is invalid
+    if (emin > emax) {
+        std::string msg = "Invalid energy interval specified. Minimum"
+                          " energy "+emin.print(NORMAL)+" can not be"
+                          " larger than maximum energy "+
+                          emax.print(NORMAL)+".";
+        throw GException::invalid_argument(G_REMOVE_ENG, msg);
+    }
+
+    // Loop over all elements
+    for (int inx = 0; inx < m_num; ++inx) {
+
+        // If energy interval corresponds exactly to the energy
+        // boundary then remove the element
+        if ((m_min[inx] == emin) && (m_max[inx] == emax)) {
+            this->remove(inx);
+            break;
+        }
+
+        // ... otherwise, if energy interval is enclosed in energy boundary
+        // then split the element into two
+        else if ((m_min[inx] < emin) && (m_max[inx] > emax)) {
+            GEnergy emin_old = m_min[inx];
+            GEnergy emax_old = m_max[inx];
+            this->remove(inx);
+            this->insert(emin_old, emin);
+            this->insert(emax, emax_old);
+            break;
+        }
+
+        // ... otherwise
+        else {
+
+            // If emin is comprised in energy interval then set maximum
+            // energy to interval start
+            if ((m_min[inx] <= emin) && (m_max[inx] >= emin)) {
+                m_max[inx] = emin;
+            }
+
+            // If emax is comprised in energy interval then set minimum
+            // energy to interval end
+            if ((m_min[inx] <= emax) && (m_max[inx] >= emax)) {
+                m_min[inx] = emax;
+            }
+
+        }
+
+    } // endfor: looped over boundaries
 
     // Update attributes
     set_attributes();

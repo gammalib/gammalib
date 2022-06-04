@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GEbounds.hpp - Energy boundaries class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -92,6 +92,7 @@ public:
     void           merge(void);
     void           merge(const GEnergy& emin, const GEnergy& emax);
     void           remove(const int& index);
+    void           remove(const GEnergy& emin, const GEnergy& emax);
     void           reserve(const int& num);
     void           extend(const GEbounds& ebds);
     void           set(const GEnergies& energies);

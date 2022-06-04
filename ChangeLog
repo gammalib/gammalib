@@ -1,8 +1,9 @@
-2022-05-31
+2022-06-04
 
         * Version 2.0.0 released
         ========================
 
+        Add GEbounds::remove() method (#4062)
         Add ASTRI and FACT as supported instrument type for the CTA module (#4058)
         Fix bug in GGti::insert() and GGti::merge() methods (#4030)
         By default, do not allow log-likelihood decrease in LM optimiser
