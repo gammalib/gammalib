@@ -109,7 +109,7 @@ of commands (make sure that anaconda is included in your ``$PATH`` environment):
 .. code-block:: bash
 
    $ ./configure
-   $ conda-build dev/conda.recipe
+   $ conda build dev/conda.recipe --python=3.9
 
 Once this is done, you can create a conda environment using the development
 version as follows:
@@ -117,13 +117,8 @@ version as follows:
 .. code-block:: bash
 
    $ conda create -n gammalib-devel python=3.9
-   $ source activate gammalib-devel
+   $ conda activate gammalib-devel
    $ conda install --use-local gammalib=2.0.0.dev
 
-Note that you can choose between Python 2.7, 3.5, 3.6, 3.7, 3.8 and 3.9 for
-your conda environment. If you only need the conda package for one specific
-Python version you can build the conda package as follows:
-
-.. code-block:: bash
-
-   $ conda-build dev/conda.recipe --python 3.9
+Note that you can choose between Python 2.7, 3.5, 3.6, 3.7, 3.8, 3.9 and 3.10
+for your conda environment.
