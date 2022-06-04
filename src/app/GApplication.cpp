@@ -628,6 +628,12 @@ void GApplication::logFileOpen(const bool& clobber)
         // Initialise the application logger
         log.open(log_filename(), clobber);
 
+        // If we're in debug mode then all output is also dumped on the
+        // screen
+        if (logDebug()) {
+            log.cout(true);
+        }
+
         // Write header into log file
         log_header();
 

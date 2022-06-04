@@ -29,6 +29,7 @@
         Make extension name check case insensitive in GFits::extno()
         Add numerical gradient step size member to GObservation
         Add stamp() methods to GApplication (#3662)
+        Display application header in debug mode (#3631) 
         Add ASCL shield to "About" page (#3630)
         Add GModelSpectralFunc spectral constructor (#3626)
         Add GModelSpectralBins class (#3606)

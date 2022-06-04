@@ -219,6 +219,9 @@ Add Astrophysics Source Code Library (ASCL) shield to "About" page (#3630)
 
 5. Application module
 ---------------------
+Debug now is now enabled before writing the header in GApplication::logFileOpen
+so that the header will also be written to the console in debug mode (#3631).
+
 Add GApplication::stamp() methods to write provenance information into a FITS
 HDU, a FITS object or a FITS file. So far the only provenance information that
 is written is the CREATOR keyword (#3662).
