@@ -28,7 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#include <cstdlib>     // getenv
+#include <cstdlib>     // std::putenv
 #include "test_SPI.hpp"
 
 /* __ Namespaces _________________________________________________________ */
