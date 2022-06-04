@@ -28,7 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <cstdlib>     // getenv
+//#include <cstdlib>     // getenv
 #include <vector>
 #include "GTools.hpp"
 #include "test_GSupport.hpp"
@@ -40,7 +40,7 @@
 /* __ Debug definitions __________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string datadir  = std::getenv("TEST_DATA");
+const std::string datadir  = gammalib::getenv("TEST_DATA");
 const std::string csv_file = datadir + "/csv.dat";
 
 
@@ -182,7 +182,7 @@ void TestGSupport::test_expand_env(void)
                 "Unexpected string \""+s_out+"\" (expected \""+s_ref+"\")");
 
     // Get home environment variable
-    std::string home(std::getenv("HOME"));
+    std::string home(gammalib::getenv("HOME"));
 
     // $ENV{HOME} environment variable within string
     s_in  = "My $ENV{HOME} is my castle.";

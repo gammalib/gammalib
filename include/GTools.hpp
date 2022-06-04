@@ -67,6 +67,7 @@ namespace gammalib {
     std::string              filepath(const std::string& pathname,
                                       const std::string& filename);
     std::string              tmpnam(void);
+    std::string              getenv(const std::string& arg);
     std::string              str(const unsigned short int& value);
     std::string              str(const unsigned int& value);
     std::string              str(const unsigned long int& value);

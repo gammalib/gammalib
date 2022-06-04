@@ -30,7 +30,7 @@
 #endif
 #include <stdlib.h>
 #include <unistd.h>
-#include <cstdlib>     // std::getenv
+//#include <cstdlib>     // std::getenv
 #include "GTools.hpp"
 #include "test_COM.hpp"
 
@@ -39,7 +39,7 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string datadir              = std::getenv("TEST_COM_DATA");
+const std::string datadir              = gammalib::getenv("TEST_COM_DATA");
 const std::string com_caldb            = datadir + "/../../caldb";
 const std::string com_iaq              = "SIM2(1.00-3.00)MeV(2)deg"; // 1-3 MeV
 const std::string com_dre              = datadir+"/m50439_dre.fits"; // 1-3 MeV

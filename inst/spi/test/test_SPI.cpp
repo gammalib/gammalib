@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 test_SPI.cpp - Test INTEGRAL/SPI classes                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2020 by Juergen Knoedlseder                              *
+ *  copyright (C) 2020-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,7 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <cstdlib>     // getenv
+//#include <cstdlib>     // getenv
 #include "test_SPI.hpp"
 
 /* __ Namespaces _________________________________________________________ */
@@ -36,7 +36,7 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string datadir          = std::getenv("TEST_SPI_DATA");
+const std::string datadir          = gammalib::getenv("TEST_SPI_DATA");
 const std::string spi_caldb        = datadir + "/../../caldb";
 const std::string og_dol           = datadir+"/obs/og_spi.fits";
 const std::string spi_model        = datadir+"/models.xml";

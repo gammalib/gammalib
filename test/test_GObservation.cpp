@@ -28,7 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <cstdlib>                 // std::getenv
+//#include <cstdlib>                 // std::getenv
 #include "testinst/GTestLib.hpp"
 #include "test_GObservation.hpp"
 
@@ -46,7 +46,7 @@ pthread_attr_t gomp_thread_attr;
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string datadir        = std::getenv("TEST_DATA");
+const std::string datadir        = gammalib::getenv("TEST_DATA");
 const std::string ephem_integral = datadir + "/ephem_crab_integral.fits";
 const std::string ephem_tempo2   = datadir + "/ephem_crab_tempo2.par";
 const std::string ephem_fermi    = datadir + "/ephem_db_fermi.fits";

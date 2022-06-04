@@ -147,6 +147,7 @@ The following methods have been added:
 - GCOMSelection::use_d1()
 - GCOMSelection::use_d2()
 - gammalib::tmpnam()
+- gammalib::getenv()
 - gammalib::strdate()
 - gammalib::compare()
 - gammalib::xml_check_parnum()
@@ -437,6 +438,9 @@ were added to compute the total solid angle within specified sky region(s) (#178
 
 14. Support module
 ------------------
+Added gammalib::getenv() function that returns the value of an environment variable,
+dealing safely with environment variables that were not found (#4063).
+
 Added GDaemon class that implements the GammaLib daemon. The GammaLib daemon collects
 on a regular basis low-level application statistics and generates from this information
 high-level statistics on a daily basis. This avoids that the low-level statistics

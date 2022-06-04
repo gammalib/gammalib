@@ -46,6 +46,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`4063 <https://cta-redmine.irap.omp.eu/issues/4063>`_] -
+  Add ``gammalib::getenv()`` function
 * [`4062 <https://cta-redmine.irap.omp.eu/issues/4062>`_] -
   Add ``GEbounds::remove()`` method
 * [`4058 <https://cta-redmine.irap.omp.eu/issues/4058>`_] -

@@ -710,7 +710,7 @@ void TestGApplication::test_GApplication(void)
 int main(void)
 {
     // Set test data directory
-    std::string datadir = std::getenv("TEST_DATA");
+    std::string datadir = gammalib::getenv("TEST_DATA");
 
     // Set PFILES environment variable
     setenv("PFILES", datadir.c_str(), 1);

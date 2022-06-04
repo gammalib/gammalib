@@ -3,6 +3,7 @@
         * Version 2.0.0 released
         ========================
 
+        Add gammalib::getenv() function (#4063)
         Add GEbounds::remove() method (#4062)
         Add ASTRI and FACT as supported instrument type for the CTA module (#4058)
         Fix bug in GGti::insert() and GGti::merge() methods (#4030)

@@ -31,7 +31,7 @@
 #include <iostream>
 #include <ostream>
 #include <stdexcept>
-#include <cstdlib>     // getenv
+//#include <cstdlib>     // getenv
 #include "test_GModel.hpp"
 #include "GTools.hpp"
 
@@ -71,7 +71,7 @@ void TestGModel::set(void)
     name("GModel");
 
     // Set test data directory
-    std::string datadir = std::getenv("TEST_DATA");
+    std::string datadir = gammalib::getenv("TEST_DATA");
 
     // Set test files
     m_map_file        = datadir + "/cena_lobes_parkes.fits";

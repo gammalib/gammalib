@@ -454,6 +454,33 @@ std::string gammalib::tmpnam(void)
 
 
 /***********************************************************************//**
+ * @brief Return value of environment variable
+ *
+ * @param[in] arg Environment variable
+ * @return Value of environment variable.
+ *
+ * Returns the value of an environment variable @p arg. If the environment
+ * variable is not found an empty string will be returned.
+ ***************************************************************************/
+std::string gammalib::getenv(const std::string& arg)
+{
+    // Initialise environment variable
+    std::string env;
+
+    // Get pointer to environment variable string
+    const char* ptr = std::getenv(arg.c_str());
+
+    // If pointer is not NULL then extract value of environment variable
+    if (ptr != NULL) {
+        env = std::string(ptr);
+    }
+
+    // Return environment variable
+    return env;
+}
+
+
+/***********************************************************************//**
  * @brief Convert unsigned short integer value into string
  *
  * @param[in] value Unsigned short integer to be converted into string.

@@ -36,7 +36,7 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string datadir   = std::getenv("TEST_XXX_DATA");
+const std::string datadir   = gammalib::getenv("TEST_XXX_DATA");
 const std::string xxx_caldb = datadir + "/../../caldb";
 
 

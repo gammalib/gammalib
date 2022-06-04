@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  test_GXspec.hpp - Test Xspec module                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,14 +28,14 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <cstdlib>     // getenv
+//#include <cstdlib>     // getenv
 #include "test_GXspec.hpp"
 #include "GTools.hpp"
 
 
 /* __ Constants __________________________________________________________ */
-const std::string datadir = std::getenv("TEST_DATA");
-const std::string rmfname = datadir + "/rmf.fits";
+const std::string datadir  = gammalib::getenv("TEST_DATA");
+const std::string rmfname  = datadir + "/rmf.fits";
 
 
 /***********************************************************************//**

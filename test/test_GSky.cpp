@@ -44,7 +44,7 @@
 #define G_WCS_COPY_DEBUG
 
 /* __ Constants __________________________________________________________ */
-const std::string datadir         = std::getenv("TEST_DATA");
+const std::string datadir         = gammalib::getenv("TEST_DATA");
 const std::string sky_region_circ = datadir + "/test_circle_region.reg";
 const std::string sky_region_rect = datadir + "/test_rect_region.reg";
 const std::string sky_region_map  = datadir + "/test_map_region.fits";

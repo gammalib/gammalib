@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       test_CTA.cpp - Test CTA classes                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,7 +32,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <cmath>
-#include <cstdlib>     // getenv
+//#include <cstdlib>     // getenv
 #include "GCTALib.hpp"
 #include "GTools.hpp"
 #include "GNodeArray.hpp"
@@ -44,7 +44,7 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string datadir               = std::getenv("TEST_CTA_DATA");
+const std::string datadir               = gammalib::getenv("TEST_CTA_DATA");
 const std::string caldbdir              = datadir + "/../caldb";
 const std::string cta_caldb             = datadir + "/../../caldb";
 const std::string cta_irf               = "cta_dummy_irf";

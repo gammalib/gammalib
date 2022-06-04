@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  test_LAT.cpp - test Fermi/LAT classes                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,7 +31,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <iostream>
-#include <cstdlib>     // getenv
+//#include <cstdlib>     // getenv
 #include "GLATLib.hpp"
 #include "GTools.hpp"
 #include "test_LAT.hpp"
@@ -41,7 +41,7 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string datadir    = std::getenv("TEST_LAT_DATA");
+const std::string datadir    = gammalib::getenv("TEST_LAT_DATA");
 const std::string lat_caldb  = datadir + "/../../caldb";
 const std::string dirPass6   = datadir + "/p6v3";
 const std::string dirPass7   = datadir + "/p7v6";

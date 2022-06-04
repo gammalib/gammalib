@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    test_GXml.cpp - Test xml module                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,7 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <cstdlib>     // getenv
+//#include <cstdlib>     // getenv
 #include "test_GXml.hpp"
 #include "GTools.hpp"
 
@@ -44,7 +44,7 @@ void TestGXml::set(void)
     name("GXml");
 
     // Set datadir
-    std::string datadir = std::getenv("TEST_DATA");
+    std::string datadir = gammalib::getenv("TEST_DATA");
 
     // Set XML filename
     m_xml_file = datadir + "/test.xml";
