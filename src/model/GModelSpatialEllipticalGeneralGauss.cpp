@@ -754,7 +754,7 @@ void GModelSpatialEllipticalGeneralGauss::update() const
         // Perform precomputations. Note also
         // that the model normalisation is only correct in the small angle
         // approximation and for  ridx order unity or smaller.
-        if (m_minor_rad > 0.0 and m_major_rad > 0.0 and ridx() > 0.0) {
+        if ((m_minor_rad > 0.0) && (m_major_rad > 0.0) && (ridx() > 0.0)) {
             m_inv_ridx = 1.0 / ridx() ;
             m_norm     = 1.0 / (gammalib::twopi * m_minor_rad * m_major_rad * ridx() *
                                 std::exp(gammalib::gammln(2.0 * ridx())) );
