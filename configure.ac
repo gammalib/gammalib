@@ -29,7 +29,7 @@
 #############################################################################
 # Initialisation                                                            #
 #############################################################################
-AC_INIT([gammalib], [2.0.0.dev], [jurgen.knodlseder@irap.omp.eu], [gammalib])
+AC_INIT([gammalib], [2.0.0], [jurgen.knodlseder@irap.omp.eu], [gammalib])
 AC_CONFIG_SRCDIR([src/support/GTools.cpp])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([.])
@@ -55,7 +55,7 @@ AC_CONFIG_HEADER([config.h])
 # 5. If any interfaces have been removed or changed since the last public   #
 #    release, then set age to 0.                                            #
 #############################################################################
-GAMMALIB_LT_VERSION="8:1:0"
+GAMMALIB_LT_VERSION="9:0:0"
 AC_SUBST(GAMMALIB_LT_VERSION)
 
 

@@ -1,6 +1,6 @@
 GammaLib information
 ====================
-* Version: 2.0.0.dev (6 June 2022)
+* Version: 2.0.0 (6 June 2022)
 
 [![Build Status](https://cta-jenkins.irap.omp.eu/buildStatus/icon?job=gammalib-integrate-os)](https://cta-jenkins.irap.omp.eu/job/gammalib-integrate-os/)
 
@@ -201,7 +201,7 @@ If everything works successfully you should see
 or
 
     ============================================================================
-    Testsuite summary for gammalib 2.0.0.dev
+    Testsuite summary for gammalib 2.0.0
     ============================================================================
     # TOTAL: 22
     # PASS:  22
