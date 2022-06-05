@@ -2374,6 +2374,11 @@ std::string gammalib::host_country(const bool& force_query)
 
                     } // endif: host-country file opened successfully
 
+                    // Unlock file
+                    lock.l_type = F_UNLCK;
+                    fcntl(fd, F_SETLK, &lock);
+                    close(fd);
+
                 } // endif: file locking successful
 
             } // end of OMP critial zone

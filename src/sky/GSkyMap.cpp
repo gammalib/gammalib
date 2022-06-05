@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GSkyMap.cpp - Sky map class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -2312,8 +2312,8 @@ GSkyMap GSkyMap::extract(const GSkyRegions& inclusions) const
         if (inclusions.contains(pixdir)) {
 
             // Get the x,y pixel
-            int pix_x = pixel.x();
-            int pix_y = pixel.y();
+            int pix_x = int(pixel.x());
+            int pix_y = int(pixel.y());
 
             // Update x,y pixel ranges
             startx = (pix_x < startx) ? pix_x : startx;

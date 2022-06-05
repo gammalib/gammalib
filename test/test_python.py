@@ -2,7 +2,7 @@
 # ==========================================================================
 # This scripts performs unit tests for the GammaLib Python bindings.
 #
-# Copyright (C) 2012-2017 Juergen Knoedlseder
+# Copyright (C) 2012-2022 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -186,13 +186,13 @@ def test(installed=False):
         testdir = inspect.getfile(gammalib.tests)
         head, tail = os.path.split(testdir)
 
-        os.system('cp -r %s %s' % (head+'/spi',  'spi'))
         # Copy over test data
         os.system('cp -r %s %s' % (head+'/data', 'data'))
         os.system('cp -r %s %s' % (head+'/com',  'com'))
         os.system('cp -r %s %s' % (head+'/cta',  'cta'))
         os.system('cp -r %s %s' % (head+'/lat',  'lat'))
         os.system('cp -r %s %s' % (head+'/mwl',  'mwl'))
+        os.system('cp -r %s %s' % (head+'/spi',  'spi'))
 
         # Special post processing for CTA files. This is needed because
         # the XML files contain absolute PATH information. This is a kluge

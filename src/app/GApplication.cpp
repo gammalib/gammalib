@@ -54,7 +54,6 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-//#define G_LAUNCH_DAEMON //!< Launch daemon when initialising application
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -1239,11 +1238,6 @@ void GApplication::init_members(void)
     // Initialise internal CPU seconds counter
     m_celapse = 0.0;
 
-    // Optionally start daemon
-    #if defined(G_LAUNCH_DAEMON)
-    start_daemon();
-    #endif
-
     // Return
     return;
 }
@@ -1463,60 +1457,6 @@ void GApplication::write_statistics(void)
         } // end of OMP critial zone
 
     } // endif: statistics should be written
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Start GammaLib daemon
- *
- * Starts GammaLib daemon. The GammaLib daemon becomes an independent child
- * process, hence it will not affect the application that originally launched
- * the daemon.
- ***************************************************************************/
-void GApplication::start_daemon(void) const
-{
-    // Initialise daemon
-    GDaemon daemon;
-
-    // If daemon is not alive then create instance
-    if (!daemon.alive()) {
-
-        // Create child process to start the daemon. Do nothing if child
-        // process creation fails.
-        int pid = fork();
-        if (pid >= 0) {
-
-            // If we have a PID of 0 we are in the child process. In this
-            // case we create and start the daemon ...
-            if (pid == 0) {
-
-                // The child process becomes session leader
-                setsid();
-
-                // Ignore signals
-                signal(SIGCHLD, SIG_IGN); // Ignore if child has stopped
-                signal(SIGHUP,  SIG_IGN); // Ignore death of controlling process
-
-                // Fork for the second time and let the first fork
-                // process terminate
-                pid = fork();
-                if (pid == 0) {
-                    GDaemon daemon;
-                    daemon.start();
-                    exit(EXIT_SUCCESS);
-                }
-                else {
-                    exit(EXIT_SUCCESS);
-                }
-
-            }
-
-        } // endif: child proces created
-
-    } // endif: daemon
 
     // Return
     return;

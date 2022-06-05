@@ -523,14 +523,14 @@ void GCOMSelection::read(const GFitsHDU& hdu)
 
     // Read ToF selection
     if (hdu.has_card("TOFMIN") && hdu.has_card("TOFMAX")) {
-        m_tof_min = hdu.real("TOFMIN");
-        m_tof_max = hdu.real("TOFMAX");
+        m_tof_min = hdu.integer("TOFMIN");
+        m_tof_max = hdu.integer("TOFMAX");
     }
 
     // Read PSD selection
     if (hdu.has_card("PSDMIN") && hdu.has_card("PSDMAX")) {
-        m_psd_min = hdu.real("PSDMIN");
-        m_psd_max = hdu.real("PSDMAX");
+        m_psd_min = hdu.integer("PSDMIN");
+        m_psd_max = hdu.integer("PSDMAX");
     }
 
     // Read rejection flag selection

@@ -413,7 +413,7 @@ void GCOMDri::compute_dre(const GCOMObservation& obs,
             }
 
             // Compute Compton scatter angle index. Skip if it's invalid.
-            int iphibar = (event->phibar() - m_phimin) / m_phibin;
+            int iphibar = int((event->phibar() - m_phimin) / m_phibin);
             if (iphibar < 0) {
                 num_phibar_too_low++;
                 continue;

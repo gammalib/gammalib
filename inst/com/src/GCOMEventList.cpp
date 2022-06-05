@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GCOMEventList.cpp - COMPTEL event list class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -557,7 +557,7 @@ void GCOMEventList::read_events(const GFitsTable& table)
         centre.lb_deg(table.real("GLON_SCZ"), table.real("GLAT_SCZ"));
 
         // Get data set representation version
-        int verno = table.real("DSD_REP");
+        int verno = table.integer("DSD_REP");
         #if defined(G_DEBUG_TOFCOR)
         std::cout << "GCOMEventList::read_events: DSD_REP = ";
         std::cout << verno << std::endl;

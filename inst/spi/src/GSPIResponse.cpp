@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GSPIResponse.cpp - INTEGRAL/SPI response class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2020 by Juergen Knoedlseder                              *
+ *  copyright (C) 2020-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -823,7 +823,7 @@ void GSPIResponse::read_detids(const GFits& fits)
 
     // Extract values
     for (int i = 0; i < num; ++i) {
-        m_detids.push_back(col_detid->real(i));
+        m_detids.push_back(col_detid->integer(i));
     }
 
     // Return

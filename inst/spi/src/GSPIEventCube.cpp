@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GSPIEventCube.cpp - INTEGRAL/SPI event bin container class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2020-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2020-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1154,14 +1154,14 @@ void GSPIEventCube::read_pnt(const GFitsTable* pnt, const GFitsTable* gti)
                                       "\"SPI.-OBS.-PNT\" differs from \""+
                                       gti_ptid->string(irow)+"\" in "
                                       "\"SPI.-OBS.-GTI\" extension for detector "+
-                                      gammalib::str(det_id->real(irow))+". Please "
+                                      gammalib::str(det_id->integer(irow))+". Please "
                                       "specify a valid Observation Group.";
                     throw GException::invalid_value(G_READ_PNT, msg);
                 }
 
                 // Store pointing direction and detector identifier
                 m_dir[irow].dir(pnt_dir);
-                m_dir[irow].detid(det_id->real(irow));
+                m_dir[irow].detid(det_id->integer(irow));
 
             } // endfor: looped over all detectors
 
