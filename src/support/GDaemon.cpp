@@ -610,49 +610,59 @@ void GDaemon::update_statistics(void)
                 // Lock file
                 fcntl(fd, F_SETLKW, &lock);
 
-                // Load CSV file
-                GCsv statistics(filename, ",");
+                // Put all activities into try-catch block
+                try {
 
-                // Recover valid "statistics.xml" file
-                recover_valid_xml();
+                    // Load CSV file
+                    GCsv statistics(filename, ",");
 
-                // Set high-level statistics filename
-                GFilename filename_work = gammalib::gamma_filename("statistics.xml");
-                GFilename filename_copy = gammalib::gamma_filename("statistics.xml~");
+                    // Recover valid "statistics.xml" file
+                    recover_valid_xml();
 
-                // Load high-level statistics file
-                GXml xml;
-                xml.load(filename_work);
+                    // Set high-level statistics filename
+                    GFilename filename_work = gammalib::gamma_filename("statistics.xml");
+                    GFilename filename_copy = gammalib::gamma_filename("statistics.xml~");
 
-                // Update file only if XML document is not empty
-                if (!xml.is_empty()) {
+                    // Load high-level statistics file
+                    GXml xml;
+                    xml.load(filename_work);
 
-                    // Save XML file into a copy
-                    xml.save(filename_copy);
+                    // Update file only if XML document is not empty
+                    if (!xml.is_empty()) {
 
-                    // Update dates in header
-                    update_dates(xml, statistics);
+                        // Save XML file into a copy
+                        xml.save(filename_copy);
 
-                    // Update countries in header and data
-                    update_countries_header(xml, statistics);
-                    update_countries_data(xml, statistics);
+                        // Update dates in header
+                        update_dates(xml, statistics);
 
-                    // Update versions in data
-                    update_versions_data(xml, statistics);
+                        // Update countries in header and data
+                        update_countries_header(xml, statistics);
+                        update_countries_data(xml, statistics);
 
-                    // Update daily information
-                    update_daily(xml, statistics);
+                        // Update versions in data
+                        update_versions_data(xml, statistics);
 
-                    // Save updated high-level statistics XML file
-                    xml.save(filename_work);
+                        // Update daily information
+                        update_daily(xml, statistics);
 
-                    // Now get rid of the copy
-                    std::remove(filename_copy.url().c_str());
+                        // Save updated high-level statistics XML file
+                        xml.save(filename_work);
 
-                    // And finally get rid of the low-level statistics file
-                    std::remove(filename.url().c_str());
+                        // Now get rid of the copy
+                        std::remove(filename_copy.url().c_str());
 
-                } // endif: XML document was not empty
+                        // And finally get rid of the low-level statistics file
+                        std::remove(filename.url().c_str());
+
+                    } // endif: XML document was not empty
+
+                }
+                catch (const std::exception &except) {
+                    m_log << "[" << (int)(m_pid) << "] ";
+                    m_log << "Exception catched by daemon" << std::endl;
+                    m_log << except.what() << std::endl;
+                }
 
                 // Unlock file
                 lock.l_type = F_UNLCK;
