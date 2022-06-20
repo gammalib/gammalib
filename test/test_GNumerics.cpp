@@ -369,6 +369,24 @@ void TestGNumerics::test_ndarray(void)
     test_value(pow(nda,3.0)(0,0), std::pow(3.0,3.0));
     test_value(pow(nda,3.0)(0,1), std::pow(5.5,3.0));
 
+    // Test index methods
+    std::vector<int> inxv1;
+    std::vector<int> inxv2;
+    inxv1.push_back(2);
+    inxv1.push_back(0);
+    inxv2.push_back(1);
+    inxv2.push_back(1);
+    int inx1 = nd2.index(inxv1);
+    test_value(inx1, 2, "Test index vector (2,0)");
+    int inx2 = nd2.index(inxv2);
+    test_value(inx2, 4, "Test index vector (1,1)");
+    inxv1 = nd2.index(inx1);
+    test_value(inxv1[0], 2, "Test index vector element 0");
+    test_value(inxv1[1], 0, "Test index vector element 1");
+    inxv2 = nd2.index(inx2);
+    test_value(inxv2[0], 1, "Test index vector element 0");
+    test_value(inxv2[1], 1, "Test index vector element 1");
+
     // Exit test
     return;
 }

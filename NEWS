@@ -1,6 +1,6 @@
-New Features and Important Changes in GammaLib 2.0.0
+New Features and Important Changes in GammaLib 2.1.0
 
-6 June 2022
+20 June 2022
 
 
 1. Introduction
@@ -12,199 +12,28 @@ made since the last release of GammaLib.
 2. Public interface modifications
 ---------------------------------
 The following classes have been added:
-- GFunctions
-- GIntegrals
-- GDaemon
-- GResponseVectorCache
-- GPulsar
-- GPulsarEphemeris
-- GEphemerides
-- GSkyDirs
-- GSkyRegionRect
-- GModelAssociation
-- GModelAssociations
-- GModelSpectralBins
-- GModelSpatialRadialGeneralGauss
-- GModelSpatialEllipticalGeneralGauss
-- GCTAModelSkyCube
-- GCTABackground2D
-- GCOMBvc
-- GCOMBvcs
-- GCOMModelDRM
-- GCOMModelDRBPhibarBins
+- none
 
 The following classes have been removed:
-- GCTAExceptionHandler
-- GCTAException
-- GLATExceptionHandler
-- GLATException
-- GMWLExceptionHandler
-- GMWLException
+- none
 
 The following classes have been renamed:
-- GCOMModelDRBFitting to GCOMModelDRBPhibarNodes
+- none
 
 The following methods have been added:
-- GApplication::statistics()
-- GApplication::add_celapse()
-- GApplication::gCO2e()
-- GApplication::stamp(GFitsHdu&)
-- GApplication::stamp(GFits&)
-- GApplication::stamp(GFilename&)
-- GFitsTableCol::tscale()
-- GResponse::convolve(GModelSky&, GObservation&, GMatrixSparse*)
-- GResponse::irf_spatial(GModelSky&, GObservation&, GMatrix*)
-- GObservation::model(GModels&, GMatrixSparse*)
-- GObservation::model_grad(GModel&, GModelPar&)
-- GObservation::grad_step_size()
-- GEbounds::remove(GEnergy&, GEnergy&)
-- GGti::reduce(GGti&)
-- GTime::leap_seconds()
-- GTime::utc2tt()
-- GPhases::length()
-- GMatrixBase::is_empty()
-- angle(GVector&, GVector&)
-- GModels::eval(GObservation&, GMatrixSparse*)
-- GModel::eval(GObservation&, GMatrixSparse*)
-- GModel::associations()
-- GModelSky::eval(GObservation&, GMatrixSparse*)
-- GModelData::eval(GObservation&, GMatrixSparse*)
-- GModelSky::flux(GEnergy&, GEnergy&)
-- GModelSky::flux(GSkyRegion&, GEnergy&, GEnergy&)
-- GModelSky::eflux(GEnergy&, GEnergy&)
-- GModelSky::eflux(GSkyRegion&, GEnergy&, GEnergy&)
-- GModelSky::flux_error(GEnergy&, GEnergy&)
-- GModelSky::flux_error(GSkyRegion&, GEnergy&, GEnergy&)
-- GModelSky::eflux_error(GEnergy&, GEnergy&)
-- GModelSky::eflux_error(GSkyRegion&, GEnergy&, GEnergy&)
-- GModelSpatialComposite::flux(GSkyRegion&, GEnergy&, GTime&)
-- GModelSpatialDiffuseConst::flux(GSkyRegion&, GEnergy&, GTime&)
-- GModelSpatialDiffuseCube::flux(GSkyRegion&, GEnergy&, GTime&)
-- GModelSpatialDiffuseMap::flux(GSkyRegion&, GEnergy&, GTime&)
-- GModelSpatialPointSource::flux(GSkyRegion&, GEnergy&, GTime&)
-- GModelSpatialPointSource::coordsys()
-- GModelSpatialRadial::is_energy_dependent()
-- GModelSpatialRadial::is_time_dependent()
-- GModelSpatialRadial::coordsys()
-- GModelSpatialElliptical::coordsys()
-- GModelSpectralFunc(GModelSpectral&, GEnergies&)
-- GModelSpectralFunc::nodes()
-- GModelSpectralFunc::is_empty()
-- GModelSpectralFunc::append()
-- GModelSpectralFunc::insert()
-- GModelSpectralFunc::remove()
-- GModelSpectralFunc::reserve()
-- GModelSpectralFunc::extend()
-- GModelSpectralFunc::energy()
-- GModelSpectralFunc::intensity()
-- GModelSpectralFunc::save()
-- GModelSpectralNodes::error()
-- GSkyMap::correlate()
-- GSkyMap::flux(GSkyRegion&, int&)
-- GSkyMap::flux(GSkyRegions&, int&)
-- GSkyMap::solidangle(GSkyRegion&)
-- GSkyMap::solidangle(GSkyRegions&)
-- GSkyDir::galvector()
-- GOptimizerLM::npars()
-- GOptimizerLM::nfree()
-- GXmlElement(std::string&, int&)
-- GXmlElement(std::string&, double&)
-- GXmlElement(std::string&, std::string&)
-- GXmlElement::value()
-- GXmlElement::string()
-- GXmlElement::real()
-- GXmlElement::integer()
-- GPhases::contains()
-- GCTAEventBin::emin()
-- GCTAEventBin::emax()
-- GCOMObservation::GCOMObservation(GCOMDri&, GCOMDri&, GCOMDri&, GCOMDri&)
-- GCOMObservation::drename()
-- GCOMObservation::drbname()
-- GCOMObservation::drgname()
-- GCOMObservation::drxname()
-- GCOMObservation::response(GCOMResponse&)
-- GCOMObservation::compute_drb()
-- GCOMObservation::tim(GCOMTim&)
-- GCOMObservation::oads(GCOMOads&)
-- GCOMObservation::bvcs(GCOMBvcs&)
-- GCOMObservation::bvcs()
-- GCOMEventAtom::x_d2()
-- GCOMEventAtom::y_d2()
-- GCOMTim::reduce(GGti&)
-- GCOMOad::pos()
-- GCOMDri::tof_correction()
-- GCOMDri::phase_correction()
-- GCOMDri::num_superpackets()
-- GCOMDri::num_used_superpackets()
-- GCOMDri::num_skipped_superpackets()
-- GCOMSelection::orbital_phases()
-- GCOMSelection::orbital_period()
-- GCOMSelection::orbital_phase()
-- GCOMSelection::pulsar_phases()
-- GCOMSelection::pulsar()
-- GCOMSelection::has_pulsar()
-- GCOMSelection::fpmtflag()
-- GCOMSelection::use_d1()
-- GCOMSelection::use_d2()
-- gammalib::tmpnam()
-- gammalib::getenv()
-- gammalib::strdate()
-- gammalib::compare()
-- gammalib::xml_check_parnum()
-- gammalib::xml_check_type()
-- gammalib::host_country()
-- gammalib::http_query()
-- gammalib::gamma_filename()
-- gammalib::check_energy_interval()
-- gammalib::check_prj_x2s_status()
-- gammalib::check_prj_s2x_status()
+- GNdarray::index(int&)
 
 The following methods have been removed:
-- GFitsTableCol::scale()
-- GModelSpatialPointSource::ra()
-- GModelSpatialPointSource::dec()
-- GModelSpatialRadial::ra()
-- GModelSpatialRadial::dec()
-- GModelSpatialElliptical::ra()
-- GModelSpatialElliptical::dec()
-- GCOMObservation::drm(GModelSky&)
-- GCOMResponse::irf_spatial()
-- GCOMSelection::zeta_min()
-- GCOMSelection::zeta_max()
-- GCOMSelection::phase_curve()
+- none
 
 The following methods have been renamed:
 - none
 
 The arguments for the following methods have been changed:
-- GModelSpatial::flux(GSkyRegion&, GEnergy&, GTime&) was
-  GModelSpatial::flux(GSkyRegion*, GEnergy&, GTime&)
-- GModelSpatialPointSource::GModelSpatialPointSource(GSkyDir&, std::string&) was
-  GModelSpatialPointSource::GModelSpatialPointSource(GSkyDir&)
-- GModelSpatialPointSource::GModelSpatialPointSource(double&, double&, std::string&) was
-  GModelSpatialPointSource::GModelSpatialPointSource(double&, double&)
-- GModelSpatialRadialDisk::GModelSpatialRadialDisk(GSkyDir&, double&, std::string&) was
-  GModelSpatialRadialDisk::GModelSpatialRadialDisk(GSkyDir&, double&)
-- GModelSpatialRadialGauss::GModelSpatialRadialGauss(GSkyDir&, double&, std::string&) was
-  GModelSpatialRadialGauss::GModelSpatialRadialGauss(GSkyDir&, double&)
-- GModelSpatialRadialGeneralGauss::GModelSpatialRadialGeneralGauss(GSkyDir&, double&, double&, std::string&) was
-  GModelSpatialRadialGeneralGauss::GModelSpatialRadialGeneralGauss(GSkyDir&, double&, double&)
-- GModelSpatialRadialRing::GModelSpatialRadialRing(GSkyDir&, double&, double&, std::string&) was
-  GModelSpatialRadialRing::GModelSpatialRadialRing(GSkyDir&, double&, double&)
-- GModelSpatialRadialShell::GModelSpatialRadialShell(GSkyDir&, double&, double&, std::string&) was
-  GModelSpatialRadialShell::GModelSpatialRadialShell(GSkyDir&, double&, double&)
-- GModelSpatialEllipticalDisk::GModelSpatialEllipticalDisk(GSkyDir&, double&, double&, double&, std::string&) was
-  GModelSpatialEllipticalDisk::GModelSpatialEllipticalDisk(GSkyDir&, double&, double&, double&)
-- GModelSpatialEllipticalGauss::GModelSpatialEllipticalGauss(GSkyDir&, double&, double&, double&, std::string&) was
-  GModelSpatialEllipticalGauss::GModelSpatialEllipticalGauss(GSkyDir&, double&, double&, double&)
-- GModelSpatialEllipticalGeneralGauss::GModelSpatialEllipticalGeneralGauss(GSkyDir&, double&, double&, double&, double&, std::string&) was
-  GModelSpatialEllipticalGeneralGauss::GModelSpatialEllipticalGeneralGauss(GSkyDir&, double&, double&, double&, double&)
-- GCOMObservation::drm(GSkyModel&) was GCOMObservation::drm(GSource&)
+- none
 
 The return value of the following methods has been changed:
-- GCOMObservation::drb() now returns reference to GCOMDri
-- GCOMObservation::drg() now returns reference to GCOMDri
-- GCOMObservation::drx() now returns reference to GCOMDri
+- none
 
 
 3. Configuration
@@ -214,29 +43,12 @@ None
 
 4. Documentation
 ----------------
-Add Astrophysics Source Code Library (ASCL) shield to "About" page (#3630)
+None
 
 
 5. Application module
 ---------------------
-Debug now is now enabled before writing the header in GApplication::logFileOpen
-so that the header will also be written to the console in debug mode (#3631).
-
-Add GApplication::stamp() methods to write provenance information into a FITS
-HDU, a FITS object or a FITS file. So far the only provenance information that
-is written is the CREATOR keyword (#3662).
-
-Add GApplication::gCO2e() method to estimate the carbon footprint if the elapsed
-CPU time. The carbon footprint estimation is also added to the trailer text of
-an application to raise awareness. In addition, an ASCII file is maintained in
-the $HOME/.gamma folder that contains statistics on application usage, including
-carbon footprint information. The methods GApplication::statistics() were added
-to enable/disable writing of statistics. The method GApplication::add_celapse()
-was added to allow adding of additional CPU seconds of child processes in
-Python multi-processing (#3592).
-
-Corrected the computation of the elapsed CPU time in an application in case
-that OpenMP is enabled (#3417).
+None
 
 
 6. Base module
@@ -246,243 +58,53 @@ None
 
 7. FITS I/O Interface
 ---------------------
-The extension name check is now case insensitive in GFits::extno().
-
-Added GFitsTableCol::tscale() methods and a m_tscale member to the class that
-contains the optional TSCALn keyword value (m_tscale=1 in case that no scaling
-keyword is found). Upon loading of a column with m_tscale!=1 the FITS scaling
-will be set to 1 and TZERO to 0 so that the values are loaded unscaled. This
-assures that no information is lost. If needed, scaling of the FITS column
-values has to be performed manually. The GFitsTableCol::scale() method was
-removed since it won't have any effect anymore (#3553).
+None
 
 
 8. Linear algebra module
 ------------------------
-The friend function angle(GVector&,GVector&) was added that computes the angle
-between two vectors (#3908).
-
-Fixed some issues with matrix methods that did not work on empty matrices. The
-GMatrixBase::is_empty() method was added to check whether a matrix is empty
-or not (#3541).
-
-Fixed an incompatibility between GMatrixSparse::mix_column_prepare() and
-GMatrixSparse::mix_column() methods that led in rare cases to a segmentation
-fault (#3563).
-
-Implemented GMatrixSparse::row() and GMatrixSparse::add_to_row() methods.
+None
 
 
 9. Model module
 ---------------
-Added support for Galactic coordinates in spatial models. The ra() and dec()
-methods have been removed for spatial models, access to the coordinates is now
-only supported via the dir() method. Models with celestial coordinates have
-the parameters "RA" and "DEC", models with Galactic coordinates have the 
-parameters "GLON" and "GLAT" (#3988).
-
-Added GModelSpatialRadialGeneralGauss and GModelSpatialEllipticalGeneralGauss
-classes to model general Gaussian functions as spatial components (#3924).
-
-Gradients for spectral model parameters are now also computed for all models in
-case that the factor values are negative. This provides now error bars for photon
-and energy flux power laws that are allowed to take negative flux values.
-
-Added GModelSpectralFunc spectral model constructor that enables creating a file
-function from an arbitrary spectral model (#3626).
-
-Added GModelSpectralBins class that implements statistically independent spectral
-bins as the spectral model component. In addition, added GModelSpectralNodes::error()
-method so that intensity errors can be accessed directly (#3606).
-
-Added methods to GModelSpectralFunc to allow building of a file function
-in memory (#3535).
-
-Modified GModelSpectralFunc::load_nodes() method so that an empty file name now
-leads to an exception (#3474).
-
-Added GModelAssociation class to implement a model association and the
-GModelAssociations container class to hold a list of model associations.
-The GModelAssociations class was added as a member of GModel, and
-GModel::associations() getter and setter methods have been implemented to
-access the associations. The associations are also automatically written in
-the GModel::read_attributes() and GModel::write_attributes() methods, and
-the association names are displayed by GModel::print_attributes() (#3469).
-
-Added GModels::eval() vector evaluation method to compute the model values for
-all events within a given observation (#3455).
-
-Added methods to GSkyModel to compute the photon flux and energy flux as
-well as their errors (#3439, #3074).
-
-Added analytical gradients to the GModelSpatialRadialGauss class (#3203).
-
-Added is_energy_dependent() and is_time_dependent() methods to GModelSpatialRadial
-to allow for checking of energy or time dependence of spatial model components.
-
-Reimplemented the GModelSpatial::flux(GSkyRegion&, GEnergy&, GTime&) method at
-the level of the following derived classes so that flux computation works for all
-kind of regions:
-- GModelSpatialComposite
-- GModelSpatialDiffuseConst 
-- GModelSpatialDiffuseCube
-- GModelSpatialDiffuseMap
-- GModelSpatialPointSource
-(#1785)
-
-A pre-computation cache was added to the GModelSpatialGauss class (#1300).
+None
 
 
 10. Numerics module
 -------------------
-The GFunctions class was added to implement the virtual base class for a set of
-functions. The GIntegrals class was added that performs integration over a set
-of functions (#3328).
+Added GNdarray::index(int&) method to return the index vector from an array element
+index.
 
 
 11. Observation module
 ----------------------
-Added GEbounds::remove(GEnergy&, GEnergy&) to remove an energy interval from
-the energy boundaries (#4062).
-
-Fixed bug in GGti::insert() method that always inserted the interval at the
-beginning of the Good Time Intervals. Fixed also GGti::merge() method that 
-did not update the Good Time Interval attributes after merging (#4030).
-
-Corrected the GTime::utc() method so that it returns a correct UTC string
-for times before the year 1972 (#3974).
-
-Add GEphemerides class to deal with JPL ephemerides and specifically the
-DE200 ephemerides. A JPL DE200 ephemerides file was added to a refdata
-direction, the file is installed in $GAMMALIB/share/refdata. Add further-
-more GTime::leap_seconds() and GTime::utc2tt() methods to support time
-system conversions in GEphemerides and GPulsar classes (#3973).
-
-Add GPhases::length() method that returns the total length of the phase
-intervals (#3973).
-
-Add GGti::reduce(GGti&) method to reduce Good Time Intervals to the intersection
-with a specific list of intervals (#3973).
-
-Add GPulsar and GPulsarEphemeris classes to support pulsar analysis (#3973).
-
-Add likelihood fit event selection hook (#3912).
-
-Add numerical gradient step size as member of GObservation to allow instrument-
-specific step size values.
-
-The GResponse class now support the fitting of spectral lines which requires that
-energy dispersion is enabled in the computations (#3386).
-
-Add GPhases::contains() method to check whether a phase is contained in the phase
-container (#3564).
-
-The sparse gradient matrix is now transposed in the likelihood method so that the
-elements can be access column-wise instead of row-wise, which speeds-up the element
-access (#3501).
-
-Add source removal from vector cache to GResponse::remove_response_cache()
-method (#3499).
-
-The GResponseVectorCache class was added to handle caching of the vector response.
-Only non-zero IRF values are stored by the class. The class was integrated in the
-GResponse class (#3403).
-
-A vectorised response computation was implemented in GResponse that computes the
-IRF for all events in a given observations. This allows for a considerable reduction
-of the operations, in particular for binned or stacked analysis, where the code can
-benefit from the cube structure of the data. The vectorised response is now used
-by all likelihood functions (#3203).
-
-The GResponse::edisp_kern integration kernel class that is used for the integration
-over true energies in case that energy dispersion should be considered now derives
-from GFunctions. The actual function value is returned in the first slot of the
-GNdarray returned by the GResponse::edisp_kern::eval() method, while the other slots
-contain the analytical parameter gradients. The GIntegrals class is now used in the
-GResponse::convolve() method to perform the true energy integration, integrating not
-only the function but also any available parameter gradients (#3333).
+None
 
 
 12. Optimization module
 -----------------------
-The members m_npars, m_nfree and m_num_dec were not copied in the
-GOptimizerLM::copy_members(). Copying of these missing members was added to the
-method.
-
-Added GOptimizerLM::npars() and GOptimizerLM::nfree() methods.
+None
 
 
 13. Sky module
 --------------
-Added GSkyDir::galvector() methods as equivalents to the GSkyDir::celvector()
-methods for Galactic coordinates (#3907).
-
-Added GSkyMap::correlate() method as opposed to GSkyMap::smooth(). While the later
-smoothes a map, and hence conserves the intensity in a sky map, the correlate()
-method will sum the intensities over a correlation kernel and assign the result to
-the sky map pixels (#3461). 
-
-Fixed a bug in GSkyMap::stack_maps() where the stacked map was always stored in a
-one-dimensional GNdarray. Now, a stacked map is saved as a two-dimensional
-GNdarray for WCS maps.
-
-Added GSkyDirs container class to hold sky directions. The GHealpix::boundaries()
-method now returns an instance of GSkyDirs (#3324).
-
-Added GSkyRegionRect class to implement a rectangular region on the sky (#3248).
-
-Added GSkyMap::flux(GSkyRegion&, int&) and GSkyMap::flux(GSkyRegions&, int&) methods
-to compute the total flux within a given sky region or a list of sky regions. The flux
-returns the sum of the intensity times the solidangle for all pixels that are contained
-within the sky region(s). Containment is tested using the GSkyMap::contains() methods.
-Equivalent methods GSkyMap::solidangle(GSkyRegion&) and GSkyMap::solidangle(GSkyRegions&)
-were added to compute the total solid angle within specified sky region(s) (#1785).
+None
 
 
 14. Support module
 ------------------
-Added gammalib::getenv() function that returns the value of an environment variable,
-dealing safely with environment variables that were not found (#4063).
-
-Added GDaemon class that implements the GammaLib daemon. The GammaLib daemon collects
-on a regular basis low-level application statistics and generates from this information
-high-level statistics on a daily basis. This avoids that the low-level statistics
-file becomes too large. A daemon launcher gammalibd was added that launches the daemon
-when initialising gammalib (#3592).
-
-Added gammalib::gamma_filename() method that returns the full path for a filename in
-the users's .gamma directory.
-
-Added gammalib::host_country() method that returns the host country on which the code
-is executed.
-
-Added gammalib::http_query() method to get the response of a HTTP query.
-
-Added gammalib::strdate() method that returns a string of the current date and
-time (#3592).
-
-Added gammalib::compare() function to compare two floating point numbers with a
-relative tolerance (#3552).
-
-Added gammalib::tmpnam() function to return a temporary file name, in replacement
-of the deprecated str::tmpnam() function (#3324).
-
-The GException class was reworked so that only a limited number of standard exceptions
-are thrown by GammaLib. This allows for a simpler and more coherent Python interface.
-All specific exception methods were removed, and a number of help functions were
-implemented to reduce code duplication (#35).
+None
 
 
 15. XML module
 --------------
-Added value constructors the GXmlElement interface and the methods value(), string(),
-real() and integer() to access the value as string, floating point or integer value
-(#3431). 
+None 
 
 
 16. VO module
 -------------
-Use gammalib::tmpnam() instead of str::tmpnam() in GVOClient (#3324).
+None
 
 
 17. Xspec module
@@ -502,92 +124,17 @@ None
 
 20. Fermi-LAT interface
 -----------------------
-Adapted the GLATResponse interface to the vectorised response computation (#3203).
+None
 
 
 21. CTA interface
 -----------------
-The module now also supports ASTRI and FACT as instrument type (#4058).
-
-Added the GCTABackground2D class that implements a two-dimensional background model
-spanned by energy and offset angle (#3527).
-
-Added the GCTAEventBin::emin() and emax() methods that return the energy boundaries
-of the event bin (#3472).
-
-Added the GCTAModelSkyCube class that implements a data space model for CTA (#3442).
-
-Implement in GCTAResponseCube an optimised vectorised response computation for radial
-models that applies for a stacked analysis. The code supports in particular analytical
-spatial model gradients (#3203).
+None
 
 
 22. COMPTEL interface
 ---------------------
-Renamed GCOMModelDRBFitting class to GCOMModelDRBPhibarNodes (#3914).
-
-Implement a 2.042144 seconds clock correction before TJD 8798 and tics 28800000 
-(1992-06-25T01:00:00) to provide accurate times for pulsar analysis (#3973).
-
-Added GCOMBvc and GCOMBvcs classes to support reading and using of BVC files for
-pulsar analysis. The interface of the GCOMSelection was modified so that it
-supports both orbital and pulsar phase selection. The interface of GCOMObservation
-was extended so that the class supports the optional handling of BVC files. A
-GCOMTim::reduce(GGti&) method was added to allow the reduction of the COMPTEL
-Good Time Intervals to the intervals covered by the pulsar ephemerides (#3973).
-
-Removed GCOMSelection::zeta_min() and GCOMSelection::zeta_max() since event-wise
-zeta selection is actually not used and the zeta cut is applied using the minimum
-value of the corresponding Phibar layer. Having this additional selection was always
-a source of confusion.
-
-Added GCOMSelection::use_d1() and GCOMSelection::use_d2() methods to control the usage
-of D1 and D2 modules. The control logic was implemented in GCOMDri and header keywords
-with per module information are now written into the DRE FITS files. A D1 and D2
-module usage string is also written into DRE and DRG files (#3917).
-
-Added GCOMSelection::fpmtflag() methods to select the method how D2 modules with
-failed PMTs will be handled. If the flag is set to 0, D2 modules with failed PMTs
-will be discarded, if set to 1 modules with failed PMT will be included, and if set
-to 2 events around failed PMTs will be excluded (#3917).
-
-Added GCOMEventAtom::x_d2() and GCOMEventAtom::y_d2() methods to set and retrieve
-D2 module X and Y positions. The information is now also read from an EVP file
-in the GCOMEventList::read_events() method (#3917).
-
-Added GCOMModelDRBPhibarBins class to enable fitting of the Phibar layers of a DRB
-model without interpolation (#3913).
-
-Added GCOMModelDRM class to enable fitting of DRM data cubes to the data (#3910).
-
-Added phase selection to GCOMSelection and GCOMDri (#3564).
-
-Store DRB, DRG and DRX as instances of GCOMDri instead of GSkyMap in GCOMObservation
-(#3560).
-
-Added GCOMObservation::compute_drb() method to compute background models for COMPTEL.
-So far the PHINOR and BGDLIXA background methods were implemented (#3557).
-
-Added method to set COMPTEL response using GCOMResponse instance.
-
-Added DRI constructor to GCOMObservation class.
-
-Added member access methods to GCOMDri class.
-
-Implemented ToF correction when reading EVP version 2 datasets (#3549).
-
-Implemented ToF correction in IRF computation. The ToF correction is based on table 1
-in COM-RP-ROL-DRG-057 (#3548).
-
-Set the COMPTEL average deadtime to 0.965 as quoted in Rob van Dijk's thesis on page
-62 (#3547).
-
-Added methods to access DRI filenames in GCOMObservation.
-
-Implemented vectorised response computation in GCOMResponse::irf_ptsrc() method (#3501).
-
-Remove internal response caching since caching is handled by the base class response
-computation methods (#2973).
+None
 
 
 23. INTEGRAL/SPI interface

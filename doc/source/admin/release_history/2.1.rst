@@ -1,0 +1,31 @@
+.. _2.1:
+
+GammaLib 2.1 release
+====================
+
+Overview
+--------
+
+GammaLib 2.1 is a major release that adds significant functionality.
+
+In particular, this release provides:
+
+* ...
+
+
+Bug fixes
+---------
+
+
+Improvements
+------------
+
+* Add ``GNdarray::index()`` method
+
+
+New features
+------------
+
+
+Clean up
+--------

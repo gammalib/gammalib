@@ -1,3 +1,11 @@
+2022-06-20
+
+        * Version 2.1.0 released
+        ========================
+
+        Add GNdarray::index() method
+
+
 2022-06-06
 
         * Version 2.0.0 released

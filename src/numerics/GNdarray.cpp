@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GNdarray.cpp - N-dimensional array class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2016-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -763,6 +763,37 @@ int GNdarray::index(const std::vector<int>& i) const
 
     // Return index
     return index;
+}
+
+
+/***********************************************************************//**
+* @brief Compute index vector
+*
+* @param[in] index Array element index.
+* @return Index vector.
+*
+* Computes index vector from an array element index.
+***************************************************************************/
+std::vector<int> GNdarray::index(const int& index) const
+{
+    // Get number of array dimensions
+    int dim = m_shape.size();
+
+    // Set working index
+    int inx = index;
+
+    // Initialise index vector
+    std::vector<int> i(dim, 0);
+
+    // Compute index vector
+    for (int k = dim-1; k >= 0; --k) {
+        int strides = m_strides[k];
+        i[k]        = inx / strides;
+        inx        -= strides * i[k];
+    }
+
+    // Return index vector
+    return i;
 }
 
 

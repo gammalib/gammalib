@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GNdarray.hpp - N-dimensional array class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2016-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -111,6 +111,7 @@ public:
     const std::vector<int>& strides(void) const;
     void                    shape(const std::vector<int>& shape);
     int                     index(const std::vector<int>& i) const;
+    std::vector<int>        index(const int& index) const;
     double&                 at(const int& ix);
     double&                 at(const int& ix, const int& iy);
     double&                 at(const int& ix, const int& iy, const int& iz);
