@@ -511,7 +511,9 @@ void GOptimizerLM::errors(GOptimizerFunction& fct, GOptimizerPars& pars)
                 // Try now with diagonal loaded matrix
                 *curvature = save_curvature;
                 for (int ipar = 0; ipar < npars; ++ipar) {
-                    (*curvature)(ipar,ipar) += 1.0e-10;
+                    if ((*curvature)(ipar,ipar) != 0.0) {
+                        (*curvature)(ipar,ipar) += 1.0e-10;
+                    }
                 }
 
                 // Signal loading
