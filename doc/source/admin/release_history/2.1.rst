@@ -20,7 +20,8 @@ Bug fixes
 Improvements
 ------------
 
-* Add ``GNdarray::index()`` method
+* [`4069 <https://cta-redmine.irap.omp.eu/issues/4069>`_] -
+  Add optional energy scaling in ``GModelSpectralTable`` class and add ``GNdarray::index()`` method
 
 
 New features

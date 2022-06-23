@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GModelSpectralTable.hpp - Spectral table model class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2019-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2019-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -89,6 +89,7 @@ public:
     virtual std::string          print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
+    int                           nspectra(void) const;
     GModelSpectralTablePar&       table_par(const int& index);
     const GModelSpectralTablePar& table_par(const int& index) const;
     GModelSpectralTablePar&       table_par(const std::string& name);
@@ -100,6 +101,7 @@ public:
     void                          save(const GFilename& filename,
                                        const bool&      clobber = false) const;
     const GFilename&              filename(void) const;
+    void                          energy_scale(const std::string& name);
 
 protected:
     // Protected methods
@@ -108,6 +110,8 @@ protected:
     void          free_members(void);
     void          set_par_pointers(void);
     void          set_energy_nodes(void);
+    void          scale_energy(void);
+    bool          has_energy_scale(void) const;
     GFitsBinTable create_par_table(void) const;
     GFitsBinTable create_eng_table(void) const;
     GFitsBinTable create_spec_table(void) const;
@@ -125,6 +129,9 @@ protected:
     GNdarray                    m_spectra;     //!< Spectra
     GEbounds                    m_ebounds;     //!< Energy boundaries
     mutable GFilename           m_filename;    //!< Filename of table
+    std::string                 m_escale_par;  //!< Energy scaling parameter
+    double                      m_escale;      //!< Energy scale
+    double                      m_log10escale; //!< log10 of energy scale
 
     // Cached members used for pre-computations
     mutable int                 m_npars;       //!< Number of parameters

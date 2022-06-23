@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GModelSpectralTable.i - Spectral table model class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2019-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2019-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -66,15 +66,17 @@ public:
     virtual void                 write(GXmlElement& xml) const;
 
     // Other methods
-    GModelSpectralTablePar&       table_par(const int& index);
-    GModelSpectralTablePar&       table_par(const std::string& name);
-    double                        norm(void) const;
-    void                          norm(const double& norm);
-    const GEbounds&               ebounds(void) const;
-    void                          load(const GFilename& filename);
-    void                          save(const GFilename& filename,
-                                       const bool&      clobber = false) const;
-    const GFilename&              filename(void) const;
+    int                          nspectra(void) const;
+    GModelSpectralTablePar&      table_par(const int& index);
+    GModelSpectralTablePar&      table_par(const std::string& name);
+    double                       norm(void) const;
+    void                         norm(const double& norm);
+    const GEbounds&              ebounds(void) const;
+    void                         load(const GFilename& filename);
+    void                         save(const GFilename& filename,
+                                      const bool&      clobber = false) const;
+    const GFilename&             filename(void) const;
+    void                         energy_scale(const std::string& name);
 };
 
 

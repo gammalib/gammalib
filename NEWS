@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.1.0
 
-20 June 2022
+23 June 2022
 
 
 1. Introduction
@@ -22,6 +22,9 @@ The following classes have been renamed:
 
 The following methods have been added:
 - GNdarray::index(int&)
+- GModelSpectralTable::nspectra()
+- GModelSpectralTable::scale_energy()
+- GModelSpectralTable::has_energy_scale()
 
 The following methods have been removed:
 - none
@@ -68,13 +71,17 @@ None
 
 9. Model module
 ---------------
-None
+Added energy scaling of model that may be useful for table models that scale
+with an energy parameter (#4069).
+
+Added GModelSpectralTable::nspectra() method to return number of spectra in a
+table model (#4069).
 
 
 10. Numerics module
 -------------------
 Added GNdarray::index(int&) method to return the index vector from an array element
-index.
+index (#4069).
 
 
 11. Observation module

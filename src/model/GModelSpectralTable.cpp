@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GModelSpectralTable.cpp - Spectral table model class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2019-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2019-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -60,6 +60,7 @@ const GModelSpectralRegistry g_spectral_table_registry(&g_spectral_table_seed);
 #define G_WRITE                    "GModelSpectralTable::write(GXmlElement&)"
 #define G_LOAD                        "GModelSpectralTable::load(GFilename&)"
 #define G_TABLE_PAR                    "GModelSpectralTable::table_par(int&)"
+#define G_ENERGY_SCALE      "GModelSpectralTable::energy_scale(std::string&)"
 #define G_LOAD_PAR                    "GModelSpectralTable::load_par(GFits&)"
 #define G_PAR_INDEX            "GModelSpectralTable::par_index(std::string&)"
 #define G_UPDATE                              "GModelSpectralTable::update()"
@@ -70,7 +71,9 @@ const GModelSpectralRegistry g_spectral_table_registry(&g_spectral_table_seed);
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_DEBUG_LOAD_SPEC                     //!< Debug load_spec() method
+//#define G_DEBUG_ESCALE                            //!< Debug energy scaling
 //#define G_DEBUG_UPDATE                           //!< Debug update() method
+//#define G_DEBUG_CALLTREE                               //!< Debug call tree
 
 
 /*==========================================================================
@@ -378,14 +381,28 @@ double GModelSpectralTable::eval(const GEnergy& srcEng,
     // Update spectral function
     update();
 
+    // Get energy to interpolate. In case that the spectrum was scaled
+    // then use now to actual parameter value of the energy scale to
+    // get scaling factor
+    double log10energy = srcEng.log10MeV();
+    if (m_log10escale != 0.0) {
+        log10energy -= std::log10(table_par(m_escale_par).par().value());
+        #if defined(G_DEBUG_ESCALE)
+        std::cout << "GModelSpectralTable::eval";
+        std::cout << " " << srcEng.log10MeV();
+        std::cout << " " << log10energy << std::endl;
+        #endif
+    }
+
     // Interpolate function in log10 energy
-    m_log_nodes.set_value(srcEng.log10MeV());
+    m_log_nodes.set_value(log10energy);
     double wgt_left  = m_log_nodes.wgt_left();
     double wgt_right = m_log_nodes.wgt_right();
     int    inx_left  = m_log_nodes.inx_left();
     int    inx_right = m_log_nodes.inx_right();
-    double func      = wgt_left  * m_lin_values(inx_left,0) +
-                       wgt_right * m_lin_values(inx_right,0);
+    double val_left  = m_lin_values(inx_left, 0);
+    double val_right = m_lin_values(inx_right,0);
+    double func      = wgt_left  * val_left + wgt_right * val_right;
 
     // Compute function value
     double value = m_norm.value() * func;
@@ -412,9 +429,20 @@ double GModelSpectralTable::eval(const GEnergy& srcEng,
 
             // If parameter is free then compute gradient
             if (par.is_free()) {
-                grad = (wgt_left  * m_lin_values(inx_left,i+1) +
-                        wgt_right * m_lin_values(inx_right,i+1)) *
-                        par.scale() * m_norm.value();
+                double grad_left  = m_lin_values(inx_left, i+1);
+                double grad_right = m_lin_values(inx_right,i+1);
+                if ((m_log10escale != 0.0) && (par.name() == m_escale_par)) {
+                    double dxdp = -1.0 / (gammalib::ln10 * par.factor_value());
+                    grad        = ((m_log_nodes.wgt_grad_left()  * dxdp * val_left)  +
+                                   (m_log_nodes.wgt_grad_right() * dxdp * val_right) +
+                                   (wgt_left  * grad_left + wgt_right * grad_right) *
+                                    par.scale()) *
+                                   m_norm.value();
+                }
+                else {
+                    grad = (wgt_left  * grad_left + wgt_right * grad_right) *
+                           par.scale() * m_norm.value();
+                }
             }
 
             // Set gradient
@@ -729,6 +757,11 @@ void GModelSpectralTable::read(const GXmlElement& xml)
         }
     }
 
+    // Optionally set energy scale
+    if (xml.has_attribute("energyscale")) {
+        energy_scale(xml.attribute("energyscale"));
+    }
+
     // Return
     return;
 }
@@ -772,6 +805,11 @@ void GModelSpectralTable::write(GXmlElement& xml) const
 
     // Set file attribute
     xml.attribute("file", gammalib::xml_file_reduce(xml, m_filename));
+
+    // Optionally write energy scale attribute
+    if (!m_escale_par.empty()) {
+        xml.attribute("energyscale", m_escale_par);
+    }
 
     // Return
     return;
@@ -878,6 +916,36 @@ void GModelSpectralTable::save(const GFilename& filename,
 
 
 /***********************************************************************//**
+ * @brief Return number of spectra in table model
+ *
+ * @return Number of spectra.
+ *
+ * If no table model is empty the method returns zero.
+ ***************************************************************************/
+int GModelSpectralTable::nspectra(void) const
+{
+    // Initialise number of spectra
+    int nspectra = 0;
+
+    // If there are spectra then compute their number
+    if (m_table_pars.size() > 0) {
+
+        // Initialise number of spectra
+        nspectra = 1;
+
+        // Multiply number of values for all parameters
+        for (int i = 0; i < m_table_pars.size(); ++i) {
+            nspectra *= m_table_pars[i]->values().size();
+        }
+
+    } // endif: there were spectra
+
+    // Return number of spectra
+    return nspectra;
+}
+
+
+/***********************************************************************//**
  * @brief Return reference to table parameter
  *
  * @param[in] index Table parameter index [0,...,size()[.
@@ -944,6 +1012,56 @@ const GModelSpectralTablePar& GModelSpectralTable::table_par(const std::string& 
 
     // Return reference
     return *(m_table_pars[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Set energy scale
+ *
+ * @param[in] name Table parameter name for energy scaling.
+ *
+ * @exception GException::invalid_argument
+ *            Table model parameter name not found.s
+ *
+ * Sets a given table parameter @p name as energy scale for table model
+ * interpolation.
+ ***************************************************************************/
+void GModelSpectralTable::energy_scale(const std::string& name)
+{
+    // Continue only if energy scale is not yet set
+    if ((m_escale_par.empty()) && (m_log10escale == 0)) {
+
+        // Find parameter name in list of table parameters
+        for (int i = 0; i < m_table_pars.size(); ++i) {
+            GModelPar& par = m_table_pars[i]->par();
+            if (par.name() == name) {
+                m_escale_par = name;
+                break;
+            }
+        }
+
+        // Throw an exception if parameter name is not found
+        if (m_escale_par.empty()) {
+            std::string msg = "\"energyscale\" attribute specified but "
+                              "parameter \""+name+"\" not found in the "
+                              "table model. Please specify one of the "
+                              "table model parameters as energy scale.";
+            throw GException::invalid_argument(G_READ, msg);
+        }
+
+        // Optionally log parameter name
+        #if defined(G_DEBUG_ESCALE)
+        std::cout << "GModelSpectralTable::energy_scale(): ";
+        std::cout << "energyscale=" << m_escale_par << std::endl;
+        #endif
+
+        // Scale energy
+        scale_energy();
+
+    } // endif: energy scale is not yet set
+
+    // Return
+    return;
 }
 
 
@@ -1060,6 +1178,9 @@ void GModelSpectralTable::init_members(void)
     m_spectra.clear();
     m_ebounds.clear();
     m_filename.clear();
+    m_escale_par.clear();
+    m_escale      = 0.0;
+    m_log10escale = 0.0;
 
     // Initialize cache
     m_npars  = 0;
@@ -1106,6 +1227,9 @@ void GModelSpectralTable::copy_members(const GModelSpectralTable& model)
     m_spectra     = model.m_spectra;
     m_ebounds     = model.m_ebounds;
     m_filename    = model.m_filename;
+    m_escale_par  = model.m_escale_par;
+    m_escale      = model.m_escale;
+    m_log10escale = model.m_log10escale;
 
     // Copy cache
     m_npars       = model.m_npars;
@@ -1157,6 +1281,11 @@ void GModelSpectralTable::free_members(void)
  ***************************************************************************/
 void GModelSpectralTable::set_par_pointers(void)
 {
+    // Debug option: write header
+    #if defined(G_DEBUG_CALLTREE)
+    std::cout << "GModelSpectralTable::set_par_pointers()" << std::endl;
+    #endif
+
     // Clear pointers
     m_pars.clear();
 
@@ -1178,6 +1307,12 @@ void GModelSpectralTable::set_par_pointers(void)
  ***************************************************************************/
 void GModelSpectralTable::set_energy_nodes(void)
 {
+    // Debug option: write header
+    #if defined(G_DEBUG_CALLTREE)
+    std::cout << "GModelSpectralTable::set_energy_nodes()";
+    std::cout << " " << m_ebounds.size() << std::endl;
+    #endif
+
     // Determine number of energy bins
     int nebins = m_ebounds.size();
 
@@ -1198,10 +1333,156 @@ void GModelSpectralTable::set_energy_nodes(void)
             m_log_nodes.append(log10_energy_MeV);
         }
 
+        // If energy scaling is enabled then divide energy nodes by energy
+        // scale
+        if (has_energy_scale()) {
+            for (int i = 0; i < nebins; ++i) {
+                m_lin_nodes[i] /= m_escale;
+                m_log_nodes[i] -= m_log10escale;
+            }
+        }
+
     } // endif: there were energy bins
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Scale energy
+ *
+ * Scales the energy axis so that all spectra are relative to the energy
+ * scaling parameter. This scaling is useful for better interpolation of
+ * spectra that have a feature that depends of an energy parameter.
+ ***************************************************************************/
+void GModelSpectralTable::scale_energy(void)
+{
+    // Debug options: write header
+    #if defined(G_DEBUG_CALLTREE)
+    std::cout << "GModelSpectralTable::scale_energy()";
+    std::cout << " \"" << m_escale_par << "\"";
+    std::cout << " " << m_log10escale << std::endl;
+    #elif defined(G_DEBUG_ESCALE)
+    std::cout << "GModelSpectralTable::scale_energy(): entry" << std::endl;
+    #endif
+
+    // Continue only if energy scale parameter is not empty and if table
+    // model was not yet scaled
+    if (!(m_escale_par.empty()) && (m_escale == 0.0)) {
+
+        // Get energy scale values in table model
+        const GNodeArray& escales = m_table_pars[m_escale_par]->values();
+
+        // Continue only if there are energy scales
+        if (escales.size() > 0) {
+
+            // Get table model dimensions, number of spectra and energy
+            // scale parameter index
+            int npars    = m_table_pars.size();
+            int nebins   = m_ebounds.size();
+            int nspectra = this->nspectra();
+            int ipar     = par_index(m_escale_par);
+
+            // Get largest energy scale in table model and its base 10
+            // logarithm
+            m_escale      = escales[escales.size()-1];
+            m_log10escale = std::log10(m_escale);
+
+            // Debug option: write largest energy scale
+            #if defined(G_DEBUG_ESCALE)
+            std::cout << " Largest energy scale: " << escale0;
+            std::cout << " MeV" << std::endl;
+            #endif
+
+            // Adjust spectra according to energy scale of each spectrum
+            for (int ispectrum = 0; ispectrum < nspectra; ++ispectrum) {
+
+                // Get parameter index vector
+                std::vector<int> ispec = m_spectra.index(ispectrum);
+
+                // Get energy scale for spectrum
+                double escale      = table_par(m_escale_par).values()[ispec[ipar]];
+                double log10escale = std::log10(escale);
+
+                // Debug option: write information for spectrum
+                #if defined(G_DEBUG_ESCALE)
+                std::cout << " " << ispectrum;
+                std::cout << " " << ispec[ipar];
+                std::cout << " " << escale;
+                std::cout << " MeV" << std::endl;
+                #endif
+
+                // Initialise scaled spectrum
+                std::vector<double> spectrum(nebins,0.0);
+
+                // Initialise vector for spectrum access
+                std::vector<int> index(npars+1,0);
+                for (int k = 0; k < npars; ++k) {
+                    index[k] = ispec[k];
+                }
+
+                // Setup scale spectrum
+                for (int iebin = 0; iebin < nebins; ++iebin) {
+
+                    // Get scaled log10 energy for energy bin
+                    double log10energy = m_log_nodes[iebin] - m_log10escale + log10escale;
+
+                    // Interpolate function in log10 energy
+                    m_log_nodes.set_value(log10energy);
+                    double wgt_left  = m_log_nodes.wgt_left();
+                    double wgt_right = m_log_nodes.wgt_right();
+                    index[npars]     = m_log_nodes.inx_left();
+                    double val_left  = m_spectra(index);
+                    index[npars]     = m_log_nodes.inx_right();
+                    double val_right = m_spectra(index);
+                    spectrum[iebin]  = wgt_left * val_left + wgt_right * val_right;
+
+                } // endfor: scaled spectrum
+
+                // Save scaled spectrum
+                index[npars] = 0;
+                for (int iebin = 0; iebin < nebins; ++iebin, ++index[npars]) {
+                    m_spectra(index) = spectrum[iebin];
+                }
+
+            } // endfor: looped over all spectra
+
+            // Divide energy nodes by largest energy scale value
+            for (int iebin = 0; iebin < nebins; ++iebin) {
+                m_lin_nodes[iebin] /= m_escale;
+                m_log_nodes[iebin] -= m_log10escale;
+            }
+
+        } // endif: there were energy scales
+
+        // Force update
+        m_last_values.clear();
+
+    } // endif: energy scale parameter was not empty
+
+    // Debug option: write trailer
+    #if defined(G_DEBUG_ESCALE)
+    std::cout << "GModelSpectralTable::update(): exit" << std::endl;
+    #endif
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Signal that energy scale was set
+ *
+ * @return True if energy scale was set
+ ***************************************************************************/
+bool GModelSpectralTable::has_energy_scale(void) const
+{
+    // Set energy scale flag
+    bool flag = (m_escale != 0.0);
+
+    // Return flag
+    return flag;
 }
 
 
@@ -2028,19 +2309,20 @@ void GModelSpectralTable::update_flux(void) const
         // the node boundaries.
         double epivot = std::sqrt(emin*emax);
 
-        // Compute spectral index
-        double gamma = std::log(fmin/fmax) / std::log(emin/emax);
-
-        // Compute power law normalisation
-        double prefactor = fmin / std::pow(emin/epivot, gamma);
-
-        // Compute photon flux between nodes
-        double flux = prefactor *
-                      gammalib::plaw_photon_flux(emin, emax, epivot, gamma);
-
-        // Compute energy flux between nodes
-        double eflux = prefactor *
-                       gammalib::plaw_energy_flux(emin, emax, epivot, gamma);
+        // Compute spectral index, power law normalisation, photon and
+        // energy flux between nodes
+        double gamma     = 0.0;
+        double prefactor = 0.0;
+        double flux      = 0.0;
+        double eflux     = 0.0;
+        if ((fmin > 0.0) && (fmax > 0.0)) {
+            gamma     = std::log(fmin/fmax) / std::log(emin/emax);
+            prefactor = fmin / std::pow(emin/epivot, gamma);
+            flux      = prefactor *
+                        gammalib::plaw_photon_flux(emin, emax, epivot, gamma);
+            eflux     = prefactor *
+                        gammalib::plaw_energy_flux(emin, emax, epivot, gamma);
+        }
 
         // Convert energy flux from MeV/cm2/s to erg/cm2/s
         eflux *= gammalib::MeV2erg;

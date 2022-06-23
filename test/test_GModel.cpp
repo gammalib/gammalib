@@ -3189,8 +3189,8 @@ void TestGModel::test_table(void)
 
     // Test value constructor
     GModelSpectralTable model2(m_table, 2.0);
-    test_value(model2.filename().url(), m_table,
-                "Check file function data file name");
+    test_value(model2.filename().url(), m_table, "Check file function data file name");
+    test_value(model2.nspectra(), 400, "Check number of spectra");
     test_value(model2.norm(), 2.0);
 
     // Test XML constructor
@@ -3199,9 +3199,10 @@ void TestGModel::test_table(void)
     GModelSpectralTable model3(*element);
     test_value(model3.size(), 3);
     test_value(model3.type(), "TableModel", "Check model type");
-    test_value(model3.filename().url(), m_table,
-               "Check table model data file name");
+    test_value(model3.filename().url(), m_table, "Check table model data file name");
+    test_value(model3.nspectra(), 400, "Check number of spectra");
     test_value(model3.norm(), 1.0);
+
 
     // Test filename method
     //model3.filename(m_table);
