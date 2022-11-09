@@ -1,8 +1,9 @@
-2022-06-23
+2022-11-09
 
         * Version 2.1.0 released
         ========================
 
+        Add GCOMObservation::npred() method
         Add optional energy scaling in GModelSpectralTable class (#4069)
         Add GNdarray::index() method (#4069)
 

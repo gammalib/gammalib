@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.1.0
 
-23 June 2022
+9 November 2022
 
 
 1. Introduction
@@ -25,6 +25,7 @@ The following methods have been added:
 - GModelSpectralTable::nspectra()
 - GModelSpectralTable::scale_energy()
 - GModelSpectralTable::has_energy_scale()
+- GCOMObservation::npred()
 
 The following methods have been removed:
 - none
@@ -141,7 +142,8 @@ None
 
 22. COMPTEL interface
 ---------------------
-None
+Added GCOMObservation::npred() method that computes number of events in a model
+component.
 
 
 23. INTEGRAL/SPI interface

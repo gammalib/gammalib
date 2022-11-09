@@ -67,6 +67,9 @@ public:
     virtual void                read(const GXmlElement& xml);
     virtual void                write(GXmlElement& xml) const;
 
+    // Reimplemented virtual methods
+    virtual double   npred(const GModel& model) const;
+
     // Other methods
     bool             is_unbinned(void) const;
     bool             is_binned(void) const;

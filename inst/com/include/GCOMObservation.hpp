@@ -100,6 +100,9 @@ public:
     virtual void                write(GXmlElement& xml) const;
     virtual std::string         print(const GChatter& chatter = NORMAL) const;
 
+    // Reimplemented virtual methods
+    virtual double   npred(const GModel& model) const;
+
     // Other methods
     bool             is_unbinned(void) const;
     bool             is_binned(void) const;

@@ -382,6 +382,54 @@ void GCOMObservation::response(const GCaldb& caldb, const std::string& rspname)
 
 
 /***********************************************************************//**
+ * @brief Return total number of predicted counts for one model
+ *
+ * @param[in] model Gamma-ray source model.
+ * @return Total number of predicted counts in model.
+ *
+ * Returns the total number of predicted counts in a given model component.
+ ***************************************************************************/
+double GCOMObservation::npred(const GModel& model) const
+{
+    // Initialise Npred
+    double npred = 0.0;
+
+    // Setup model container
+    GModels models;
+    models.append(model);
+
+    // Compute model vector
+    GVector model_vector = this->model(models, NULL);
+
+    // Get number of events
+    int nevents = model_vector.size();
+
+    // Iterate over all bins
+    for (int i = 0; i < nevents; ++i) {
+
+        // Skip events that should not be used
+        if (!use_event_for_likelihood(i)) {
+            continue;
+        }
+
+        // Get event pointer
+        const GEventBin* bin =
+            (*(static_cast<GEventCube*>(const_cast<GEvents*>(events()))))[i];
+
+        // Get model value
+        double model_value = model_vector[i] * bin->size();
+
+        // Update Npred
+        npred += model_value;
+
+    } // endfor: looped over all bins
+
+    // Return Npred
+    return npred;
+}
+
+
+/***********************************************************************//**
  * @brief Read observation from XML element
  *
  * @param[in] xml XML element.
