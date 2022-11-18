@@ -545,6 +545,20 @@ void GCOMObservation::read(const GXmlElement& xml)
             m_phi_last = gammalib::toint(xml.attribute("phi_last"));
         }
 
+        // Optionally load response cache
+        if (gammalib::xml_has_par(xml, "RSP")) {
+
+            // Get and expand filename
+            m_rspname = gammalib::xml_get_attr(G_READ, xml, "RSP", "file");
+            m_rspname = gammalib::xml_file_expand(xml, m_rspname);
+
+            // If file exists then load it
+            if (m_rspname.exists()) {
+                m_response.load_cache(m_rspname);
+            }
+
+        } // endif: optionally loaded response cache
+
     } // endelse: binned observation
 
     // Return
@@ -657,6 +671,23 @@ void GCOMObservation::write(GXmlElement& xml) const
         // If there is a last Phibar layer selection then write it into XML file
         if (m_phi_last != -1) {
             xml.attribute("phi_last", gammalib::str(m_phi_last));
+        }
+
+        // Optionally set response cache parameter
+        if (!m_rspname.is_empty()) {
+        
+            // Set cache parameter
+            par = gammalib::xml_need_par(G_WRITE, xml, "RSP");
+            par->attribute("file", gammalib::xml_file_reduce(xml, m_rspname));
+
+            // If response cache file does not yet exist then save it now
+            // Note that this code assumes that the cache will never change
+            // once it has been computed. In case that the cache may have
+            // changed, a different file name needs to be choosen
+            if (!m_rspname.exists()) {
+                m_response.save_cache(m_rspname);
+            }
+
         }
 
     } // endif: observation was binned
@@ -931,6 +962,10 @@ std::string GCOMObservation::print(const GChatter& chatter) const
         // Append response (if available)
         if (response()->rspname().length() > 0) {
             result.append("\n"+response()->print(gammalib::reduce(chatter)));
+            if (!m_rspname.is_empty()) {
+                result.append("\n"+gammalib::parformat("Response cache file"));
+                result.append(m_rspname);
+            }
         }
 
         // Append events
@@ -1001,6 +1036,7 @@ void GCOMObservation::init_members(void)
     m_drbname.clear();
     m_drgname.clear();
     m_drxname.clear();
+    m_rspname.clear();
     m_drb.clear();
     m_drg.clear();
     m_drx.clear();
@@ -1042,6 +1078,7 @@ void GCOMObservation::copy_members(const GCOMObservation& obs)
     m_drbname    = obs.m_drbname;
     m_drgname    = obs.m_drgname;
     m_drxname    = obs.m_drxname;
+    m_rspname    = obs.m_rspname;
     m_drb        = obs.m_drb;
     m_drg        = obs.m_drg;
     m_drx        = obs.m_drx;

@@ -20,6 +20,9 @@ Bug fixes
 Improvements
 ------------
 
+* [`4159 <https://cta-redmine.irap.omp.eu/issues/4159>`_] -
+  Implement response vector cache storage in FITS file
+* Add ``GCOMObservation::npred()`` method
 * [`4069 <https://cta-redmine.irap.omp.eu/issues/4069>`_] -
   Add optional energy scaling in ``GModelSpectralTable`` class and add ``GNdarray::index()`` method
 

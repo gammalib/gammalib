@@ -45,6 +45,7 @@
 #include "GObservation.hpp"
 #include "GFitsImage.hpp"
 #include "GFitsImageFloat.hpp"
+#include "GFilename.hpp"
 #include "GModelSky.hpp"
 #include "GModelSpatialPointSource.hpp"
 #include "GModelSpatialRadial.hpp"
@@ -680,6 +681,40 @@ void GCOMResponse::write(GFitsImageFloat& image) const
         image.card("OBSERVER", "Unknown", "Observer that created FITS file");
 
     } // endif: response was not empty
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Load response cache.
+ *
+ * @param[in] filename Response cache filename.
+ *
+ * Loads response cache from FITS file.
+ ***************************************************************************/
+void GCOMResponse::load_cache(const GFilename& filename)
+{
+    // Load response vector cache
+    m_irf_vector_cache.load(filename);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Save response cache.
+ *
+ * @param[in] filename Response cache filename.
+ *
+ * Saves response cache from FITS file.
+ ***************************************************************************/
+void GCOMResponse::save_cache(const GFilename& filename) const
+{
+    // Save response vector cache
+    m_irf_vector_cache.save(filename);
 
     // Return
     return;

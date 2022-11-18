@@ -51,9 +51,11 @@ const std::string com_tim              = datadir+"/m10695_tim.fits";
 const std::string com_oad              = datadir+"/m20039_oad.fits";
 const std::string com_bvc              = datadir+"/s10150_10000rows_bvc.fits";
 const std::string com_obs              = datadir+"/obs.xml";
+const std::string com_obs_cache        = datadir+"/obs_cache.xml";
 const std::string com_obs_unbinned     = datadir+"/obs_unbinned.xml";
 const std::string com_obs_unbinned_bvc = datadir+"/obs_unbinned_bvc.xml";
 const std::string com_model            = datadir+"/crab.xml";
+const std::string com_model_fix        = datadir+"/crab_fix.xml";
 
 
 /***********************************************************************//**
@@ -97,6 +99,8 @@ void TestGCOM::set(void)
            "GCOMObservation: Test DRM model");
     append(static_cast<pfunction>(&TestGCOM::test_binned_optimizer),
            "GCOMObservation: Test binned optimizer");
+    append(static_cast<pfunction>(&TestGCOM::test_binned_optimizer_cached),
+           "GCOMObservation: Test binned optimizer using response cache");
 
     // Return
     return;
@@ -908,6 +912,112 @@ void TestGCOM::test_binned_optimizer(void)
     // Perform LM optimization
     double fit_results[] = {83.465936, 0.1564261,
                             21.577906, 0.1435089,
+                            0.001680, 8.31055e-05,
+                            -2.05, 0,
+                            1, 0,
+                            1, 0,
+                            1, 0,
+                            0, 0,
+                            3, 0,
+                            0, 0,
+                            5, 0,
+                            3.1544363, 0.0904736,
+                            7, 0,
+                            27.873634, 0.272976,
+                            9, 0,
+                            43.647845, 0.348297,
+                            11, 0,
+                            54.110192, 0.396509,
+                            13, 0,
+                            60.915092, 0.431733,
+                            15, 0,
+                            65.103076, 0.457085,
+                            17, 0,
+                            64.874275, 0.466881,
+                            19, 0,
+                            60.717290, 0.458654,
+                            21, 0,
+                            57.567023, 0.451533,
+                            23, 0,
+                            54.436832, 0.441844,
+                            25, 0,
+                            51.905956, 0.433130,
+                            27, 0,
+                            49.103135, 0.422415,
+                            29, 0,
+                            47.182469, 0.415945,
+                            31, 0,
+                            44.236418, 0.406013,
+                            33, 0,
+                            43.143253, 0.40499,
+                            35, 0,
+                            41.706222, 0.403297,
+                            37, 0,
+                            39.920715, 0.39994,
+                            39, 0,
+                            37.603855, 0.39392,
+                            41, 0,
+                            36.712561, 0.395238,
+                            43, 0,
+                            35.817285, 0.397315,
+                            45, 0,
+                            33.719920, 0.392628,
+                            47, 0,
+                            29.961140, 0.377506,
+                            49, 0,
+                            27.998613, 0.372603};
+    test_try("Perform LM optimization");
+    try {
+        GOptimizerLM opt;
+        opt.max_iter(100);
+        obs.optimize(opt);
+        obs.errors(opt);
+        test_try_success();
+        for (int i = 0, j = 0; i < obs.models().size(); ++i) {
+            const GModel* model = obs.models()[i];
+            for (int k = 0; k < model->size(); ++k) {
+                GModelPar par  = (*model)[k];
+                std::string msg = "Verify optimization result for " + par.print();
+                test_value(par.value(), fit_results[j++], 5.0e-5, msg);
+                test_value(par.error(), fit_results[j++], 5.0e-5, msg);
+            }
+        }
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Code that saves the response cache
+    //static_cast<GCOMObservation*>(obs[0])->cachename("irfcache.fits");
+    //obs.save("obs_cache.xml");
+
+    // Exit test
+    return;
+
+}
+
+
+/***********************************************************************//**
+ * @brief Test binned optimizer using response cache
+ ***************************************************************************/
+void TestGCOM::test_binned_optimizer_cached(void)
+{
+    const std::string com_obs_cache        = datadir+"/obs_cache.xml";
+    const std::string com_obs_unbinned     = datadir+"/obs_unbinned.xml";
+    const std::string com_obs_unbinned_bvc = datadir+"/obs_unbinned_bvc.xml";
+    const std::string com_model            = datadir+"/crab.xml";
+    const std::string com_model_fix        = datadir+"/crab_fix.xml";
+
+
+    // Load observations using response cache
+    GObservations obs(com_obs_cache);
+
+    // Load models from XML file
+    obs.models(com_model_fix);
+
+    // Perform LM optimization
+    double fit_results[] = {83.465936, 0.0,
+                            21.577906, 0.0,
                             0.001680, 8.31055e-05,
                             -2.05, 0,
                             1, 0,

@@ -35,6 +35,7 @@
 /* __ Forward declarations _______________________________________________ */
 class GVector;
 class GFilename;
+class GFitsTable;
 
 /* __ Constants __________________________________________________________ */
 

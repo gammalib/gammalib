@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCOMResponse.hpp - COMPTEL Response class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -45,6 +45,7 @@ class GTime;
 class GObservation;
 class GFitsImage;
 class GFitsImageFloat;
+class GFilename;
 
 
 /***********************************************************************//**
@@ -90,6 +91,8 @@ public:
     void               load(const std::string& rspname);
     void               read(const GFitsImage& hdu);
     void               write(GFitsImageFloat& image) const;
+    void               load_cache(const GFilename& filename);
+    void               save_cache(const GFilename& filename) const;
 
 private:
     // Private methods

@@ -137,19 +137,21 @@ public:
     const GFilename& drbname(void) const;
     const GFilename& drgname(void) const;
     const GFilename& drxname(void) const;
+    const GFilename& rspname(void) const;
     const int&       phi_first(void) const;
     const int&       phi_last(void) const;
     void             drename(const GFilename& drename);
     void             drbname(const GFilename& drbname);
     void             drgname(const GFilename& drgname);
     void             drxname(const GFilename& drxname);
+    void             rspname(const GFilename& rspname);
     void             phi_first(const int& phi_first);
     void             phi_last(const int& phi_last);
     void             compute_drb(const std::string& method,
                                  const GCOMDri&     drm,
                                  const int&         nrunav = 3,
                                  const int&         navgr  = 3,
-                                 const int&         nincl  = 13,
+                                 const int&         nincl  = 15,
                                  const int&         nexcl  = 0);
 
 protected:
@@ -168,12 +170,12 @@ protected:
     void    compute_drb_bgdlixa(const GCOMDri& drm,
                                 const int&     nrunav = 3,
                                 const int&     navgr  = 3,
-                                const int&     nincl  = 13,
+                                const int&     nincl  = 15,
                                 const int&     nexcl  = 0);
     void    compute_drb_bgdlixe(const GCOMDri& drm,
                                 const int&     nrunav = 3,
                                 const int&     navgr  = 3,
-                                const int&     nincl  = 13,
+                                const int&     nincl  = 15,
                                 const int&     nexcl  = 0);
     GSkyMap get_weighted_drg_map(void) const;
     void    get_bgdlixa_phibar_indices(const int& iphibar,
@@ -200,6 +202,7 @@ protected:
     GFilename              m_drbname;    //!< DRB filename
     GFilename              m_drgname;    //!< DRG filename
     GFilename              m_drxname;    //!< DRX filename
+    GFilename              m_rspname;    //!< Response cache filename
     GCOMDri                m_drb;        //!< Background model
     GCOMDri                m_drg;        //!< Geometry factors
     GCOMDri                m_drx;        //!< Exposure map
@@ -595,6 +598,19 @@ const GFilename& GCOMObservation::drxname(void) const
 
 
 /***********************************************************************//**
+ * @brief Return response cache filename
+ *
+ * @return Response cache filename.
+ ***************************************************************************/
+inline
+const GFilename& GCOMObservation::rspname(void) const
+{
+    // Return response cache filename
+    return (m_rspname);
+}
+
+
+/***********************************************************************//**
  * @brief Return index of first Phibar layer to be used for likelihood fitting
  *
  * @return Index of first Phibar layer.
@@ -668,6 +684,19 @@ inline
 void GCOMObservation::drxname(const GFilename& drxname)
 {
     m_drxname = drxname;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set response cache filename filename
+ *
+ * @param[in] cachename Response cache filename.
+ ***************************************************************************/
+inline
+void GCOMObservation::rspname(const GFilename& rspname)
+{
+    m_rspname = rspname;
     return;
 }
 

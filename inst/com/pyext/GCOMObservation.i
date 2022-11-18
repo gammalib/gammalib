@@ -104,19 +104,21 @@ public:
     const GFilename& drbname(void) const;
     const GFilename& drgname(void) const;
     const GFilename& drxname(void) const;
+    const GFilename& rspname(void) const;
     const int&       phi_first(void) const;
     const int&       phi_last(void) const;
     void             drename(const GFilename& drename);
     void             drbname(const GFilename& drbname);
     void             drgname(const GFilename& drgname);
     void             drxname(const GFilename& drxname);
+    void             rspname(const GFilename& rspname);
     void             phi_first(const int& phi_first);
     void             phi_last(const int& phi_last);
     void             compute_drb(const std::string& method,
                                  const GCOMDri&     drm,
                                  const int&         nrunav = 3,
                                  const int&         navgr  = 3,
-                                 const int&         nincl  = 13,
+                                 const int&         nincl  = 15,
                                  const int&         nexcl  = 0);
 };
 

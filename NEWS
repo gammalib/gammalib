@@ -29,6 +29,9 @@ The following methods have been added:
 - GResponseVectorCache::save()
 - GResponseVectorCache::read()
 - GCOMObservation::npred()
+- GCOMObservation::cachename()
+- GCOMResponse::load_cache()
+- GCOMResponse::save_cache()
 
 The following methods have been removed:
 - none
@@ -146,6 +149,12 @@ None
 
 22. COMPTEL interface
 ---------------------
+Added GCOMObservation::cachename() method to set and retrieve the name of a
+response cache file. If set, the response cache file will automatically
+written or loaded when handling XML files. In addition, GCOMResponse methods
+load_cache() and save_cache() were added to manage the loading and saving
+of the response cache (#4159).
+
 Added GCOMObservation::npred() method that computes number of events in a model
 component.
 

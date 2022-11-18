@@ -67,6 +67,7 @@ public:
     void                test_model_bins(void);
     void                test_model_drm(void);
     void                test_binned_optimizer(void);
+    void                test_binned_optimizer_cached(void);
 };
 
 #endif /* TEST_COM_HPP */
