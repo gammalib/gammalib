@@ -2075,7 +2075,7 @@ void TestGObservation::test_response_vector_cache(void)
     GVector vector4(10);
     bool flag = cache.contains("Crab", &vector4);
     test_assert(flag, "Test that cache contains Crab vector.");
-    test_assert(vector4 == vector1, "Test cache values Crab.");
+    test_assert(vector4 == vector1, "Test cache values for Crab.");
 
     // Add another vector and check
     cache.set("Vela", vector2);
@@ -2117,6 +2117,21 @@ void TestGObservation::test_response_vector_cache(void)
     cache.clear();
     test_assert(cache.is_empty(), "Test that emptied cache is empty");
     test_value(cache.size(), 0, "Test emptied cache size");
+
+    // Add Crab and Vela to response vector cache and test saving and loading
+    cache.set("Crab", vector1);
+    cache.set("Vela", vector2);
+    cache.save("test_response_vector_cache.fits", true);
+    cache.clear();
+    cache.load("test_response_vector_cache.fits");
+    test_assert(!cache.is_empty(), "Test that loaded cache is not empty");
+    test_value(cache.size(), 2, "Test loaded cache size");
+    flag = cache.contains("Crab", &vector4);
+    test_assert(flag, "Test that loaded cache contains Crab vector.");
+    test_assert(vector4 == vector1, "Test loaded cache values for Crab.");
+    flag = cache.contains("Vela", &vector5);
+    test_assert(flag, "Test that loaded cache contains Vela vector.");
+    test_assert(vector5 == vector2, "Test loaded cache values for Vela.");
 
     // Return
     return;

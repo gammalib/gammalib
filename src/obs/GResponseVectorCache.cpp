@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GResponseVectorCache.cpp - Response vector cache class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2020 by Juergen Knoedlseder                              *
+ *  copyright (C) 2020-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,6 +30,13 @@
 #endif
 #include "GTools.hpp"
 #include "GVector.hpp"
+#include "GFilename.hpp"
+#include "GFits.hpp"
+#include "GFitsTable.hpp"
+#include "GFitsBinTable.hpp"
+#include "GFitsTableStringCol.hpp"
+#include "GFitsTableLongCol.hpp"
+#include "GFitsTableDoubleCol.hpp"
 #include "GResponseVectorCache.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -341,6 +348,178 @@ bool GResponseVectorCache::contains(const std::string& cache_id,
 
     // Return containment flag
     return contains;
+}
+
+
+/***********************************************************************//**
+ * @brief Load response vector cache from FITS file
+ *
+ * @param[in] filename FITS file name.
+ *
+ * Loads the response vector cache from a FITS file. All binary tables in
+ * the FITS file are assumed to be response vector cache entries.
+ ***************************************************************************/
+void GResponseVectorCache::load(const GFilename& filename)
+{
+    // Free members
+    free_members();
+
+    // Initialise attributes
+    init_members();
+
+    // Open FITS file
+    GFits fits(filename);
+
+    // Loop over all extensions
+    for (int i = 0; i < fits.size(); ++i) {
+
+        // Handle only binary table extensions
+        if (fits[i]->exttype() == GFitsHDU::HT_BIN_TABLE) {
+            read(*fits.table(i));
+        }
+
+    } // endfor: looped over all extensions
+
+    // Close FITS file
+    fits.close();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Save the response vector cache into FITS file
+ *
+ * @param[in] filename FITS file name.
+ * @param[in] clobber Overwrite an response vector cache file?
+ *
+ * Saves the response vector cache into a FITS file. If a file with the given
+ * @p filename does not yet exist it will be created, otherwise the method
+ * opens the existing file. The response vector cache can only be appended
+ * to an existing file if the @p clobber flag is set to "true" (otherwise
+ * an exception is thrown).
+ *
+ * The method will append all cache entries as binary FITS tables to the
+ * FITS file. The table extension names are defined by the cache
+ * identifiers. All cache entries with identifiers exceeding 80 characters
+ * will be skipped to avoid truncation of cache identifiers.
+ ***************************************************************************/
+void GResponseVectorCache::save(const GFilename&   filename,
+                                const bool&        clobber) const
+{
+    // Open or create FITS file (without extension name)
+    GFits fits(filename.url(), true);
+
+    // Loop over the cache entries
+    for (int i = 0; i < size(); ++i) {
+
+        // Set extension name
+        std::string extname = m_cache_ids[i];
+
+        // Skip entries with too long identifiers
+        if (extname.length() > 80) {
+            continue;
+        }
+
+        // Get number of cache entries
+        int entries = m_cache_entries[i];
+
+        // Create response vector cache columns
+        GFitsTableDoubleCol col_values("VALUES",   entries);
+        GFitsTableLongCol   col_indices("INDICES", entries);
+
+        // Write cache values and indices in columns
+        double* values  = m_cache_values[i];
+        int*    indices = m_cache_indices[i];
+        for (int k = 0; k < entries; ++k, ++values, ++indices) {
+            col_values(k)  = *values;
+            col_indices(k) = *indices;
+        }
+
+        // Create binary table
+        GFitsBinTable table(entries);
+        table.append(col_values);
+        table.append(col_indices);
+        table.extname(extname);
+
+        // Write mandatory keywords
+        table.card("HDUCLASS", "OGIP",         "Format conforms to OGIP standard");
+        table.card("HDUCLAS1", "RESPONSE",     "Extension contains response data");
+        table.card("HDUCLAS2", "VECTOR_CACHE", "Extension contains a response vector cache");
+        table.card("HDUVERS",  "1.0.0",        "Version of the file format");
+
+        // If the FITS object contains already an extension with the same
+        // name then remove now this extension
+        if (fits.contains(extname)) {
+            fits.remove(extname);
+        }
+
+        // Append response vector cache to FITS file
+        fits.append(table);
+
+
+    } // endfor: looped over cache entries
+
+    // Save to file
+    fits.save(clobber);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read response vector cache from FITS table
+ *
+ * @param[in] table FITS table.
+ *
+ * Reads response vector cache from a FITS table. There is one cache entry
+ * in a FITS table, with the table extension name specifying the cache
+ * identifier. Only tables containing the "HDUCLAS2" keyword set to
+ * "VECTOR_CACHE" will be considered by the method, all other tables will
+ * be simply skipped.
+ ***************************************************************************/
+void GResponseVectorCache::read(const GFitsTable& table)
+{
+    // Continue only if table contains a response vector cache
+    if (table.has_card("HDUCLAS2") && table.string("HDUCLAS2") == "VECTOR_CACHE") {
+
+        // Get number of rows in FITS table
+        int entries = table.nrows();
+
+        // Continue only if there are rows in the FITS table
+        if (entries > 0) {
+
+            // Set cache ID from extension name
+            std::string cache_id = table.extname();
+
+            // Get column pointers
+            const GFitsTableCol* col_values  = table["VALUES"];
+            const GFitsTableCol* col_indices = table["INDICES"];
+
+            // Allocate memory for values and indices
+            double* values  = new double[entries];
+            int*    indices = new int[entries];
+
+            // Put information and pointers into cache
+            m_cache_ids.push_back(cache_id);
+            m_cache_entries.push_back(entries);
+            m_cache_values.push_back(values);
+            m_cache_indices.push_back(indices);
+
+            // Extact values and indices
+            for (int i = 0; i < entries; ++i) {
+                *values++  = col_values->real(i);
+                *indices++ = col_indices->integer(i);
+            }
+
+        } // endif: there were entries in table
+
+    } // endif: table contained a response vector cache
+
+    // Return
+    return;
 }
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GResponseVectorCache.hpp - Response vector cache class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2020 by Juergen Knoedlseder                              *
+ *  copyright (C) 2020-2022 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -34,6 +34,7 @@
 
 /* __ Forward declarations _______________________________________________ */
 class GVector;
+class GFilename;
 
 /* __ Constants __________________________________________________________ */
 
@@ -71,6 +72,10 @@ public:
     void                  remove(const std::string& cache_id);
     bool                  contains(const std::string& cache_id,
                                    GVector*           irfs = NULL) const;
+    void                  load(const GFilename& filename);
+    void                  save(const GFilename& filename,
+                               const bool& clobber = false) const;
+    void                  read(const GFitsTable& table);
     std::string           print(const GChatter& chatter = NORMAL) const;
 
 protected:

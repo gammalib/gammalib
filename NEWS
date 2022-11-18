@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.1.0
 
-9 November 2022
+18 November 2022
 
 
 1. Introduction
@@ -25,6 +25,9 @@ The following methods have been added:
 - GModelSpectralTable::nspectra()
 - GModelSpectralTable::scale_energy()
 - GModelSpectralTable::has_energy_scale()
+- GResponseVectorCache::load()
+- GResponseVectorCache::save()
+- GResponseVectorCache::read()
 - GCOMObservation::npred()
 
 The following methods have been removed:
@@ -87,7 +90,8 @@ index (#4069).
 
 11. Observation module
 ----------------------
-None
+Added GResponseVectorCache::load(), save() and read() methods to store and load
+response vector cache values using a FITS file (#4159).
 
 
 12. Optimization module

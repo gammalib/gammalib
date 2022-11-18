@@ -1,8 +1,9 @@
-2022-11-09
+2022-11-18
 
         * Version 2.1.0 released
         ========================
 
+        Implement response vector cache storage in FITS file (#4159)
         Add GCOMObservation::npred() method
         Add optional energy scaling in GModelSpectralTable class (#4069)
         Add GNdarray::index() method (#4069)
