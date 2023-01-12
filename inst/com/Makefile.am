@@ -142,7 +142,9 @@ caldbirfs_DATA = $(caldb_irfs)
 
 # Test data to distribute
 testdatacom       = test/data/obs.xml \
+                    test/data/obs_cache.xml \
                     test/data/crab.xml \
+                    test/data/crab_fix.xml \
                     test/data/m32171_drx.fits.gz \
                     test/data/m34997_drg.fits.gz \
                     test/data/m50438_dre.fits.gz \
@@ -151,7 +153,8 @@ testdatacom       = test/data/obs.xml \
                     test/data/m50441_dre.fits.gz \
                     test/data/m20039_oad.fits.gz \
                     test/data/m20041_oad.fits.gz \
-                    test/data/s10150_10000rows_bvc.fits.gz
+                    test/data/s10150_10000rows_bvc.fits.gz \
+                    test/data/irfcache.fits.gz
 testdatacomdir    = $(pyexecdir)/gammalib/tests/com/data
 testdatacom_DATA  = $(testdatacom)
 testcaldbcom      = test/caldb/data/cgro/comptel/caldb.indx
