@@ -920,7 +920,7 @@ void GModelSpectralTable::save(const GFilename& filename,
  *
  * @return Number of spectra.
  *
- * If no table model is empty the method returns zero.
+ * If the table model is empty the method returns zero.
  ***************************************************************************/
 int GModelSpectralTable::nspectra(void) const
 {
