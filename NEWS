@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.1.0
 
-18 November 2022
+13 January 2023
 
 
 1. Introduction
@@ -78,6 +78,9 @@ None
 
 9. Model module
 ---------------
+Fixed a segfault problem when saving an empty instance of GModelSpectralTable
+(#4198).
+
 Added energy scaling of model that may be useful for table models that scale
 with an energy parameter (#4069).
 

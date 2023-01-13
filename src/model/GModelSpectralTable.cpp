@@ -1681,9 +1681,12 @@ GFitsBinTable GModelSpectralTable::create_eng_table(void) const
 GFitsBinTable GModelSpectralTable::create_spec_table(void) const
 {
     // Compute number of rows
-    int nrows = 1;
-    for (int i = 0; i < m_spectra.dim()-1; ++i) {
-        nrows *= m_spectra.shape()[i];
+    int nrows = 0;
+    if (m_spectra.dim() > 0) {
+        nrows = 1;
+        for (int i = 0; i < m_spectra.dim()-1; ++i) {
+            nrows *= m_spectra.shape()[i];
+        }
     }
 
     // Compute number of parameters

@@ -16,6 +16,9 @@ In particular, this release provides:
 Bug fixes
 ---------
 
+* [`4198 <https://cta-redmine.irap.omp.eu/issues/4198>`_] -
+  Fix segfault on saving empty ``GModelSpectralTable`` instance
+
 
 Improvements
 ------------
