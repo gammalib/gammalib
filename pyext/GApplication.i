@@ -95,9 +95,6 @@ public:
     std::string                     classname(void) const;
     const std::string&              name(void) const;
     const std::string&              version(void) const;
-    double                          telapse(void) const;
-    double                          celapse(void) const;
-    double                          gCO2e(const std::string& country) const;
     void                            add_celapse(const double& celapse);
     bool                            logTerse(void) const;
     bool                            logNormal(void) const;
