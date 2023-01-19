@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib application module
 #
-# Copyright (C) 2012-2022 Juergen Knoedlseder
+# Copyright (C) 2012-2023 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -349,6 +349,30 @@ class Test(gammalib.GPythonTestSuite):
         app['integer'] = 'NAN'
         self.test_assert(app['real'].is_notanumber(), 'NAN real parameter')
         self.test_assert(app['integer'].is_valid(), 'NAN integer parameter')
+
+        # Check value logging
+        app.logFileOpen()
+        app._log_value(gammalib.NORMAL, 'String parameter', '3.14');
+        app._log_value(gammalib.NORMAL, 'Floating parameter', 3.14);
+        app._log_value(gammalib.NORMAL, 'Integer parameter', 3);
+        app._log_value(gammalib.NORMAL, 'String parameter', '3.14', 'pi');
+        app._log_value(gammalib.NORMAL, 'Floating parameter', 3.14, 'keV');
+        app._log_value(gammalib.NORMAL, 'Integer parameter', 3, 'units')
+        app.logFileClose()
+        fp   = open('test_application.log', 'r')
+        line = fp.readlines()
+        self.test_value(len(line), 13, 'Check number of lines in log file')
+        self.test_value(line[0],  '********************************************************************************\n','Line 1')
+        self.test_value(line[1],  '*                               test_GApplication                              *\n','Line 2')
+        self.test_value(line[2],  '* ---------------------------------------------------------------------------- *\n','Line 3')
+        self.test_value(line[4],  '********************************************************************************\n','Line 5')
+        self.test_value(line[5],  ' String parameter ..........: 3.14\n','Line 6')
+        self.test_value(line[6],  ' Floating parameter ........: 3.14\n','Line 7')
+        self.test_value(line[7],  ' Integer parameter .........: 3\n','Line 8')
+        self.test_value(line[8],  ' String parameter ..........: 3.14 pi\n','Line 9')
+        self.test_value(line[9],  ' Floating parameter ........: 3.14 keV\n','Line 10')
+        self.test_value(line[10], ' Integer parameter .........: 3 units\n','Line 11')
+        fp.close()
 
         # Return
         return

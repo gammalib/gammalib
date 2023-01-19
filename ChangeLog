@@ -1,8 +1,9 @@
-2023-01-13
+2023-01-19
 
         * Version 2.1.0 released
         ========================
 
+        Add optional unit parameter to GApplication::log_value() methods (#4202)
         Fix segfault on saving empty GModelSpectralTable (#4198)
         Implement response vector cache storage in FITS file (#4159)
         Add GCOMObservation::npred() method

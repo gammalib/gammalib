@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GApplication.i - GammaLib application base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2022 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2023 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -133,8 +133,11 @@ public:
  ***************************************************************************/
 %pythoncode %{
 # Log the value of a parameter
-def _log_value(self, chatter, name, value):
-    string = gammalib.parformat(str(name))+str(value)
+def _log_value(self, chatter, name, value, *unit):
+    if len(unit) > 0:
+        string = gammalib.parformat(str(name))+str(value)+' '+str(unit[0])
+    else:
+        string = gammalib.parformat(str(name))+str(value)
     self._log_string(chatter, string)
 GApplication._log_value = _log_value
 %}

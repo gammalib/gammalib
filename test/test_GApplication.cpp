@@ -1,7 +1,7 @@
 /***************************************************************************
  *            test_GApplication.cpp - test GApplication classes            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2022 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2023 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -538,6 +538,9 @@ void TestGApplication::test_GApplication(void)
     app1.log_value(NORMAL, "String parameter", "3.14");
     app1.log_value(NORMAL, "Floating parameter", 3.14);
     app1.log_value(NORMAL, "Integer parameter", 3);
+    app1.log_value(NORMAL, "String parameter", "3.14", "pi");
+    app1.log_value(NORMAL, "Floating parameter", 3.14, "keV");
+    app1.log_value(NORMAL, "Integer parameter", 3, "units");
     app1.log_value(VERBOSE, "Verbose string parameter", "3.14!!");
     app1.log_value(VERBOSE, "Verbose floating parameter", 99.9);
     app1.log_value(VERBOSE, "Verbose integer parameter", -1);
@@ -598,77 +601,88 @@ void TestGApplication::test_GApplication(void)
         test_value(line, " Integer parameter .........: 3\n",
                          "Check log file line 9");
 
+        // Test logging of user parameter with units
+        fgets(line, 100, fp);
+        test_value(line, " String parameter ..........: 3.14 pi\n",
+                         "Check log file line 10");
+        fgets(line, 100, fp);
+        test_value(line, " Floating parameter ........: 3.14 keV\n",
+                         "Check log file line 11");
+        fgets(line, 100, fp);
+        test_value(line, " Integer parameter .........: 3 units\n",
+                         "Check log file line 12");
+
         // Test logging of header 1
         fgets(line, 100, fp);
-        test_value(line, "\n", "Check log file line 10");
+        test_value(line, "\n", "Check log file line 13");
         fgets(line, 100, fp);
-        test_value(line, "+==========+\n", "Check log file line 11");
+        test_value(line, "+==========+\n", "Check log file line 14");
         fgets(line, 100, fp);
-        test_value(line, "| Header 1 |\n", "Check log file line 12");
+        test_value(line, "| Header 1 |\n", "Check log file line 15");
         fgets(line, 100, fp);
-        test_value(line, "+==========+\n", "Check log file line 13");
+        test_value(line, "+==========+\n", "Check log file line 16");
 
         // Test logging of header 2
         fgets(line, 100, fp);
-        test_value(line, "+----------+\n", "Check log file line 14");
+        test_value(line, "+----------+\n", "Check log file line 17");
         fgets(line, 100, fp);
-        test_value(line, "| Header 2 |\n", "Check log file line 15");
+        test_value(line, "| Header 2 |\n", "Check log file line 18");
         fgets(line, 100, fp);
-        test_value(line, "+----------+\n", "Check log file line 16");
+        test_value(line, "+----------+\n", "Check log file line 19");
 
         // Test logging of header 3
         fgets(line, 100, fp);
-        test_value(line, "=== Header 3 ===\n", "Check log file line 17");
+        test_value(line, "=== Header 3 ===\n", "Check log file line 20");
 
         // Test logging of parameters
         fgets(line, 100, fp);
-        test_value(line, "+============+\n", "Check log file line 18");
+        test_value(line, "+============+\n", "Check log file line 21");
         fgets(line, 100, fp);
-        test_value(line, "| Parameters |\n", "Check log file line 19");
+        test_value(line, "| Parameters |\n", "Check log file line 22");
         fgets(line, 100, fp);
-        test_value(line, "+============+\n", "Check log file line 20");
+        test_value(line, "+============+\n", "Check log file line 23");
         fgets(line, 100, fp);
         test_value(line, " real ......................: 83.63\n",
-                         "Check log file line 21");
-        fgets(line, 100, fp);
-        test_value(line, " integer ...................: 1\n",
-                         "Check log file line 22");
-        fgets(line, 100, fp);
-        test_value(line, " string ....................: CEL\n",
-                         "Check log file line 23");
-        fgets(line, 100, fp);
-        test_value(line, " filename ..................: file.fits\n",
                          "Check log file line 24");
         fgets(line, 100, fp);
-        test_value(line, " time ......................: 2005-10-08T14:30:25\n",
+        test_value(line, " integer ...................: 1\n",
                          "Check log file line 25");
         fgets(line, 100, fp);
-        test_value(line, " chatter ...................: 2\n",
+        test_value(line, " string ....................: CEL\n",
                          "Check log file line 26");
         fgets(line, 100, fp);
-        test_value(line, " clobber ...................: yes\n",
+        test_value(line, " filename ..................: file.fits\n",
                          "Check log file line 27");
         fgets(line, 100, fp);
-        test_value(line, " debug .....................: no\n",
+        test_value(line, " time ......................: 2005-10-08T14:30:25\n",
                          "Check log file line 28");
         fgets(line, 100, fp);
-        test_value(line, " mode ......................: ql\n",
+        test_value(line, " chatter ...................: 2\n",
                          "Check log file line 29");
         fgets(line, 100, fp);
-        test_value(line, " logfile ...................: test_application.log\n",
+        test_value(line, " clobber ...................: yes\n",
                          "Check log file line 30");
+        fgets(line, 100, fp);
+        test_value(line, " debug .....................: no\n",
+                         "Check log file line 31");
+        fgets(line, 100, fp);
+        test_value(line, " mode ......................: ql\n",
+                         "Check log file line 32");
+        fgets(line, 100, fp);
+        test_value(line, " logfile ...................: test_application.log\n",
+                         "Check log file line 33");
         fgets(line, 32, fp);
         test_value(line, "Application \"test_GApplication\"",
-                         "Check log file line 31");
+                         "Check log file line 34");
 
         // Empty remaining characters (not checked since they are machine
         // dependent)
         fgets(line, 200, fp);
         fgets(line, 100, fp);
-        test_value(line, "\n", "Check log file line 32");
+        test_value(line, "\n", "Check log file line 35");
         fgets(line, 32, fp);
         test_value(line, "Application \"test_GApplication\"",
-                         "Check log file line 33");
+                         "Check log file line 36");
 
         // Close log file
         fclose(fp);

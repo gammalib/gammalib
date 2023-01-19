@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.1.0
 
-13 January 2023
+19 January 2023
 
 
 1. Introduction
@@ -40,7 +40,7 @@ The following methods have been renamed:
 - none
 
 The arguments for the following methods have been changed:
-- none
+- GApplication::log_value() methods now have optional unit parameters
 
 The return value of the following methods has been changed:
 - none
@@ -58,7 +58,9 @@ None
 
 5. Application module
 ---------------------
-None
+Add optional "unit" parameter was added to the GApplication::log_value() 
+methods, and if this parameter is not a zero length string a unit will
+be appended to the output (#4202).
 
 
 6. Base module

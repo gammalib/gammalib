@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GApplication.hpp - GammaLib application base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2022 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2023 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -103,13 +103,16 @@ public:
                                                const bool&        linefeed = true);
     void                            log_value(const GChatter&    chatter,
                                               const std::string& name,
-                                              const std::string& value);
+                                              const std::string& value,
+                                              const std::string& unit = "");
     void                            log_value(const GChatter&    chatter,
                                               const std::string& name,
-                                              const int&         value);
+                                              const int&         value,
+                                              const std::string& unit = "");
     void                            log_value(const GChatter&    chatter,
                                               const std::string& name,
-                                              const double&      value);
+                                              const double&      value,
+                                              const std::string& unit = "");
     void                            log_header1(const GChatter&    chatter,
                                                 const std::string& header);
     void                            log_header2(const GChatter&    chatter,

@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GApplication.cpp - GammaLib application base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2022 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2023 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -885,13 +885,15 @@ void GApplication::log_string(const GChatter&    chatter,
  * @param[in] chatter Minimum required chattiness
  * @param[in] name Parameter name string
  * @param[in] value Value string
+ * @param[in] unit Value unit string
  *
  * Writes a parameter value into the log file if chattiness is at least
  * @p chatter.
  ***************************************************************************/
 void GApplication::log_value(const GChatter&    chatter,
                              const std::string& name,
-                             const std::string& value)
+                             const std::string& value,
+                             const std::string& unit)
 {
     // Get chattiness of application
     GChatter chattiness = static_cast<GChatter>((&m_pars["chatter"])->integer());
@@ -900,7 +902,11 @@ void GApplication::log_value(const GChatter&    chatter,
     // required chattiness
     if (chattiness >= chatter) {
         log << gammalib::parformat(name);
-        log << value << std::endl;
+        log << value;
+        if (!unit.empty()) {
+            log << " " << unit;
+        }
+        log << std::endl;
     }
 
     // Return
@@ -914,13 +920,15 @@ void GApplication::log_value(const GChatter&    chatter,
  * @param[in] chatter Minimum required chattiness
  * @param[in] name Parameter name string
  * @param[in] value Integer value
+ * @param[in] unit Value unit string
  *
  * Writes a parameter value into the log file if chattiness is at least
  * @p chatter.
  ***************************************************************************/
 void GApplication::log_value(const GChatter&    chatter,
                              const std::string& name,
-                             const int&         value)
+                             const int&         value,
+                             const std::string& unit)
 {
     // Get chattiness of application
     GChatter chattiness = static_cast<GChatter>((&m_pars["chatter"])->integer());
@@ -929,7 +937,11 @@ void GApplication::log_value(const GChatter&    chatter,
     // required chattiness
     if (chattiness >= chatter) {
         log << gammalib::parformat(name);
-        log << value << std::endl;
+        log << value;
+        if (!unit.empty()) {
+            log << " " << unit;
+        }
+        log << std::endl;
     }
 
     // Return
@@ -943,13 +955,15 @@ void GApplication::log_value(const GChatter&    chatter,
  * @param[in] chatter Minimum required chattiness
  * @param[in] name Parameter name string
  * @param[in] value Floating point value
+ * @param[in] unit Value unit string
  *
  * Writes a parameter value into the log file if chattiness is at least
  * @p chatter.
  ***************************************************************************/
 void GApplication::log_value(const GChatter&    chatter,
                              const std::string& name,
-                             const double&      value)
+                             const double&      value,
+                             const std::string& unit)
 {
     // Get chattiness of application
     GChatter chattiness = static_cast<GChatter>((&m_pars["chatter"])->integer());
@@ -958,7 +972,11 @@ void GApplication::log_value(const GChatter&    chatter,
     // required chattiness
     if (chattiness >= chatter) {
         log << gammalib::parformat(name);
-        log << value << std::endl;
+        log << value;
+        if (!unit.empty()) {
+            log << " " << unit;
+        }
+        log << std::endl;
     }
 
     // Return
