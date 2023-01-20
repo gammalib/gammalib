@@ -1,8 +1,9 @@
-2023-01-19
+2023-01-20
 
         * Version 2.1.0 released
         ========================
 
+        Add GIntegral::adaptive_gauss_kronrod() method (#4204)
         Add optional unit parameter to GApplication::log_value() methods (#4202)
         Fix segfault on saving empty GModelSpectralTable (#4198)
         Implement response vector cache storage in FITS file (#4159)

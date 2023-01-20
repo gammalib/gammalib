@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 test_GNumerics.hpp - test numerics modules              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2023 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -105,7 +105,9 @@ public:
     void                   test_integral(void);
     void                   test_integrals(void);
     void                   test_romberg_integration(void);
+    void                   test_trapzd_integration(void);
     void                   test_adaptive_simpson_integration(void);
+    void                   test_adaptive_gauss_kronrod_integration(void);
     void                   test_gauss_kronrod_integration(void);
 
 private:

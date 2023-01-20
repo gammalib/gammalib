@@ -23,6 +23,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`4204 <https://cta-redmine.irap.omp.eu/issues/4204>`_] -
+  Add ``GIntegral::adaptive_gauss_kronrod()`` method
 * [`4202 <https://cta-redmine.irap.omp.eu/issues/4202>`_] -
   Add optional unit parameter to ``GApplication::log_value()`` methods
 * [`4159 <https://cta-redmine.irap.omp.eu/issues/4159>`_] -

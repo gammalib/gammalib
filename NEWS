@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.1.0
 
-19 January 2023
+20 January 2023
 
 
 1. Introduction
@@ -22,6 +22,7 @@ The following classes have been renamed:
 
 The following methods have been added:
 - GNdarray::index(int&)
+- GIntegral::adaptive_gauss_kronrod()
 - GModelSpectralTable::nspectra()
 - GModelSpectralTable::scale_energy()
 - GModelSpectralTable::has_energy_scale()
@@ -92,6 +93,9 @@ table model (#4069).
 
 10. Numerics module
 -------------------
+Added GIntegral::adaptive_gauss_kronrod() method to adaptively compute the 
+Gauss-Lobatto-Kronrod integral of a kernel function (#4204).
+
 Added GNdarray::index(int&) method to return the index vector from an array element
 index (#4069).
 

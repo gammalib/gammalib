@@ -1,7 +1,7 @@
 /***************************************************************************
  *                test_GNumerics.cpp  -  test numerics modules             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2020 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2023 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -66,8 +66,12 @@ void TestGNumerics::set(void)
            "Test GIntegrals");
     append(static_cast<pfunction>(&TestGNumerics::test_romberg_integration),
            "Test Romberg integration");
+    append(static_cast<pfunction>(&TestGNumerics::test_trapzd_integration),
+           "Test Trapezoidal integration");
     append(static_cast<pfunction>(&TestGNumerics::test_adaptive_simpson_integration),
            "Test adaptive Simpson integration");
+    append(static_cast<pfunction>(&TestGNumerics::test_adaptive_gauss_kronrod_integration),
+           "Test adaptive Gauss-Kronrod integration");
     append(static_cast<pfunction>(&TestGNumerics::test_gauss_kronrod_integration),
            "Test Gauss-Kronrod integration");
 
@@ -577,6 +581,8 @@ void TestGNumerics::test_integral(void)
     // Test integral and integrand allocation
     Gauss     integrand(m_sigma);
     GIntegral integral(&integrand);
+    test_value(integral.iter(), 0, "Check initial iterations");
+    test_value(integral.calls(), 0, "Check initial calls");
 
     // Exit test
     return;
@@ -631,7 +637,7 @@ void TestGNumerics::test_romberg_integration(void)
 
     // Integrate over the entire Gaussian
     double result = integral.romberg(-10.0*m_sigma, 10.0*m_sigma);
-    test_value(result, 1.0, 1.0e-6, "Check full integration result");
+    test_value(result, 1.0, 1.0e-6, "Check full interval integration result");
 
     // Test [-1sigma, 1sigma]
     result = integral.romberg(-m_sigma, m_sigma);
@@ -640,6 +646,34 @@ void TestGNumerics::test_romberg_integration(void)
 
     // Test [0.0, 1sigma]
     result = integral.romberg(0.0, m_sigma);
+    test_value(result, 0.34134475, 1.0e-6,
+               "Check [0, 1sigma] integration results");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test Trapezoidal integration
+ ***************************************************************************/
+void TestGNumerics::test_trapzd_integration(void)
+{
+    // Set-up integral
+    Gauss     integrand(m_sigma);
+    GIntegral integral(&integrand);
+
+    // Integrate over the entire Gaussian
+    double result = integral.trapzd(-10.0*m_sigma, 10.0*m_sigma, 100);
+    test_value(result, 1.0, 1.0e-6, "Check full interval integration result");
+
+    // Test [-1sigma, 1sigma]
+    result = integral.trapzd(-m_sigma, m_sigma, 100);
+    test_value(result, 0.68268948, 1.0e-6,
+               "Check [-1sigma, 1sigma] integration results");
+
+    // Test [0.0, 1sigma]
+    result = integral.trapzd(0.0, m_sigma, 100);
     test_value(result, 0.34134475, 1.0e-6,
                "Check [0, 1sigma] integration results");
 
@@ -659,7 +693,7 @@ void TestGNumerics::test_adaptive_simpson_integration(void)
 
     // Integrate over the entire Gaussian
     double result = integral.adaptive_simpson(-10.0*m_sigma, 10.0*m_sigma);
-    test_value(result, 1.0, 1.0e-6, "Check full integration result");
+    test_value(result, 1.0, 1.0e-6, "Check full interval integration result");
 
     // Test [-1sigma, 1sigma]
     result = integral.adaptive_simpson(-m_sigma, m_sigma);
@@ -669,6 +703,35 @@ void TestGNumerics::test_adaptive_simpson_integration(void)
 
     // Test [0.0, 1sigma]
     result = integral.adaptive_simpson(0.0, m_sigma);
+    test_value(result, 0.34134475, 1.0e-6,
+               "Check [0, 1sigma] integration results");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test adaptive Gauss-Kronrod integration
+ ***************************************************************************/
+void TestGNumerics::test_adaptive_gauss_kronrod_integration(void)
+{
+    // Set-up integral
+    Gauss     integrand(m_sigma);
+    GIntegral integral(&integrand);
+
+    // Integrate over the entire Gaussian
+    double result = integral.adaptive_gauss_kronrod(-10.0*m_sigma, 10.0*m_sigma);
+    test_value(result, 1.0, 1.0e-6, "Check full interval integration result");
+
+    // Test [-1sigma, 1sigma]
+    result = integral.adaptive_gauss_kronrod(-m_sigma, m_sigma);
+    test_value(result, 0.68268948, 1.0e-6,
+               "Check [-1sigma, 1sigma] integration results");
+
+
+    // Test [0.0, 1sigma]
+    result = integral.adaptive_gauss_kronrod(0.0, m_sigma);
     test_value(result, 0.34134475, 1.0e-6,
                "Check [0, 1sigma] integration results");
 
@@ -688,7 +751,7 @@ void TestGNumerics::test_gauss_kronrod_integration(void)
 
     // Integrate over the entire Gaussian
     double result = integral.gauss_kronrod(-10.0*m_sigma, 10.0*m_sigma);
-    test_value(result, 1.0, 1.0e-6, "Check full integration result");
+    test_value(result, 1.0, 1.0e-6, "Check full interval integration result");
 
     // Test [-1sigma, 1sigma]
     result = integral.gauss_kronrod(-m_sigma, m_sigma);

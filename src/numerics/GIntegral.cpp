@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GIntegral.cpp - Integration class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2023 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,6 +28,7 @@
 #include <cmath>            // std::abs()
 #include <vector>
 #include <algorithm>        // std::sort
+#include <limits>           // numeric_limits
 #include "GIntegral.hpp"
 #include "GException.hpp"
 #include "GTools.hpp"
@@ -433,7 +434,7 @@ double GIntegral::romberg(const double& a, const double& b, const int& order)
     m_calls      = 0;
     m_has_abserr = false;
     m_has_relerr = false;
-    
+
     // Continue only if integration range is valid
     if (b > a) {
 
@@ -541,7 +542,7 @@ double GIntegral::romberg(const double& a, const double& b, const int& order)
                 gammalib::warning(origin, m_message);
             }
         }
-    
+
     } // endif: integration range was valid
 
     // Return result
@@ -596,21 +597,21 @@ double GIntegral::trapzd(const double& a, const double& b, const int& n,
     if (a == b) {
         result = 0.0;
     }
-    
+
     // ... otherwise use trapeziodal rule
     else {
-    
+
         // Case A: Only a single step is requested
         if (n == 1) {
-        
+
             // Evaluate integrand at boundaries
             double y_a = m_kernel->eval(a);
             double y_b = m_kernel->eval(b);
             m_calls += 2;
-            
+
             // Compute result
             result = 0.5*(b-a)*(y_a + y_b);
-            
+
         } // endif: only a single step was requested
 
         // Case B: More than a single step is requested
@@ -660,20 +661,20 @@ double GIntegral::trapzd(const double& a, const double& b, const int& n,
             double x   = a + 0.5*del;
             double sum = 0.0;
             for (int j = 0; j < it; ++j, x+=del) {
-                
+
                 // Evaluate integrand
                 double y = m_kernel->eval(x);
                 m_calls++;
 
                 // Add integrand
                 sum += y;
-                
+
             } // endfor: looped over steps
 
             // Set result
             result = 0.5*(result + (b-a)*sum/tnm);
         }
-        
+
     } // endelse: trapeziodal rule was applied
 
     // Return result
@@ -723,7 +724,7 @@ double GIntegral::adaptive_simpson(const double& a, const double& b) const
     double fb = m_kernel->eval(b);
     double fc = m_kernel->eval(c);
     m_calls  += 3;
-    
+
     // Compute integral using Simpson's rule
     double S = (h/6.0) * (fa + 4.0*fc + fb);
 
@@ -750,6 +751,99 @@ double GIntegral::adaptive_simpson(const double& a, const double& b) const
             gammalib::warning(origin, m_message);
         }
     }
+
+    // Return result
+    return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Adaptive Gauss-Lobatto-Kronrod integration
+ *
+ * @param[in] a Left integration boundary.
+ * @param[in] b Right integration boundary.
+ * @return Integral of kernel over interval [a,b].
+ *
+ * Integrates the function using an adaptive Gauss-Lobatto method with a
+ * Kronrod extension.
+ ***************************************************************************/
+double GIntegral::adaptive_gauss_kronrod(const double& a, const double& b) const
+{
+    // Set constants
+    const double alpha = std::sqrt(2.0/3.0);
+    const double beta  = 1.0/std::sqrt(5.0);
+    const double x1    = 0.942882415695480;
+    const double x2    = 0.641853342345781;
+    const double x3    = 0.236383199662150;
+    const double x[12] = {0,-x1,-alpha,-x2,-beta,-x3,0.0,x3,beta,x2,alpha,x1};
+    const double eps   = std::numeric_limits<double>::epsilon();
+
+    // Set tolerance, assuring that the tolerance is not smaller than the
+    // machine precision
+    double tol = (m_eps < 10.0*eps) ? 10.0 * eps : m_eps;
+
+    // Initialise integration status information
+    m_isvalid    = true;
+    m_iter       = 0;
+    m_calls      = 0;
+    m_has_abserr = false;
+    m_has_relerr = false;
+    m_terminate  = true;
+
+    // Allocate result storage array
+    double y[13];
+
+    // Compute midpoint and step size
+    double m = 0.5 * (a+b);
+    double h = 0.5 * (b-a);
+
+    // Evaluate function at end points
+    double fa = m_kernel->eval(a);
+    double fb = m_kernel->eval(b);
+    m_calls  += 2;
+
+    // Store end points
+    y[0]  = fa;
+    y[12] = fb;
+
+    // Evaluate function at intermediate points
+    for (int i = 1; i < 12; ++i) {
+        y[i] = m_kernel->eval(m + x[i]*h);
+        m_calls++;
+    }
+
+    // 4-point Gauss-Lobatto formula
+    double i2 = (h/6.0)*(y[0]+y[12]+5.0*(y[4]+y[8]));
+
+    // 7-point Konrod extension
+    double i1 = (h/1470.0) * ( 77.0 * (y[0]+y[12])+
+                              432.0 * (y[2]+y[10])+
+                              625.0 * (y[4]+y[8])+
+                              672.0 * y[6]);
+
+    // 13-point Konrod extension
+    double is = h*(0.0158271919734802 * (y[0]+y[12])+
+                   0.0942738402188500 * (y[1]+y[11])+
+                   0.155071987336585  * (y[2]+y[10])+
+                   0.188821573960182  * (y[3]+y[9])+
+                   0.199773405226859  * (y[4]+y[8])+
+                   0.224926465333340  * (y[5]+y[7])+
+                   0.242611071901408  * y[6]);
+
+    // Estimate errors
+    double erri1 = std::abs(i1-is);
+    double erri2 = std::abs(i2-is);
+
+    // Check on convergence
+    double r     = (erri2 != 0.0)       ? erri1/erri2 : 1.0;
+    double toler = (r > 0.0 && r < 1.0) ? tol/r       : tol;
+    if (is == 0.0) {
+        is = b-a;
+    }
+
+    // Call helper
+    is           = std::abs(is);
+    double value = adaptive_gauss_kronrod_aux(a, b, fa, fb, is, toler);
 
     // Return result
     return value;
@@ -929,9 +1023,9 @@ double GIntegral::gauss_kronrod(const double& a, const double& b) const
                                  gammalib::str(b)+")";
             gammalib::warning(origin, m_message);
         }
-        
+
     } while (false); // end of main loop
-    
+
     // Return result
     return result;
 }
@@ -1191,7 +1285,7 @@ double GIntegral::adaptive_simpson_aux(const double& a, const double& b,
     double fd = m_kernel->eval(d);
     double fe = m_kernel->eval(e);
     m_calls  += 2;
-    
+
     // Compute integral using Simpson's rule for the left and right interval
     double h12    = h / 12.0;
     double Sleft  = h12 * (fa + 4.0*fd + fc);
@@ -1206,18 +1300,93 @@ double GIntegral::adaptive_simpson_aux(const double& a, const double& b,
 //    if (std::abs(S2 - S) <= 15.0 * m_eps * std::abs(S2)) {
         value = S2 + (S2 - S)/15.0;
     }
-    
+
     // ... else if the maximum recursion depth was reached then compute the
     // result and signal result invalidity
     else if (bottom <= 0) {
         value     = S2 + (S2 - S)/15.0;
         m_isvalid = false;
     }
-    
+
     // ... otherwise call this method recursively
     else {
         value = adaptive_simpson_aux(a, c, 0.5*eps, Sleft,  fa, fc, fd, bottom-1) +
                 adaptive_simpson_aux(c, b, 0.5*eps, Sright, fc, fb, fe, bottom-1);
+    }
+
+    // Return result
+    return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Adaptive Gauss-Lobatto-Kronrod integration helper
+ *
+ * @param[in] a Left integration boundary.
+ * @param[in] b Right integration boundary.
+ * @param[in] fa Function value at the left integration boundary.
+ * @param[in] fb Function value at the right integration boundary.
+ * @param[in] is 13-point Kronrod extension of previous step.
+ * @return Integral of kernel over interval [a,b].
+ *
+ * Integrates the function using an adaptive Gauss-Lobatto method with a
+ * Kronrod extension.
+ ***************************************************************************/
+double GIntegral::adaptive_gauss_kronrod_aux(const double& a,
+                                             const double& b,
+                                             const double& fa,
+                                             const double& fb,
+                                             const double& is,
+                                             const double& toler) const
+{
+    // Set constants
+    const double alpha = std::sqrt(2.0/3.0);
+    const double beta  = 1.0/std::sqrt(5.0);
+
+    // Initialise value
+    double value = 0.0;
+
+    // Compute midpoint and step size
+    double m = 0.5*(a+b);
+    double h = 0.5*(b-a);
+
+    // Compute intermediate points
+    double mll = m - alpha*h;
+    double ml  = m - beta*h;
+    double mr  = m + beta*h;
+    double mrr = m + alpha*h;
+
+    // Evaluate function at intermediate points
+    double fmll = m_kernel->eval(mll);
+    double fml  = m_kernel->eval(ml);
+    double fm   = m_kernel->eval(m);
+    double fmr  = m_kernel->eval(mr);
+    double fmrr = m_kernel->eval(mrr);
+    m_calls    += 5;
+
+    // 4-point Gauss-Lobatto formula
+    double i2 = h/6.0*(fa+fb+5.0*(fml+fmr));
+
+    // 7-point Konrod extension
+    double i1 = h/1470.0*(77.0*(fa+fb)+432.0*(fmll+fmrr)+625.0*(fml+fmr)+672.0*fm);
+
+    // Check for convergence
+    if (std::abs(i1-i2) <= toler*is || mll <= a || b <= mrr) {
+        if ((mll <= a || b <= mrr) && m_terminate) {
+           m_isvalid   = false;
+           m_terminate = false;
+        }
+        value = i1;
+    }
+
+    // ... otherwise subdivide interval
+    else {
+        value = adaptive_gauss_kronrod_aux(a,  mll,   fa, fmll, is, toler) +
+                adaptive_gauss_kronrod_aux(mll, ml, fmll,  fml, is, toler) +
+                adaptive_gauss_kronrod_aux(ml,   m,  fml,   fm, is, toler) +
+                adaptive_gauss_kronrod_aux(m,   mr,   fm,  fmr, is, toler) +
+                adaptive_gauss_kronrod_aux(mr, mrr,  fmr, fmrr, is, toler) +
+                adaptive_gauss_kronrod_aux(mrr,  b, fmrr,   fb, is, toler);
     }
 
     // Return result

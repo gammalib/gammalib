@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GIntegral.i - Integration class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2023 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -71,6 +71,7 @@ public:
     double             trapzd(const double& a, const double& b,
                               const int& n = 1, double result = 0.0);
     double             adaptive_simpson(const double& a, const double& b) const;
+    double             adaptive_gauss_kronrod(const double& a, const double& b) const;
     double             gauss_kronrod(const double& a, const double& b) const;
 };
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GIntegral.hpp - Integration class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2023 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -83,6 +83,7 @@ public:
                               const int&    n = 1,
                               double        result = 0.0);
     double             adaptive_simpson(const double& a, const double& b) const;
+    double             adaptive_gauss_kronrod(const double& a, const double& b) const;
     double             gauss_kronrod(const double& a, const double& b) const;
     std::string        print(const GChatter& chatter = NORMAL) const;
 
@@ -97,6 +98,10 @@ protected:
                                 const double& fa, const double& fb,
                                 const double& fc,
                                 const int& bottom) const;
+    double adaptive_gauss_kronrod_aux(const double& a, const double& b,
+                                      const double& fa, const double& fb,
+                                      const double& is,
+                                      const double& toler) const;
     double rescale_error(double err,
                          const double& result_abs,
                          const double& result_asc) const;
@@ -117,6 +122,7 @@ protected:
     mutable double      m_abserr;     //!< Absolute integration error
     mutable double      m_relerr;     //!< Absolute integration error
     mutable std::string m_message;    //!< Status message (if result is invalid)
+    mutable bool        m_terminate;  //!< Signals termination of subdivision
 };
 
 
