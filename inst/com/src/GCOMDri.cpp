@@ -45,7 +45,6 @@
 #include "GCOMOads.hpp"
 #include "GCOMTim.hpp"
 #include "GCOMStatus.hpp"
-#include "GCOMSupport.hpp"
 #include "GCOMObservation.hpp"
 #include "GCOMEventList.hpp"
 #include "GCOMSelection.hpp"

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCOMDri.hpp - COMPTEL Data Space class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2022 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017-2023 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -59,6 +59,8 @@ namespace gammalib {
  * @brief COMPTEL Data Space class
  ***************************************************************************/
 class GCOMDri : public GBase {
+
+    friend class GCOMDris;
 
 public:
     // Constructors and destructors

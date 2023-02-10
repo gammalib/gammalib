@@ -34,8 +34,6 @@
 #include "GContainer.hpp"
 
 /* __ Forward declarations _______________________________________________ */
-//class GFilename;
-//class GFitsTable;
 
 /* __ Constants __________________________________________________________ */
 
@@ -75,6 +73,9 @@ public:
     void           remove(const int& index);
     void           reserve(const int& num);
     void           extend(const GCOMDris& dris);
+    void           compute_drws(const GCOMObservation& obs,
+                                const GCOMSelection&   select = GCOMSelection(),
+                                const double&          zetamin = 5.0);
     std::string    print(const GChatter& chatter = NORMAL) const;
 
 protected:
