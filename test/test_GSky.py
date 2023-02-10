@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib sky module.
 #
-# Copyright (C) 2012-2021 Juergen Knoedlseder
+# Copyright (C) 2012-2023 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -211,7 +211,7 @@ class Test(gammalib.GPythonTestSuite):
         sum = 0.0
         for pix in map:
             sum += pix
-        self.test_value(sum, 16.0)        
+        self.test_value(sum, 16.0)
 
         # Addition operator
         map_res = map + map_b
@@ -240,6 +240,17 @@ class Test(gammalib.GPythonTestSuite):
         self.test_value(map_res[1], 3.0/2.0)
         self.test_value(map_res[2], 5.0/3.0)
         self.test_value(map_res[3], 7.0/4.0)
+
+        # Equality operator
+        self.test_assert(map == map, 'Check map equality')
+
+        # Inequality operator
+        map_ineq1 = gammalib.GSkyMap('TAN', 'CEL', 83.6331, 22.0145, -3.7, 2.6, 2, 2)
+        map_ineq2 = gammalib.GSkyMap('CAR', 'CEL', 0.0, 0.0, -3.7, 2.6, 2, 2)
+        map_ineq3 = gammalib.GSkyMap('CAR', 'CEL', 83.6331, 22.0145, -3.7, 2.6, 2, 3)
+        self.test_assert(map != map_ineq1, 'Check map inequality (projection)')
+        self.test_assert(map != map_ineq2, 'Check map inequality (centre)')
+        self.test_assert(map != map_ineq3, 'Check map inequality (pixels)')
 
         # Return
         return

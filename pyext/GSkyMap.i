@@ -1,7 +1,7 @@
 /***************************************************************************
  *                         GSkyMap.i - Sky map class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2023 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -235,6 +235,10 @@ public:
     GSkyMap __itruediv__(const double& factor) {
         self->operator/=(factor);
         return (*self);
+    }
+    // Equality operator
+    bool __is__(const GSkyMap &map) {
+            return (*self) == map;
     }
     // Add pixel access operator as Python array
     PyObject* array(const int& imap = 0) {

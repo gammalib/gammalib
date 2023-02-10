@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.1.0
 
-20 January 2023
+10 February 2023
 
 
 1. Introduction
@@ -23,6 +23,8 @@ The following classes have been renamed:
 The following methods have been added:
 - GNdarray::index(int&)
 - GIntegral::adaptive_gauss_kronrod()
+- GSkyMap::operator==()
+- GSkyMap::operator!=()
 - GModelSpectralTable::nspectra()
 - GModelSpectralTable::scale_energy()
 - GModelSpectralTable::has_energy_scale()
@@ -113,7 +115,9 @@ None
 
 13. Sky module
 --------------
-None
+Added comparison operators for sky map. Sky maps are considered identical if their
+projections are identical, their coordinate definition and their number if pixels.
+The actual content of the map is not relevant (#4209).
 
 
 14. Support module

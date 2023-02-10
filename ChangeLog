@@ -1,8 +1,9 @@
-2023-01-20
+2023-02-10
 
         * Version 2.1.0 released
         ========================
 
+        Add GSkyMap comparison operators (#4209)
         Add GIntegral::adaptive_gauss_kronrod() method (#4204)
         Add optional unit parameter to GApplication::log_value() methods (#4202)
         Fix segfault on saving empty GModelSpectralTable (#4198)

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  test_GSky.cpp - Test sky module                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2022 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2023 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1125,13 +1125,13 @@ void TestGSky::test_GSkyMap(void)
     GSkyMap empty_map;
 
     // Test that empty map is indeed empty
-	test_assert(empty_map.is_empty(), "Check for empty sky map");
-	test_value(empty_map.nmaps(), 0, "Check for no sky maps");
-	test_value(empty_map.npix(), 0, "Check number of empty sky map pixels");
-	test_value(empty_map.nx(), 0, "Check number of empty sky map X pixels");
-	test_value(empty_map.ny(), 0, "Check number of empty sky map X pixels");
-	test_value(empty_map.ndim(), 0, "Check empty sky map dimension");
-	test_value(empty_map.shape().size(), 0, "Check empty sky map shape");
+    test_assert(empty_map.is_empty(), "Check for empty sky map");
+    test_value(empty_map.nmaps(), 0, "Check for no sky maps");
+    test_value(empty_map.npix(), 0, "Check number of empty sky map pixels");
+    test_value(empty_map.nx(), 0, "Check number of empty sky map X pixels");
+    test_value(empty_map.ny(), 0, "Check number of empty sky map X pixels");
+    test_value(empty_map.ndim(), 0, "Check empty sky map dimension");
+    test_value(empty_map.shape().size(), 0, "Check empty sky map shape");
 
     // Test that writing, publishing and printing of empty sky map does not
     // lead to a segmentation fault
@@ -1145,10 +1145,10 @@ void TestGSky::test_GSkyMap(void)
     GSkyMap map_new("CAR", "GAL", 0.0, 0.0, -0.1, 0.1, 100, 100, 2);
 
     // Test map dimensions and shape
-	test_value(map_src.nmaps(), 2, "Check that sky map contains 2 maps");
-	test_value(map_src.ndim(), 1, "Check that sky map has one dimension");
-	test_value(map_src.shape().size(), 1, "Check that sky map has a shape size of 1");
-	test_value(map_src.shape()[0], 2, "Check that sky map has 2 maps");
+    test_value(map_src.nmaps(), 2, "Check that sky map contains 2 maps");
+    test_value(map_src.ndim(), 1, "Check that sky map has one dimension");
+    test_value(map_src.shape().size(), 1, "Check that sky map has a shape size of 1");
+    test_value(map_src.shape()[0], 2, "Check that sky map has 2 maps");
 
     // Fill map pixels
     double total_src = 0.0;
@@ -1179,8 +1179,8 @@ void TestGSky::test_GSkyMap(void)
     total_dst /= 100.0;
     total_new /= 100.0;
     total_ref /= 100.0;
-	test_value(total_dst, total_ref, 1.0e-3, "Test operator+=(GSkyMap)");
-	test_value(total_new, total_ref, 1.0e-3, "Test operator+(GSkyMap)");
+    test_value(total_dst, total_ref, 1.0e-3, "Test operator+=(GSkyMap)");
+    test_value(total_new, total_ref, 1.0e-3, "Test operator+(GSkyMap)");
 
     // Subtract pixels from destination map
     map_new  = map_dst - map_src;
@@ -1196,8 +1196,8 @@ void TestGSky::test_GSkyMap(void)
             total_new += map_dst(pix,k);
         }
     }
-	test_value(total_dst, 0.0, 1.0e-3, "Test operator-=(GSkyMap)");
-	test_value(total_new, 0.0, 1.0e-3, "Test operator-(GSkyMap)");
+    test_value(total_dst, 0.0, 1.0e-3, "Test operator-=(GSkyMap)");
+    test_value(total_new, 0.0, 1.0e-3, "Test operator-(GSkyMap)");
 
     // Check map multiplication
     GSkyMap test_map  = map_src;
@@ -1213,8 +1213,8 @@ void TestGSky::test_GSkyMap(void)
             total_ref  += map_src(pix,k) * map_src(pix,k);
         }
     }
-	test_value(total_test, total_ref, 1.0e-3, "Test operator*=(GSkyMap)");
-	test_value(total_new,  total_ref, 1.0e-3, "Test operator*(GSkyMap)");
+    test_value(total_test, total_ref, 1.0e-3, "Test operator*=(GSkyMap)");
+    test_value(total_new,  total_ref, 1.0e-3, "Test operator*(GSkyMap)");
 
     // Check map division
     test_map   = map_src;
@@ -1230,8 +1230,8 @@ void TestGSky::test_GSkyMap(void)
             total_ref  += map_src(pix,k) / map_src(pix,k);
         }
     }
-	test_value(total_test, total_ref, 1.0e-3, "Test operator/=(GSkyMap)");
-	test_value(total_new,  total_ref, 1.0e-3, "Test operator/(GSkyMap)");
+    test_value(total_test, total_ref, 1.0e-3, "Test operator/=(GSkyMap)");
+    test_value(total_new,  total_ref, 1.0e-3, "Test operator/(GSkyMap)");
 
     // Check map scaling
     test_map   = map_src;
@@ -1242,7 +1242,7 @@ void TestGSky::test_GSkyMap(void)
             total_test += test_map(pix,k);
         }
     }
-	test_value(total_test, total_src*3.3, 1.0e-3, "Test operator*=(double)");
+    test_value(total_test, total_src*3.3, 1.0e-3, "Test operator*=(double)");
 
     // Check map division
     test_map   = map_src;
@@ -1253,7 +1253,7 @@ void TestGSky::test_GSkyMap(void)
             total_test += test_map(pix,k);
         }
     }
-	test_value(total_test, total_src/3.3, 1.0e-3, "Test operator/=(double)");
+    test_value(total_test, total_src/3.3, 1.0e-3, "Test operator/=(double)");
 
     // Check map value addition
     test_map   = map_src;
@@ -1265,7 +1265,7 @@ void TestGSky::test_GSkyMap(void)
             total_test += test_map(pix,k);
         }
     }
-	test_value(total_test, ref, 1.0e-3, "Test operator+=(double)");
+    test_value(total_test, ref, 1.0e-3, "Test operator+=(double)");
 
     // Check map value subtraction
     test_map   = map_src;
@@ -1277,7 +1277,11 @@ void TestGSky::test_GSkyMap(void)
             total_test += test_map(pix,k);
         }
     }
-	test_value(total_test, ref, 1.0e-3, "Test operator-=(double)");
+    test_value(total_test, ref, 1.0e-3, "Test operator-=(double)");
+
+    // Test equality opeators
+    test_assert(map_src == map_src, "Check map equality");
+    test_assert(map_src != map_dst, "Check map inequality");
 
     // Save maps
     map_src.save("test_map_src.fits", true);
@@ -1290,8 +1294,8 @@ void TestGSky::test_GSkyMap(void)
     for (int pix = 0; pix < map_stacked.npix(); ++pix) {
         total_stacked += map_stacked(pix);
     }
-	test_value(total_stacked, total_src, 1.0e-3, "Test stack_maps() method");
-	test_value(map_stacked.nmaps(), 1, "Test stack_maps() method");
+    test_value(total_stacked, total_src, 1.0e-3, "Test stack_maps() method");
+    test_value(map_stacked.nmaps(), 1, "Test stack_maps() method");
 
     // Test total counts computation
     GNdarray counts_spectrum = map_src.counts();
@@ -1299,12 +1303,12 @@ void TestGSky::test_GSkyMap(void)
     for (int i = 0; i < counts_spectrum.size(); ++i) {
         total_counts += counts_spectrum(i);
     }
-	test_value(total_counts, total_src, 1.0e-3, "Test counts() method");
-	test_value(counts_spectrum.size(), map_src.nmaps(), "Test counts() method");
+    test_value(total_counts, total_src, 1.0e-3, "Test counts() method");
+    test_value(counts_spectrum.size(), map_src.nmaps(), "Test counts() method");
 
     // Test total flux computation
     GNdarray flux_spectrum = map_src.flux();
-	test_value(flux_spectrum.size(), map_src.nmaps(), "Test flux() method");
+    test_value(flux_spectrum.size(), map_src.nmaps(), "Test flux() method");
 
     // Test flux in region methods
     GSkyRegionCircle    gc_circle(266.40499, -28.93617, 3.0);
@@ -1333,8 +1337,8 @@ void TestGSky::test_GSkyMap(void)
             total_more += map_more(pix,k);
         }
     }
-	test_value(total_more, total_src, 1.0e-3, "Test nmaps() method with more maps");
-	test_value(map_more.nmaps(), 4, "Test nmaps() method with more maps");
+    test_value(total_more, total_src, 1.0e-3, "Test nmaps() method with more maps");
+    test_value(map_more.nmaps(), 4, "Test nmaps() method with more maps");
     GSkyMap map_less = map_src;
     map_less.nmaps(1);
     double total_less = 0.0;
@@ -1343,8 +1347,8 @@ void TestGSky::test_GSkyMap(void)
             total_less += map_less(pix,k);
         }
     }
-	test_value(total_less, 0.5*total_src, 1.0e-3, "Test nmaps() method with less maps");
-	test_value(map_less.nmaps(), 1, "Test nmaps() method with less maps");
+    test_value(total_less, 0.5*total_src, 1.0e-3, "Test nmaps() method with less maps");
+    test_value(map_less.nmaps(), 1, "Test nmaps() method with less maps");
 
     // Test map extraction
     GSkyMap map_extract = map_src.extract(0);
@@ -1354,8 +1358,8 @@ void TestGSky::test_GSkyMap(void)
             total_extract += map_extract(pix,k);
         }
     }
-	test_value(total_extract, 0.5*total_src, 1.0e-3, "Test extract() method with 1 map");
-	test_value(map_extract.nmaps(), 1, "Test extract() method with 1 map");
+    test_value(total_extract, 0.5*total_src, 1.0e-3, "Test extract() method with 1 map");
+    test_value(map_extract.nmaps(), 1, "Test extract() method with 1 map");
     map_extract = map_src.extract(0,2);
     total_extract = 0.0;
     for (int k = 0; k < map_extract.nmaps(); ++k) {
@@ -1363,17 +1367,17 @@ void TestGSky::test_GSkyMap(void)
             total_extract += map_extract(pix,k);
         }
     }
-	test_value(total_extract, total_src, 1.0e-3, "Test extract() method with 2 maps");
-	test_value(map_extract.nmaps(), 2, "Test extract() method with 2 maps");
+    test_value(total_extract, total_src, 1.0e-3, "Test extract() method with 2 maps");
+    test_value(map_extract.nmaps(), 2, "Test extract() method with 2 maps");
 
     // Define one more map for shaping manipulation
     GSkyMap map_shape0("CAR", "GAL", 0.0, 0.0, -1.0, 1.0, 10, 10);
 
     // Test map dimensions and shape
-	test_value(map_shape0.nmaps(), 1, "Check that sky map contains one map");
-	test_value(map_shape0.ndim(), 1, "Check that sky map has one dimension");
-	test_value(map_shape0.shape().size(), 1, "Check that sky map has a shape size of 1");
-	test_value(map_shape0.shape()[0], 1, "Check that sky map has one map");
+    test_value(map_shape0.nmaps(), 1, "Check that sky map contains one map");
+    test_value(map_shape0.ndim(), 1, "Check that sky map has one dimension");
+    test_value(map_shape0.shape().size(), 1, "Check that sky map has a shape size of 1");
+    test_value(map_shape0.shape()[0], 1, "Check that sky map has one map");
 
     // Save map
     map_shape0.save("test_map_shape0.fits", true);
@@ -1382,19 +1386,19 @@ void TestGSky::test_GSkyMap(void)
     GSkyMap map_load_shape0("test_map_shape0.fits");
 
     // Test map dimensions and shape
-	test_value(map_load_shape0.nmaps(), 1, "Check that sky map contains one map");
-	test_value(map_load_shape0.ndim(), 1, "Check that sky map has one dimension");
-	test_value(map_load_shape0.shape().size(), 1, "Check that sky map has a shape size of 1");
-	test_value(map_load_shape0.shape()[0], 1, "Check that sky map has one map");
+    test_value(map_load_shape0.nmaps(), 1, "Check that sky map contains one map");
+    test_value(map_load_shape0.ndim(), 1, "Check that sky map has one dimension");
+    test_value(map_load_shape0.shape().size(), 1, "Check that sky map has a shape size of 1");
+    test_value(map_load_shape0.shape()[0], 1, "Check that sky map has one map");
 
     // Define one more map for shaping manipulation
     GSkyMap map_shape("CAR", "GAL", 0.0, 0.0, -1.0, 1.0, 10, 10, 12);
 
     // Test initial map dimensions and shape
-	test_value(map_shape.nmaps(), 12, "Check that sky map contains 12 maps");
-	test_value(map_shape.ndim(), 1, "Check that sky map has one dimension");
-	test_value(map_shape.shape().size(), 1, "Check that sky map has a shape size of 1");
-	test_value(map_shape.shape()[0], 12, "Check that sky map has 12 maps");
+    test_value(map_shape.nmaps(), 12, "Check that sky map contains 12 maps");
+    test_value(map_shape.ndim(), 1, "Check that sky map has one dimension");
+    test_value(map_shape.shape().size(), 1, "Check that sky map has a shape size of 1");
+    test_value(map_shape.shape()[0], 12, "Check that sky map has 12 maps");
 
     // Save map
     map_shape.save("test_map_shape1.fits", true);
@@ -1403,20 +1407,20 @@ void TestGSky::test_GSkyMap(void)
     GSkyMap map_load_shape1("test_map_shape1.fits");
 
     // Test loaded map dimensions and shape
-	test_value(map_load_shape1.nmaps(), 12, "Check that sky map contains 12 maps");
-	test_value(map_load_shape1.ndim(), 1, "Check that sky map has one dimension");
-	test_value(map_load_shape1.shape().size(), 1, "Check that sky map has a shape size of 1");
-	test_value(map_load_shape1.shape()[0], 12, "Check that sky map has 12 maps");
+    test_value(map_load_shape1.nmaps(), 12, "Check that sky map contains 12 maps");
+    test_value(map_load_shape1.ndim(), 1, "Check that sky map has one dimension");
+    test_value(map_load_shape1.shape().size(), 1, "Check that sky map has a shape size of 1");
+    test_value(map_load_shape1.shape()[0], 12, "Check that sky map has 12 maps");
 
     // Set new map shape
     map_shape.shape(3,4);
 
     // Test map dimensions and shape
-	test_value(map_shape.nmaps(), 12, "Check that sky map contains 12 maps");
-	test_value(map_shape.ndim(), 2, "Check that sky map has two dimensions");
-	test_value(map_shape.shape().size(), 2, "Check that sky map has a shape size of 2");
-	test_value(map_shape.shape()[0], 3, "Check that sky map has 3 maps in first dimension");
-	test_value(map_shape.shape()[1], 4, "Check that sky map has 4 maps in second dimension");
+    test_value(map_shape.nmaps(), 12, "Check that sky map contains 12 maps");
+    test_value(map_shape.ndim(), 2, "Check that sky map has two dimensions");
+    test_value(map_shape.shape().size(), 2, "Check that sky map has a shape size of 2");
+    test_value(map_shape.shape()[0], 3, "Check that sky map has 3 maps in first dimension");
+    test_value(map_shape.shape()[1], 4, "Check that sky map has 4 maps in second dimension");
 
     // Save map
     map_shape.save("test_map_shape2.fits", true);
@@ -1425,22 +1429,22 @@ void TestGSky::test_GSkyMap(void)
     GSkyMap map_load_shape2("test_map_shape2.fits");
 
     // Test map dimensions and shape
-	test_value(map_load_shape2.nmaps(), 12, "Check that sky map contains 12 maps");
-	test_value(map_load_shape2.ndim(), 2, "Check that sky map has two dimensions");
-	test_value(map_load_shape2.shape().size(), 2, "Check that sky map has a shape size of 2");
-	test_value(map_load_shape2.shape()[0], 3, "Check that sky map has 3 maps in first dimension");
-	test_value(map_load_shape2.shape()[1], 4, "Check that sky map has 4 maps in second dimension");
+    test_value(map_load_shape2.nmaps(), 12, "Check that sky map contains 12 maps");
+    test_value(map_load_shape2.ndim(), 2, "Check that sky map has two dimensions");
+    test_value(map_load_shape2.shape().size(), 2, "Check that sky map has a shape size of 2");
+    test_value(map_load_shape2.shape()[0], 3, "Check that sky map has 3 maps in first dimension");
+    test_value(map_load_shape2.shape()[1], 4, "Check that sky map has 4 maps in second dimension");
 
     // Set new map shape
     map_shape.shape(2,3,2);
 
     // Test map dimensions and shape
-	test_value(map_shape.nmaps(), 12, "Check that sky map contains 12 maps");
-	test_value(map_shape.ndim(), 3, "Check that sky map has three dimensions");
-	test_value(map_shape.shape().size(), 3, "Check that sky map has a shape size of 3");
-	test_value(map_shape.shape()[0], 2, "Check that sky map has 2 maps in first dimension");
-	test_value(map_shape.shape()[1], 3, "Check that sky map has 3 maps in second dimension");
-	test_value(map_shape.shape()[2], 2, "Check that sky map has 2 maps in third dimension");
+    test_value(map_shape.nmaps(), 12, "Check that sky map contains 12 maps");
+    test_value(map_shape.ndim(), 3, "Check that sky map has three dimensions");
+    test_value(map_shape.shape().size(), 3, "Check that sky map has a shape size of 3");
+    test_value(map_shape.shape()[0], 2, "Check that sky map has 2 maps in first dimension");
+    test_value(map_shape.shape()[1], 3, "Check that sky map has 3 maps in second dimension");
+    test_value(map_shape.shape()[2], 2, "Check that sky map has 2 maps in third dimension");
 
     // Save map
     map_shape.save("test_map_shape3.fits", true);
@@ -1449,12 +1453,12 @@ void TestGSky::test_GSkyMap(void)
     GSkyMap map_load_shape3("test_map_shape3.fits");
 
     // Test map dimensions and shape
-	test_value(map_load_shape3.nmaps(), 12, "Check that sky map contains 12 maps");
-	test_value(map_load_shape3.ndim(), 3, "Check that sky map has three dimensions");
-	test_value(map_load_shape3.shape().size(), 3, "Check that sky map has a shape size of 3");
-	test_value(map_load_shape3.shape()[0], 2, "Check that sky map has 2 maps in first dimension");
-	test_value(map_load_shape3.shape()[1], 3, "Check that sky map has 3 maps in second dimension");
-	test_value(map_load_shape3.shape()[2], 2, "Check that sky map has 2 maps in third dimension");
+    test_value(map_load_shape3.nmaps(), 12, "Check that sky map contains 12 maps");
+    test_value(map_load_shape3.ndim(), 3, "Check that sky map has three dimensions");
+    test_value(map_load_shape3.shape().size(), 3, "Check that sky map has a shape size of 3");
+    test_value(map_load_shape3.shape()[0], 2, "Check that sky map has 2 maps in first dimension");
+    test_value(map_load_shape3.shape()[1], 3, "Check that sky map has 3 maps in second dimension");
+    test_value(map_load_shape3.shape()[2], 2, "Check that sky map has 2 maps in third dimension");
 
     // Load map for smoothing
     GSkyMap map_smooth(sky_map);
@@ -1475,7 +1479,7 @@ void TestGSky::test_GSkyMap(void)
     for (int pix = 0; pix < map_smooth1.npix(); ++pix) {
         sum_smooth1 += map_smooth1(pix);
     }
-	test_value(sum_smooth1, ref_smooth, "Check DISK smoothing");
+    test_value(sum_smooth1, ref_smooth, "Check DISK smoothing");
 
     // Smooth map using GAUSSIAN kernel
     GSkyMap map_smooth2 = map_smooth;

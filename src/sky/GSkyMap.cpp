@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GSkyMap.cpp - Sky map class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2022 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2023 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -4155,4 +4155,46 @@ GSkyMap clip(const GSkyMap& map, const double& thresh)
 
     // Return sky map
     return result;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                                 Friends                                 =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Equality operator
+ *
+ * @param[in] a First sky map.
+ * @param[in] b Second sky map.
+ * @return True if @p a and @p b are identical.
+ *
+ * Two sky maps are considered identical if they have the same projections,
+ * coordinate definiton and number of pixels. The actual content of the map
+ * does not need to be identical.
+ ***************************************************************************/
+bool operator==(const GSkyMap &a, const GSkyMap &b)
+{
+    // Return result
+    return a.is_same(b);
+}
+
+
+/***********************************************************************//**
+ * @brief Non-equality operator
+ *
+ * @param[in] a First sky map.
+ * @param[in] b Second sky map.
+ * @return True if @p a and @p b are not identical.
+ *
+ * Two sky maps are considered different if they either differ in projections,
+ * coordinate definiton or number of pixels. The actual content of the map
+ * does is not relevant.
+ ***************************************************************************/
+bool operator!=(const GSkyMap &a, const GSkyMap &b)
+{
+    // Return result
+    return !(a == b);
 }

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GSkyMap.hpp - Sky map class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2023 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -88,12 +88,14 @@ class GSkyRegions;
  ***************************************************************************/
 class GSkyMap : public GBase {
 
-	friend GSkyMap sqrt(const GSkyMap& map);
-	friend GSkyMap log(const GSkyMap& map);
-	friend GSkyMap log10(const GSkyMap& map);
-	friend GSkyMap abs(const GSkyMap& map);
-	friend GSkyMap sign(const GSkyMap& map);
+    friend GSkyMap sqrt(const GSkyMap& map);
+    friend GSkyMap log(const GSkyMap& map);
+    friend GSkyMap log10(const GSkyMap& map);
+    friend GSkyMap abs(const GSkyMap& map);
+    friend GSkyMap sign(const GSkyMap& map);
     friend GSkyMap clip(const GSkyMap& map, const double& thresh);
+    friend bool operator==(const GSkyMap &a, const GSkyMap &b);
+    friend bool operator!=(const GSkyMap &a, const GSkyMap &b);
 
 public:
     // Constructors and destructors
