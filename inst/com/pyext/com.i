@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        com.i - COMPTEL module                           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2022 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2023 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -122,5 +122,6 @@
 %include "GCOMBvc.i"
 %include "GCOMBvcs.i"
 %include "GCOMDri.i"
+%include "GCOMDris.i"
 %include "GCOMStatus.i"
 %include "GCOMSelection.i"

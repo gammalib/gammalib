@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile.am for com module                                                #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2016-2022 Juergen Knoedlseder                               #
+# Copyright (C) 2016-2023 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -39,6 +39,7 @@ sources = src/com_helpers_response_vector.cpp \
           src/GCOMSupport.cpp \
           src/GCOMSelection.cpp \
           src/GCOMStatus.cpp \
+          src/GCOMDris.cpp \
           src/GCOMDri.cpp \
           src/GCOMOads.cpp \
           src/GCOMOad.cpp \
@@ -65,6 +66,7 @@ sources = src/com_helpers_response_vector.cpp \
 pkginclude_HEADERS = include/GCOMTools.hpp \
                      include/GCOMSelection.hpp \
                      include/GCOMStatus.hpp \
+                     include/GCOMDris.hpp \
                      include/GCOMDri.hpp \
                      include/GCOMOads.hpp \
                      include/GCOMOad.hpp \
