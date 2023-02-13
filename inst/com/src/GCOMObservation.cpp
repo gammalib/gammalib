@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCOMObservation.cpp - COMPTEL Observation class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2022 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2023 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -55,6 +55,7 @@ const GObservationRegistry g_obs_com_registry(&g_obs_com_seed);
 #define G_READ                          "GCOMObservation::read(GXmlElement&)"
 #define G_WRITE                        "GCOMObservation::write(GXmlElement&)"
 #define G_LOAD_DRB                    "GCOMObservation::load_drb(GFilename&)"
+#define G_LOAD_DRW                    "GCOMObservation::load_drw(GFilename&)"
 #define G_LOAD_DRG                    "GCOMObservation::load_drg(GFilename&)"
 #define G_DRM                                "GCOMObservation::drm(GModels&)"
 #define G_COMPUTE_DRB "GCOMObservation::compute_drb(std::string&, GCOMDri&, "\
@@ -119,6 +120,7 @@ GCOMObservation::GCOMObservation(const GXmlElement& xml) : GObservation()
  *
  * @param[in] dre Event cube.
  * @param[in] drb Background cube.
+ * @param[in] drw Weighting cube.
  * @param[in] drg Geometry cube.
  * @param[in] drx Exposure map.
  *
@@ -128,6 +130,7 @@ GCOMObservation::GCOMObservation(const GXmlElement& xml) : GObservation()
  ***************************************************************************/
 GCOMObservation::GCOMObservation(const GCOMDri& dre,
                                  const GCOMDri& drb,
+                                 const GCOMDri& drw,
                                  const GCOMDri& drg,
                                  const GCOMDri& drx) : GObservation()
 {
@@ -137,6 +140,7 @@ GCOMObservation::GCOMObservation(const GCOMDri& dre,
     // Store DRIs
     m_events = new GCOMEventCube(dre);
     m_drb    = drb;
+    m_drw    = drw;
     m_drg    = drg;
     m_drx    = drx;
 
@@ -149,6 +153,7 @@ GCOMObservation::GCOMObservation(const GCOMDri& dre,
     m_name     = "unknown";
     m_drename  = "";
     m_drbname  = "";
+    m_drwname  = "";
     m_drgname  = "";
     m_drxname  = "";
 
@@ -162,6 +167,7 @@ GCOMObservation::GCOMObservation(const GCOMDri& dre,
  *
  * @param[in] drename Event cube name.
  * @param[in] drbname Background cube name.
+ * @param[in] drwname Weighting cube name.
  * @param[in] drgname Geometry cube name.
  * @param[in] drxname Exposure map name.
  *
@@ -169,6 +175,7 @@ GCOMObservation::GCOMObservation(const GCOMDri& dre,
  *
  *     DRE - Events cube
  *     DRB - Background model cube
+ *     DRW - Weighting cube
  *     DRG - Geometry factors cube
  *     DRX - Exposure map
  *
@@ -176,6 +183,7 @@ GCOMObservation::GCOMObservation(const GCOMDri& dre,
  ***************************************************************************/
 GCOMObservation::GCOMObservation(const GFilename& drename,
                                  const GFilename& drbname,
+                                 const GFilename& drwname,
                                  const GFilename& drgname,
                                  const GFilename& drxname) : GObservation()
 {
@@ -183,7 +191,7 @@ GCOMObservation::GCOMObservation(const GFilename& drename,
     init_members();
 
     // Load observation
-    load(drename, drbname, drgname, drxname);
+    load(drename, drbname, drwname, drgname, drxname);
 
     // Return
     return;
@@ -459,6 +467,7 @@ double GCOMObservation::npred(const GModel& model) const
  *     <observation name="Crab" id="000001" instrument="COM">
  *       <parameter name="DRE" file="m50438_dre.fits"/>
  *       <parameter name="DRB" file="m34997_drg.fits"/>
+ *       <parameter name="DRW" file="m34997_drw.fits"/>
  *       <parameter name="DRG" file="m34997_drg.fits"/>
  *       <parameter name="DRX" file="m32171_drx.fits"/>
  *       <parameter name="IAQ" value="UNH(1.0-3.0)MeV"/>
@@ -513,6 +522,7 @@ void GCOMObservation::read(const GXmlElement& xml)
         // Get parameters
         std::string drename = gammalib::xml_get_attr(G_READ, xml, "DRE", "file");
         std::string drbname = gammalib::xml_get_attr(G_READ, xml, "DRB", "file");
+        std::string drwname = gammalib::xml_get_attr(G_READ, xml, "DRW", "file");
         std::string drgname = gammalib::xml_get_attr(G_READ, xml, "DRG", "file");
         std::string drxname = gammalib::xml_get_attr(G_READ, xml, "DRX", "file");
         std::string iaqname = gammalib::xml_get_attr(G_READ, xml, "IAQ", "value");
@@ -520,12 +530,13 @@ void GCOMObservation::read(const GXmlElement& xml)
         // Expand file names
         drename                      = gammalib::xml_file_expand(xml, drename);
         drbname                      = gammalib::xml_file_expand(xml, drbname);
+        drwname                      = gammalib::xml_file_expand(xml, drwname);
         drgname                      = gammalib::xml_file_expand(xml, drgname);
         drxname                      = gammalib::xml_file_expand(xml, drxname);
         std::string iaqname_expanded = gammalib::xml_file_expand(xml, iaqname);
 
         // Load observation
-        load(drename, drbname, drgname, drxname);
+        load(drename, drbname, drwname, drgname, drxname);
 
         // Load IAQ by trying first the expanded name as a FITS file and
         // otherwise the unexpanded name
@@ -597,6 +608,7 @@ void GCOMObservation::read(const GXmlElement& xml)
  *     <observation name="Crab" id="000001" instrument="COM">
  *       <parameter name="DRE" file="m50438_dre.fits"/>
  *       <parameter name="DRB" file="m34997_drg.fits"/>
+ *       <parameter name="DRW" file="m34997_drw.fits"/>
  *       <parameter name="DRG" file="m34997_drg.fits"/>
  *       <parameter name="DRX" file="m32171_drx.fits"/>
  *       <parameter name="IAQ" value="UNH(1.0-3.0)MeV"/>
@@ -651,6 +663,10 @@ void GCOMObservation::write(GXmlElement& xml) const
         par = gammalib::xml_need_par(G_WRITE, xml, "DRB");
         par->attribute("file", gammalib::xml_file_reduce(xml, m_drbname));
 
+        // Set DRW parameter
+        par = gammalib::xml_need_par(G_WRITE, xml, "DRW");
+        par->attribute("file", gammalib::xml_file_reduce(xml, m_drwname));
+
         // Set DRG parameter
         par = gammalib::xml_need_par(G_WRITE, xml, "DRG");
         par->attribute("file", gammalib::xml_file_reduce(xml, m_drgname));
@@ -702,15 +718,17 @@ void GCOMObservation::write(GXmlElement& xml) const
  *
  * @param[in] drename Event cube name.
  * @param[in] drbname Background cube name.
+ * @param[in] drwname Weighting cube name.
  * @param[in] drgname Geometry cube name.
  * @param[in] drxname Exposure map name.
  *
- * Load event cube from DRE file, background model from DRB file, geometry
- * factors from DRG file and the exposure map from the DRX file. All files
- * are mandatory.
+ * Load event cube from DRE file, background model from DRB file, weigthing
+ * cube from DRW file, geometry factors from DRG file and the exposure map
+ * from the DRX file. All files are mandatory.
  ***************************************************************************/
 void GCOMObservation::load(const GFilename& drename,
                            const GFilename& drbname,
+                           const GFilename& drwname,
                            const GFilename& drgname,
                            const GFilename& drxname)
 {
@@ -719,6 +737,9 @@ void GCOMObservation::load(const GFilename& drename,
 
     // Load DRB
     load_drb(drbname);
+
+    // Load DRW
+    load_drw(drwname);
 
     // Load DRG
     load_drg(drgname);
@@ -1000,11 +1021,6 @@ std::string GCOMObservation::print(const GChatter& chatter) const
             result.append("\n"+gammalib::parformat("BVCs")+"undefined");
         }
 
-        // Append DRB, DRG and DRX
-        //result.append("\n"+m_drb.print(chatter));
-        //result.append("\n"+m_drg.print(chatter));
-        //result.append("\n"+m_drx.print(chatter));
-
     } // endif: chatter was not silent
 
     // Return result
@@ -1034,10 +1050,12 @@ void GCOMObservation::init_members(void)
     // Initialise members for binned observation
     m_drename.clear();
     m_drbname.clear();
+    m_drwname.clear();
     m_drgname.clear();
     m_drxname.clear();
     m_rspname.clear();
     m_drb.clear();
+    m_drw.clear();
     m_drg.clear();
     m_drx.clear();
     m_ewidth    = 0.0;
@@ -1076,10 +1094,12 @@ void GCOMObservation::copy_members(const GCOMObservation& obs)
     // Copy members for binned observation
     m_drename    = obs.m_drename;
     m_drbname    = obs.m_drbname;
+    m_drwname    = obs.m_drwname;
     m_drgname    = obs.m_drgname;
     m_drxname    = obs.m_drxname;
     m_rspname    = obs.m_rspname;
     m_drb        = obs.m_drb;
+    m_drw        = obs.m_drw;
     m_drg        = obs.m_drg;
     m_drx        = obs.m_drx;
     m_ewidth     = obs.m_ewidth;
@@ -1214,6 +1234,50 @@ void GCOMObservation::load_drb(const GFilename& drbname)
 
 
 /***********************************************************************//**
+ * @brief Load weighting cube from DRW file
+ *
+ * @param[in] drwname DRW filename.
+ *
+ * @exception GException::invalid_value
+ *            DRW data space incompatible with DRE data space.
+ *
+ * Load the weighting cube from the primary image of the specified FITS file.
+ ***************************************************************************/
+void GCOMObservation::load_drw(const GFilename& drwname)
+{
+    // Continue only if filename is not empty
+    if (!drwname.is_empty()) {
+
+        // Open FITS file
+        GFits fits(drwname);
+
+        // Get image
+        const GFitsImage& image = *fits.image("Primary");
+
+        // Read weighting cube
+        m_drw.read(image);
+
+        // Close FITS file
+        fits.close();
+
+        // Check map dimensions
+        if (!check_dri(m_drw)) {
+            std::string msg = "DRW data cube \""+drwname+"\" incompatible with "
+                              "DRE data cube \""+m_drename+"\".";
+            throw GException::invalid_value(G_LOAD_DRW, msg);
+        }
+
+        // Store DRW filename
+        m_drwname = drwname;
+
+    } // endif: DRW filename was empty
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Load geometry factors from DRG file
  *
  * @param[in] drgname DRG filename.
@@ -1245,7 +1309,7 @@ void GCOMObservation::load_drg(const GFilename& drgname)
     if (!check_dri(m_drg)) {
         std::string msg = "DRG data cube \""+drgname+"\" incompatible with "
                           "DRE data cube \""+m_drename+"\".";
-        throw GException::invalid_value(G_LOAD_DRB, msg);
+        throw GException::invalid_value(G_LOAD_DRG, msg);
     }
 
     // Store DRG filename

@@ -349,7 +349,21 @@ void GCOMDris::extend(const GCOMDris& dris)
  * @exception GException::invalid_argument
  *            No event list found in COMPTEL observation.
  *
- * Compute DRW cubes for a COMPTEL observation.
+ * Compute DRW cubes for a COMPTEL observation. DRW cubes are event-rate
+ * weighted geometry cubes, where event rate are time and energy-dependent.
+ *
+ * Three hard-wired energy ranges are defined for which the event rate is
+ * determined on a 5 minutes basis:
+ *
+ *       E < 1.8 MeV
+ *       1.8 < E < 4.3 MeV
+ *       E > 4.3 MeV
+ *
+ * For each superpacket, these event rates are linearly interpolated to the
+ * relevant superpacket time.
+ *
+ * The DRW cubes are normalised so that the sum of each Phibar layer equals
+ * to unity.
  ***************************************************************************/
 void GCOMDris::compute_drws(const GCOMObservation& obs,
                             const GCOMSelection&   select,
@@ -366,6 +380,12 @@ void GCOMDris::compute_drws(const GCOMObservation& obs,
 
     // Continue only if there are DRWs in container
     if (!is_empty()) {
+
+        // Debug
+        #if defined(G_DEBUG_COMPUTE_DRWS)
+        std::cout << "Initialisation" << std::endl;
+        std::cout << "--------------" << std::endl;
+        #endif
 
         // Initialise D1 & D2 module status
         GCOMStatus status;
@@ -397,6 +417,11 @@ void GCOMDris::compute_drws(const GCOMObservation& obs,
             // Set all DRG bins to zero
             m_dris[i].init_cube();
 
+            // Debug
+            #if defined(G_DEBUG_COMPUTE_DRWS)
+            std::cout << m_dris[i].print() << std::endl;
+            #endif
+
         } // endfor: looped over all DRWs
 
         // Get pointer to event list. Throw an exception if the observation
@@ -407,6 +432,12 @@ void GCOMDris::compute_drws(const GCOMObservation& obs,
                               "specify an observation that contains an event list.";
             throw GException::invalid_argument(G_COMPUTE_DRWS, msg);
         }
+
+        // Debug
+        #if defined(G_DEBUG_COMPUTE_DRWS)
+        std::cout << "Determine energy-dependent event rates" << std::endl;
+        std::cout << "--------------------------------------" << std::endl;
+        #endif
 
         // Initialise current time and vectors for computation of node function
         // and vectors for energy-dependent rate interpolation
@@ -494,6 +525,12 @@ void GCOMDris::compute_drws(const GCOMObservation& obs,
 
         } // endfor: looped over events
 
+        // Debug
+        #if defined(G_DEBUG_COMPUTE_DRWS)
+        std::cout << "Compute DRWs" << std::endl;
+        std::cout << "------------" << std::endl;
+        #endif
+
         // Get Good Time Intervals. If a pulsar selection is specified then
         // reduce the Good Time Intervals to the validity intervals of the
         // pulsar emphemerides.
@@ -523,6 +560,29 @@ void GCOMDris::compute_drws(const GCOMObservation& obs,
             // Get Orbit Aspect Data mid-time in seconds
             double time = oad.tstart().secs() + 0.5 * (oad.tstop() - oad.tstart());
 
+            // Compute energy-dependent rates
+            std::vector<double> rates;
+            for (int i = 0; i < size(); ++i) {
+                if (m_dris[i].m_ebounds.emin().MeV() > 4.3) {
+                    rates.push_back(times.interpolate(time, rates2));
+                }
+                else if (m_dris[i].m_ebounds.emin().MeV() > 1.8) {
+                    rates.push_back(times.interpolate(time, rates1));
+                }
+                else {
+                    rates.push_back(times.interpolate(time, rates0));
+                }
+            }
+
+            // Debug
+            #if defined(G_DEBUG_COMPUTE_DRWS)
+            std::cout << "time=" << time;
+            for (int i = 0; i < size(); ++i) {
+                std::cout << " r[" << i << "]=" << rates[i];
+            }
+            std::cout << std::endl;
+            #endif
+
             // Prepare Earth horizon angle computation. The celestial system
             // is reinterpreted as the COMPTEL coordinate system, where the
             // 90 degrees - zenith angle becomes the declination and the azimuth
@@ -535,19 +595,22 @@ void GCOMDris::compute_drws(const GCOMObservation& obs,
             geocentre_comptel.radec_deg(phi_geocentre, 90.0-theta_geocentre);
 
             // Compute geometrical factors for all (Chi, Psi). We assume here
-            // that their size and definition is identical, which checked on
-            // entry
+            // that their size and definition is identical, which was checked
+            // before
             for (int index = 0; index < dri->m_dri.npix(); ++index) {
 
-                // Get sky direction for (Chi, Psi)
-                GSkyDir sky = dri->m_dri.inx2dir(index);
+                // Get sky direction and solid angle for (Chi, Psi)
+                GSkyDir sky   = dri->m_dri.inx2dir(index);
+                double  omega = dri->m_dri.solidangle(index);
 
                 // Convert sky direction to COMPTEL coordinates
                 double theta = oad.theta(sky);
                 double phi   = oad.phi(sky);
 
-                // Compute geometric factor summed over all D1, D2
-                double geometry = dri->compute_geometry(oad.tjd(), theta, phi, select, status);
+                // Compute geometric factor summed over all D1, D2 times
+                // the solid angle of the weighting cube pixel
+                double geometry = dri->compute_geometry(oad.tjd(), theta, phi, select, status) *
+                                  omega;
 
                 // Compute Earth horizon angle as the distance between the Earth
                 // centre in COMPTEL coordinates and the (Chi, Psi) pixel in
@@ -562,32 +625,18 @@ void GCOMDris::compute_drws(const GCOMObservation& obs,
                     // Compute minimum Earth horizon angle for Phibar layer
                     double ehamin = double(iphibar) * dri->m_phibin + zetamin;
 
-                    // Add up geometry if the Earth horizon angle is equal or
-                    // larger than the minimum
+                    // Add up weighted geometry if the Earth horizon angle is
+                    // equal or larger than the minimum
                     if (eha >= ehamin) {
 
                         // Get data space index
                         int inx = index + iphibar * dri->m_dri.npix();
 
-                        // Loop over DRWs and multiply with appopriate rates
+                        // Loop over DRWs and multiply geometry with appopriate
+                        // rates
                         for (int i = 0; i < size(); ++i) {
-
-                            // Set rate by interpolating the precomputed vectors
-                            double rate = 0.0;
-                            if (m_dris[i].m_ebounds.emin().MeV() > 4.3) {
-                                rate = times.interpolate(time, rates2);
-                            }
-                            else if (m_dris[i].m_ebounds.emin().MeV() > 1.8) {
-                                rate = times.interpolate(time, rates1);
-                            }
-                            else {
-                                rate = times.interpolate(time, rates0);
-                            }
-
-                            // Set DRW
-                            m_dris[i][inx] += geometry * rate;
-
-                        } // endfor: looped over DRWs
+                            m_dris[i][inx] += geometry * rates[i];
+                        }
 
                     } // endif: Earth horizon cut passed
 
@@ -597,7 +646,7 @@ void GCOMDris::compute_drws(const GCOMObservation& obs,
 
         } // endfor: looped over Orbit Aspect Data
 
-        // Normalisation Phibar layers of all DRWs to unity
+        // Normalise Phibar layers of all DRWs to unity
         for (int i = 0; i < size(); ++i) {
 
             // Loop over Phibar layers

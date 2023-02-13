@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCOMObservation.i - COMPTEL observation class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2022 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2023 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -41,10 +41,12 @@ public:
     explicit GCOMObservation(const GXmlElement& xml);
     GCOMObservation(const GCOMDri& dre,
                     const GCOMDri& drb,
+                    const GCOMDri& drw,
                     const GCOMDri& drg,
                     const GCOMDri& drx);
     GCOMObservation(const GFilename& drename,
                     const GFilename& drbname,
+                    const GFilename& drwname,
                     const GFilename& drgname,
                     const GFilename& drxname);
     GCOMObservation(const GFilename&              evpname,
@@ -75,6 +77,7 @@ public:
     bool             is_binned(void) const;
     void             load(const GFilename& drename,
                           const GFilename& drbname,
+                          const GFilename& drwname,
                           const GFilename& drgname,
                           const GFilename& drxname);
     void             load(const GFilename&              evpname,
@@ -91,6 +94,7 @@ public:
     const double&    obs_id(void) const;
     const double&    ewidth(void) const;
     const GCOMDri&   drb(void) const;
+    const GCOMDri&   drw(void) const;
     const GCOMDri&   drg(void) const;
     const GCOMDri&   drx(void) const;
     GCOMDri          drm(const GModels& models) const;
@@ -102,6 +106,7 @@ public:
     void             bvcs(const GCOMBvcs& bvcs);
     const GFilename& drename(void) const;
     const GFilename& drbname(void) const;
+    const GFilename& drwname(void) const;
     const GFilename& drgname(void) const;
     const GFilename& drxname(void) const;
     const GFilename& rspname(void) const;
@@ -109,6 +114,7 @@ public:
     const int&       phi_last(void) const;
     void             drename(const GFilename& drename);
     void             drbname(const GFilename& drbname);
+    void             drwname(const GFilename& drwname);
     void             drgname(const GFilename& drgname);
     void             drxname(const GFilename& drxname);
     void             rspname(const GFilename& rspname);
