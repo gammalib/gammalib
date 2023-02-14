@@ -65,6 +65,8 @@ const GObservationRegistry g_obs_com_registry(&g_obs_com_seed);
                                           "GCOMDri&, int&, int&, int&, int&)"
 #define G_COMPUTE_DRB_BGDLIXE         "GCOMObservation::compute_drb_bgdlixe("\
                                           "GCOMDri&, int&, int&, int&, int&)"
+#define G_COMPUTE_DRB_BGDLIXF         "GCOMObservation::compute_drb_bgdlixf("\
+                                          "GCOMDri&, int&, int&, int&, int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -109,6 +111,50 @@ GCOMObservation::GCOMObservation(const GXmlElement& xml) : GObservation()
 
     // Read XML
     read(xml);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Binned observation DRI constructor
+ *
+ * @param[in] dre Event cube.
+ * @param[in] drb Background cube.
+ * @param[in] drg Geometry cube.
+ * @param[in] drx Exposure map.
+ *
+ * Creates COMPTEL observation from DRI instances.
+ *
+ * The method fixes the deadtime correction factor deadc to 0.965.
+ ***************************************************************************/
+GCOMObservation::GCOMObservation(const GCOMDri& dre,
+                                 const GCOMDri& drb,
+                                 const GCOMDri& drg,
+                                 const GCOMDri& drx) : GObservation()
+{
+    // Initialise members
+    init_members();
+
+    // Store DRIs
+    m_events = new GCOMEventCube(dre);
+    m_drb    = drb;
+    m_drg    = drg;
+    m_drx    = drx;
+
+    // Set attributes
+    m_obs_id   = 0;
+    m_ontime   = m_events->gti().ontime();
+    m_deadc    = 0.965;
+    m_livetime = m_deadc * m_ontime;
+    m_ewidth   = m_events->emax().MeV() - m_events->emin().MeV();
+    m_name     = "unknown";
+    m_drename  = "";
+    m_drbname  = "";
+    m_drwname  = "";
+    m_drgname  = "";
+    m_drxname  = "";
 
     // Return
     return;
@@ -901,15 +947,20 @@ GCOMDri GCOMObservation::drm(const GModels& models) const
 /***********************************************************************//**
  * @brief Compute DRB cube
  *
- * @param[in] method Background method (PHINOR, BGDLIXA or BGDLIXE).
+ * @param[in] method Background method (PHINOR, BGDLIXA, BGDLIXE or BGDLIXF).
  * @param[in] drm DRM cube.
- * @param[in] nrunav BGDLIXA: number of bins used for running average.
- * @param[in] navgr BGDLIXA: number of bins used for averaging.
- * @param[in] nincl BGDLIXA: number of Phibar layers to include.
- * @param[in] nexcl BGDLIXA: number of Phibar layers to exclude.
+ * @param[in] nrunav BGDLIXn: number of bins used for running average.
+ * @param[in] navgr BGDLIXn: number of bins used for averaging.
+ * @param[in] nincl BGDLIXn: number of Phibar layers to include.
+ * @param[in] nexcl BGDLIXn: number of Phibar layers to exclude.
  *
- * Computes a COMPTEL DRB cube using either the PHINOR or BGDLIXA method.
- * See the protected methods compute_drb_phinor() and compute_drb_bgdlixa()
+ * Computes a COMPTEL DRB cube using either the PHINOR or BGDLIX method.
+ * There are three variants of the BGFLIX method (BGDLIXA, BGDLIXE and
+ * BGDLIXF). See the protected methods
+ * compute_drb_phinor(),
+ * compute_drb_bgdlixa(),
+ * compute_drb_bgdlixe(), and
+ * compute_drb_bgdlixf()
  * for more information.
  ***************************************************************************/
 void GCOMObservation::compute_drb(const std::string& method,
@@ -928,6 +979,9 @@ void GCOMObservation::compute_drb(const std::string& method,
     }
     else if (method == "BGDLIXE") {
         compute_drb_bgdlixe(drm, nrunav, navgr, nincl, nexcl);
+    }
+    else if (method == "BGDLIXF") {
+        compute_drb_bgdlixf(drm, nrunav, navgr, nincl, nexcl);
     }
     else {
         std::string msg = "Unknown background method \""+method+"\". "
@@ -1957,6 +2011,217 @@ void GCOMObservation::compute_drb_bgdlixe(const GCOMDri& drm,
     }
 
     // Fit Phibar normalised DRG to DRE-DRM
+    for (int ichi = 0; ichi < nchi; ++ichi) {
+
+        // Compute running average window in Chi
+        int kchi_min = ichi - navgr2;
+        int kchi_max = ichi + navgr2;
+        if (kchi_min < 0) {
+            kchi_min = 0;
+        }
+        if (kchi_max >= nchi) {
+            kchi_max = nchi - 1;
+        }
+
+        // Loop over Psi pixels
+        for (int ipsi = 0; ipsi < npsi; ++ipsi) {
+
+            // Compute running average window in Psi
+            int kpsi_min = ipsi - navgr2;
+            int kpsi_max = ipsi + navgr2;
+            if (kpsi_min < 0) {
+                kpsi_min = 0;
+            }
+            if (kpsi_max >= npsi) {
+                kpsi_max = npsi - 1;
+            }
+
+            // Loop over Phibar layers
+            for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
+
+                 // Get Phibar index range for sums
+                int ksel1 = 0;
+                int kex1  = 0;
+                int kex2  = 0;
+                int ksel2 = 0;
+                get_bgdlixa_phibar_indices(iphibar, nincl, nexcl,
+                                           &ksel1, &kex1, &kex2, &ksel2);
+
+                // Initialise sums
+                double sum_dre = 0.0;
+                double sum_drm = 0.0;
+                double sum_dri = 0.0;
+
+                // Compute running average
+                for (int kchi = kchi_min; kchi <= kchi_max; ++kchi) {
+                    for (int kpsi = kpsi_min; kpsi <= kpsi_max; ++kpsi) {
+
+                        // Get index
+                        int kpix = kchi + kpsi * nchi;
+
+                        // Take sum over [ksel1, kex1]
+                        if (kex1 >= 0) {
+                            for (int kphibar = ksel1; kphibar <= kex1; ++kphibar) {
+                                sum_dre += map_dre(kpix, kphibar);
+                                sum_drm += map_drm(kpix, kphibar);
+                                sum_dri += map_dri(kpix, kphibar);
+                            }
+                        }
+
+                        // Take sum over [kxe2, ksel2]
+                        if (kex2 < nphibar) {
+                            for (int kphibar = kex2; kphibar <= ksel2; ++kphibar) {
+                                sum_dre += map_dre(kpix, kphibar);
+                                sum_drm += map_drm(kpix, kphibar);
+                                sum_dri += map_dri(kpix, kphibar);
+                            }
+                        }
+
+                    } // endfor: looped over kpsi
+                } // endfor: looped over kchi
+
+                // Renormalize DRI locally to DRE-DRM
+                int ipix = ichi + ipsi * nchi;
+                if (sum_dri > 0.0) {
+                    double norm            = (sum_dre - sum_drm) / sum_dri;
+                    map_drb(ipix, iphibar) = map_dri(ipix, iphibar) * norm;
+                }
+                else {
+                    map_drb(ipix, iphibar) = 0.0;
+                }
+
+            } // endfor: looped over Phibar layers
+
+        } // endfor: looped over Psi pixels
+
+    } // endfor: looped over Chi pixels
+
+    // Phibar normalise DRB
+    for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
+        double sum_dre = 0.0;
+        double sum_drm = 0.0;
+        double sum_drb = 0.0;
+        for (int ipix = 0; ipix < npix; ++ipix) {
+            sum_dre += map_dre(ipix, iphibar);
+            sum_drm += map_drm(ipix, iphibar);
+            sum_drb += map_drb(ipix, iphibar);
+        }
+        if (sum_drb > 0.0) {
+            double norm = (sum_dre - sum_drm) / sum_drb;
+            for (int ipix = 0; ipix < npix; ++ipix) {
+                map_drb(ipix, iphibar) *= norm;
+            }
+        }
+        else {
+            for (int ipix = 0; ipix < npix; ++ipix) {
+                map_drb(ipix, iphibar) = 0.0;
+            }
+        }
+    }
+
+    // Make sure that DRB is non-negative
+    for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
+        for (int ipix = 0; ipix < npix; ++ipix) {
+            if (map_drb(ipix, iphibar) < 0.0) {
+                map_drb(ipix, iphibar) = 0.0;
+            }
+        }
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Compute DRB cube using BGDLIXF method
+ *
+ * @param[in] drm DRM cube.
+ * @param[in] nrunav Number of bins used for running average.
+ * @param[in] navgr Number of bins used for averaging.
+ * @param[in] nincl Number of Phibar layers to include.
+ * @param[in] nexcl Number of Phibar layers to exclude.
+ *
+ * @exception GException::invalid_value
+ *            Observation does not contain an event cube
+ * @exception GException::invalid_argument
+ *            DRM cube is incompatible with DRE
+ *
+ * Computes a DRB cube using the BGDLIXF method. This method differs from
+ * the BGDLIXE method in the DRW instead of the DRG is used for background
+ * model computation.
+ ***************************************************************************/
+void GCOMObservation::compute_drb_bgdlixf(const GCOMDri& drm,
+                                          const int&     nrunav,
+                                          const int&     navgr,
+                                          const int&     nincl,
+                                          const int&     nexcl)
+{
+    // Extract COMPTEL event cube
+    const GCOMEventCube* cube = dynamic_cast<const GCOMEventCube*>(this->events());
+    if (cube == NULL) {
+        std::string msg = "Observation \""+this->name()+"\" ("+this->id()+") "
+                          "does not contain a COMPTEL event cube. Please "
+                          "specify a COMPTEL observation containing and event "
+                          "cube.";
+        throw GException::invalid_value(G_COMPUTE_DRB_BGDLIXF, msg);
+    }
+
+    // Check DRM
+    if (!check_dri(drm)) {
+        std::string msg = "Specified DRM cube is incompatible with DRE. Please "
+                          "specify a DRM with a data-space definition that is "
+                          "identical to that of the DRE.";
+        throw GException::invalid_argument(G_COMPUTE_DRB_BGDLIXE, msg);
+    }
+
+    // Initialise DRB and scratch DRI by cloning DRW
+    m_drb       = m_drw;
+    GCOMDri dri = m_drw;
+
+    // Get references to relevant sky maps
+    const GSkyMap& map_dre = cube->dre().map();
+    const GSkyMap& map_drm = drm.map();
+    const GSkyMap& map_drw = m_drw.map();
+    GSkyMap&       map_drb = const_cast<GSkyMap&>(m_drb.map());
+    GSkyMap&       map_dri = const_cast<GSkyMap&>(dri.map());
+
+    // Get data space dimensions
+    int nchi    = m_drw.nchi();
+    int npsi    = m_drw.npsi();
+    int nphibar = m_drw.nphibar();
+    int npix    = nchi * npsi;
+
+    // Precompute half running average lengths
+    int navgr2 = int(navgr/2);
+
+    // Initialise DRB and scratch DRI
+    for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
+        for (int ipix = 0; ipix < npix; ++ipix) {
+            map_drb(ipix, iphibar) = 0.0;
+            map_dri(ipix, iphibar) = 0.0;
+        }
+    }
+
+    // Phibar normalise DRW
+    for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
+        double sum_dre = 0.0;
+        double sum_drm = 0.0;
+        double sum_drw = 0.0;
+        for (int ipix = 0; ipix < npix; ++ipix) {
+            sum_dre += map_dre(ipix, iphibar);
+            sum_drm += map_drm(ipix, iphibar);
+            sum_drw += map_drw(ipix, iphibar);
+        }
+        if (sum_drw > 0.0) {
+            double norm = (sum_dre - sum_drm) / sum_drw;
+            for (int ipix = 0; ipix < npix; ++ipix) {
+                map_dri(ipix, iphibar) = map_drw(ipix, iphibar) * norm;
+            }
+        }
+    }
+
+    // Fit Phibar normalised DRW to DRE-DRM
     for (int ichi = 0; ichi < nchi; ++ichi) {
 
         // Compute running average window in Chi

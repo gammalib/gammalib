@@ -70,6 +70,10 @@ public:
     explicit GCOMObservation(const GXmlElement& xml);
     GCOMObservation(const GCOMDri& dre,
                     const GCOMDri& drb,
+                    const GCOMDri& drg,
+                    const GCOMDri& drx);
+    GCOMObservation(const GCOMDri& dre,
+                    const GCOMDri& drb,
                     const GCOMDri& drw,
                     const GCOMDri& drg,
                     const GCOMDri& drx);
@@ -180,6 +184,11 @@ protected:
                                 const int&     nincl  = 15,
                                 const int&     nexcl  = 0);
     void    compute_drb_bgdlixe(const GCOMDri& drm,
+                                const int&     nrunav = 3,
+                                const int&     navgr  = 3,
+                                const int&     nincl  = 15,
+                                const int&     nexcl  = 0);
+    void    compute_drb_bgdlixf(const GCOMDri& drm,
                                 const int&     nrunav = 3,
                                 const int&     navgr  = 3,
                                 const int&     nincl  = 15,
