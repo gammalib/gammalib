@@ -34,6 +34,9 @@
 #include "GContainer.hpp"
 
 /* __ Forward declarations _______________________________________________ */
+class GCOMObservation;
+class GCOMEventList;
+class GCOMSelection;
 
 /* __ Constants __________________________________________________________ */
 
@@ -75,7 +78,9 @@ public:
     void           extend(const GCOMDris& dris);
     void           compute_drws(const GCOMObservation& obs,
                                 const GCOMSelection&   select = GCOMSelection(),
-                                const double&          zetamin = 5.0);
+                                const double&          zetamin = 5.0,
+                                const double&          timebin = 300.0,
+                                const std::string&     method = "phibar");
     std::string    print(const GChatter& chatter = NORMAL) const;
 
 protected:
@@ -83,6 +88,16 @@ protected:
     void init_members(void);
     void copy_members(const GCOMDris& dris);
     void free_members(void);
+    void compute_drws_energy(const GCOMObservation& obs,
+                             const GCOMEventList*   events,
+                             const GCOMSelection&   select = GCOMSelection(),
+                             const double&          zetamin = 5.0,
+                             const double&          timebin = 300.0);
+    void compute_drws_phibar(const GCOMObservation& obs,
+                             const GCOMEventList*   events,
+                             const GCOMSelection&   select = GCOMSelection(),
+                             const double&          zetamin = 5.0,
+                             const double&          timebin = 300.0);
 
     // Protected data members
     std::vector<GCOMDri> m_dris; //!< Data space instances
