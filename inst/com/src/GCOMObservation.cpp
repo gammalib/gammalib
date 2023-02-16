@@ -518,6 +518,8 @@ double GCOMObservation::npred(const GModel& model) const
  *       <parameter name="DRX" file="m32171_drx.fits"/>
  *       <parameter name="IAQ" value="UNH(1.0-3.0)MeV"/>
  *     </observation>
+ *
+ * Note that the DRW parameter is optional.
  ***************************************************************************/
 void GCOMObservation::read(const GXmlElement& xml)
 {
@@ -568,10 +570,14 @@ void GCOMObservation::read(const GXmlElement& xml)
         // Get parameters
         std::string drename = gammalib::xml_get_attr(G_READ, xml, "DRE", "file");
         std::string drbname = gammalib::xml_get_attr(G_READ, xml, "DRB", "file");
-        std::string drwname = gammalib::xml_get_attr(G_READ, xml, "DRW", "file");
         std::string drgname = gammalib::xml_get_attr(G_READ, xml, "DRG", "file");
         std::string drxname = gammalib::xml_get_attr(G_READ, xml, "DRX", "file");
         std::string iaqname = gammalib::xml_get_attr(G_READ, xml, "IAQ", "value");
+
+        // Optionally get DRW
+        std::string drwname = (gammalib::xml_has_par(xml, "DRW")) ?
+                              gammalib::xml_get_attr(G_READ, xml, "DRW", "file") :
+                              "";
 
         // Expand file names
         drename                      = gammalib::xml_file_expand(xml, drename);
@@ -659,6 +665,8 @@ void GCOMObservation::read(const GXmlElement& xml)
  *       <parameter name="DRX" file="m32171_drx.fits"/>
  *       <parameter name="IAQ" value="UNH(1.0-3.0)MeV"/>
  *     </observation>
+ *
+ * Note that the DRW parameter is optional.
  ***************************************************************************/
 void GCOMObservation::write(GXmlElement& xml) const
 {
@@ -710,8 +718,10 @@ void GCOMObservation::write(GXmlElement& xml) const
         par->attribute("file", gammalib::xml_file_reduce(xml, m_drbname));
 
         // Set DRW parameter
-        par = gammalib::xml_need_par(G_WRITE, xml, "DRW");
-        par->attribute("file", gammalib::xml_file_reduce(xml, m_drwname));
+        if (m_drwname != "") {
+            par = gammalib::xml_need_par(G_WRITE, xml, "DRW");
+            par->attribute("file", gammalib::xml_file_reduce(xml, m_drwname));
+        }
 
         // Set DRG parameter
         par = gammalib::xml_need_par(G_WRITE, xml, "DRG");
