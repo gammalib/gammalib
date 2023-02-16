@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       test_COM.cpp - test COM classes                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2022 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2023 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -45,6 +45,7 @@ const std::string com_iaq              = "SIM2(1.00-3.00)MeV(2)deg"; // 1-3 MeV
 const std::string com_dre              = datadir+"/m50439_dre.fits"; // 1-3 MeV
 const std::string com_drb              = datadir+"/m34997_drg.fits";
 const std::string com_drg              = datadir+"/m34997_drg.fits";
+const std::string com_drw              = "";
 const std::string com_drx              = datadir+"/m32171_drx.fits";
 const std::string com_evp              = datadir+"/m16992_tjd8393_evp.fits";
 const std::string com_tim              = datadir+"/m10695_tim.fits";
@@ -583,11 +584,12 @@ void TestGCOM::test_binned_obs(void)
     test_value(obs1.drxname().url(), "", "Test DRX filename for void observation");
 
     // Test DRI constructor
-    GCOMObservation obs2(com_dre, com_drb, com_drg, com_drx);
+    GCOMObservation obs2(com_dre, com_drb, com_drw, com_drg, com_drx);
     test_assert(!obs2.is_unbinned(), "Test if DRI observation is not unbinned");
     test_assert(obs2.is_binned(), "Test if DRI observation is binned");
     test_value(obs2.drename().url(), com_dre, "Test DRE filename for DRI observation");
     test_value(obs2.drbname().url(), com_drb, "Test DRB filename for DRI observation");
+    test_value(obs2.drwname().url(), com_drw, "Test DRW filename for DRI observation");
     test_value(obs2.drgname().url(), com_drg, "Test DRG filename for DRI observation");
     test_value(obs2.drxname().url(), com_drx, "Test DRX filename for DRI observation");
 
@@ -897,7 +899,7 @@ void TestGCOM::test_binned_optimizer(void)
     // Load binned COMPTEL observation
     test_try("Load binned COMPTEL observation");
     try {
-        run.load(com_dre, com_drb, com_drg, com_drx);
+        run.load(com_dre, com_drb, com_drw, com_drg, com_drx);
         run.response(GCaldb("cgro", "comptel"), com_iaq);
         obs.append(run);
         test_try_success();
