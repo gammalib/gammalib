@@ -90,14 +90,14 @@ protected:
     void free_members(void);
     void compute_drws_energy(const GCOMObservation& obs,
                              const GCOMEventList*   events,
-                             const GCOMSelection&   select = GCOMSelection(),
-                             const double&          zetamin = 5.0,
-                             const double&          timebin = 300.0);
+                             const GCOMSelection&   select,
+                             const double&          zetamin,
+                             const double&          timebin);
     void compute_drws_phibar(const GCOMObservation& obs,
                              const GCOMEventList*   events,
-                             const GCOMSelection&   select = GCOMSelection(),
-                             const double&          zetamin = 5.0,
-                             const double&          timebin = 300.0);
+                             const GCOMSelection&   select,
+                             const double&          zetamin,
+                             const double&          timebin);
 
     // Protected data members
     std::vector<GCOMDri> m_dris; //!< Data space instances

@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.1.0
 
-10 February 2023
+16 February 2023
 
 
 1. Introduction
@@ -12,7 +12,7 @@ made since the last release of GammaLib.
 2. Public interface modifications
 ---------------------------------
 The following classes have been added:
-- none
+- GCOMDris
 
 The following classes have been removed:
 - none
@@ -31,7 +31,10 @@ The following methods have been added:
 - GResponseVectorCache::load()
 - GResponseVectorCache::save()
 - GResponseVectorCache::read()
+- GCOMObservation(GCOMDri&, GCOMDri&, GCOMDri&, GCOMDri&, GCOMDri&)
 - GCOMObservation::npred()
+- GCOMObservation::drw()
+- GCOMObservation::drwname()
 - GCOMObservation::cachename()
 - GCOMResponse::load_cache()
 - GCOMResponse::save_cache()
@@ -44,6 +47,10 @@ The following methods have been renamed:
 
 The arguments for the following methods have been changed:
 - GApplication::log_value() methods now have optional unit parameters
+- GCOMObservation() filename constructor now takes 5 filenames on
+  input; was four filenames before
+- GCOMObservation::load() method now takes 5 filenames on input; was 
+  four filenames before
 
 The return value of the following methods has been changed:
 - none
@@ -162,6 +169,16 @@ None
 
 22. COMPTEL interface
 ---------------------
+Added GCOMDris container class. This class specifically provides the
+GCOMDris::compute_drws() that allows computation of weighting cubes for
+all energy bins (#4209).
+
+Added support for weighting cubes in GCOMObservation class. The filename
+constructor takes five filenames, with the third filename being in the DRW
+filename. A GCOMObservation::drw() method was added to retrieve the DRW,
+GCOMObservation::drwname() methods were added to set and retrieve the DRW
+filename (#4209).
+
 Added GCOMObservation::cachename() method to set and retrieve the name of a
 response cache file. If set, the response cache file will automatically
 written or loaded when handling XML files. In addition, GCOMResponse methods

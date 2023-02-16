@@ -1,8 +1,9 @@
-2023-02-10
+2023-02-16
 
         * Version 2.1.0 released
         ========================
 
+        Add COMPTEL DRW support to GCOMObservation and GCOMDris (#4209)
         Add GSkyMap comparison operators (#4209)
         Add GIntegral::adaptive_gauss_kronrod() method (#4204)
         Add optional unit parameter to GApplication::log_value() methods (#4202)

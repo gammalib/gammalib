@@ -28,6 +28,8 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <fstream>
+#include <iostream>
 #include "GException.hpp"
 #include "GMath.hpp"
 #include "GCOMTools.hpp"
@@ -53,12 +55,12 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+#define G_COMPUTE_DRWS_EHACORR  //!< Correct Earth horizon cut
 
 /* __ Debug definitions __________________________________________________ */
-#define G_DEBUG_COMPUTE_DRWS
+//#define G_DEBUG_COMPUTE_DRWS
 
 /* __ Constants __________________________________________________________ */
-const double superpacket_duration = 16.384; // Duration of superpacket (s)
 
 
 /*==========================================================================
@@ -876,7 +878,7 @@ void GCOMDris::compute_drws_energy(const GCOMObservation& obs,
  * weighted geometry cubes which were multiplied by the solid angle of
  * the (Chi,Psi) pixels.
  *
- * For this method the event rates depend on  time and Phibar angle. For
+ * For this method the event rates depend on time and Phibar angle. For
  * each superpacket, the event rates are linearly interpolated to the
  * relevant superpacket time.
  *
@@ -889,6 +891,9 @@ void GCOMDris::compute_drws_phibar(const GCOMObservation& obs,
                                    const double&          zetamin,
                                    const double&          timebin)
 {
+    // Set constants
+    const double ehacorrmax = 10.0; //!< Maximum EHA correction factor
+
     // Debug
     #if defined(G_DEBUG_COMPUTE_DRWS)
     std::cout << "GCOMDris::compute_drws_phibar" << std::endl;
@@ -940,9 +945,11 @@ void GCOMDris::compute_drws_phibar(const GCOMObservation& obs,
         // Apply Earth horizon cut. Note that we need to correct later
         // for this cut to remove the additional time variation coming
         // from the cut.
+        #if defined(G_COMPUTE_DRWS_EHACORR)
         if ((event->eha() - event->phibar()) < zetamin) {
             continue;
         }
+        #endif
 
         // If time exceeds time bin then add rates
         while (event->time().secs() > (time + timebin)) {
@@ -991,6 +998,21 @@ void GCOMDris::compute_drws_phibar(const GCOMObservation& obs,
 
     } // endif: appended remaining rates
 
+    // Debug: write debug file
+    #if defined(G_DEBUG_COMPUTE_DRWS)
+    std::ofstream debugfile;
+    debugfile.open("compute_drws_phibar_tbin_rates.csv");
+    debugfile.precision(12);
+    for (int i = 0; i < times.size(); ++i) {
+        debugfile << times[i];
+        for (int iphibar = 0; iphibar < dri->nphibar(); ++iphibar) {
+            debugfile << "," << rates[iphibar][i];
+        }
+        debugfile << std::endl;
+    }
+    debugfile.close();
+    #endif
+
     // Debug
     #if defined(G_DEBUG_COMPUTE_DRWS)
     std::cout << "Compute DRWs" << std::endl;
@@ -1008,6 +1030,16 @@ void GCOMDris::compute_drws_phibar(const GCOMObservation& obs,
     if (select.has_pulsar()) {
         tim.reduce(select.pulsar().validity());
     }
+
+    // Debug: open debug files file
+    #if defined(G_DEBUG_COMPUTE_DRWS)
+    std::ofstream debugfile1;
+    std::ofstream debugfile2;
+    debugfile1.open("compute_drws_phibar_sp_rates.csv");
+    debugfile2.open("compute_drws_phibar_sp_ehacorr.csv");
+    debugfile1.precision(12);
+    debugfile2.precision(12);
+    #endif
 
     // Loop over Orbit Aspect Data
     for (int i_oad = 0; i_oad < obs.oads().size(); ++i_oad) {
@@ -1031,10 +1063,13 @@ void GCOMDris::compute_drws_phibar(const GCOMObservation& obs,
         double time = oad.tstart().secs() + 0.5 * (oad.tstop() - oad.tstart());
 
         // Compute Phibar-dependent rates by interpolation of precomputed
-        // rate vectors
+        // rate vectors. Make sure that rates never become negative.
         std::vector<double> rate_oad(dri->nphibar());
         for (int iphibar = 0; iphibar < dri->nphibar(); ++iphibar) {
             rate_oad[iphibar] = times.interpolate(time, rates[iphibar]);
+            if (rate_oad[iphibar] < 0.0) {
+                rate_oad[iphibar] = 0.0;
+            }
         }
 
         // Prepare Earth horizon angle computation. The celestial system
@@ -1074,6 +1109,12 @@ void GCOMDris::compute_drws_phibar(const GCOMObservation& obs,
 
         } // endfor: computed solid-angle-corrected geometry factors
 
+        // Debug: write time in debug files
+        #if defined(G_DEBUG_COMPUTE_DRWS)
+        debugfile1 << time;
+        debugfile2 << time;
+        #endif
+
         // Correct rates for Earth horizon cut
         for (int iphibar = 0; iphibar < dri->nphibar(); ++iphibar) {
 
@@ -1092,13 +1133,30 @@ void GCOMDris::compute_drws_phibar(const GCOMObservation& obs,
                 }
             }
 
-            // If something passes the Earth horizon cut then correct
-            // the rate
-            if (rates_sum_cut != 0.0) {
-                rate_oad[iphibar] *= rates_sum_all / rates_sum_cut;
+            // Compute Earth horizon cut correction, limited to a maximum of ehacorrmax
+            double ehacorr = (rates_sum_cut != 0.0) ? rates_sum_all / rates_sum_cut : ehacorrmax;
+            if (ehacorr > ehacorrmax) {
+                ehacorr = ehacorrmax;
             }
 
+            // Correct rate
+            #if defined(G_COMPUTE_DRWS_EHACORR)
+            rate_oad[iphibar] *= ehacorr;
+            #endif
+
+            // Debug: write rate and correction in debug files
+            #if defined(G_DEBUG_COMPUTE_DRWS)
+            debugfile1 << "," << rate_oad[iphibar];
+            debugfile2 << "," << ehacorr;
+            #endif
+
         } // endfor: looped over Phibar
+
+        // Debug: write linefeeds in debug files
+        #if defined(G_DEBUG_COMPUTE_DRWS)
+        debugfile1 << std::endl;
+        debugfile2 << std::endl;
+        #endif
 
         // Loop over all DRWs
         for (int i = 0; i < size(); ++i) {
@@ -1131,6 +1189,12 @@ void GCOMDris::compute_drws_phibar(const GCOMObservation& obs,
         } // endfor: looped over all DRWs
 
     } // endfor: looped over Orbit Aspect Data
+
+    // Debug: close debug files
+    #if defined(G_DEBUG_COMPUTE_DRWS)
+    debugfile1.close();
+    debugfile2.close();
+    #endif
 
     // Return
     return;

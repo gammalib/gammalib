@@ -10,7 +10,7 @@ GammaLib 2.1 is a major release that adds significant functionality.
 
 In particular, this release provides:
 
-* ...
+* Weighting cube DRW support for COMPTEL interface
 
 
 Bug fixes
@@ -24,7 +24,8 @@ Improvements
 ------------
 
 * [`4209 <https://cta-redmine.irap.omp.eu/issues/4209>`_] -
-  Add ``GSkyMap`` comparison operators (#4209)
+  Add ``GSkyMap`` comparison operators.
+  Add COMPTEL DRW support to ``GCOMObservation`` and add ``GCOMDris`` class.
 * [`4204 <https://cta-redmine.irap.omp.eu/issues/4204>`_] -
   Add ``GIntegral::adaptive_gauss_kronrod()`` method
 * [`4202 <https://cta-redmine.irap.omp.eu/issues/4202>`_] -
