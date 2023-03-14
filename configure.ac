@@ -919,6 +919,15 @@ else
     AC_SUBST(PYTHON_OPEN)  
     AC_SUBST(PYTHON_CLOSE)
 
+    # Do we have sysconfig?
+    AC_MSG_CHECKING([for the sysconfig Python package])
+    ac_sysconfig_result=`$PYTHON -c "import sysconfig" 2>&1`
+    if test -z "$ac_sysconfig_result"; then
+      AC_MSG_RESULT([yes])
+    else
+      AC_MSG_RESULT([no])
+    fi
+
     # Do we have distutils?
     AC_MSG_CHECKING([for the distutils Python package])
     ac_distutils_result=`$PYTHON -c "import distutils" 2>&1`
@@ -938,12 +947,17 @@ else
       AC_MSG_RESULT([no])
     fi
 
-    # If we have distutils then get python path from distutils ...
-    if test -z "$ac_distutils_result"; then
+    # If we have sysconfig or distutils then get python path
+    if test -z "$ac_sysconfig_result" || test -z "$ac_distutils_result"; then
 
       # Get Python path
-      python_path=`$PYTHON -c "import distutils.sysconfig; \
-                               print(distutils.sysconfig.get_python_inc());"`
+      if test -z "$ac_sysconfig_result"; then
+        python_path=`$PYTHON -c "import sysconfig; \
+                                 print(sysconfig.get_paths()[['include']]);"`
+      else
+        python_path=`$PYTHON -c "import distutils.sysconfig; \
+                                 print(distutils.sysconfig.get_python_inc());"`
+      fi
       if test -n "${python_path}"; then
         SAVED_CPPFLAGS="$CPPFLAGS"
         CPPFLAGS="$CPPFLAGS -I$python_path"
@@ -960,8 +974,13 @@ else
       # changed from Mac OS X 10.9 on.
       if [test "x$osx_mavericks" = "xyes"]; then
         AC_MSG_CHECKING([Python MACOSX_DEPLOYMENT_TARGET])
-        python_target=`$PYTHON -c "from distutils import sysconfig; \
-                                   print(sysconfig.get_config_vars()[['MACOSX_DEPLOYMENT_TARGET']]);" 2> /dev/null`
+        if test -z "$ac_sysconfig_result"; then
+          python_target=`$PYTHON -c "import sysconfig; \
+                                     print(sysconfig.get_config_vars()[['MACOSX_DEPLOYMENT_TARGET']]);" 2> /dev/null`
+        else
+          python_target=`$PYTHON -c "from distutils import sysconfig; \
+                                     print(sysconfig.get_config_vars()[['MACOSX_DEPLOYMENT_TARGET']]);" 2> /dev/null`
+        fi
         python_compact_target=`echo $python_target | sed 's/\(10\.[[0-9]]*\).*/\1/' | sed -e 's/\.//g'`
         case $python_compact_target in
           (*[!0-9]*|'')
