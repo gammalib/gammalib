@@ -18,11 +18,14 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.    #
 #                                                                           #
 #############################################################################
+import sys
+if sys.version_info < (3, 2):
+    from distutils import sysconfig
+else:
+    import sysconfig
 from setuptools import setup, Extension
-import sysconfig
 import glob
 import os
-import sys
 import re
 import shutil
 
