@@ -21,6 +21,7 @@ pyext/gammalib/*.py
 pyext/gammalib/*.cpp
 pyext/gammalib/*.so
 pyext/setup.py
+pyext/gammalib.egg-info
 dev/conda.recipe/meta.yaml
 m4/libtool.m4
 m4/ltoptions.m4
