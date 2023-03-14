@@ -134,7 +134,7 @@ loaded properly.
 
 Much more is still to come. Please be a little bit patient, we're working
 on it. In the meantime you may check the `Doxygen
-documentation <doxygen/index.html>`_ to see what classes and methods are
+documentation <../doxygen/index.html>`_ to see what classes and methods are
 available.
 
 Getting Help
