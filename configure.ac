@@ -856,10 +856,11 @@ AC_SUBST(OPENMP_LIB_LDFLAGS)
 # Python binding requires Python and either the files gammalib_wrap.cpp and #
 # gammalib.py or swig to create these files.  The following conditionals    #
 # are set:                                                                  #
-# WITH_PYTHON    - Python bindings will be built                            #
-# HAVE_SWIG      - swig is available                                        #
-# HAVE_WRAPPERS  - wrappers are available                                   #
-# BUILD_WRAPPERS - build the Python wrappers                                #
+# WITH_PYTHON     - Python bindings will be built                           #
+# HAVE_SWIG       - swig is available                                       #
+# HAVE_WRAPPERS   - wrappers are available                                  #
+# HAVE_SETUPTOOLS - Python setuptools module available                      #
+# BUILD_WRAPPERS  - build the Python wrappers                               #
 #############################################################################
 # Initialise flags
 enable_python="no"
@@ -867,6 +868,7 @@ has_python="no"
 has_python_h="no"
 has_swig="no"
 has_wrappers="no"
+has_setuptools="no"
 build_wrappers="no"
 
 # Check if the code is a git clone. In that case the systems switches to
@@ -922,6 +924,16 @@ else
     ac_distutils_result=`$PYTHON -c "import distutils" 2>&1`
     if test -z "$ac_distutils_result"; then
       AC_MSG_RESULT([yes])
+    else
+      AC_MSG_RESULT([no])
+    fi
+
+    # Do we have setuptools?
+    AC_MSG_CHECKING([for the setuptools Python package])
+    ac_setuptools_result=`$PYTHON -c "import setuptools" 2>&1`
+    if test -z "$ac_setuptools_result"; then
+      AC_MSG_RESULT([yes])
+      has_setuptools="yes"
     else
       AC_MSG_RESULT([no])
     fi
@@ -1075,6 +1087,7 @@ fi
 AM_CONDITIONAL(WITH_PYTHON, test "x$enable_python" = "xyes")
 AM_CONDITIONAL(HAVE_SWIG, test "x$has_swig" = "xyes")
 AM_CONDITIONAL(HAVE_WRAPPERS, test "x$has_wrappers" = "xyes")
+AM_CONDITIONAL(HAVE_SETUPTOOLS, test "x$has_setuptools" = "xyes")
 AM_CONDITIONAL(BUILD_WRAPPERS, test "x$build_wrappers" = "xyes")
 
 # Set Python environment
