@@ -23,7 +23,10 @@ if sys.version_info < (3, 2):
     from distutils import sysconfig
 else:
     import sysconfig
-from setuptools import setup, Extension
+try:
+    from setuptools import setup, Extension
+except (ImportError):
+    from distutils.core import setup, Extension
 import glob
 import os
 import re
