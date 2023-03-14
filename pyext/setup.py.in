@@ -1,7 +1,7 @@
 #############################################################################
-# Disutils setup file for gammalib Python extension module                  #
+# Setup file for gammalib Python extension module                           #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2011-2020 Juergen Knoedlseder                               #
+# Copyright (C) 2011-2023 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -18,8 +18,8 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.    #
 #                                                                           #
 #############################################################################
-from distutils.core import setup, Extension
-from distutils import sysconfig
+from setuptools import setup, Extension
+import sysconfig
 import glob
 import os
 import sys
@@ -54,7 +54,7 @@ if (len(sys.argv) >= 3):
 # Darwin MacPorts kluge: Remove -L/opt/local/lib path from LDSHARED as this
 # overrides the GammaLib settings. Otherwise, MacPorts libraries would be
 # used instead of the libraries selected by GammaLib
-if sys.platform.lower().startswith("darwin"):
+if sys.platform.lower().startswith('darwin'):
 
     # Get configuration variables
     cvars = sysconfig.get_config_vars()
@@ -79,6 +79,10 @@ install_files        = glob.glob('@top_srcdir@/pyext/*.i')
 library_dirs         = ['../src/.libs']
 runtime_library_dirs = ['../src/.libs']
 libraries            = ['gamma']
+
+# Initialise Python test files
+test_files = ['gammalib/tests/__init__.py']
+test_files.extend(glob.glob('@abs_top_srcdir@/test/test_*.py'))
 
 # Add install directory to runtime library path
 if os.path.exists(prefix+'/lib'):
@@ -189,6 +193,9 @@ for module in inst_modules:
     # Add SWIG files to install_files
     install_files.extend(glob.glob('@top_srcdir@/inst/'+module+'/pyext/*.i'))
 
+    # Add Python test files
+    test_files.extend(glob.glob('@top_srcdir@/inst/'+module+'/test/test_*.py'))
+
     # In case that wrappers were not built then copy the module wrapper files
     # from the source to the build directory. Only do this if the build
     # directory differs from the source directory
@@ -211,8 +218,155 @@ for module in inst_modules:
     ext_modules.append(ext_module)
     py_modules.append(pkg_name+'.'+module)
 
+# Add test data
+test_data = ['@abs_top_srcdir@/test/data/initial_coords.txt',
+             '@abs_top_srcdir@/test/data/fk5_to_galactic.txt',
+             '@abs_top_srcdir@/test/data/file.fits.gz',
+             '@abs_top_srcdir@/test/data/test_GApplication.par',
+             '@abs_top_srcdir@/test/data/model_point_plaw.xml',
+             '@abs_top_srcdir@/test/data/test_cube.fits',
+             '@abs_top_srcdir@/test/data/filefunction.txt',
+             '@abs_top_srcdir@/test/data/model_point_table.fits',
+             '@abs_top_srcdir@/test/data/model_temporal_lightcurve.fits',
+             '@abs_top_srcdir@/test/data/model_temporal_phasecurve.fits']
+test_caldbidx = ['@abs_top_srcdir@/test/data/caldb/data/cta/prod2/caldb.indx']
+test_caldbbcf = ['@abs_top_srcdir@/test/data/caldb/data/cta/prod2/bcf/North_0.5h/irf_file.fits.gz']
+
+# Add COMPTEL test data
+test_data_com = ['@abs_top_srcdir@/inst/com/test/data/obs.xml',
+                 '@abs_top_srcdir@/inst/com/test/data/obs_cache.xml',
+                 '@abs_top_srcdir@/inst/com/test/data/crab.xml',
+                 '@abs_top_srcdir@/inst/com/test/data/crab_fix.xml',
+                 '@abs_top_srcdir@/inst/com/test/data/m32171_drx.fits.gz',
+                 '@abs_top_srcdir@/inst/com/test/data/m34997_drg.fits.gz',
+                 '@abs_top_srcdir@/inst/com/test/data/m50438_dre.fits.gz',
+                 '@abs_top_srcdir@/inst/com/test/data/m50439_dre.fits.gz',
+                 '@abs_top_srcdir@/inst/com/test/data/m50440_dre.fits.gz',
+                 '@abs_top_srcdir@/inst/com/test/data/m50441_dre.fits.gz',
+                 '@abs_top_srcdir@/inst/com/test/data/m20039_oad.fits.gz',
+                 '@abs_top_srcdir@/inst/com/test/data/m20041_oad.fits.gz',
+                 '@abs_top_srcdir@/inst/com/test/data/s10150_10000rows_bvc.fits.gz',
+                 '@abs_top_srcdir@/inst/com/test/data/irfcache.fits.gz']
+test_caldbidx_com = ['@abs_top_srcdir@/inst/com/test/caldb/data/cgro/comptel/caldb.indx']
+test_caldbbcf_com = ['@abs_top_srcdir@/inst/com/test/caldb/data/cgro/comptel/bcf/m10371_sda.fits.gz',
+                     '@abs_top_srcdir@/inst/com/test/caldb/data/cgro/comptel/bcf/m10564_sdb.fits.gz',
+                     '@abs_top_srcdir@/inst/com/test/caldb/data/cgro/comptel/bcf/u47569_iaq.fits.gz']
+
+# Add CTA test data
+test_data_cta = ['@abs_top_srcdir@/inst/cta/test/data/irf_1dc.xml',
+                 '@abs_top_srcdir@/inst/cta/test/data/irf_unbinned.xml',
+                 '@abs_top_srcdir@/inst/cta/test/data/irf_hess_aeff.fits.gz',
+                 '@abs_top_srcdir@/inst/cta/test/data/irf_hess_bkg.fits.gz',
+                 '@abs_top_srcdir@/inst/cta/test/data/irf_hess_bkg2.fits.gz',
+                 '@abs_top_srcdir@/inst/cta/test/data/irf_hess_edisp.fits.gz',
+                 '@abs_top_srcdir@/inst/cta/test/data/irf_hess_psf.fits.gz',
+                 '@abs_top_srcdir@/inst/cta/test/data/crab_irf.xml',
+                 '@abs_top_srcdir@/inst/cta/test/data/onoff_model.xml',
+                 '@abs_top_srcdir@/inst/cta/test/data/crab_events.fits.gz',
+                 '@abs_top_srcdir@/inst/cta/test/data/crab_cntmap.fits.gz',
+                 '@abs_top_srcdir@/inst/cta/test/data/crab_modcube.fits.gz']
+test_caldb_cta = ['@abs_top_srcdir@/inst/cta/test/caldb/cta_dummy_irf.dat',
+                  '@abs_top_srcdir@/inst/cta/test/caldb/prod1_gauss.fits.gz',
+                  '@abs_top_srcdir@/inst/cta/test/caldb/prod1_king.fits.gz']
+test_dc1_cta = ['@abs_top_srcdir@/inst/cta/test/caldb/dc1/arf.fits.gz',
+                '@abs_top_srcdir@/inst/cta/test/caldb/dc1/psf.fits.gz',
+                '@abs_top_srcdir@/inst/cta/test/caldb/dc1/psf_magic.fits.gz',
+                '@abs_top_srcdir@/inst/cta/test/caldb/dc1/rmf.fits.gz']
+
+# Add LAT test data
+test_data_lat = ['@abs_top_srcdir@/inst/lat/test/data/p8v2/binned_expmap.fits.gz',
+                 '@abs_top_srcdir@/inst/lat/test/data/p8v2/cntmap.fits.gz',
+                 '@abs_top_srcdir@/inst/lat/test/data/p8v2/ft1.fits.gz',
+                 '@abs_top_srcdir@/inst/lat/test/data/p8v2/ft2.fits.gz',
+                 '@abs_top_srcdir@/inst/lat/test/data/p8v2/iso_P8R2_SOURCE_V6_v06.txt',
+                 '@abs_top_srcdir@/inst/lat/test/data/p8v2/ltcube.fits.gz',
+                 '@abs_top_srcdir@/inst/lat/test/data/p8v2/modmap.fits.gz',
+                 '@abs_top_srcdir@/inst/lat/test/data/p8v2/obs_binned.xml',
+                 '@abs_top_srcdir@/inst/lat/test/data/p8v2/obs_unbinned.xml',
+                 '@abs_top_srcdir@/inst/lat/test/data/p8v2/source_model.xml',
+                 '@abs_top_srcdir@/inst/lat/test/data/p8v2/srcmap.fits.gz']
+test_caldbidx_lat = ['@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/caldb.indx.gz']
+test_caldbbcf_lat = ['@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/irf_index.fits.gz',
+                     '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/valid_evclass_selections.txt',
+                     '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/valid_evtype_selections.txt']
+test_caldbea_lat = ['@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/ea/aeff_P6_v3_diff_front.fits.gz',
+                    '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/ea/aeff_P6_v3_diff_back.fits.gz',
+                    '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/ea/aeff_P7SOURCE_V6_front.fits.gz',
+                    '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/ea/aeff_P7SOURCE_V6_back.fits.gz',
+                    '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/ea/aeff_P7REP_SOURCE_V15_back.fits.gz',
+                    '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/ea/aeff_P7REP_SOURCE_V15_front.fits.gz',
+                    '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/ea/aeff_P8R2_SOURCE_V6_EDISP.fits.gz',
+                    '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/ea/aeff_P8R2_SOURCE_V6_FB.fits.gz',
+                    '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/ea/aeff_P8R2_SOURCE_V6_PSF.fits.gz',
+                    '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/ea/aeff_P8R3_SOURCE_V2_EDISP.fits.gz',
+                    '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/ea/aeff_P8R3_SOURCE_V2_FB.fits.gz',
+                    '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/ea/aeff_P8R3_SOURCE_V2_PSF.fits.gz']
+test_caldbedisp_lat = ['@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/edisp/edisp_P6_v3_diff_front.fits.gz',
+                       '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/edisp/edisp_P6_v3_diff_back.fits.gz',
+                       '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/edisp/edisp_P7SOURCE_V6_front.fits.gz',
+                       '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/edisp/edisp_P7SOURCE_V6_back.fits.gz',
+                       '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/edisp/edisp_P7REP_SOURCE_V15_back.fits',
+                       '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/edisp/edisp_P7REP_SOURCE_V15_front.fits',
+                       '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/edisp/edisp_P8R2_SOURCE_V6_EDISP.fits.gz',
+                       '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/edisp/edisp_P8R2_SOURCE_V6_FB.fits.gz',
+                       '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/edisp/edisp_P8R2_SOURCE_V6_PSF.fits.gz',
+                       '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/edisp/edisp_P8R3_SOURCE_V2_EDISP.fits.gz',
+                       '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/edisp/edisp_P8R3_SOURCE_V2_FB.fits.gz',
+                       '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/edisp/edisp_P8R3_SOURCE_V2_PSF.fits.gz']
+test_caldbpsf_lat = ['@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/psf/psf_P6_v3_diff_front.fits.gz',
+                     '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/psf/psf_P6_v3_diff_back.fits.gz',
+                     '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/psf/psf_P7SOURCE_V6_front.fits.gz',
+                     '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/psf/psf_P7SOURCE_V6_back.fits.gz',
+                     '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/psf/psf_P7REP_SOURCE_V15_back.fits.gz',
+                     '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/psf/psf_P7REP_SOURCE_V15_front.fits.gz',
+                     '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/psf/psf_P8R2_SOURCE_V6_EDISP.fits.gz',
+                     '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/psf/psf_P8R2_SOURCE_V6_FB.fits.gz',
+                     '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/psf/psf_P8R2_SOURCE_V6_PSF.fits.gz',
+                     '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/psf/psf_P8R3_SOURCE_V2_EDISP.fits.gz',
+                     '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/psf/psf_P8R3_SOURCE_V2_FB.fits.gz',
+                     '@abs_top_srcdir@/inst/lat/test/caldb/data/glast/lat/bcf/psf/psf_P8R3_SOURCE_V2_PSF.fits.gz']
+
+# Add MWL test data
+test_data_mwl = ['@abs_top_srcdir@/inst/mwl/test/data/crab_mwl.fits']
+
+# Add SPI test data
+test_data_spi = ['@abs_top_srcdir@/inst/spi/test/data/obs.xml',
+                 '@abs_top_srcdir@/inst/spi/test/data/models.xml',
+                 '@abs_top_srcdir@/inst/spi/test/data/models_noinit.xml']
+test_obs_spi = ['@abs_top_srcdir@/inst/spi/test/data/obs/og_spi.fits.gz',
+                '@abs_top_srcdir@/inst/spi/test/data/obs/spi_bvar_gedsat_se.fits.gz',
+                '@abs_top_srcdir@/inst/spi/test/data/obs/spi_pnt_filter.fits.gz']
+test_obsspi_spi = ['@abs_top_srcdir@/inst/spi/test/data/obs/spi/back_model.fits.gz',
+                   '@abs_top_srcdir@/inst/spi/test/data/obs/spi/back_model_idx.fits.gz',
+                   '@abs_top_srcdir@/inst/spi/test/data/obs/spi/dead_time.fits.gz',
+                   '@abs_top_srcdir@/inst/spi/test/data/obs/spi/energy_boundaries.fits.gz',
+                   '@abs_top_srcdir@/inst/spi/test/data/obs/spi/evts_det_spec.fits.gz',
+                   '@abs_top_srcdir@/inst/spi/test/data/obs/spi/gti.fits.gz',
+                   '@abs_top_srcdir@/inst/spi/test/data/obs/spi/pointing.fits.gz']
+
 # Set data files to install.
-data_files=[(prefix+'/share/gammalib/swig', install_files)]
+data_files=[(prefix+'/share/gammalib/swig', install_files),
+            ('gammalib/tests', test_files),
+            ('gammalib/tests/data', test_data),
+            ('gammalib/tests/data/caldb/data/cta/prod2', test_caldbidx),
+            ('gammalib/tests/data/caldb/data/cta/prod2/bcf/North_0.5h', test_caldbbcf),
+            ('gammalib/tests/com/data', test_data_com),
+            ('gammalib/tests/com/caldb/data/cgro/comptel', test_caldbidx_com),
+            ('gammalib/tests/com/caldb/data/cgro/comptel/bcf', test_caldbbcf_com),
+            ('gammalib/tests/cta/data', test_data_cta),
+            ('gammalib/tests/cta/caldb', test_caldb_cta),
+            ('gammalib/tests/cta/caldb/dc1', test_dc1_cta),
+            ('gammalib/tests/lat/data/p8v2', test_data_lat),
+            ('gammalib/tests/lat/caldb/data/glast/lat', test_caldbidx_lat),
+            ('gammalib/tests/lat/caldb/data/glast/lat/bcf', test_caldbbcf_lat),
+            ('gammalib/tests/lat/caldb/data/glast/lat/bcf/ea', test_caldbea_lat),
+            ('gammalib/tests/lat/caldb/data/glast/lat/bcf/edisp', test_caldbedisp_lat),
+            ('gammalib/tests/lat/caldb/data/glast/lat/bcf/psf', test_caldbpsf_lat),
+            ('gammalib/tests/mwl/data', test_data_mwl),
+            ('gammalib/tests/spi/data', test_data_spi),
+            ('gammalib/tests/spi/data/obs', test_obs_spi),
+            ('gammalib/tests/spi/data/obs/spi', test_obsspi_spi)]
+data_files = [(prefix+'/share/gammalib/swig', install_files)]
 
 # Setup
 setup(name='@PACKAGE_NAME@',
