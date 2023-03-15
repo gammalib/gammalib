@@ -16,6 +16,8 @@ In particular, this release provides:
 Bug fixes
 ---------
 
+* [`4223 <https://cta-redmine.irap.omp.eu/issues/4223>`_] -
+  Replace ``distutils`` by ``setuptools`` for Python setup
 * [`4198 <https://cta-redmine.irap.omp.eu/issues/4198>`_] -
   Fix segfault on saving empty ``GModelSpectralTable`` instance
 
