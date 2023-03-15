@@ -300,5 +300,6 @@ endif
 	rm -rf $(top_builddir)/pyext/gammalib/*.pyc
 	rm -rf $(top_builddir)/pyext/gammalib/_*.so
 	rm -rf $(top_builddir)/pyext/gammalib/__pycache__
+	rm -rf $(top_builddir)/pyext/gammalib.egg-info
 
 endif # WITH_PYTHON
