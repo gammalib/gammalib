@@ -35,6 +35,7 @@
 #include "GCOMResponse.hpp"
 #include "GCOMTim.hpp"
 #include "GCOMOads.hpp"
+#include "GCOMHkds.hpp"
 #include "GCOMBvcs.hpp"
 #include "GCOMDri.hpp"
 #include "GCOMEventList.hpp"
@@ -85,6 +86,7 @@ public:
     GCOMObservation(const GFilename&              evpname,
                     const GFilename&              timname,
                     const std::vector<GFilename>& oadnames,
+                    const std::vector<GFilename>& hkdnames,
                     const GFilename&              bvcname = "");
     GCOMObservation(const GCOMObservation& obs);
     virtual ~GCOMObservation(void);
@@ -120,6 +122,7 @@ public:
     void             load(const GFilename&              evpname,
                           const GFilename&              timname,
                           const std::vector<GFilename>& oadnames,
+                          const std::vector<GFilename>& hkdnames,
                           const GFilename&              bvcname = "");
     void             response(const GCaldb& caldb, const std::string& rspname);
     void             response(const GCOMResponse& response);
@@ -139,6 +142,8 @@ public:
     void             tim(const GCOMTim& tim);
     const GCOMOads&  oads(void) const;
     void             oads(const GCOMOads& oads);
+    const GCOMHkds&  hkds(void) const;
+    void             hkds(const GCOMHkds& hkds);
     const GCOMBvcs&  bvcs(void) const;
     void             bvcs(const GCOMBvcs& bvcs);
     const GFilename& drename(void) const;
@@ -232,9 +237,11 @@ protected:
     GFilename              m_evpname;    //!< EVP filename
     GFilename              m_timname;    //!< TIM filename
     std::vector<GFilename> m_oadnames;   //!< OAD filenames
+    std::vector<GFilename> m_hkdnames;   //!< HKD filenames
     GFilename              m_bvcname;    //!< BVC filename
     GCOMTim                m_tim;        //!< COMPTEL Good Time Intervals
     GCOMOads               m_oads;       //!< Orbit Aspect Data
+    GCOMHkds               m_hkds;       //!< Housekeeping Data
     GCOMBvcs               m_bvcs;       //!< Solar System Barycentre Data
 };
 
@@ -522,6 +529,32 @@ inline
 void GCOMObservation::oads(const GCOMOads& oads)
 {
     m_oads = oads;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return Housekeeping Data collection
+ *
+ * @return Housekeeping Data collection
+ ***************************************************************************/
+inline
+const GCOMHkds& GCOMObservation::hkds(void) const
+{
+    // Return Housekeeping Data collection
+    return (m_hkds);
+}
+
+
+/***********************************************************************//**
+ * @brief Set Housekeeping Data collection
+ *
+ * @param[in] hkds Housekeeping Data collection.
+ ***************************************************************************/
+inline
+void GCOMObservation::hkds(const GCOMHkds& hkds)
+{
+    m_hkds = hkds;
     return;
 }
 

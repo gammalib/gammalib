@@ -43,6 +43,8 @@ sources = src/com_helpers_response_vector.cpp \
           src/GCOMDri.cpp \
           src/GCOMOads.cpp \
           src/GCOMOad.cpp \
+          src/GCOMHkds.cpp \
+          src/GCOMHkd.cpp \
           src/GCOMBvcs.cpp \
           src/GCOMBvc.cpp \
           src/GCOMTim.cpp \
@@ -70,6 +72,8 @@ pkginclude_HEADERS = include/GCOMTools.hpp \
                      include/GCOMDri.hpp \
                      include/GCOMOads.hpp \
                      include/GCOMOad.hpp \
+                     include/GCOMHkds.hpp \
+                     include/GCOMHkd.hpp \
                      include/GCOMBvcs.hpp \
                      include/GCOMBvc.hpp \
                      include/GCOMTim.hpp \

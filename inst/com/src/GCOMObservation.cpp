@@ -250,24 +250,30 @@ GCOMObservation::GCOMObservation(const GFilename& drename,
  * @param[in] evpname Event list FITS file name.
  * @param[in] timname Good Time Intervals FITS file name.
  * @param[in] oadnames List of Orbit Aspect Data FITS file names.
+ * @param[in] hkdnames List of Housekeeping Data FITS file names.
  * @param[in] bvcname Solar System Barycentre Data FITS file name.
  *
  * Creates a COMPTEL unbinned observation by loading the event list, Good
  * Time Interval, Orbit Aspect Data and optionally the Solar System
- * Barycentre Data from FITS files. Except of the Solar System Barycentre
- * Data all files are mandatory. The Solar System Barycentre Data will only
- * be loaded if the file name is not empty.
+ * Barycentre Data from FITS files.
+ *
+ * Except of the Housekeeping Data and the Solar System Barycentre Data all
+ * files are mandatory. The Housekeeping Data and the Solar System Barycentre
+ * Data will only be loaded if the file names are not empty.
+ *
+ * See load() method for more information.
  ***************************************************************************/
 GCOMObservation::GCOMObservation(const GFilename&              evpname,
                                  const GFilename&              timname,
                                  const std::vector<GFilename>& oadnames,
+                                 const std::vector<GFilename>& hkdnames,
                                  const GFilename&              bvcname)
 {
     // Initialise members
     init_members();
 
     // Load observation
-    load(evpname, timname, oadnames, bvcname);
+    load(evpname, timname, oadnames, hkdnames, bvcname);
 
     // Return
     return;
@@ -498,6 +504,8 @@ double GCOMObservation::npred(const GModel& model) const
  *       <parameter name="TIM" file="m10695_tim.fits"/>
  *       <parameter name="OAD" file="m20039_oad.fits"/>
  *       <parameter name="OAD" file="m20041_oad.fits"/>
+ *       <parameter name="HKD" file="m20035_hkd.fits"/>
+ *       <parameter name="HKD" file="m20037_hkd.fits"/>
  *       <parameter name="BVC" file="s10150_bvc.fits"/>
  *       ...
  *     </observation>
@@ -505,8 +513,8 @@ double GCOMObservation::npred(const GModel& model) const
  * where the observation can contain an arbitrary number of OAD file
  * parameters. The @p file attribute provide either absolute or relative
  * file names. If a file name includes no access path it is assumed that
- * the file resides in the same location as the XML file. The BVC file is
- * optional and does not need to be specified.
+ * the file resides in the same location as the XML file. The HKD and BVC
+ * files are optional and do not need to be specified.
  *
  * For a binned observation the XML format is
  *
@@ -552,6 +560,17 @@ void GCOMObservation::read(const GXmlElement& xml)
            }
         }
 
+        // Get and expand optional HKD file names
+        std::vector<GFilename> hkdnames;
+        for (int i = 0; i < xml.elements("parameter"); ++i) {
+            const GXmlElement* element = xml.element("parameter", i);
+            if (element->attribute("name") == "HKD") {
+                std::string hkdname = element->attribute("file");
+                hkdname = gammalib::xml_file_expand(xml, hkdname);
+                hkdnames.push_back(GFilename(hkdname));
+           }
+        }
+
         // Get and expand optional BVC file name
         std::string bvcname = "";
         if (gammalib::xml_has_par(xml, "BVC")) {
@@ -560,7 +579,7 @@ void GCOMObservation::read(const GXmlElement& xml)
         }
 
         // Load observation
-        load(evpname, timname, oadnames, bvcname);
+        load(evpname, timname, oadnames, hkdnames, bvcname);
 
     } // endif: unbinned observation
 
@@ -644,6 +663,8 @@ void GCOMObservation::read(const GXmlElement& xml)
  *       <parameter name="TIM" file="m10695_tim.fits"/>
  *       <parameter name="OAD" file="m20039_oad.fits"/>
  *       <parameter name="OAD" file="m20041_oad.fits"/>
+ *       <parameter name="HKD" file="m20035_hkd.fits"/>
+ *       <parameter name="HKD" file="m20037_hkd.fits"/>
  *       <parameter name="BVC" file="s10150_bvc.fits"/>
  *       ...
  *     </observation>
@@ -651,9 +672,9 @@ void GCOMObservation::read(const GXmlElement& xml)
  * where the observation can contain an arbitrary number of OAD file
  * parameters. The @p file attribute provide either absolute or relative
  * file names. If a file name includes no access path it is assumed that
- * the file resides in the same location as the XML file. The BVC file is
- * optional and is only written if BVC information is contained in the
- * observation.
+ * the file resides in the same location as the XML file. The HKD and BVC
+ * files are optional and are  only written if HKD and BVC information is
+ * contained in the observation.
  *
  * For a binned observation the XML format is
  *
@@ -696,6 +717,12 @@ void GCOMObservation::write(GXmlElement& xml) const
         for (int i = 0; i < m_oadnames.size(); ++i) {
             par = static_cast<GXmlElement*>(xml.append(GXmlElement("parameter name=\"OAD\"")));
             par->attribute("file", gammalib::xml_file_reduce(xml, m_oadnames[i]));
+        }
+
+        // Optionally set HKD parameters
+        for (int i = 0; i < m_hkdnames.size(); ++i) {
+            par = static_cast<GXmlElement*>(xml.append(GXmlElement("parameter name=\"HKD\"")));
+            par->attribute("file", gammalib::xml_file_reduce(xml, m_hkdnames[i]));
         }
 
         // Optionally set BVC parameters
@@ -814,18 +841,23 @@ void GCOMObservation::load(const GFilename& drename,
  * @param[in] evpname Event list FITS file name.
  * @param[in] timname Good Time Intervals FITS file name.
  * @param[in] oadnames List of Orbit Aspect Data FITS file names.
+ * @param[in] hkdnames List of Housekeeping Data FITS file names.
  * @param[in] bvcname Solar System Barycentre Data FITS file name.
  *
  * Loads the event list, Good Time Interval, Orbit Aspect Data and optionally
- * the Solar System Barycentre Data for an unbinned observation. Except of
- * the Solar System Barycentre Data all files are mandatory. The Solar
- * System Barycentre Data will only be loaded if the file name is not empty.
+ * Housekeeping data and Solar System Barycentre Data for an unbinned
+ * observation.
+ *
+ * Except of the Housekeeping Data and the Solar System Barycentre Data all
+ * files are mandatory. The Housekeeping Data and the Solar System Barycentre
+ * Data will only be loaded if the file names are not empty.
  *
  * The method fixes the deadtime correction factor deadc to 0.965.
  ***************************************************************************/
 void GCOMObservation::load(const GFilename&              evpname,
                            const GFilename&              timname,
                            const std::vector<GFilename>& oadnames,
+                           const std::vector<GFilename>& hkdnames,
                            const GFilename&              bvcname)
 {
     // Clear object
@@ -886,6 +918,22 @@ void GCOMObservation::load(const GFilename&              evpname,
         m_oads.extend(oads[i]);
     }
 
+    // Optionally load HKD data
+    for (int i = 0; i < hkdnames.size(); ++i) {
+
+        // Load HKD file
+        GCOMHkds hdks(hkdnames[i]);
+
+        // Skip file if it is empty
+        if (hdks.size() < 1) {
+            continue;
+        }
+
+        // Extend housekeeping data
+        m_hkds.extend(hdks);
+
+    }
+
     // Optionally load BVC data
     if (bvcname != "") {
         m_bvcs.load(bvcname);
@@ -895,6 +943,7 @@ void GCOMObservation::load(const GFilename&              evpname,
     m_evpname  = evpname;
     m_timname  = timname;
     m_oadnames = oadnames;
+    m_hkdnames = hkdnames;
     m_bvcname  = bvcname;
 
     // Return
@@ -1077,6 +1126,14 @@ std::string GCOMObservation::print(const GChatter& chatter) const
             result.append("\n"+gammalib::parformat("OADs")+"undefined");
         }
 
+        // Append HKDs (if available)
+        if (!m_hkds.is_empty()) {
+            result.append("\n"+m_hkds.print(gammalib::reduce(chatter)));
+        }
+        else {
+            result.append("\n"+gammalib::parformat("HKDs")+"undefined");
+        }
+
         // Append BVCs (if available)
         if (!m_bvcs.is_empty()) {
             result.append("\n"+m_bvcs.print(gammalib::reduce(chatter)));
@@ -1130,9 +1187,11 @@ void GCOMObservation::init_members(void)
     m_evpname.clear();
     m_timname.clear();
     m_oadnames.clear();
+    m_hkdnames.clear();
     m_bvcname.clear();
     m_tim.clear();
     m_oads.clear();
+    m_hkds.clear();
     m_bvcs.clear();
 
     // Return
@@ -1174,9 +1233,11 @@ void GCOMObservation::copy_members(const GCOMObservation& obs)
     m_evpname  = obs.m_evpname;
     m_timname  = obs.m_timname;
     m_oadnames = obs.m_oadnames;
+    m_hkdnames = obs.m_hkdnames;
     m_bvcname  = obs.m_bvcname;
     m_tim      = obs.m_tim;
     m_oads     = obs.m_oads;
+    m_hkds     = obs.m_hkds;
     m_bvcs     = obs.m_bvcs;
 
     // Return

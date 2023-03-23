@@ -37,6 +37,7 @@ The following methods have been added:
 - GCOMObservation::npred()
 - GCOMObservation::drw()
 - GCOMObservation::drwname()
+- GCOMObservation::hkds()
 - GCOMObservation::cachename()
 - GCOMResponse::load_cache()
 - GCOMResponse::save_cache()
@@ -53,6 +54,9 @@ The arguments for the following methods have been changed:
   input; was four filenames before
 - GCOMObservation::load() method now takes 5 filenames on input; was 
   four filenames before
+- GCOMObservation::load() method and GCOMObservation::GCOMObservation()
+  constructor now takes also a vector for housekeeping file namess on
+  input
 
 The return value of the following methods has been changed:
 - none
@@ -174,6 +178,9 @@ None
 
 22. COMPTEL interface
 ---------------------
+Added support to GCOMObservation class for reading and writing of housekeeping
+data (#4209).
+
 Added GCOMHkd and GCOMHkds classes for the handling of housekeeping data
 (#4209).
 

@@ -56,6 +56,7 @@ public:
     GCOMObservation(const GFilename&              evpname,
                     const GFilename&              timname,
                     const std::vector<GFilename>& oadnames,
+                    const std::vector<GFilename>& hkdnames,
                     const GFilename&              bvcname = "");
     GCOMObservation(const GCOMObservation& obs);
     virtual ~GCOMObservation(void);
@@ -87,6 +88,7 @@ public:
     void             load(const GFilename&              evpname,
                           const GFilename&              timname,
                           const std::vector<GFilename>& oadnames,
+                          const std::vector<GFilename>& hkdnames,
                           const GFilename&              bvcname = "");
     void             response(const GCaldb& caldb, const std::string& rspname);
     void             response(const GCOMResponse& response);
@@ -106,6 +108,8 @@ public:
     void             tim(const GCOMTim& tim);
     const GCOMOads&  oads(void) const;
     void             oads(const GCOMOads& oads);
+    const GCOMHkds&  hkds(void) const;
+    void             hkds(const GCOMHkds& hkds);
     const GCOMBvcs&  bvcs(void) const;
     void             bvcs(const GCOMBvcs& bvcs);
     const GFilename& drename(void) const;

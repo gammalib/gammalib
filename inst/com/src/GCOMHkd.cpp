@@ -229,25 +229,40 @@ void GCOMHkd::remove(const int& index)
  *
  * @param[in] hkd Housekeeping Data container.
  *
- * Append Housekeeping Data container to existing container.
+ * Extend existing Housekeeping Data container with data found in another
+ * container by respecting the time ordering of the data.
  ***************************************************************************/
 void GCOMHkd::extend(const GCOMHkd& hkd)
 {
     // Do nothing if Housekeeping Data container is empty
     if (!hkd.is_empty()) {
 
-        // Get size. Note that we extract the size first to avoid an
-        // endless loop that arises when a container is appended to
-        // itself.
+        // Get current number of housekeeping data
         int num = hkd.size();
 
         // Reserve enough space
         reserve(size() + num);
 
-        // Loop over all elements and append them to container
-        for (int i = 0; i < num; ++i) {
-            m_times.append(hkd.m_times[i]);
-            m_values.push_back(hkd.m_values[i]);
+        // Find index of where to insert Housekeeping Data
+        int index = 0;
+        for (; index < size(); ++index) {
+            if (hkd.m_times[0] < m_times[index]) {
+                break;
+            }
+        }
+
+        // Inserts Housekeeping Data
+        if (index < size()) {
+            for (int i = 0; i < num; ++i) {
+                m_times.insert(index+i, hkd.m_times[i]);
+                m_values.insert(m_values.begin()+index+i, hkd.m_values[i]);
+            }
+        }
+        else {
+            for (int i = 0; i < num; ++i) {
+                m_times.append(hkd.m_times[i]);
+                m_values.push_back(hkd.m_values[i]);
+            }
         }
 
     } // endif: Housekeeping Data container was not empty
