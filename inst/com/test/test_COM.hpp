@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  test_COM.hpp  -  Test COMPTEL classes                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2022 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2023 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -55,6 +55,8 @@ public:
     void                test_tim_class(void);
     void                test_oad_class(void);
     void                test_oads_class(void);
+    void                test_hkd_class(void);
+    void                test_hkds_class(void);
     void                test_bvc_class(void);
     void                test_bvcs_class(void);
     void                test_inst_dir(void);

@@ -70,6 +70,10 @@ public:
     void               extend(const GCOMHkd& hkd);
     const std::string& name(void) const;
     void               name(const std::string& name);
+    const GTime&       time(const int& index) const;
+    void               time(const int& index, const GTime& time);
+    const double&      value(const int& index) const;
+    void               value(const int& index, const double& value);
     std::string        print(const GChatter& chatter = NORMAL) const;
 
 protected:

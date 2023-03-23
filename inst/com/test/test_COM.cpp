@@ -50,10 +50,12 @@ const std::string com_drx              = datadir+"/m32171_drx.fits";
 const std::string com_evp              = datadir+"/m16992_tjd8393_evp.fits";
 const std::string com_tim              = datadir+"/m10695_tim.fits";
 const std::string com_oad              = datadir+"/m20039_oad.fits";
+const std::string com_hkd              = datadir+"/m20035_hkd.fits";
 const std::string com_bvc              = datadir+"/s10150_10000rows_bvc.fits";
 const std::string com_obs              = datadir+"/obs.xml";
 const std::string com_obs_cache        = datadir+"/obs_cache.xml";
 const std::string com_obs_unbinned     = datadir+"/obs_unbinned.xml";
+const std::string com_obs_unbinned_hkd = datadir+"/obs_unbinned_hkd.xml";
 const std::string com_obs_unbinned_bvc = datadir+"/obs_unbinned_bvc.xml";
 const std::string com_model            = datadir+"/crab.xml";
 const std::string com_model_fix        = datadir+"/crab_fix.xml";
@@ -76,6 +78,10 @@ void TestGCOM::set(void)
            "GCOMOad: Test COMPTEL Orbit Aspect Data");
     append(static_cast<pfunction>(&TestGCOM::test_oads_class),
            "GCOMOads: Test COMPTEL Orbit Aspect Data container");
+    append(static_cast<pfunction>(&TestGCOM::test_hkd_class),
+           "GCOMHkd: Test COMPTEL Housekeeping Data");
+    append(static_cast<pfunction>(&TestGCOM::test_hkds_class),
+           "GCOMHkds: Test COMPTEL Housekeeping Data collection");
     append(static_cast<pfunction>(&TestGCOM::test_bvc_class),
            "GCOMOad: Test COMPTEL Solar System Barycentre Data");
     append(static_cast<pfunction>(&TestGCOM::test_bvcs_class),
@@ -262,6 +268,116 @@ void TestGCOM::test_oads_class(void)
                "Check OAD gcaz of row 2920");
     test_value(oads[2919].gcel(), 1.584999*gammalib::rad2deg, 1.0e-4,
                "Check OAD gecl of row 2920");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GCOMHkd class
+ ***************************************************************************/
+void TestGCOM::test_hkd_class(void)
+{
+    // Allocate empty GCOMHkd class
+    GCOMHkd hkd;
+    test_assert(hkd.is_empty(), "Check that empty instance is empty");
+    test_value(hkd.size(), 0, "Check that empty instance contains no data");
+    test_value(hkd.name(), "", "Check that empty instance has no name");
+
+    // Define times
+    GTime time1 = gammalib::com_time(8392, 624010000);
+    GTime time2 = gammalib::com_time(8406, 542890000);
+    GTime time3 = gammalib::com_time(8408, 103460000);
+    GTime time4 = gammalib::com_time(8418, 207680000);
+
+    // Setup instance
+    hkd.name("TEST");
+    hkd.append(time1, 3.0);
+    hkd.append(time2, 5.0);
+    test_assert(!hkd.is_empty(), "Check that setup instance is not empty");
+    test_value(hkd.size(), 2, "Check that setup instance contains 2 elements");
+    test_value(hkd.name(), "TEST", "Check that setup instance has name \"TEST\"");
+    test_value(hkd.time(0).secs(), time1.secs(), "Check first time");
+    test_value(hkd.time(1).secs(), time2.secs(), "Check second time");
+    test_value(hkd.value(0), 3.0, "Check first value");
+    test_value(hkd.value(1), 5.0, "Check second value");
+
+    // Remove element
+    hkd.remove(0);
+    test_assert(!hkd.is_empty(), "Check that instance is still not empty");
+    test_value(hkd.size(), 1, "Check that instance now contains 1 element");
+    test_value(hkd.time(0).secs(), time2.secs(), "Check first time");
+    test_value(hkd.value(0), 5.0, "Check first value");
+
+    // Copy instance
+    GCOMHkd hkd_cpy = hkd;
+    test_assert(!hkd_cpy.is_empty(), "Check that copied instance is still not empty");
+    test_value(hkd_cpy.size(), 1, "Check that copied instance contains 1 element");
+    test_value(hkd_cpy.name(), "TEST", "Check that copied instance has name \"TEST\"");
+    test_value(hkd_cpy.time(0).secs(), time2.secs(), "Check first time of copied instance");
+    test_value(hkd_cpy.value(0), 5.0, "Check first value of copied instance");
+
+    // Extend instance
+    GCOMHkd hkd_ext;
+    hkd_ext.append(time3, 30.0);
+    hkd_ext.append(time4, 50.0);
+    test_try("Test extension with invalid parameter name");
+    try {
+        hkd.extend(hkd_ext);
+        test_try_failure("Invalid parameter name shall throw an exception.");
+    }
+    catch (GException::invalid_argument &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    hkd_ext.name("TEST");
+    hkd.extend(hkd_ext);
+    test_assert(!hkd.is_empty(), "Check that extended instance is still not empty");
+    test_value(hkd.size(), 3, "Check that extended instance contains 3 elements");
+    test_value(hkd.name(), "TEST", "Check that extended instance has name \"TEST\"");
+    test_value(hkd.time(0).secs(), time2.secs(), "Check first time of extended instance");
+    test_value(hkd.value(0), 5.0, "Check first value of extended instance");
+    test_value(hkd.time(1).secs(), time3.secs(), "Check second time of extended instance");
+    test_value(hkd.value(1), 30.0, "Check second value of extended instance");
+    test_value(hkd.time(2).secs(), time4.secs(), "Check third time of extended instance");
+    test_value(hkd.value(2), 50.0, "Check third value of extended instance");
+
+    // Extend instance in reverse time (tests internal time ordering)
+    hkd_ext.extend(hkd_cpy);
+    test_assert(!hkd_ext.is_empty(), "Check that reversely extended instance is still not empty");
+    test_value(hkd_ext.size(), 3, "Check that reversely extended instance contains 3 elements");
+    test_value(hkd_ext.name(), "TEST", "Check that reversely extended instance has name \"TEST\"");
+    test_value(hkd_ext.time(0).secs(), time2.secs(), "Check first time of reversely extended instance");
+    test_value(hkd_ext.value(0), 5.0, "Check first value of reversely extended instance");
+    test_value(hkd_ext.time(1).secs(), time3.secs(), "Check second time of reversely extended instance");
+    test_value(hkd_ext.value(1), 30.0, "Check second value of reversely extended instance");
+    test_value(hkd_ext.time(2).secs(), time4.secs(), "Check third time of reversely extended instance");
+    test_value(hkd_ext.value(2), 50.0, "Check third value of reversely extended instance");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GCOMHkds class
+ ***************************************************************************/
+void TestGCOM::test_hkds_class(void)
+{
+    // Allocate empty GCOMHkds class
+    GCOMHkds hkds0;
+    test_assert(hkds0.is_empty(), "Check that empty instance is empty");
+    test_value(hkds0.size(), 0, "Check that empty instance contains no data");
+
+    // Load Housekeeping Data from FITS file
+    GCOMHkds hkds1(com_hkd);
+    test_assert(!hkds1.is_empty(), "Check that loaded instance is not empty");
+    test_value(hkds1.size(), 161, "Check that loaded instance contains 161 parameters");
+    test_assert(hkds1.contains("SCV2M"), "Check that loaded instance contains \"SCV2M\" parameter");
+    test_value(hkds1["SCV2M"].size(), 4626, "Check that loaded instance contains 161 \"SCV2M\" values");
 
     // Return
     return;
@@ -515,6 +631,10 @@ void TestGCOM::test_unbinned_obs(void)
     std::vector<GFilename> oads;
     oads.push_back(com_oad);
 
+    // Set HKDs vector
+    std::vector<GFilename> hkds;
+    hkds.push_back(com_hkd);
+
     // Test filename constructor without BVC
     GCOMObservation obs1(com_evp, com_tim, oads);
     test_assert(obs1.is_unbinned(), "Test if observation is unbinned");
@@ -522,18 +642,20 @@ void TestGCOM::test_unbinned_obs(void)
     test_value(obs1.events()->number(), 81063, "Test number of events");
     test_value(obs1.tim().gti().size(), 162, "Test size of TIM");
     test_value(obs1.oads().size(), 5273, "Test size of OADs");
+    test_value(obs1.hkds().size(), 0, "Test size of HKDs");
     test_value(obs1.bvcs().size(), 0, "Test size of BVC");
 
-    // Test filename constructor with BVC
-    GCOMObservation obs2(com_evp, com_tim, oads, com_bvc);
+    // Test filename constructor with HKD and BVC
+    GCOMObservation obs2(com_evp, com_tim, oads, hkds, com_bvc);
     test_assert(obs2.is_unbinned(), "Test if observation is unbinned");
     test_assert(!obs2.is_binned(), "Test if observation is not binned");
     test_value(obs2.events()->number(), 81063, "Test number of events");
     test_value(obs2.tim().gti().size(), 162, "Test size of TIM");
     test_value(obs2.oads().size(), 5273, "Test size of OADs");
+    test_value(obs2.hkds().size(), 161, "Test size of HKDs");
     test_value(obs2.bvcs().size(), 10000, "Test size of BVC");
 
-    // Test XML constructor without BVC dataset
+    // Test XML constructor without HKD and BVC dataset
     GObservations    obss3(com_obs_unbinned);
     GCOMObservation* obs3 = static_cast<GCOMObservation*>(obss3[0]);
     test_assert(obs3->is_unbinned(), "Test if observation is unbinned");
@@ -541,17 +663,30 @@ void TestGCOM::test_unbinned_obs(void)
     test_value(obs3->events()->number(), 81063, "Test number of events");
     test_value(obs3->tim().gti().size(), 162, "Test size of TIM");
     test_value(obs3->oads().size(), 10545, "Test size of OADs");
+    test_value(obs3->hkds().size(), 0, "Test size of HKDs");
     test_value(obs3->bvcs().size(), 0, "Test size of BVC");
 
-    // Test XML constructor with BVC dataset
-    GObservations    obss4(com_obs_unbinned_bvc);
+    // Test XML constructor with HKD dataset
+    GObservations    obss4(com_obs_unbinned_hkd);
     GCOMObservation* obs4 = static_cast<GCOMObservation*>(obss4[0]);
     test_assert(obs4->is_unbinned(), "Test if observation is unbinned");
     test_assert(!obs4->is_binned(), "Test if observation is not binned");
     test_value(obs4->events()->number(), 81063, "Test number of events");
     test_value(obs4->tim().gti().size(), 162, "Test size of TIM");
     test_value(obs4->oads().size(), 10545, "Test size of OADs");
-    test_value(obs4->bvcs().size(), 10000, "Test size of BVC");
+    test_value(obs4->hkds().size(), 161, "Test size of HKDs");
+    test_value(obs4->bvcs().size(), 0, "Test size of BVC");
+
+    // Test XML constructor with BVC dataset
+    GObservations    obss5(com_obs_unbinned_bvc);
+    GCOMObservation* obs5 = static_cast<GCOMObservation*>(obss5[0]);
+    test_assert(obs5->is_unbinned(), "Test if observation is unbinned");
+    test_assert(!obs5->is_binned(), "Test if observation is not binned");
+    test_value(obs5->events()->number(), 81063, "Test number of events");
+    test_value(obs5->tim().gti().size(), 162, "Test size of TIM");
+    test_value(obs5->oads().size(), 10545, "Test size of OADs");
+    test_value(obs5->hkds().size(), 0, "Test size of HKDs");
+    test_value(obs5->bvcs().size(), 10000, "Test size of BVC");
 
     // Exit test
     return;

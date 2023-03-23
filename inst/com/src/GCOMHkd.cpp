@@ -35,6 +35,11 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_REMOVE                                      "GCOMHkd::remove(int&)"
+#define G_EXTEND                                  "GCOMHkd::extend(GCOMHkd&)"
+#define G_TIME_GET                                      "GCOMHkd::time(int&)"
+#define G_VALUE_GET                                    "GCOMHkd::value(int&)"
+#define G_TIME_SET                              "GCOMHkd::time(int&, GTime&)"
+#define G_VALUE_SET                           "GCOMHkd::value(int&, double&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -229,6 +234,9 @@ void GCOMHkd::remove(const int& index)
  *
  * @param[in] hkd Housekeeping Data container.
  *
+ * @exception GException::invalid_argument
+ *            Mismatch between housekeeping parameter names.
+ *
  * Extend existing Housekeeping Data container with data found in another
  * container by respecting the time ordering of the data.
  ***************************************************************************/
@@ -236,6 +244,15 @@ void GCOMHkd::extend(const GCOMHkd& hkd)
 {
     // Do nothing if Housekeeping Data container is empty
     if (!hkd.is_empty()) {
+
+        // Check that housekeeping parameter name corresponds to expectation
+        if (hkd.name() != name()) {
+            std::string msg = "Housekeeping parameter name \""+hkd.name()+"\" "
+                              "does not correspond to expected name \""+
+                              name()+"\". Please specify a container with "
+                              "the expected parameter name.";
+            throw GException::invalid_argument(G_EXTEND, msg);
+        }
 
         // Get current number of housekeeping data
         int num = hkd.size();
@@ -270,6 +287,111 @@ void GCOMHkd::extend(const GCOMHkd& hkd)
     // Return
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Return reference to Housekeeping Data time
+ *
+ * @param[in] index Housekeeping Data index [0,...,size()-1].
+ * @return Reference to Housekeeping Data time.
+ *
+ * @exception GException::out_of_range
+ *            Housekeeping Data @p index is out of range.
+ *
+ * Returns a reference to the Housekeeping Data time with the specified
+ * @p index.
+ ***************************************************************************/
+const GTime& GCOMHkd::time(const int& index) const
+{
+    // Raise exception if index is out of range
+    if (index < 0 || index >= size()) {
+        std::string msg = "Housekeeping Data index";
+        throw GException::out_of_range(G_TIME_GET, msg, index, size());
+    }
+
+    // Return reference to time
+    return m_times[index];
+}
+
+
+/***********************************************************************//**
+ * @brief Set Housekeeping Data time
+ *
+ * @param[in] index Housekeeping Data index [0,...,size()-1].
+ * @param[in] time Housekeeping Data time.
+ *
+ * @exception GException::out_of_range
+ *            Housekeeping Data @p index is out of range.
+ *
+ * Sets the Housekeeping Data time with the specified @p index.
+ ***************************************************************************/
+void GCOMHkd::time(const int& index, const GTime& time)
+{
+    // Raise exception if index is out of range
+    if (index < 0 || index >= size()) {
+        std::string msg = "Housekeeping Data index";
+        throw GException::out_of_range(G_TIME_SET, msg, index, size());
+    }
+
+    // Set time
+    m_times[index] = time;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return reference to Housekeeping Data value
+ *
+ * @param[in] index Housekeeping Data index [0,...,size()-1].
+ * @return Reference to Housekeeping Data value.
+ *
+ * @exception GException::out_of_range
+ *            Housekeeping Data @p index is out of range.
+ *
+ * Returns a reference to the Housekeeping Data value with the specified
+ * @p index.
+ ***************************************************************************/
+const double& GCOMHkd::value(const int& index) const
+{
+    // Raise exception if index is out of range
+    if (index < 0 || index >= size()) {
+        std::string msg = "Housekeeping Data index";
+        throw GException::out_of_range(G_VALUE_GET, msg, index, size());
+    }
+
+    // Return reference to value
+    return m_values[index];
+}
+
+
+/***********************************************************************//**
+ * @brief Set Housekeeping Data value
+ *
+ * @param[in] index Housekeeping Data index [0,...,size()-1].
+ * @param[in] value Housekeeping Data value.
+ *
+ * @exception GException::out_of_range
+ *            Housekeeping Data @p index is out of range.
+ *
+ * Sets the Housekeeping Data value with the specified @p index.
+ ***************************************************************************/
+void GCOMHkd::value(const int& index, const double& value)
+{
+    // Raise exception if index is out of range
+    if (index < 0 || index >= size()) {
+        std::string msg = "Housekeeping Data index";
+        throw GException::out_of_range(G_VALUE_SET, msg, index, size());
+    }
+
+    // Set value
+    m_values[index] = value;
+
+    // Return
+    return;
+}
+
 
 
 /***********************************************************************//**

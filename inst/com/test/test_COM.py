@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib COMPTEL module.
 #
-# Copyright (C) 2012-2022 Juergen Knoedlseder
+# Copyright (C) 2012-2023 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -64,6 +64,8 @@ class Test(gammalib.GPythonTestSuite):
         test_support.pickeling(self, gammalib.GCOMModelDRM())
         test_support.pickeling(self, gammalib.GCOMOad())
         test_support.pickeling(self, gammalib.GCOMOads())
+        test_support.pickeling(self, gammalib.GCOMHkd())
+        test_support.pickeling(self, gammalib.GCOMHkds())
         test_support.pickeling(self, gammalib.GCOMBvc())
         test_support.pickeling(self, gammalib.GCOMBvcs())
         test_support.pickeling(self, gammalib.GCOMObservation())
@@ -125,6 +127,11 @@ class Test(gammalib.GPythonTestSuite):
         oad.georad(30.0)
         oads = gammalib.GCOMOads()
         oads.append(oad)
+        hkd = gammalib.GCOMHkd()
+        hkd.append(gammalib.GTime(1.0,'secs'), 3.0)
+        hkd.append(gammalib.GTime(2.0,'secs'), 5.0)
+        hkds = gammalib.GCOMHkds()
+        hkds.append(hkd)
         bvc = gammalib.GCOMBvc()
         bvc.time(gammalib.GTime(1.0,'secs'))
         bvc.tjd(1000)
@@ -153,6 +160,8 @@ class Test(gammalib.GPythonTestSuite):
         test_support.pickeling(self, gammalib.GCOMModelDRBPhibarNodes(model['Background']))
         test_support.pickeling(self, gammalib.GCOMOad(oad))
         test_support.pickeling(self, gammalib.GCOMOads(oads))
+        test_support.pickeling(self, gammalib.GCOMHkd(hkd))
+        test_support.pickeling(self, gammalib.GCOMHkds(hkds))
         test_support.pickeling(self, gammalib.GCOMBvc(bvc))
         test_support.pickeling(self, gammalib.GCOMBvcs(bvcs))
         test_support.pickeling(self, gammalib.GCOMObservation(obs[0]))

@@ -55,6 +55,10 @@ public:
     void               extend(const GCOMHkd& hkd);
     const std::string& name(void) const;
     void               name(const std::string& name);
+    const GTime&       time(const int& index) const;
+    void               time(const int& index, const GTime& time);
+    const double&      value(const int& index) const;
+    void               value(const int& index, const double& value);
 };
 
 
@@ -67,9 +71,15 @@ public:
     }
 %pythoncode {
     def __getstate__(self):
-        state = ()
+        state = {'name'  :  self.name(),
+                 'times' : [self.time(i)  for i in range(self.size())],
+                 'values': [self.value(i) for i in range(self.size())]}
         return state
     def __setstate__(self, state):
-        self.__init__()
+        self.__init__(state['name'])
+        size = len(state['times'])
+        self.reserve(size)
+        for i in range(size):
+            self.append(state['times'][i], state['values'][i])
 }
 };

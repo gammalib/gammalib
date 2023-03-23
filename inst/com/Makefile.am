@@ -159,6 +159,7 @@ testdatacom       = test/data/obs.xml \
                     test/data/m50441_dre.fits.gz \
                     test/data/m20039_oad.fits.gz \
                     test/data/m20041_oad.fits.gz \
+                    test/data/m20035_hkd.fits.gz \
                     test/data/s10150_10000rows_bvc.fits.gz \
                     test/data/irfcache.fits.gz
 testdatacomdir    = $(pyexecdir)/gammalib/tests/com/data
