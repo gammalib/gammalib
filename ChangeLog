@@ -1,9 +1,10 @@
-2023-03-15
+2023-03-23
 
         * Version 2.1.0 released
         ========================
 
         Replace distutils by setuptools for Python setup (#4223)
+        Add GCOMHkd and GCOMHkds classes (#4209)
         Add COMPTEL DRW support to GCOMObservation and GCOMDris (#4209)
         Add GSkyMap comparison operators (#4209)
         Add GIntegral::adaptive_gauss_kronrod() method (#4204)

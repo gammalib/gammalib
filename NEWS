@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.1.0
 
-15 March 2023
+23 March 2023
 
 
 1. Introduction
@@ -13,6 +13,8 @@ made since the last release of GammaLib.
 ---------------------------------
 The following classes have been added:
 - GCOMDris
+- GCOMHkd
+- GCOMHkds
 
 The following classes have been removed:
 - none
@@ -172,6 +174,9 @@ None
 
 22. COMPTEL interface
 ---------------------
+Added GCOMHkd and GCOMHkds classes for the handling of housekeeping data
+(#4209).
+
 Added GCOMDris container class. This class specifically provides the
 GCOMDris::compute_drws() that allows computation of weighting cubes for
 all energy bins (#4209).

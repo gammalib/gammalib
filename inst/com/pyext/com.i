@@ -119,6 +119,8 @@
 %include "GCOMTim.i"
 %include "GCOMOad.i"
 %include "GCOMOads.i"
+%include "GCOMHkd.i"
+%include "GCOMHkds.i"
 %include "GCOMBvc.i"
 %include "GCOMBvcs.i"
 %include "GCOMDri.i"
