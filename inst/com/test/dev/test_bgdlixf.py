@@ -56,7 +56,6 @@ def get_veto_rates(xmlname):
 
         # Get 2nd Veto dome rates housekeeping data
         hkd = com.hkds()['SCV2M']
-        print(hkd)
 
         # Extract data
         for i in range(hkd.size()):
@@ -73,35 +72,37 @@ def get_veto_rates(xmlname):
 # ====================================== #
 # Check time ordering of Veto dome rates #
 # ====================================== #
-def check_veto_rates(xmlname):
+def check_veto_rates():
     """
     Check time ordering of Veto dome rates
-
-    Parameters
-    ----------
-    xmlname : str
-        Observation definition XML file name
     """
-    # Load observations
-    obs = gammalib.GObservations(xmlname)
+    # Get all XML files
+    xmlnames = glob.glob('dbase/xml/vp*.xml')
+    xmlnames.sort()
 
-    # Loop over observations
-    for com in obs:
+    # Loop over XML files
+    for xmlname in xmlnames:
 
-        # Get 2nd Veto dome rates housekeeping data
-        hkd = com.hkds()['SCV2M']
+        # Load observations
+        obs = gammalib.GObservations(xmlname)
 
-        # Check times
-        nbad = 0
-        for i in range(hkd.size()):
-            if i == 0:
-                last_time = hkd.time(i)
-            else:
-                if hkd.time(i) <= last_time:
-                    nbad += 1
-                    print('%s: %.5f <= %.5f' % (com.id(), hkd.time(i).mjd(), last_time.mjd()))
-        if nbad == 0:
-            print('%s: ok.' % (com.id()))
+        # Loop over observations
+        for com in obs:
+
+            # Get 2nd Veto dome rates housekeeping data
+            hkd = com.hkds()['SCV2M']
+
+            # Check times
+            nbad = 0
+            for i in range(hkd.size()):
+                if i == 0:
+                    last_time = hkd.time(i)
+                else:
+                    if hkd.time(i) <= last_time:
+                        nbad += 1
+                        print('%s: %.5f <= %.5f' % (com.id(), hkd.time(i).mjd(), last_time.mjd()))
+            if nbad == 0:
+                print('%s: ok.' % (com.id()))
 
     # Return
     return
@@ -147,23 +148,14 @@ if __name__ == '__main__':
     print('* Test BGDLIXF rate fitting *')
     print('*****************************')
 
+    # Check time ordering of veto rates
+    #check_veto_rates()
+
     # Set file names
-    #hkdname = '/project-data/comptel/data/phase01/vp0001_0/m20074_hkd.fits'
-    #hkdname = '/project-data/comptel/data/phase07/vp0701_0/m26689_hkd.fits'
-    #xmlname = 'dbase/xml/vp0001_0.xml'
+    xmlname = 'dbase/xml/vp0001_0.xml'
 
-    # Get all XML files
-    xmlnames = glob.glob('dbase/xml/vp*.xml')
-    xmlnames.sort()
+    # Get Veto dome rates
+    rates = get_veto_rates(xmlname)
 
-    # Loop over XML files
-    for xmlname in xmlnames:
-
-        # Check Veto rates
-        check_veto_rates(xmlname)
-
-        # Get Veto dome rates
-        #rates = get_veto_rates(xmlname)
-
-        # Show Veto dome rates
-        #show_veto_rates(rates)
+    # Show Veto dome rates
+    show_veto_rates(rates)

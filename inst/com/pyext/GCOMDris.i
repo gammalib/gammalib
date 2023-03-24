@@ -57,7 +57,7 @@ public:
                              const GCOMSelection&   select = GCOMSelection(),
                              const double&          zetamin = 5.0,
                              const double&          timebin = 300.0,
-                             const std::string&     method = "phibar");
+                             const std::string&     method = "vetorate");
 };
 
 

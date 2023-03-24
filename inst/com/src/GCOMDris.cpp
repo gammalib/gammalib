@@ -32,6 +32,12 @@
 #include <iostream>
 #include "GException.hpp"
 #include "GMath.hpp"
+#include "GFits.hpp"
+#include "GFitsImageDouble.hpp"
+#include "GFitsImageShort.hpp"
+#include "GOptimizerPars.hpp"
+#include "GOptimizerPar.hpp"
+#include "GOptimizerLM.hpp"
 #include "GCOMTools.hpp"
 #include "GCOMSupport.hpp"
 #include "GCOMDri.hpp"
@@ -58,7 +64,8 @@
 #define G_COMPUTE_DRWS_EHACORR  //!< Correct Earth horizon cut
 
 /* __ Debug definitions __________________________________________________ */
-//#define G_DEBUG_COMPUTE_DRWS
+#define G_DEBUG_COMPUTE_DRWS
+#define G_DEBUG_SAVE_WORKING_ARRAYS
 
 /* __ Constants __________________________________________________________ */
 
@@ -351,7 +358,7 @@ void GCOMDris::extend(const GCOMDris& dris)
  * @param[in] select Selection set.
  * @param[in] zetamin Minimum Earth horizon - Phibar cut (deg).
  * @param[in] timebin Time binning for rate determination (sec).
- * @param[in] method Method to compute DRWs ("energy" or "phibar").
+ * @param[in] method Method to compute DRWs ("energy", "phibar" or "vetorate").
  *
  * @exception GException::invalid_value
  *            DRW with mismatching definition encountered in container.
@@ -407,6 +414,9 @@ void GCOMDris::compute_drws(const GCOMObservation& obs,
             // Set all DRG bins to zero
             m_dris[i].init_cube();
 
+            // Set DRW header method parameter
+            m_dris[i].m_drw_method = method;
+
             // Debug
             #if defined(G_DEBUG_COMPUTE_DRWS)
             std::cout << m_dris[i].print() << std::endl;
@@ -431,6 +441,11 @@ void GCOMDris::compute_drws(const GCOMObservation& obs,
         // Method B: Phibar-dependent weighting
         else if (method == "phibar") {
             compute_drws_phibar(obs, events, select, zetamin, timebin);
+        }
+
+        // Method C: Veto rate weighting
+        else if (method == "vetorate") {
+            compute_drws_vetorate(obs, events, select, zetamin);
         }
 
         // Normalise Phibar layers of all DRWs to unity
@@ -512,6 +527,14 @@ void GCOMDris::init_members(void)
     // Initialise members
     m_dris.clear();
 
+    // Initialise working arrays
+    m_wrk_counts.clear();
+    m_wrk_ehacutcorr.clear();
+    m_wrk_vetorate.clear();
+    m_wrk_constrate.clear();
+    m_wrk_rate.clear();
+    m_wrk_use_sp.clear();
+
     // Return
     return;
 }
@@ -526,6 +549,14 @@ void GCOMDris::copy_members(const GCOMDris& dris)
 {
     // Copy members
     m_dris = dris.m_dris;
+
+    // Copy working arrays
+    m_wrk_counts     = dris.m_wrk_counts;
+    m_wrk_ehacutcorr = dris.m_wrk_ehacutcorr;
+    m_wrk_vetorate   = dris.m_wrk_vetorate;
+    m_wrk_constrate  = dris.m_wrk_constrate;
+    m_wrk_rate       = dris.m_wrk_rate;
+    m_wrk_use_sp     = dris.m_wrk_use_sp;
 
     // Return
     return;
@@ -546,7 +577,7 @@ void GCOMDris::free_members(void)
  * @brief Compute background weighting cubes using energy dependent rates
  *
  * @param[in] obs COMPTEL observation.
- * @param[in] event COMPTEL event list.
+ * @param[in] events COMPTEL event list.
  * @param[in] select Selection set.
  * @param[in] zetamin Minimum Earth horizon - Phibar cut (deg).
  * @param[in] timebin Time binning for rate determination (sec).
@@ -869,7 +900,7 @@ void GCOMDris::compute_drws_energy(const GCOMObservation& obs,
  * @brief Compute background weighting cubes using Phibar dependent rates
  *
  * @param[in] obs COMPTEL observation.
- * @param[in] event COMPTEL event list.
+ * @param[in] events COMPTEL event list.
  * @param[in] select Selection set.
  * @param[in] zetamin Minimum Earth horizon - Phibar cut (deg).
  * @param[in] timebin Time binning for rate determination (sec).
@@ -1195,6 +1226,884 @@ void GCOMDris::compute_drws_phibar(const GCOMObservation& obs,
     debugfile1.close();
     debugfile2.close();
     #endif
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Compute background weighting cubes using veto rates
+ *
+ * @param[in] obs COMPTEL observation.
+ * @param[in] events COMPTEL event list.
+ * @param[in] select Selection set.
+ * @param[in] zetamin Minimum Earth horizon - Phibar cut (deg).
+ *
+ * Compute DRW cubes for a COMPTEL observation. DRW cubes are event-rate
+ * weighted geometry cubes which were multiplied by the solid angle of
+ * the (Chi,Psi) pixels.
+ ***************************************************************************/
+void GCOMDris::compute_drws_vetorate(const GCOMObservation& obs,
+                                     const GCOMEventList*   events,
+                                     const GCOMSelection&   select,
+                                     const double&          zetamin)
+{
+    // Debug
+    #if defined(G_DEBUG_COMPUTE_DRWS)
+    std::cout << "GCOMDris::compute_drws_vetorate" << std::endl;
+    std::cout << "===============================" << std::endl;
+    #endif
+
+    // Setup working arrays
+    vetorate_setup(obs, events, select, zetamin);
+
+    // Debug: Save working arrays in FITS file
+    #if defined(G_DEBUG_SAVE_WORKING_ARRAYS)
+    vetorate_save("debug_gcomdris_compute_drws_vetorate.fits");
+    vetorate_load("debug_gcomdris_compute_drws_vetorate.fits");
+    #endif
+
+    // Fit working arrays to determine f_prompt parameter
+    vetorate_fit();
+
+    // Generate DRWs
+    vetorate_generate(obs, select, zetamin);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Setup working arrays for vetorate computation
+ *
+ * @param[in] obs COMPTEL observation.
+ * @param[in] events COMPTEL event list.
+ * @param[in] select Selection set.
+ * @param[in] zetamin Minimum Earth horizon - Phibar cut (deg).
+ *
+ * Setup working arrays for vetorate DRW computation. There are four working
+ * arrays:
+ *
+ * @c m_wrk_counts is a 3D working array spanned by superpacket index,
+ * phibar layer and energy bin, containing the number of events passing the
+ * event selections for the specified bin.
+ *
+ * @c m_wrk_ehacutcorr is a 2D working array spanned by superpacket index
+ * and phibar layer, containing the fraction of the solid-angle weighted
+ * geometry that passes the Earth horizon cut for the specified bin. This
+ * array represents the response to a given incident event rate.
+ *
+ * @c m_wrk_vetorate is a 1D working array, containing the veto rate as
+ * function of superpacket index.
+ *
+ * @c m_wrk_use_sp is a 1D working array, signalling the usage of a given
+ * superpacket.
+ *
+ * Note that the method also sets the superpacket usage and event selection
+ * statistics of all DRWs.
+ ***************************************************************************/
+void GCOMDris::vetorate_setup(const GCOMObservation& obs,
+                              const GCOMEventList*   events,
+                              const GCOMSelection&   select,
+                              const double&          zetamin)
+{
+    // Debug
+    #if defined(G_DEBUG_COMPUTE_DRWS)
+    std::cout << "GCOMDris::vetorate_setup" << std::endl;
+    std::cout << "========================" << std::endl;
+    #endif
+
+    // Initialise D1 & D2 module status
+    GCOMStatus status;
+
+    // Get pointer to first DRW (assume their definition is identical)
+    const GCOMDri* dri0 = &(m_dris[0]);
+
+    // Extract dimensions
+    int noads   = obs.oads().size();
+    int npix    = dri0->m_dri.npix();
+    int nphibar = dri0->nphibar();
+    int neng    = size();
+
+    // Debug
+    #if defined(G_DEBUG_COMPUTE_DRWS)
+    std::cout << "Number of superpackets: " << noads << std::endl;
+    std::cout << "Number of pixels: " << npix << std::endl;
+    std::cout << "Number of Phibar layers: " << nphibar << std::endl;
+    std::cout << "Number of energies: " << neng << std::endl;
+    #endif
+
+    // Define working arrays
+    m_wrk_counts     = GNdarray(noads, nphibar, neng);
+    m_wrk_ehacutcorr = GNdarray(noads, nphibar);
+    m_wrk_vetorate   = GNdarray(noads);
+    m_wrk_use_sp     = std::vector<bool>(noads);
+
+    // Allocate further working arrays
+    GNdarray geo(npix);
+    GNdarray eha(npix);
+
+    // Setup node array and rate vector for veto rate interpolation
+    const GCOMHkd&      hdk = obs.hkds()["SCV2M"];
+    GNodeArray          veto_times;
+    std::vector<double> veto_rates;
+    veto_times.reserve(hdk.size());
+    veto_rates.reserve(hdk.size());
+    for (int i = 0; i < hdk.size(); ++i) {
+        double rate = hdk.value(i);
+        if (rate > 0.0) {
+            veto_times.append(hdk.time(i).secs());
+            veto_rates.push_back(rate);
+        }
+    }
+
+    // Setup sky directions and solid angles for all (Chi, Psi)
+    std::vector<GSkyDir> skys;
+    std::vector<double>  omegas;
+    for (int index = 0; index < dri0->m_dri.npix(); ++index) {
+        GSkyDir sky   = dri0->m_dri.inx2dir(index);
+        double  omega = dri0->m_dri.solidangle(index);
+        skys.push_back(sky);
+        omegas.push_back(omega);
+    }
+
+    // Debug
+    #if defined(G_DEBUG_COMPUTE_DRWS)
+    std::cout << "Setup node array for veto rate interpolation: ";
+    std::cout << veto_times.size() << " times, ";
+    std::cout << veto_rates.size() << " rates" << std::endl;
+    #endif
+
+    // Get Good Time Intervals. If a pulsar selection is specified then
+    // reduce the Good Time Intervals to the validity intervals of the
+    // pulsar emphemerides.
+    GCOMTim tim = obs.tim();
+    if (select.has_pulsar()) {
+        tim.reduce(select.pulsar().validity());
+    }
+
+    // Initialise event counter
+    int i_evt = 0;
+
+    // Signal that loop should be terminated
+    bool terminate = false;
+
+    // Loop over Orbit Aspect Data
+    for (int i_oad = 0; i_oad < noads; ++i_oad) {
+
+        // Get reference to Orbit Aspect Data of superpacket
+        const GCOMOad &oad = obs.oads()[i_oad];
+
+        // Check superpacket usage for all DRWs so that their statistics
+        // get correctly updated
+        m_wrk_use_sp[i_oad] = true;
+        for (int i = 0; i < size(); ++i) {
+            if (!m_dris[i].use_superpacket(oad, tim, select)) {
+                m_wrk_use_sp[i_oad] = false;
+            }
+        }
+        if (!m_wrk_use_sp[i_oad]) {
+            continue;
+        }
+
+        // Get Orbit Aspect Data mid-time in seconds
+        double time = oad.tstart().secs() + 0.5 * (oad.tstop() - oad.tstart());
+
+        // Prepare Earth horizon angle computation. The celestial system
+        // is reinterpreted as the COMPTEL coordinate system, where the
+        // 90 degrees - zenith angle becomes the declination and the azimuth
+        // angle becomes Right Ascension. This allows us later to use the
+        // GSkyDir::dist method to compute the distance between the geocentre
+        // and the telescope Z-axis.
+        double  theta_geocentre = double(oad.gcel());
+        double  phi_geocentre   = double(oad.gcaz());
+        GSkyDir geocentre_comptel;
+        geocentre_comptel.radec_deg(phi_geocentre, 90.0-theta_geocentre);
+
+        // Compute solid-angle-corrected geometry factors and Earth horizon
+        // angles for all (Chi,Psi) pixels
+        double total_geo = 0.0;
+        for (int index = 0; index < npix; ++index) {
+
+            // Convert sky direction to COMPTEL coordinates
+            double theta = oad.theta(skys[index]);
+            double phi   = oad.phi(skys[index]);
+
+            // Compute geometric factor summed over all D1, D2 times
+            // the solid angle of the weighting cube pixel
+            double geometry = dri0->compute_geometry(oad.tjd(), theta, phi,
+                                                     select, status) * omegas[index];
+
+            // Store and sum up geometric factor
+            geo(index)  = geometry;
+            total_geo  += geometry;
+
+            // Compute Earth horizon angle as the distance between the Earth
+            // centre in COMPTEL coordinates and the (Chi, Psi) pixel in
+            // COMPTEL coordinates minus the radius of the Earth.
+            GSkyDir chipsi_comptel;
+            chipsi_comptel.radec_deg(phi, 90.0-theta);
+            eha(index) = geocentre_comptel.dist_deg(chipsi_comptel) - oad.georad();
+
+        } // endfor: looped over (Chi, Psi)
+
+        // Compute Earth horizon cut correction factor for all Phibar layers
+        if (total_geo > 0.0) {
+            for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
+                double ehamin       = double(iphibar) * dri0->m_phibin + zetamin;
+                double accepted_geo = 0.0;
+                for (int index = 0; index < npix; ++index) {
+                    if (eha(index) >= ehamin) {
+                        accepted_geo += geo(index);
+                    }
+                }
+                m_wrk_ehacutcorr(i_oad, iphibar) = accepted_geo / total_geo;
+            }
+        }
+
+        // Compute veto rate for superpacket time if rates are available
+        if (!veto_times.is_empty()) {
+            double value = veto_times.interpolate(time, veto_rates);
+            if (value > 0.0) {
+                m_wrk_vetorate(i_oad) = value;
+            }
+        }
+
+        // Collect all events within superpacket and store result in 3D array.
+        // Break if the end of the event list was reached.
+        for (; i_evt < events->size(); ++i_evt) {
+
+            // Get pointer to event
+            const GCOMEventAtom* event = (*events)[i_evt];
+
+            // Break loop if the end of the superpacket was reached
+            if (event->time() > oad.tstop()) {
+                break;
+            }
+
+            // Determine energy bin
+            int ienergy = -1;
+            for (int i = 0; i < size(); ++i) {
+                if ((event->energy() >= m_dris[i].m_ebounds.emin()) &&
+                    (event->energy() <= m_dris[i].m_ebounds.emax())) {
+                    ienergy = i;
+                    break;
+                }
+            }
+
+            // Skip event if it is not contained in any energy bin
+            if (ienergy == -1) {
+                continue;
+            }
+
+            // Get pointer to appropriate DRW
+            const GCOMDri* dri = &(m_dris[ienergy]);
+
+            // Check GTIs if the DRW has GTIs
+            if (dri->gti().size() > 0) {
+
+                // Skip event if it lies before the GTI start
+                if (event->time() < dri->gti().tstart()) {
+                    continue;
+                }
+
+                // Break Orbit Aspect Data loop if event lies after the GTI stop
+                else if (event->time() > dri->gti().tstop()) {
+                    terminate = true;
+                    break;
+                }
+
+            } // endif: DRW had GTIs
+
+            // Skip event if it lies before the superpacket start
+            if (event->time() < oad.tstart()) {
+                continue;
+            }
+
+            // Apply event selection
+            if (!dri->m_selection.use_event(*event)) {
+                continue;
+            }
+
+            // Compute Compton scatter angle index. Skip if it's invalid.
+            int iphibar = int((event->phibar() - dri->m_phimin) / dri->m_phibin);
+            if (iphibar < 0) {
+                continue;
+            }
+            else if (iphibar >= dri->nphibar()) {
+                continue;
+            }
+
+            // Check for Earth horizon angle. There is a constant EHA limit
+            // over a Phibar layer to be compliant with the DRG.
+            double ehamin = double(iphibar) * dri->m_phibin + zetamin;
+            if (event->eha() < ehamin) {
+                continue;
+            }
+
+            // Now fill the event in the 3D counts array
+            m_wrk_counts(i_oad, iphibar, ienergy) += 1.0;
+
+        } // endfor: collected events
+
+        // Debug
+        #if defined(G_DEBUG_COMPUTE_DRWS)
+        std::cout << "Superpacket " << i_oad;
+        std::cout << " time=" << time;
+        std::cout << " vetorate=" << m_wrk_vetorate(i_oad);
+        std::cout << " total_geo=" << total_geo;
+        std::cout << std::endl;
+        #endif
+
+        // Break Orbit Aspect Data loop if termination was signalled or if there
+        // are no more events
+        if (terminate || i_evt >= events->size()) {
+            break;
+        }
+
+    } // endfor: looped over Orbit Aspect Data
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Fit working arrays for vetorate computation
+ *
+ * Determines the f_prompt parameter for each energy bin using a maximum
+ * log-likelihood fit using the data in the working arrays for each energy
+ * bin. Based on the fitted f_prompt parameter the method also computes the
+ * expected background rate time variation for each energy bin.
+ ***************************************************************************/
+void GCOMDris::vetorate_fit(void)
+{
+    // Set constants
+    const double fprompt_init = 0.5; // Initial f_prompt value
+    const double norm         = 1.0; // Model normalisation
+
+    // Debug
+    #if defined(G_DEBUG_COMPUTE_DRWS)
+    std::cout << "GCOMDris::vetorate_fit" << std::endl;
+    std::cout << "======================" << std::endl;
+    #endif
+
+    // Extract dimension from working arrays
+    int noads   = m_wrk_counts.shape()[0];
+    int nphibar = m_wrk_counts.shape()[1];
+    int neng    = m_wrk_counts.shape()[2];
+
+    // Debug
+    #if defined(G_DEBUG_COMPUTE_DRWS)
+    std::cout << "Number of superpackets: " << noads << std::endl;
+    std::cout << "Number of Phibar layers: " << nphibar << std::endl;
+    std::cout << "Number of energies: " << neng << std::endl;
+    #endif
+
+    // Setup rate result array
+    m_wrk_rate = GNdarray(noads, neng);
+
+    // Setup normalised constant rate array and normalise veto rates
+    m_wrk_constrate   = GNdarray(noads);
+    double nvetorate  = 0.0;
+    double nconstrate = 0.0;
+    for (int ioad = 0; ioad < noads; ++ioad) {
+        if (m_wrk_vetorate(ioad) > 0.0) {
+            m_wrk_constrate(ioad) = 1.0;
+            nvetorate            += m_wrk_vetorate(ioad);
+            nconstrate           += m_wrk_constrate(ioad);
+        }
+    }
+    if (nvetorate > 0.0) {
+        for (int ioad = 0; ioad < noads; ++ioad) {
+            m_wrk_vetorate(ioad) /= nvetorate;
+        }
+    }
+    if (nconstrate > 0.0) {
+        for (int ioad = 0; ioad < noads; ++ioad) {
+            m_wrk_constrate(ioad) /= nconstrate;
+        }
+    }
+
+    // Loop over energy bins
+    for (int ieng = 0; ieng < neng; ++ieng) {
+
+        // Set fprompt parameter
+        GOptimizerPars pars;
+        GOptimizerPar  par("fprompt", fprompt_init);
+        par.range(0.0, 1.0);
+        par.factor_gradient(1.0); // To avoid zero gradient log message
+        pars.append(par);
+
+        // Set fit function
+        GCOMDris::likelihood fct(this, ieng, norm);
+
+        // Optimize function and compute errors
+        #if defined(G_DEBUG_COMPUTE_DRWS)
+        GLog log;
+        log.cout(true);
+        GOptimizerLM opt(&log);
+        #else
+        GOptimizerLM opt;
+        #endif
+        opt.eps(0.1);
+        opt.max_iter(500);
+        opt.optimize(fct, pars);
+        opt.errors(fct, pars);
+
+        // Retrieve logL
+        double logL = opt.value();
+
+        // Recover fprompt parameter and errors
+        double fprompt   = pars[0]->value();
+        double e_fprompt = pars[0]->error();
+        double fconst    = 1.0 - fprompt;
+
+        // Set resulting rate vector for this energy bin
+        for (int ioad = 0; ioad < noads; ++ioad) {
+            m_wrk_rate(ioad, ieng) = fprompt * m_wrk_vetorate(ioad) +
+                                     fconst  * m_wrk_constrate(ioad);
+        }
+
+        // Set DRW header parameters
+        m_dris[ieng].m_drw_status    = opt.status_string();
+        m_dris[ieng].m_drw_fprompt   = fprompt;
+        m_dris[ieng].m_drw_e_fprompt = e_fprompt;
+        m_dris[ieng].m_drw_iter      = opt.iter();
+
+        // Debug: Print fit results
+        #if defined(G_DEBUG_COMPUTE_DRWS)
+        std::cout << ieng;
+        std::cout << " logL=" << logL;
+        std::cout << " fprompt=" << fprompt << " +/- " << e_fprompt;
+        std::cout << std::endl;
+        #endif
+
+    } // endfor: looped over energy bins
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Generate DRWs
+ *
+ * @param[in] obs COMPTEL observation.
+ * @param[in] select Selection set.
+ * @param[in] zetamin Minimum Earth horizon - Phibar cut (deg).
+ ***************************************************************************/
+void GCOMDris::vetorate_generate(const GCOMObservation& obs,
+                                 const GCOMSelection&   select,
+                                 const double&          zetamin)
+{
+    // Debug
+    #if defined(G_DEBUG_COMPUTE_DRWS)
+    std::cout << "GCOMDris::vetorate_generate" << std::endl;
+    std::cout << "===========================" << std::endl;
+    #endif
+
+    // Initialise D1 & D2 module status
+    GCOMStatus status;
+
+    // Get pointer to first DRW (assume their definition is identical)
+    const GCOMDri* dri0 = &(m_dris[0]);
+
+    // Extract dimensions
+    int noads   = obs.oads().size();
+    int npix    = dri0->m_dri.npix();
+    int nphibar = dri0->nphibar();
+    int neng    = size();
+
+    // Debug
+    #if defined(G_DEBUG_COMPUTE_DRWS)
+    std::cout << "Number of superpackets: " << noads << std::endl;
+    std::cout << "Number of pixels: " << npix << std::endl;
+    std::cout << "Number of Phibar layers: " << nphibar << std::endl;
+    std::cout << "Number of energies: " << neng << std::endl;
+    #endif
+
+    // Allocate geometry factor and Earth horizon angle working arrays
+    GNdarray geometry(npix);
+    GNdarray eha(npix);
+
+    // Setup sky directions and solid angles for all (Chi, Psi)
+    std::vector<GSkyDir> skys;
+    std::vector<double>  omegas;
+    for (int index = 0; index < npix; ++index) {
+        GSkyDir sky   = dri0->m_dri.inx2dir(index);
+        double  omega = dri0->m_dri.solidangle(index);
+        skys.push_back(sky);
+        omegas.push_back(omega);
+    }
+
+    // Get Good Time Intervals. If a pulsar selection is specified then
+    // reduce the Good Time Intervals to the validity intervals of the
+    // pulsar emphemerides.
+    GCOMTim tim = obs.tim();
+    if (select.has_pulsar()) {
+        tim.reduce(select.pulsar().validity());
+    }
+
+    // Loop over Orbit Aspect Data
+    for (int i_oad = 0; i_oad < noads; ++i_oad) {
+
+        // Get reference to Orbit Aspect Data of superpacket
+        const GCOMOad &oad = obs.oads()[i_oad];
+
+        // Skip not-to-be-used superpackets
+        if (!m_wrk_use_sp[i_oad]) {
+            continue;
+        }
+
+        // Prepare Earth horizon angle computation. The celestial system
+        // is reinterpreted as the COMPTEL coordinate system, where the
+        // 90 degrees - zenith angle becomes the declination and the azimuth
+        // angle becomes Right Ascension. This allows us later to use the
+        // GSkyDir::dist method to compute the distance between the geocentre
+        // and the telescope Z-axis.
+        double  theta_geocentre = double(oad.gcel());
+        double  phi_geocentre   = double(oad.gcaz());
+        GSkyDir geocentre_comptel;
+        geocentre_comptel.radec_deg(phi_geocentre, 90.0-theta_geocentre);
+
+        // Compute solid-angle-corrected geometry factors and Earth horizon
+        // angles for all (Chi,Psi) pixels
+        for (int index = 0; index < npix; ++index) {
+
+            // Convert sky direction to COMPTEL coordinates
+            double theta = oad.theta(skys[index]);
+            double phi   = oad.phi(skys[index]);
+
+            // Compute geometric factor summed over all D1, D2 times
+            // the solid angle of the weighting cube pixel
+            geometry(index) = dri0->compute_geometry(oad.tjd(), theta, phi,
+                                                     select, status) * omegas[index];
+
+            // Compute Earth horizon angle as the distance between the Earth
+            // centre in COMPTEL coordinates and the (Chi, Psi) pixel in
+            // COMPTEL coordinates minus the radius of the Earth.
+            GSkyDir chipsi_comptel;
+            chipsi_comptel.radec_deg(phi, 90.0-theta);
+            eha(index) = geocentre_comptel.dist_deg(chipsi_comptel) - oad.georad();
+
+        } // endfor: computed solid-angle-corrected geometry factors
+
+        // Loop over all DRWs
+        for (int i = 0; i < size(); ++i) {
+
+            // Get pointer to appropriate DRW
+            const GCOMDri* dri = &(m_dris[i]);
+
+            // Loop over all Phibar layers
+            for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
+
+                // Compute minimum Earth horizon angle for Phibar layer
+                double ehamin = double(iphibar) * dri->m_phibin + zetamin;
+
+                // Loop over all (Chi,Psi) pixels
+                for (int index = 0; index < npix; ++index) {
+
+                    // If Earth horizon angle is equal or larger than the minimum
+                    // requirement then add up the rate weighted geometry factor
+                    if (eha(index) >= ehamin) {
+
+                        // Get data space index
+                        int inx = index + iphibar * npix;
+
+                        // Store geometry weighted with rate as DRW
+                        m_dris[i][inx] += geometry(index) * m_wrk_rate(i_oad, i);
+
+                    } // endif: Earth horizon cut passed
+
+                } // endfor: looped over (Chi, Psi)
+
+            } // endfor: looped over Phibar
+
+        } // endfor: looped over all DRWs
+
+        // Debug
+        #if defined(G_DEBUG_COMPUTE_DRWS)
+        std::cout << "Superpacket " << i_oad << std::endl;
+        #endif
+
+    } // endfor: looped over Orbit Aspect Data
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Save working arrays for vetorate computation
+ *
+ * @param[in] filename FITS filename.
+ *
+ * Save working arrays for vetorate DRW computation in FITS file.
+ ***************************************************************************/
+void GCOMDris::vetorate_save(const GFilename& filename) const
+{
+    // Debug
+    #if defined(G_DEBUG_COMPUTE_DRWS)
+    std::cout << "GCOMDris::vetorate_save" << std::endl;
+    std::cout << "=======================" << std::endl;
+    #endif
+
+    // Extract dimension from working arrays
+    int noads   = m_wrk_counts.shape()[0];
+    int nphibar = m_wrk_counts.shape()[1];
+    int neng    = m_wrk_counts.shape()[2];
+
+    // Allocate FITS images
+    GFitsImageDouble image_counts(noads, nphibar, neng);
+    GFitsImageDouble image_ehacutcorr(noads, nphibar);
+    GFitsImageDouble image_vetorate(noads);
+    GFitsImageShort  image_use_sp(noads);
+
+    // Fill FITS images from working arrays
+    for (int ioad = 0; ioad < noads; ++ioad) {
+        for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
+            for (int ienergy = 0; ienergy < neng; ++ienergy) {
+                image_counts(ioad, iphibar, ienergy) = m_wrk_counts(ioad, iphibar, ienergy);
+            }
+            image_ehacutcorr(ioad, iphibar) = m_wrk_ehacutcorr(ioad, iphibar);
+        }
+        image_vetorate(ioad) = m_wrk_vetorate(ioad);
+        image_use_sp(ioad)   = (m_wrk_use_sp[ioad]) ? 1 : 0;
+    }
+
+    // Set image attributes
+    image_counts.extname("COUNTS");
+    image_ehacutcorr.extname("EHACUTCORR");
+    image_vetorate.extname("VETORATE");
+    image_use_sp.extname("SPUSAGE");
+
+    // Create FITS file and append images
+    GFits fits;
+    fits.append(image_counts);
+    fits.append(image_ehacutcorr);
+    fits.append(image_vetorate);
+    fits.append(image_use_sp);
+
+    // Save FITS file
+    fits.saveto(filename, true);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Load working arrays for vetorate computation
+ *
+ * @param[in] filename FITS filename.
+ *
+ * Load working arrays for vetorate DRW computation from FITS file.
+ ***************************************************************************/
+void GCOMDris::vetorate_load(const GFilename& filename)
+{
+    // Debug
+    #if defined(G_DEBUG_COMPUTE_DRWS)
+    std::cout << "GCOMDris::vetorate_load" << std::endl;
+    std::cout << "=======================" << std::endl;
+    #endif
+
+    // Open FITS file
+    GFits fits(filename);
+
+    // Get images
+    const GFitsImage* image_counts     = fits.image("COUNTS");
+    const GFitsImage* image_ehacutcorr = fits.image("EHACUTCORR");
+    const GFitsImage* image_vetorate   = fits.image("VETORATE");
+    const GFitsImage* image_use_sp     = fits.image("SPUSAGE");
+
+    // Extract dimensions
+    int noads   = image_counts->naxes(0);
+    int nphibar = image_counts->naxes(1);
+    int neng    = image_counts->naxes(2);
+
+    // Debug
+    #if defined(G_DEBUG_COMPUTE_DRWS)
+    std::cout << "Number of superpackets: " << noads << std::endl;
+    std::cout << "Number of Phibar layers: " << nphibar << std::endl;
+    std::cout << "Number of energies: " << neng << std::endl;
+    #endif
+
+    // Allocate working array
+    m_wrk_counts     = GNdarray(noads, nphibar, neng);
+    m_wrk_ehacutcorr = GNdarray(noads, nphibar);
+    m_wrk_vetorate   = GNdarray(noads);
+    m_wrk_use_sp     = std::vector<bool>(noads);
+
+    // Extract data from images
+    for (int ioad = 0; ioad < noads; ++ioad) {
+        for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
+            for (int ienergy = 0; ienergy < neng; ++ienergy) {
+                m_wrk_counts(ioad, iphibar, ienergy) = image_counts->pixel(ioad, iphibar, ienergy);
+            }
+            m_wrk_ehacutcorr(ioad, iphibar) = image_ehacutcorr->pixel(ioad, iphibar);
+        }
+        m_wrk_vetorate(ioad) = image_vetorate->pixel(ioad);
+        m_wrk_use_sp[ioad]   = (image_use_sp->pixel(ioad) == 1);
+    }
+
+    // Close FITS file
+    fits.close();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Log-likelihood function constructor
+ *
+ * @param[in] dris Parent calling likelihood function.
+ * @param[in] ieng DRW energy bin.
+ * @param[in] norm Normalisation constant.
+ *
+ * Constructs the log-likelihood function that is used to determine the
+ * value of f_prompt.
+ ***************************************************************************/
+GCOMDris::likelihood::likelihood(GCOMDris     *dris,
+                                 const int&    ieng,
+                                 const double& norm) : GOptimizerFunction()
+{
+    // Store arguments
+    m_this = dris;
+    m_ieng = ieng;
+    m_norm = norm;
+
+    // Set gradient and curvature members
+    m_gradient  = GVector(1);
+    m_curvature = GMatrixSparse(1,1);
+
+    // Extract dimension from working array
+    m_noads   = m_this->m_wrk_counts.shape()[0];
+    m_nphibar = m_this->m_wrk_counts.shape()[1];
+
+    // Multiply veto and constant rate by EHA cut correction. Rates are zero
+    // in case that the vetorate is zero.
+    m_vetorate  = GNdarray(m_noads, m_nphibar);
+    m_constrate = GNdarray(m_noads, m_nphibar);
+    m_diffrate  = GNdarray(m_noads, m_nphibar);
+    for (int ioad = 0; ioad < m_noads; ++ioad) {
+        double vetorate = m_this->m_wrk_vetorate(ioad);
+        if (vetorate > 0.0) {
+            double constrate = m_this->m_wrk_constrate(ioad);
+            for (int iphibar = 0; iphibar < m_nphibar; ++iphibar) {
+                m_vetorate(ioad, iphibar)  = vetorate  * m_this->m_wrk_ehacutcorr(ioad, iphibar);
+                m_constrate(ioad, iphibar) = constrate * m_this->m_wrk_ehacutcorr(ioad, iphibar);
+                m_diffrate(ioad, iphibar)  = m_vetorate(ioad, iphibar) - m_constrate(ioad, iphibar);
+            }
+        }
+    }
+
+    // Compute rate sums
+    m_vetorate_sum  = GNdarray(m_nphibar);
+    m_constrate_sum = GNdarray(m_nphibar);
+    m_diffrate_sum  = GNdarray(m_nphibar);
+    for (int iphibar = 0; iphibar < m_nphibar; ++iphibar) {
+        for (int ioad = 0; ioad < m_noads; ++ioad) {
+            m_vetorate_sum(iphibar)  += m_vetorate(ioad, iphibar);
+            m_constrate_sum(iphibar) += m_constrate(ioad, iphibar);
+        }
+        m_diffrate_sum(iphibar) = m_vetorate_sum(iphibar) - m_constrate_sum(iphibar);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Log-likelihood function evaluation
+ *
+ * @param[in] pars Function parameters.
+ *
+ * Computes the log-likelihood function, its gradient and its curvature at
+ * the specified function parameters.
+ ***************************************************************************/
+void GCOMDris::likelihood::eval(const GOptimizerPars& pars)
+{
+    // Recover parameters
+    double fprompt = pars[0]->value();
+    double fconst  = 1.0 - fprompt;
+
+    // Extract dimension from working array
+    int noads   = m_this->m_wrk_counts.shape()[0];
+    int nphibar = m_this->m_wrk_counts.shape()[1];
+
+    // Allocate phibar normalisation arrays
+    GNdarray nevents(nphibar);
+    GNdarray nmodel(nphibar);
+    GNdarray norm(nphibar);
+
+    // Compute model
+    GNdarray model = fprompt * m_vetorate + fconst * m_constrate;
+
+    // Compute Phibar normalised model
+    GNdarray model_norm = model;
+    for (int iphibar = 0; iphibar < m_nphibar; ++iphibar) {
+        for (int ioad = 0; ioad < m_noads; ++ioad) {
+            if (model(ioad, iphibar) > 0.0) {
+                nevents(iphibar) += m_this->m_wrk_counts(ioad, iphibar, m_ieng);
+                nmodel(iphibar)  += model(ioad, iphibar);
+            }
+        }
+        if (nmodel(iphibar) > 0.0) {
+            norm(iphibar) = m_norm * nevents(iphibar) / nmodel(iphibar);
+            for (int ioad = 0; ioad < m_noads; ++ioad) {
+                model_norm(ioad, iphibar) *= norm(iphibar);
+            }
+        }
+    }
+
+    // Compute LogL
+    m_value = 0.0;
+    for (int ioad = 0; ioad < m_noads; ++ioad) {
+        for (int iphibar = 0; iphibar < m_nphibar; ++iphibar) {
+            if (model_norm(ioad, iphibar) > 0.0) {
+                m_value -= m_this->m_wrk_counts(ioad, iphibar, m_ieng) *
+                           std::log(model_norm(ioad, iphibar)) - model_norm(ioad, iphibar);
+            }
+        }
+    }
+
+    // Evaluate gradient and curvature
+    for (int iphibar = 0; iphibar < m_nphibar; ++iphibar) {
+
+        // Precompute normalisation gradient
+        double nmodel2 = nmodel(iphibar) * nmodel(iphibar);
+        double g_norm  = -m_norm * nevents(iphibar) / nmodel2 * m_diffrate_sum(iphibar);
+
+        // Loop over superpackets
+        for (int ioad = 0; ioad < m_noads; ++ioad) {
+
+            // Continue only if model is positive
+            if (model_norm(ioad, iphibar) > 0.0) {
+
+                // Pre computation
+                double fb = m_this->m_wrk_counts(ioad, iphibar, m_ieng) / model_norm(ioad, iphibar);
+                double fc = (1.0 - fb);
+                double fa = fb / model_norm(ioad, iphibar);
+
+                // Compute parameter gradient
+                double g = norm(iphibar) * m_diffrate(ioad, iphibar) + g_norm * model(ioad, iphibar);
+
+                // Update gradient
+                m_gradient[0] += fc * g;
+
+                // Update curvature
+                m_curvature(0,0) += fa * g * g;
+
+            } // endif: model was positive
+
+        } // endfor: looped over superpackets
+
+    } // endfor: looped over Phibar
 
     // Return
     return;
