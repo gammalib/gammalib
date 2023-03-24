@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GOptimizerLM.cpp - Levenberg Marquardt optimizer            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2022 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2023 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -549,6 +549,43 @@ void GOptimizerLM::errors(GOptimizerFunction& fct, GOptimizerPars& pars)
 
 
 /***********************************************************************//**
+ * @brief Set fit status string
+ *
+ * @return Fit status string.
+ ***************************************************************************/
+std::string GOptimizerLM::status_string(void) const
+{
+    // Initialise status string
+    std::string status;
+
+    // Set status string
+    switch (m_status) {
+    case G_LM_CONVERGED:
+        status = "converged";
+        break;
+    case G_LM_STALLED:
+        status = "stalled";
+        break;
+    case G_LM_SINGULAR:
+        status = "singular curvature matrix encountered";
+        break;
+    case G_LM_NOT_POSTIVE_DEFINITE:
+        status = "curvature matrix not positive definite";
+        break;
+    case G_LM_BAD_ERRORS:
+        status = "errors are inaccurate";
+        break;
+    default:
+        status = "unknown";
+        break;
+    }
+
+    // Return status
+    return status;
+}
+
+
+/***********************************************************************//**
  * @brief Print optimizer information
  *
  * @param[in] chatter Chattiness.
@@ -575,26 +612,7 @@ std::string GOptimizerLM::print(const GChatter& chatter) const
 
         // Append status
         result.append("\n"+gammalib::parformat("Optimization status"));
-        switch (m_status) {
-        case G_LM_CONVERGED:
-            result.append("converged");
-            break;
-        case G_LM_STALLED:
-            result.append("stalled");
-            break;
-        case G_LM_SINGULAR:
-            result.append("singular curvature matrix encountered");
-            break;
-        case G_LM_NOT_POSTIVE_DEFINITE:
-            result.append("curvature matrix not positive definite");
-            break;
-        case G_LM_BAD_ERRORS:
-            result.append("errors are inaccurate");
-            break;
-        default:
-            result.append("unknown");
-            break;
-        }
+        result.append(status_string());
 
         // Append further information
         result.append("\n"+gammalib::parformat("Number of parameters"));

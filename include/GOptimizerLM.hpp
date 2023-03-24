@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GOptimizerLM.hpp - Levenberg Marquardt optimizer            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2023 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -93,6 +93,7 @@ public:
     const double& lambda(void) const;
     const double& eps(void) const;
     const double& accept_dec(void) const;
+    std::string   status_string(void) const;
 
 protected:
     // Protected methods

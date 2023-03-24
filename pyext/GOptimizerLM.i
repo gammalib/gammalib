@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GOptimizerLM.i - Levenberg Marquardt optimizer class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2020 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2023 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -73,6 +73,7 @@ public:
     const double& lambda_dec(void) const;
     const double& eps(void) const;
     const double& accept_dec(void);
+    std::string   status_string(void) const;
 };
 
 
