@@ -1091,6 +1091,13 @@ void GCOMDri::init_members(void)
     // Initialise statistics
     init_statistics();
 
+    // Initialise optional DRW parameters
+    m_drw_method.clear();
+    m_drw_status.clear();
+    m_drw_fprompt   = 0.0;
+    m_drw_e_fprompt = 0.0;
+    m_drw_iter      = 0;
+
     // Initialise selection parameters
     m_has_selection = false;
     m_selection.clear();
@@ -1124,6 +1131,13 @@ void GCOMDri::copy_members(const GCOMDri& dri)
     m_num_superpackets         = dri.m_num_superpackets;
     m_num_used_superpackets    = dri.m_num_used_superpackets;
     m_num_skipped_superpackets = dri.m_num_skipped_superpackets;
+
+    // Copy optional DRW parameters
+    m_drw_method    = dri.m_drw_method;
+    m_drw_status    = dri.m_drw_status;
+    m_drw_fprompt   = dri.m_drw_fprompt;
+    m_drw_e_fprompt = dri.m_drw_e_fprompt;
+    m_drw_iter      = dri.m_drw_iter;
 
     // Copy selection parameters
     m_has_selection = dri.m_has_selection;
@@ -1443,6 +1457,17 @@ void GCOMDri::write_attributes(GFitsHDU* hdu) const
     hdu->card("NSPINP", m_num_superpackets, "Number of input superpackets");
     hdu->card("NSPUSE", m_num_used_superpackets, "Number of used superpackets");
     hdu->card("NSPSKP", m_num_skipped_superpackets, "Number of skipped superpackets");
+
+    // Write optional DRW parameters
+    if (!m_drw_method.empty()) {
+        hdu->card("DRWMETHO", m_drw_method, "DRW computation method");
+        if (m_drw_iter > 0) {
+            hdu->card("DRWFITST", m_drw_status, "DRW f_prompt fit status");
+            hdu->card("DRWFITIT", m_drw_iter, "DRW f_prompt fit iterations");
+            hdu->card("DRWFP",    m_drw_fprompt, "DRW f_prompt value");
+            hdu->card("DRWEFP",   m_drw_e_fprompt, "DRW f_prompt value error");
+        }
+    }
 
     // Return
     return;
