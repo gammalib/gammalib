@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GNdarray.i - N-dimensional array class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2016-2022 by Juergen Knoedlseder                         *
+ *  copyright (C) 2016-2023 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -152,6 +152,9 @@ public:
         return (*self) - a;
     }
     GNdarray __mul__(const double &a) {
+        return (*self) * a;
+    }
+    GNdarray __rmul__(const double &a) {
         return (*self) * a;
     }
     // Python 2.x
