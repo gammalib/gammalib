@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCOMDri.cpp - COMPTEL Data Space class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2022 by Juergen Knoedlseder                         *
+ *  copyright (C) 2017-2023 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -900,6 +900,15 @@ void GCOMDri::load(const GFilename& filename)
     // Read DRI file
     read(hdu);
 
+    // If FITS file contains binary table then copy table into member
+    for (int i = 0; i < fits.size(); ++i) {
+        const GFitsBinTable* table = dynamic_cast<const GFitsBinTable*>(fits[i]);
+        if (table != NULL) {
+            m_drw_table = *table;
+            break;
+        }
+    }
+
     // Close FITS file
     fits.close();
 
@@ -921,6 +930,11 @@ void GCOMDri::save(const GFilename& filename, const bool& clobber) const
 
     // Write data space into FITS file
     write(fits, filename.extname(gammalib::extname_dri));
+
+    // If DRI contains filled DRW binary table then append table to FITS file
+    if (m_drw_table.nrows() > 0) {
+        fits.append(m_drw_table);
+    }
 
     // Save FITS file
     fits.saveto(filename, clobber);
@@ -1091,8 +1105,9 @@ void GCOMDri::init_members(void)
     // Initialise statistics
     init_statistics();
 
-    // Initialise optional DRW parameters
+    // Initialise optional DRW members
     m_drw_method.clear();
+    m_drw_table.clear();
     m_drw_status.clear();
     m_drw_fprompt   = 0.0;
     m_drw_e_fprompt = 0.0;
@@ -1132,8 +1147,9 @@ void GCOMDri::copy_members(const GCOMDri& dri)
     m_num_used_superpackets    = dri.m_num_used_superpackets;
     m_num_skipped_superpackets = dri.m_num_skipped_superpackets;
 
-    // Copy optional DRW parameters
+    // Copy optional DRW members
     m_drw_method    = dri.m_drw_method;
+    m_drw_table     = dri.m_drw_table;
     m_drw_status    = dri.m_drw_status;
     m_drw_fprompt   = dri.m_drw_fprompt;
     m_drw_e_fprompt = dri.m_drw_e_fprompt;

@@ -33,6 +33,7 @@
 #include "GSkyMap.hpp"
 #include "GEbounds.hpp"
 #include "GGti.hpp"
+#include "GFitsBinTable.hpp"
 #include "GCOMSelection.hpp"
 
 /* __ Forward declarations _______________________________________________ */
@@ -167,12 +168,13 @@ protected:
     int   m_num_used_superpackets;    //!< Number of used superpackets
     int   m_num_skipped_superpackets; //!< Number of skipped superpackets
 
-    // Optional DRW parameters
-    std::string m_drw_method;         //!< DRW method
-    std::string m_drw_status;         //!< DRW fitting status
-    double      m_drw_fprompt;        //!< DRW fitted fprompt parameter
-    double      m_drw_e_fprompt;      //!< DRW fprompt parameter error
-    int         m_drw_iter;           //!< DRW fitting iterations
+    // Optional DRW members
+    std::string   m_drw_method;       //!< DRW method
+    GFitsBinTable m_drw_table;        //!< DRW binary table to append to the FITS file
+    std::string   m_drw_status;       //!< DRW fitting status
+    double        m_drw_fprompt;      //!< DRW fitted fprompt parameter
+    double        m_drw_e_fprompt;    //!< DRW fprompt parameter error
+    int           m_drw_iter;         //!< DRW fitting iterations
 
     // Selection parameters
     bool          m_has_selection;    //!< Signal that selection was applied
