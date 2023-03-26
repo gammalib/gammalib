@@ -83,7 +83,7 @@ public:
                                 const GCOMSelection&   select = GCOMSelection(),
                                 const double&          zetamin = 5.0,
                                 const double&          timebin = 300.0,
-                                const std::string&     method = "vetorate");
+                                const std::string&     method = "phibar");
     std::string    print(const GChatter& chatter = NORMAL) const;
 
     // Likelihood function
@@ -101,13 +101,13 @@ public:
     protected:
         int           m_ieng;          //!< DRW energy bin
         double        m_norm;          //!< Normalisation value
-        int           m_noads;         //!< Number of superpackets
+        int           m_nsp;           //!< Number of superpackets
         int           m_nphibar;       //!< Number of phibar layers
         GNdarray      m_vetorate;      //!< Vetorate array multiplied by EHA cut correction
-        GNdarray      m_constrate;     //!< Constant rate array multiplied by EHA cut correction
-        GNdarray      m_diffrate;      //!< Vetorate - Constant rate array
+        GNdarray      m_activrate;     //!< Activation rate array multiplied by EHA cut correction
+        GNdarray      m_diffrate;      //!< Vetorate - activation rate array
         GNdarray      m_vetorate_sum;  //!< Time integrated vetorate array
-        GNdarray      m_constrate_sum; //!< Time integrated constant rate array
+        GNdarray      m_activrate_sum; //!< Time integrated activation rate array
         GNdarray      m_diffrate_sum;  //!< Time integrated difference rate array
         double        m_value;         //!< Function value
         GVector       m_gradient;      //!< Gradient vector
@@ -139,9 +139,11 @@ protected:
                         const GCOMSelection&   select,
                         const double&          zetamin);
     void vetorate_fit(void);
+    void vetorate_update_activ(void);
     void vetorate_generate(const GCOMObservation& obs,
                            const GCOMSelection&   select,
                            const double&          zetamin);
+    void vetorate_finish(const GCOMObservation& obs);
     void vetorate_save(const GFilename& filename) const;
     void vetorate_load(const GFilename& filename);
 
@@ -152,7 +154,7 @@ protected:
     GNdarray          m_wrk_counts;     //!< 3D event cube array
     GNdarray          m_wrk_ehacutcorr; //!< 2D geometry response array
     GNdarray          m_wrk_vetorate;   //!< 1D vetorates array
-    GNdarray          m_wrk_constrate;  //!< 1D constant rate array
+    GNdarray          m_wrk_activrate;  //!< 2D activation rate array
     GNdarray          m_wrk_rate;       //!< 2D rate array
     std::vector<bool> m_wrk_use_sp;     //!< 1D superpacket usage array
 };

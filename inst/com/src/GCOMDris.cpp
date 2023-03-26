@@ -35,9 +35,12 @@
 #include "GFits.hpp"
 #include "GFitsImageDouble.hpp"
 #include "GFitsImageShort.hpp"
+#include "GFitsTableLongCol.hpp"
+#include "GFitsTableDoubleCol.hpp"
 #include "GOptimizerPars.hpp"
 #include "GOptimizerPar.hpp"
 #include "GOptimizerLM.hpp"
+#include "GFft.hpp"
 #include "GCOMTools.hpp"
 #include "GCOMSupport.hpp"
 #include "GCOMDri.hpp"
@@ -64,8 +67,8 @@
 #define G_COMPUTE_DRWS_EHACORR  //!< Correct Earth horizon cut
 
 /* __ Debug definitions __________________________________________________ */
-#define G_DEBUG_COMPUTE_DRWS
-#define G_DEBUG_SAVE_WORKING_ARRAYS
+//#define G_DEBUG_COMPUTE_DRWS
+//#define G_DEBUG_SAVE_WORKING_ARRAYS
 
 /* __ Constants __________________________________________________________ */
 
@@ -531,7 +534,7 @@ void GCOMDris::init_members(void)
     m_wrk_counts.clear();
     m_wrk_ehacutcorr.clear();
     m_wrk_vetorate.clear();
-    m_wrk_constrate.clear();
+    m_wrk_activrate.clear();
     m_wrk_rate.clear();
     m_wrk_use_sp.clear();
 
@@ -554,7 +557,7 @@ void GCOMDris::copy_members(const GCOMDris& dris)
     m_wrk_counts     = dris.m_wrk_counts;
     m_wrk_ehacutcorr = dris.m_wrk_ehacutcorr;
     m_wrk_vetorate   = dris.m_wrk_vetorate;
-    m_wrk_constrate  = dris.m_wrk_constrate;
+    m_wrk_activrate  = dris.m_wrk_activrate;
     m_wrk_rate       = dris.m_wrk_rate;
     m_wrk_use_sp     = dris.m_wrk_use_sp;
 
@@ -1264,11 +1267,23 @@ void GCOMDris::compute_drws_vetorate(const GCOMObservation& obs,
     vetorate_load("debug_gcomdris_compute_drws_vetorate.fits");
     #endif
 
+    // Initialise fprompt for all energies
+    for (int i = 0; i < size(); ++i) {
+        m_dris[i].m_drw_fprompt = 0.5; //!< Initial fprompt value
+    }
+
     // Fit working arrays to determine f_prompt parameter
     vetorate_fit();
+    for (int iter = 0; iter < 4; ++iter) { //!< Perform 4 iterations
+        vetorate_update_activ();
+        vetorate_fit();
+    }
 
     // Generate DRWs
     vetorate_generate(obs, select, zetamin);
+
+    // Finish DRWs
+    vetorate_finish(obs);
 
     // Return
     return;
@@ -1283,7 +1298,7 @@ void GCOMDris::compute_drws_vetorate(const GCOMObservation& obs,
  * @param[in] select Selection set.
  * @param[in] zetamin Minimum Earth horizon - Phibar cut (deg).
  *
- * Setup working arrays for vetorate DRW computation. There are four working
+ * Setup working arrays for vetorate DRW computation. There are five working
  * arrays:
  *
  * @c m_wrk_counts is a 3D working array spanned by superpacket index,
@@ -1297,6 +1312,9 @@ void GCOMDris::compute_drws_vetorate(const GCOMObservation& obs,
  *
  * @c m_wrk_vetorate is a 1D working array, containing the veto rate as
  * function of superpacket index.
+ *
+ * @c m_wrk_activrate is a 2D working array, containing the activation rate
+ * as function of superpacket index and energy range.
  *
  * @c m_wrk_use_sp is a 1D working array, signalling the usage of a given
  * superpacket.
@@ -1329,7 +1347,7 @@ void GCOMDris::vetorate_setup(const GCOMObservation& obs,
 
     // Debug
     #if defined(G_DEBUG_COMPUTE_DRWS)
-    std::cout << "Number of superpackets: " << noads << std::endl;
+    std::cout << "Number of OAD superpackets: " << noads << std::endl;
     std::cout << "Number of pixels: " << npix << std::endl;
     std::cout << "Number of Phibar layers: " << nphibar << std::endl;
     std::cout << "Number of energies: " << neng << std::endl;
@@ -1339,7 +1357,13 @@ void GCOMDris::vetorate_setup(const GCOMObservation& obs,
     m_wrk_counts     = GNdarray(noads, nphibar, neng);
     m_wrk_ehacutcorr = GNdarray(noads, nphibar);
     m_wrk_vetorate   = GNdarray(noads);
+    m_wrk_activrate  = GNdarray(noads, neng);
     m_wrk_use_sp     = std::vector<bool>(noads);
+
+    // Initialise superpacket usage array
+    for (int i_oad = 0; i_oad < noads; ++i_oad) {
+        m_wrk_use_sp[i_oad] = false;
+    }
 
     // Allocate further working arrays
     GNdarray geo(npix);
@@ -1384,8 +1408,9 @@ void GCOMDris::vetorate_setup(const GCOMObservation& obs,
         tim.reduce(select.pulsar().validity());
     }
 
-    // Initialise event counter
+    // Initialise event and superpacket counters
     int i_evt = 0;
+    int i_sp  = 0;
 
     // Signal that loop should be terminated
     bool terminate = false;
@@ -1398,10 +1423,9 @@ void GCOMDris::vetorate_setup(const GCOMObservation& obs,
 
         // Check superpacket usage for all DRWs so that their statistics
         // get correctly updated
-        m_wrk_use_sp[i_oad] = true;
         for (int i = 0; i < size(); ++i) {
-            if (!m_dris[i].use_superpacket(oad, tim, select)) {
-                m_wrk_use_sp[i_oad] = false;
+            if (m_dris[i].use_superpacket(oad, tim, select)) {
+                m_wrk_use_sp[i_oad] = true;
             }
         }
         if (!m_wrk_use_sp[i_oad]) {
@@ -1459,15 +1483,20 @@ void GCOMDris::vetorate_setup(const GCOMObservation& obs,
                         accepted_geo += geo(index);
                     }
                 }
-                m_wrk_ehacutcorr(i_oad, iphibar) = accepted_geo / total_geo;
+                m_wrk_ehacutcorr(i_sp, iphibar) = accepted_geo / total_geo;
             }
         }
 
-        // Compute veto rate for superpacket time if rates are available
+        // Compute veto rate and activation rates for superpacket time if rates
+        // are available. The activation rates are initialised with a constant
+        // rate.
         if (!veto_times.is_empty()) {
             double value = veto_times.interpolate(time, veto_rates);
             if (value > 0.0) {
-                m_wrk_vetorate(i_oad) = value;
+                m_wrk_vetorate(i_sp) = value;
+                for (int ieng = 0; ieng < neng; ++ieng) {
+                    m_wrk_activrate(i_sp, ieng) = 1.0;
+                }
             }
         }
 
@@ -1544,18 +1573,22 @@ void GCOMDris::vetorate_setup(const GCOMObservation& obs,
             }
 
             // Now fill the event in the 3D counts array
-            m_wrk_counts(i_oad, iphibar, ienergy) += 1.0;
+            m_wrk_counts(i_sp, iphibar, ienergy) += 1.0;
 
         } // endfor: collected events
 
         // Debug
         #if defined(G_DEBUG_COMPUTE_DRWS)
         std::cout << "Superpacket " << i_oad;
+        std::cout << " i_sp=" << i_sp;
         std::cout << " time=" << time;
         std::cout << " vetorate=" << m_wrk_vetorate(i_oad);
         std::cout << " total_geo=" << total_geo;
         std::cout << std::endl;
         #endif
+
+        // Increment superpacket counter
+        i_sp++;
 
         // Break Orbit Aspect Data loop if termination was signalled or if there
         // are no more events
@@ -1564,6 +1597,28 @@ void GCOMDris::vetorate_setup(const GCOMObservation& obs,
         }
 
     } // endfor: looped over Orbit Aspect Data
+
+    // Copy results in shortened Ndarrays
+    GNdarray wrk_counts(i_sp, nphibar, neng);
+    GNdarray wrk_ehacutcorr(i_sp, nphibar);
+    GNdarray wrk_vetorate(i_sp);
+    GNdarray wrk_activrate(i_sp, neng);
+    for (int i = 0; i < i_sp; ++i) {
+        for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
+            for (int ieng = 0; ieng < neng; ++ieng) {
+                wrk_counts(i, iphibar, ieng) = m_wrk_counts(i, iphibar, ieng);
+            }
+            wrk_ehacutcorr(i, iphibar) = m_wrk_ehacutcorr(i, iphibar);
+        }
+        for (int ieng = 0; ieng < neng; ++ieng) {
+            wrk_activrate(i, ieng) = m_wrk_activrate(i, ieng);
+        }
+        wrk_vetorate(i) = m_wrk_vetorate(i);
+    }
+    m_wrk_counts     = wrk_counts;
+    m_wrk_ehacutcorr = wrk_ehacutcorr;
+    m_wrk_vetorate   = wrk_vetorate;
+    m_wrk_activrate  = wrk_activrate;
 
     // Return
     return;
@@ -1581,8 +1636,7 @@ void GCOMDris::vetorate_setup(const GCOMObservation& obs,
 void GCOMDris::vetorate_fit(void)
 {
     // Set constants
-    const double fprompt_init = 0.5; // Initial f_prompt value
-    const double norm         = 1.0; // Model normalisation
+    const double norm = 1.0; // Model normalisation
 
     // Debug
     #if defined(G_DEBUG_COMPUTE_DRWS)
@@ -1591,39 +1645,45 @@ void GCOMDris::vetorate_fit(void)
     #endif
 
     // Extract dimension from working arrays
-    int noads   = m_wrk_counts.shape()[0];
+    int nsp     = m_wrk_counts.shape()[0];
     int nphibar = m_wrk_counts.shape()[1];
     int neng    = m_wrk_counts.shape()[2];
 
     // Debug
     #if defined(G_DEBUG_COMPUTE_DRWS)
-    std::cout << "Number of superpackets: " << noads << std::endl;
+    std::cout << "Number of used superpackets: " << nsp << std::endl;
     std::cout << "Number of Phibar layers: " << nphibar << std::endl;
     std::cout << "Number of energies: " << neng << std::endl;
     #endif
 
     // Setup rate result array
-    m_wrk_rate = GNdarray(noads, neng);
+    m_wrk_rate = GNdarray(nsp, neng);
 
-    // Setup normalised constant rate array and normalise veto rates
-    m_wrk_constrate   = GNdarray(noads);
-    double nvetorate  = 0.0;
-    double nconstrate = 0.0;
-    for (int ioad = 0; ioad < noads; ++ioad) {
-        if (m_wrk_vetorate(ioad) > 0.0) {
-            m_wrk_constrate(ioad) = 1.0;
-            nvetorate            += m_wrk_vetorate(ioad);
-            nconstrate           += m_wrk_constrate(ioad);
+    // Normalise veto rates
+    double nvetorate = 0.0;
+    for (int isp = 0; isp < nsp; ++isp) {
+        if (m_wrk_vetorate(isp) > 0.0) {
+            nvetorate += m_wrk_vetorate(isp);
         }
     }
     if (nvetorate > 0.0) {
-        for (int ioad = 0; ioad < noads; ++ioad) {
-            m_wrk_vetorate(ioad) /= nvetorate;
+        for (int isp = 0; isp < nsp; ++isp) {
+            m_wrk_vetorate(isp) /= nvetorate;
         }
     }
-    if (nconstrate > 0.0) {
-        for (int ioad = 0; ioad < noads; ++ioad) {
-            m_wrk_constrate(ioad) /= nconstrate;
+
+    // Normalise activation rates
+    for (int ieng = 0; ieng < neng; ++ieng) {
+        double nactivrate = 0.0;
+        for (int isp = 0; isp < nsp; ++isp) {
+            if (m_wrk_activrate(isp, ieng) > 0.0) {
+                nactivrate += m_wrk_activrate(isp, ieng);
+            }
+        }
+        if (nactivrate > 0.0) {
+            for (int isp = 0; isp < nsp; ++isp) {
+                m_wrk_activrate(isp, ieng) /= nactivrate;
+            }
         }
     }
 
@@ -1632,7 +1692,7 @@ void GCOMDris::vetorate_fit(void)
 
         // Set fprompt parameter
         GOptimizerPars pars;
-        GOptimizerPar  par("fprompt", fprompt_init);
+        GOptimizerPar  par("fprompt", m_dris[ieng].m_drw_fprompt);
         par.range(0.0, 1.0);
         par.factor_gradient(1.0); // To avoid zero gradient log message
         pars.append(par);
@@ -1659,15 +1719,15 @@ void GCOMDris::vetorate_fit(void)
         // Recover fprompt parameter and errors
         double fprompt   = pars[0]->value();
         double e_fprompt = pars[0]->error();
-        double fconst    = 1.0 - fprompt;
+        double factiv    = 1.0 - fprompt;
 
         // Set resulting rate vector for this energy bin
-        for (int ioad = 0; ioad < noads; ++ioad) {
-            m_wrk_rate(ioad, ieng) = fprompt * m_wrk_vetorate(ioad) +
-                                     fconst  * m_wrk_constrate(ioad);
+        for (int isp = 0; isp < nsp; ++isp) {
+            m_wrk_rate(isp, ieng) = fprompt * m_wrk_vetorate(isp) +
+                                    factiv  * m_wrk_activrate(isp, ieng);
         }
 
-        // Set DRW header parameters
+        // Set DRW header members
         m_dris[ieng].m_drw_status    = opt.status_string();
         m_dris[ieng].m_drw_fprompt   = fprompt;
         m_dris[ieng].m_drw_e_fprompt = e_fprompt;
@@ -1682,6 +1742,136 @@ void GCOMDris::vetorate_fit(void)
         #endif
 
     } // endfor: looped over energy bins
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Update activation rate
+ ***************************************************************************/
+void GCOMDris::vetorate_update_activ(void)
+{
+    // Set constants
+    const double norm   = 1.0; // Model normalisation
+    const double t_hour = 1.0; // Smoothing duration (hours)
+
+    // Debug
+    #if defined(G_DEBUG_COMPUTE_DRWS)
+    std::cout << "GCOMDris::vetorate_update_activ" << std::endl;
+    std::cout << "===============================" << std::endl;
+    #endif
+
+    // Extract dimension from working arrays
+    int nsp     = m_wrk_counts.shape()[0];
+    int nphibar = m_wrk_counts.shape()[1];
+    int neng    = m_wrk_counts.shape()[2];
+
+    // Setup Gaussian smoothing kernel
+    double   nsmooth = 3600.0/16.384 * t_hour;
+    double   weight  = -0.5 / (nsmooth * nsmooth);
+    GNdarray kernel(nsp);
+    double   sum     = 0.0;
+    for (int isp = 0; isp < nsp/2; ++isp) {
+        double kvalue = std::exp(weight*isp*isp);
+        if (kvalue <= 0.0) {
+            break;
+        }
+        kernel(isp) = kvalue;
+        sum        += kvalue;
+        if (isp > 0) {
+            kernel(nsp-isp) = kvalue;
+            sum            += kvalue;
+        }
+    }
+    if (sum > 0.0) {
+        for (int isp = 0; isp < nsp; ++isp) {
+            kernel(isp) /= sum;
+        }
+    }
+    GFft fft_kernel(kernel);
+
+    // Loop over energy bins
+    for (int ieng = 0; ieng < neng; ++ieng) {
+
+        // Compute model normalised to number of events for each Phibar
+        GNdarray model(nsp, nphibar);
+        GNdarray n(nphibar);
+        for (int isp = 0; isp < nsp; ++isp) {
+            for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
+                model(isp, iphibar) = m_wrk_rate(isp, ieng) * m_wrk_ehacutcorr(isp, iphibar);
+            }
+        }
+        for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
+            double nevents = 0.0;
+            double nmodel  = 0.0;
+            for (int isp = 0; isp < nsp; ++isp) {
+                if (model(isp, iphibar) > 0.0) {
+                    nevents += m_wrk_counts(isp, iphibar, ieng);
+                    nmodel  += model(isp, iphibar);
+                }
+            }
+            if (nmodel > 0.0) {
+                n(iphibar) = norm * (nevents / nmodel);
+                for (int isp = 0; isp < nsp; ++isp) {
+                    model(isp, iphibar) *= n(iphibar);
+                }
+            }
+        }
+
+        // Compute residual and Earth horizon correction cut by summing over
+        // all Phibar layers
+        GNdarray residual(nsp);
+        GNdarray ehacutcorr(nsp);
+        for (int isp = 0; isp < nsp; ++isp) {
+            for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
+                residual(isp)   += m_wrk_counts(isp, iphibar, ieng) - model(isp, iphibar);
+                ehacutcorr(isp) += n(iphibar) * m_wrk_ehacutcorr(isp, iphibar);
+            }
+        }
+
+        // Smooth residual
+        GFft fft_residual(residual);
+        fft_residual = fft_residual * fft_kernel;
+        residual     = fft_residual.backward();
+
+        // Smooth ehacutcorr
+        GFft fft_ehacutcorr(ehacutcorr);
+        fft_ehacutcorr = fft_ehacutcorr * fft_kernel;
+        ehacutcorr     = fft_ehacutcorr.backward();
+
+        // Derive indicent residual background rate
+        for (int isp = 0; isp < nsp; ++isp) {
+            if (ehacutcorr(isp) > 0.0) {
+                residual(isp) /= ehacutcorr(isp);
+            }
+        }
+
+        // Update activation rate
+        for (int isp = 0; isp < nsp; ++isp) {
+            double activ = m_wrk_activrate(isp, ieng);
+            if (activ > 0.0) {
+                double update = activ + residual(isp);
+                if (update < 0.05 * activ) { //!< Cap reduction at 5%
+                    update = 0.05 * activ;
+                }
+                m_wrk_activrate(isp, ieng) = update;
+            }
+        }
+
+        // Normalise activation rate
+        double nactivrate = 0.0;
+        for (int isp = 0; isp < nsp; ++isp) {
+            nactivrate += m_wrk_activrate(isp, ieng);
+        }
+        if (nactivrate > 0.0) {
+            for (int isp = 0; isp < nsp; ++isp) {
+                m_wrk_activrate(isp, ieng) /= nactivrate;
+            }
+        }
+
+    } // endfor: looped over all energy bins
 
     // Return
     return;
@@ -1719,7 +1909,7 @@ void GCOMDris::vetorate_generate(const GCOMObservation& obs,
 
     // Debug
     #if defined(G_DEBUG_COMPUTE_DRWS)
-    std::cout << "Number of superpackets: " << noads << std::endl;
+    std::cout << "Number of OAD superpackets: " << noads << std::endl;
     std::cout << "Number of pixels: " << npix << std::endl;
     std::cout << "Number of Phibar layers: " << nphibar << std::endl;
     std::cout << "Number of energies: " << neng << std::endl;
@@ -1746,6 +1936,9 @@ void GCOMDris::vetorate_generate(const GCOMObservation& obs,
     if (select.has_pulsar()) {
         tim.reduce(select.pulsar().validity());
     }
+
+    // Initialise superpacket counter
+    int i_sp = 0;
 
     // Loop over Orbit Aspect Data
     for (int i_oad = 0; i_oad < noads; ++i_oad) {
@@ -1814,7 +2007,7 @@ void GCOMDris::vetorate_generate(const GCOMObservation& obs,
                         int inx = index + iphibar * npix;
 
                         // Store geometry weighted with rate as DRW
-                        m_dris[i][inx] += geometry(index) * m_wrk_rate(i_oad, i);
+                        m_dris[i][inx] += geometry(index) * m_wrk_rate(i_sp, i);
 
                     } // endif: Earth horizon cut passed
 
@@ -1822,14 +2015,101 @@ void GCOMDris::vetorate_generate(const GCOMObservation& obs,
 
             } // endfor: looped over Phibar
 
+            // Set binary table information
+
         } // endfor: looped over all DRWs
 
-        // Debug
-        #if defined(G_DEBUG_COMPUTE_DRWS)
-        std::cout << "Superpacket " << i_oad << std::endl;
-        #endif
+        // Increment superpacket counter
+        i_sp++;
 
     } // endfor: looped over Orbit Aspect Data
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Finish DRWs
+ *
+ * @param[in] obs COMPTEL observation.
+ *
+ * Set DRW binary tables
+ ***************************************************************************/
+void GCOMDris::vetorate_finish(const GCOMObservation& obs)
+{
+    // Debug
+    #if defined(G_DEBUG_COMPUTE_DRWS)
+    std::cout << "GCOMDris::vetorate_finish" << std::endl;
+    std::cout << "=========================" << std::endl;
+    #endif
+
+    // Extract dimensions
+    int noads = obs.oads().size();
+
+    // Compute number of to-be-used superpackets
+    int nsp = 0;
+    for (int i_oad = 0; i_oad < noads; ++i_oad) {
+        if (m_wrk_use_sp[i_oad]) {
+            nsp++;
+        }
+    }
+
+    // Debug
+    #if defined(G_DEBUG_COMPUTE_DRWS)
+    std::cout << "Number of OAD superpackets: " << noads << std::endl;
+    std::cout << "Number of used superpackets: " << nsp << std::endl;
+    #endif
+
+    // Setup DRW binary tables
+    for (int i = 0; i < size(); ++i) {
+
+        // Get pointer to DRW
+        GCOMDri* dri = &(m_dris[i]);
+
+        // Allocate columns
+        GFitsTableLongCol   tjd("TJD",  nsp);
+        GFitsTableLongCol   tics("TICS", nsp);
+        GFitsTableDoubleCol rate("RATE", nsp);
+        GFitsTableDoubleCol vetorate("VETORATE", nsp);
+        GFitsTableDoubleCol activrate("ACTIVRATE", nsp);
+
+        // Initialise superpacket counter
+        int isp = 0;
+
+        // Loop over Orbit Aspect Data
+        for (int i_oad = 0; i_oad < noads; ++i_oad) {
+
+            // Get reference to Orbit Aspect Data of superpacket
+            const GCOMOad &oad = obs.oads()[i_oad];
+
+            // Skip not-to-be-used superpackets
+            if (!m_wrk_use_sp[i_oad]) {
+                continue;
+            }
+
+            // Fill table columns
+            tjd(isp)       = oad.tjd();
+            tics(isp)      = oad.tics();
+            rate(isp)      = m_wrk_rate(isp, i);
+            vetorate(isp)  = m_wrk_vetorate(isp);
+            activrate(isp) = m_wrk_activrate(isp, i);
+
+            // Increment superpacket counter
+            isp++;
+
+        } // endfor: looped over Orbit Aspect Data
+
+        // Append columns to binary table
+        dri->m_drw_table.clear();
+        dri->m_drw_table.extname("RATES");
+        dri->m_drw_table.append(tjd);
+        dri->m_drw_table.append(tics);
+        dri->m_drw_table.append(rate);
+        dri->m_drw_table.append(vetorate);
+        dri->m_drw_table.append(activrate);
+
+    } // endfor: looped over DRWs
 
     // Return
     return;
@@ -1852,32 +2132,40 @@ void GCOMDris::vetorate_save(const GFilename& filename) const
     #endif
 
     // Extract dimension from working arrays
-    int noads   = m_wrk_counts.shape()[0];
+    int noads   = m_wrk_use_sp.size();
+    int nsp     = m_wrk_counts.shape()[0];
     int nphibar = m_wrk_counts.shape()[1];
     int neng    = m_wrk_counts.shape()[2];
 
     // Allocate FITS images
-    GFitsImageDouble image_counts(noads, nphibar, neng);
-    GFitsImageDouble image_ehacutcorr(noads, nphibar);
-    GFitsImageDouble image_vetorate(noads);
+    GFitsImageDouble image_counts(nsp, nphibar, neng);
+    GFitsImageDouble image_ehacutcorr(nsp, nphibar);
+    GFitsImageDouble image_vetorate(nsp);
+    GFitsImageDouble image_activrate(nsp, neng);
     GFitsImageShort  image_use_sp(noads);
 
     // Fill FITS images from working arrays
-    for (int ioad = 0; ioad < noads; ++ioad) {
+    for (int isp = 0; isp < nsp; ++isp) {
         for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
-            for (int ienergy = 0; ienergy < neng; ++ienergy) {
-                image_counts(ioad, iphibar, ienergy) = m_wrk_counts(ioad, iphibar, ienergy);
+            for (int ieng = 0; ieng < neng; ++ieng) {
+                image_counts(isp, iphibar, ieng) = m_wrk_counts(isp, iphibar, ieng);
             }
-            image_ehacutcorr(ioad, iphibar) = m_wrk_ehacutcorr(ioad, iphibar);
+            image_ehacutcorr(isp, iphibar) = m_wrk_ehacutcorr(isp, iphibar);
         }
-        image_vetorate(ioad) = m_wrk_vetorate(ioad);
-        image_use_sp(ioad)   = (m_wrk_use_sp[ioad]) ? 1 : 0;
+        for (int ieng = 0; ieng < neng; ++ieng) {
+            image_activrate(isp, ieng) = m_wrk_activrate(isp, ieng);
+        }
+        image_vetorate(isp) = m_wrk_vetorate(isp);
+    }
+    for (int ioad = 0; ioad < noads; ++ioad) {
+        image_use_sp(ioad) = (m_wrk_use_sp[ioad]) ? 1 : 0;
     }
 
     // Set image attributes
     image_counts.extname("COUNTS");
     image_ehacutcorr.extname("EHACUTCORR");
     image_vetorate.extname("VETORATE");
+    image_activrate.extname("ACTIVRATE");
     image_use_sp.extname("SPUSAGE");
 
     // Create FITS file and append images
@@ -1885,6 +2173,7 @@ void GCOMDris::vetorate_save(const GFilename& filename) const
     fits.append(image_counts);
     fits.append(image_ehacutcorr);
     fits.append(image_vetorate);
+    fits.append(image_activrate);
     fits.append(image_use_sp);
 
     // Save FITS file
@@ -1917,36 +2206,45 @@ void GCOMDris::vetorate_load(const GFilename& filename)
     const GFitsImage* image_counts     = fits.image("COUNTS");
     const GFitsImage* image_ehacutcorr = fits.image("EHACUTCORR");
     const GFitsImage* image_vetorate   = fits.image("VETORATE");
+    const GFitsImage* image_activrate  = fits.image("ACTIVRATE");
     const GFitsImage* image_use_sp     = fits.image("SPUSAGE");
 
     // Extract dimensions
-    int noads   = image_counts->naxes(0);
+    int noads   = image_use_sp->naxes(0);
+    int nsp     = image_counts->naxes(0);
     int nphibar = image_counts->naxes(1);
     int neng    = image_counts->naxes(2);
 
     // Debug
     #if defined(G_DEBUG_COMPUTE_DRWS)
-    std::cout << "Number of superpackets: " << noads << std::endl;
+    std::cout << "Number of OAD superpackets: " << noads << std::endl;
+    std::cout << "Number of used superpackets: " << nsp << std::endl;
     std::cout << "Number of Phibar layers: " << nphibar << std::endl;
     std::cout << "Number of energies: " << neng << std::endl;
     #endif
 
     // Allocate working array
-    m_wrk_counts     = GNdarray(noads, nphibar, neng);
-    m_wrk_ehacutcorr = GNdarray(noads, nphibar);
-    m_wrk_vetorate   = GNdarray(noads);
+    m_wrk_counts     = GNdarray(nsp, nphibar, neng);
+    m_wrk_ehacutcorr = GNdarray(nsp, nphibar);
+    m_wrk_vetorate   = GNdarray(nsp);
+    m_wrk_activrate  = GNdarray(nsp, neng);
     m_wrk_use_sp     = std::vector<bool>(noads);
 
     // Extract data from images
-    for (int ioad = 0; ioad < noads; ++ioad) {
+    for (int isp = 0; isp < nsp; ++isp) {
         for (int iphibar = 0; iphibar < nphibar; ++iphibar) {
-            for (int ienergy = 0; ienergy < neng; ++ienergy) {
-                m_wrk_counts(ioad, iphibar, ienergy) = image_counts->pixel(ioad, iphibar, ienergy);
+            for (int ieng = 0; ieng < neng; ++ieng) {
+                m_wrk_counts(isp, iphibar, ieng) = image_counts->pixel(isp, iphibar, ieng);
             }
-            m_wrk_ehacutcorr(ioad, iphibar) = image_ehacutcorr->pixel(ioad, iphibar);
+            m_wrk_ehacutcorr(isp, iphibar) = image_ehacutcorr->pixel(isp, iphibar);
         }
-        m_wrk_vetorate(ioad) = image_vetorate->pixel(ioad);
-        m_wrk_use_sp[ioad]   = (image_use_sp->pixel(ioad) == 1);
+        for (int ieng = 0; ieng < neng; ++ieng) {
+            m_wrk_activrate(isp, ieng) = image_activrate->pixel(isp, ieng);
+        }
+        m_wrk_vetorate(isp) = image_vetorate->pixel(isp);
+    }
+    for (int ioad = 0; ioad < noads; ++ioad) {
+        m_wrk_use_sp[ioad] = (image_use_sp->pixel(ioad) == 1);
     }
 
     // Close FITS file
@@ -1981,36 +2279,36 @@ GCOMDris::likelihood::likelihood(GCOMDris     *dris,
     m_curvature = GMatrixSparse(1,1);
 
     // Extract dimension from working array
-    m_noads   = m_this->m_wrk_counts.shape()[0];
+    m_nsp     = m_this->m_wrk_counts.shape()[0];
     m_nphibar = m_this->m_wrk_counts.shape()[1];
 
     // Multiply veto and constant rate by EHA cut correction. Rates are zero
     // in case that the vetorate is zero.
-    m_vetorate  = GNdarray(m_noads, m_nphibar);
-    m_constrate = GNdarray(m_noads, m_nphibar);
-    m_diffrate  = GNdarray(m_noads, m_nphibar);
-    for (int ioad = 0; ioad < m_noads; ++ioad) {
-        double vetorate = m_this->m_wrk_vetorate(ioad);
+    m_vetorate  = GNdarray(m_nsp, m_nphibar);
+    m_activrate = GNdarray(m_nsp, m_nphibar);
+    m_diffrate  = GNdarray(m_nsp, m_nphibar);
+    for (int isp = 0; isp < m_nsp; ++isp) {
+        double vetorate = m_this->m_wrk_vetorate(isp);
         if (vetorate > 0.0) {
-            double constrate = m_this->m_wrk_constrate(ioad);
+            double activrate = m_this->m_wrk_activrate(isp, ieng);
             for (int iphibar = 0; iphibar < m_nphibar; ++iphibar) {
-                m_vetorate(ioad, iphibar)  = vetorate  * m_this->m_wrk_ehacutcorr(ioad, iphibar);
-                m_constrate(ioad, iphibar) = constrate * m_this->m_wrk_ehacutcorr(ioad, iphibar);
-                m_diffrate(ioad, iphibar)  = m_vetorate(ioad, iphibar) - m_constrate(ioad, iphibar);
+                m_vetorate(isp, iphibar)  = vetorate  * m_this->m_wrk_ehacutcorr(isp, iphibar);
+                m_activrate(isp, iphibar) = activrate * m_this->m_wrk_ehacutcorr(isp, iphibar);
+                m_diffrate(isp, iphibar)  = m_vetorate(isp, iphibar) - m_activrate(isp, iphibar);
             }
         }
     }
 
     // Compute rate sums
     m_vetorate_sum  = GNdarray(m_nphibar);
-    m_constrate_sum = GNdarray(m_nphibar);
+    m_activrate_sum = GNdarray(m_nphibar);
     m_diffrate_sum  = GNdarray(m_nphibar);
     for (int iphibar = 0; iphibar < m_nphibar; ++iphibar) {
-        for (int ioad = 0; ioad < m_noads; ++ioad) {
-            m_vetorate_sum(iphibar)  += m_vetorate(ioad, iphibar);
-            m_constrate_sum(iphibar) += m_constrate(ioad, iphibar);
+        for (int isp = 0; isp < m_nsp; ++isp) {
+            m_vetorate_sum(iphibar)  += m_vetorate(isp, iphibar);
+            m_activrate_sum(iphibar) += m_activrate(isp, iphibar);
         }
-        m_diffrate_sum(iphibar) = m_vetorate_sum(iphibar) - m_constrate_sum(iphibar);
+        m_diffrate_sum(iphibar) = m_vetorate_sum(iphibar) - m_activrate_sum(iphibar);
     }
 
     // Return
@@ -2030,44 +2328,40 @@ void GCOMDris::likelihood::eval(const GOptimizerPars& pars)
 {
     // Recover parameters
     double fprompt = pars[0]->value();
-    double fconst  = 1.0 - fprompt;
-
-    // Extract dimension from working array
-    int noads   = m_this->m_wrk_counts.shape()[0];
-    int nphibar = m_this->m_wrk_counts.shape()[1];
+    double factiv  = 1.0 - fprompt;
 
     // Allocate phibar normalisation arrays
-    GNdarray nevents(nphibar);
-    GNdarray nmodel(nphibar);
-    GNdarray norm(nphibar);
+    GNdarray nevents(m_nphibar);
+    GNdarray nmodel(m_nphibar);
+    GNdarray norm(m_nphibar);
 
     // Compute model
-    GNdarray model = fprompt * m_vetorate + fconst * m_constrate;
+    GNdarray model = fprompt * m_vetorate + factiv * m_activrate;
 
     // Compute Phibar normalised model
     GNdarray model_norm = model;
     for (int iphibar = 0; iphibar < m_nphibar; ++iphibar) {
-        for (int ioad = 0; ioad < m_noads; ++ioad) {
-            if (model(ioad, iphibar) > 0.0) {
-                nevents(iphibar) += m_this->m_wrk_counts(ioad, iphibar, m_ieng);
-                nmodel(iphibar)  += model(ioad, iphibar);
+        for (int isp = 0; isp < m_nsp; ++isp) {
+            if (model(isp, iphibar) > 0.0) {
+                nevents(iphibar) += m_this->m_wrk_counts(isp, iphibar, m_ieng);
+                nmodel(iphibar)  += model(isp, iphibar);
             }
         }
         if (nmodel(iphibar) > 0.0) {
             norm(iphibar) = m_norm * nevents(iphibar) / nmodel(iphibar);
-            for (int ioad = 0; ioad < m_noads; ++ioad) {
-                model_norm(ioad, iphibar) *= norm(iphibar);
+            for (int isp = 0; isp < m_nsp; ++isp) {
+                model_norm(isp, iphibar) *= norm(iphibar);
             }
         }
     }
 
     // Compute LogL
     m_value = 0.0;
-    for (int ioad = 0; ioad < m_noads; ++ioad) {
+    for (int isp = 0; isp < m_nsp; ++isp) {
         for (int iphibar = 0; iphibar < m_nphibar; ++iphibar) {
-            if (model_norm(ioad, iphibar) > 0.0) {
-                m_value -= m_this->m_wrk_counts(ioad, iphibar, m_ieng) *
-                           std::log(model_norm(ioad, iphibar)) - model_norm(ioad, iphibar);
+            if (model_norm(isp, iphibar) > 0.0) {
+                m_value -= m_this->m_wrk_counts(isp, iphibar, m_ieng) *
+                           std::log(model_norm(isp, iphibar)) - model_norm(isp, iphibar);
             }
         }
     }
@@ -2080,18 +2374,18 @@ void GCOMDris::likelihood::eval(const GOptimizerPars& pars)
         double g_norm  = -m_norm * nevents(iphibar) / nmodel2 * m_diffrate_sum(iphibar);
 
         // Loop over superpackets
-        for (int ioad = 0; ioad < m_noads; ++ioad) {
+        for (int isp = 0; isp < m_nsp; ++isp) {
 
             // Continue only if model is positive
-            if (model_norm(ioad, iphibar) > 0.0) {
+            if (model_norm(isp, iphibar) > 0.0) {
 
                 // Pre computation
-                double fb = m_this->m_wrk_counts(ioad, iphibar, m_ieng) / model_norm(ioad, iphibar);
+                double fb = m_this->m_wrk_counts(isp, iphibar, m_ieng) / model_norm(isp, iphibar);
                 double fc = (1.0 - fb);
-                double fa = fb / model_norm(ioad, iphibar);
+                double fa = fb / model_norm(isp, iphibar);
 
                 // Compute parameter gradient
-                double g = norm(iphibar) * m_diffrate(ioad, iphibar) + g_norm * model(ioad, iphibar);
+                double g = norm(iphibar) * m_diffrate(isp, iphibar) + g_norm * model(isp, iphibar);
 
                 // Update gradient
                 m_gradient[0] += fc * g;
