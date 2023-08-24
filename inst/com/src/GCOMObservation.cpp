@@ -534,9 +534,6 @@ void GCOMObservation::read(const GXmlElement& xml)
     // Clear observation
     clear();
 
-    // Extract instrument name
-    m_instrument = xml.attribute("instrument");
-
     // If the XML elements has a "EVP" attribute we have an unbinned
     // observation
     if (gammalib::xml_has_par(xml, "EVP")) {
@@ -642,6 +639,11 @@ void GCOMObservation::read(const GXmlElement& xml)
         } // endif: optionally loaded response cache
 
     } // endelse: binned observation
+
+    // Extract attributes
+    m_name       = xml.attribute("name");
+    m_id         = xml.attribute("id");
+    m_instrument = xml.attribute("instrument");
 
     // Return
     return;
