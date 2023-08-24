@@ -217,6 +217,7 @@ void TestGCOM::test_oad_class(void)
     oad.gcaz(123.45);
     oad.gcel(67.89);
     oad.georad(76.54);
+    oad.ehora(31.57);
 
     // Check object
     test_value(oad.tstart().secs(), gammalib::com_time(8392, 624010000).secs(),
@@ -228,6 +229,7 @@ void TestGCOM::test_oad_class(void)
     test_value(oad.gcaz(), 123.45, "Check gcaz");
     test_value(oad.gcel(), 67.89, "Check gcel");
     test_value(oad.georad(), 76.54, "Check georad");
+    test_value(oad.ehora(), 31.57, "Check ehora");
 
     // Return
     return;

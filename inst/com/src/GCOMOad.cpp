@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCOMOad.cpp - COMPTEL Orbit Aspect Data class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2022 by Juergen Knodlseder                          *
+ *  copyright (C) 2017-2023 by Juergen Knodlseder                          *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -217,6 +217,7 @@ void GCOMOad::init_members(void)
     m_gcaz   = 0.0;
     m_gcel   = 0.0;
     m_georad = 0.0;
+    m_ehora  = 0.0;
     m_pos    = GVector(3);
     m_posang = 1.0e30;
 
@@ -242,6 +243,7 @@ void GCOMOad::copy_members(const GCOMOad& oad)
     m_gcaz   = oad.m_gcaz;
     m_gcel   = oad.m_gcel;
     m_georad = oad.m_georad;
+    m_ehora  = oad.m_ehora;
     m_pos    = oad.m_pos;
     m_posang = oad.m_posang;
 

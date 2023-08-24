@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCOMOad.hpp - COMPTEL Orbit Aspect Data class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2022 by Juergen Knodlseder                          *
+ *  copyright (C) 2017-2023 by Juergen Knodlseder                          *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -78,6 +78,8 @@ public:
     void           gcel(const float& gcel);
     const float&   georad(void) const;
     void           georad(const float& georad);
+    const float&   ehora(void) const;
+    void           ehora(const float& ehora);
     const GSkyDir& zaxis(void) const;
     void           zaxis(const GSkyDir& zaxis);
     const GSkyDir& xaxis(void) const;
@@ -103,6 +105,7 @@ protected:
     float   m_gcaz;    //!< Geocentre azimuth angle (deg)
     float   m_gcel;    //!< Geocentre zenith angle (deg)
     float   m_georad;  //!< Apparent radius of Earth (deg)
+    float   m_ehora;   //!< Earth Horizon Angle of telescope pointing (deg)
     GVector m_pos;     //!< Position vector (km)
 
     // Precomputation cache
@@ -323,6 +326,35 @@ inline
 void GCOMOad::georad(const float& georad)
 {
     m_georad = georad;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return Earth Horizon Angle of telescope pointing axis
+ *
+ * @return Earth Horizon Angle of telescope pointing axis (deg).
+ *
+ * Returns the Earth Horizon Angle of telescope pointing axis in degrees.
+ ***************************************************************************/
+inline
+const float& GCOMOad::ehora(void) const
+{
+    return (m_ehora);
+}
+
+
+/***********************************************************************//**
+ * @brief Set Earth Horizon Angle of telescope pointing axis
+ *
+ * @param[in] ehora Earth Horizon Angle of telescope pointing axis (deg).
+ *
+ * Set the Earth Horizon Angle of telescope pointing axis.
+ ***************************************************************************/
+inline
+void GCOMOad::ehora(const float& ehora)
+{
+    m_ehora = ehora;
     return;
 }
 

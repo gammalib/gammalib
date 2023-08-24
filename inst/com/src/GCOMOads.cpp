@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCOMOads.cpp - COMPTEL Orbit Aspect Data container class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2021 by Juergen Knodlseder                          *
+ *  copyright (C) 2017-2023 by Juergen Knodlseder                          *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -418,6 +418,7 @@ void GCOMOads::read(const GFitsTable& table)
         const GFitsTableCol* ptr_zdecl = table["ZDECL"]; // rad
         const GFitsTableCol* ptr_xrasc = table["XRASC"]; // rad
         const GFitsTableCol* ptr_xdecl = table["XDECL"]; // rad
+        const GFitsTableCol* ptr_ehora = table["EHORA"]; // rad
 
         // Initialise Earth radius angle
         double georad = 73.5;
@@ -474,6 +475,9 @@ void GCOMOads::read(const GFitsTable& table)
             }
             #endif
             oad.georad(georad);
+
+            // Set Earth Horizon Angle in deg
+            oad.ehora(ptr_ehora->real(i) * gammalib::rad2deg);
 
             // Append record
             m_oads.push_back(oad);

@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GCOMOad.i - COMPTEL Orbit Aspect Data class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2017-2022 by Juergen Knodlseder                          *
+ *  copyright (C) 2017-2023 by Juergen Knodlseder                          *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -62,6 +62,8 @@ public:
     void           gcel(const float& gcel);
     const float&   georad(void) const;
     void           georad(const float& georad);
+    const float&   ehora(void) const;
+    void           ehora(const float& ehora);
     const GSkyDir& zaxis(void) const;
     void           zaxis(const GSkyDir& zaxis);
     const GSkyDir& xaxis(void) const;
@@ -84,7 +86,7 @@ public:
     def __getstate__(self):
         state = (self.tstart(), self.tstop(), self.zaxis(), self.xaxis(),
                  self.tjd(), self.tics(), self.gcaz(), self.gcel(),
-                 self.pos(), self.georad())
+                 self.pos(), self.georad(), self.ehora())
         return state
     def __setstate__(self, state):
         self.__init__()
@@ -98,5 +100,6 @@ public:
         self.gcel(state[7])
         self.pos(state[8])
         self.georad(state[9])
+        self.ehora(state[10])
 }
 };
