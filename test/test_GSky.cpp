@@ -2211,7 +2211,7 @@ void TestGSky::test_GSkyRegionRectangle(void)
 
     // Test solid angle computation
     GSkyRegionRectangle rect8(83.6331, 22.0145, 3.1, 2.9, 43.7);
-    double ref = 3.1*gammalib::deg2rad * 2.9*gammalib::deg2rad;
+    double ref = 0.00273821829634871;
     test_value(rect8.solidangle(), ref, "Test solid angle computation");
 
     // Test sky direction contains() method

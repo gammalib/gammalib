@@ -852,7 +852,7 @@ void GSkyRegionRectangle::free_members(void)
  * The solid angle is computed using
  *
  * \f[
- *    \Omega = {\rm width} \times {\rm height}
+ *    \Omega = 2 {\rm width} \sin \left( \frac{\rm height}{2} \right)
  * \f]
  *
  * where \f${\rm width}\f$ and \f${\rm height}\f$ are the width and the
@@ -861,7 +861,7 @@ void GSkyRegionRectangle::free_members(void)
 void GSkyRegionRectangle::compute_solid_angle(void)
 {
     // Compute solid angle
-    m_solid = m_width * m_height * gammalib::deg2rad * gammalib::deg2rad;
+    m_solid = 2.0 * m_width * gammalib::deg2rad * sin(0.5 * m_height * gammalib::deg2rad);
 
     // Return
     return;
