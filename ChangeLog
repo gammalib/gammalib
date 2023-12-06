@@ -1,8 +1,9 @@
-2023-03-23
+2023-12-06
 
         * Version 2.1.0 released
         ========================
 
+        Fix solidangle computation in GSkyRegionRectangle (#4461)
         Replace distutils by setuptools for Python setup (#4223)
         Add GCOMHkd and GCOMHkds classes (#4209)
         Add COMPTEL DRW support to GCOMObservation and GCOMDris (#4209)
