@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GModelSpatial.hpp - Spatial model abstract base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2021 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2023 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -127,60 +127,51 @@ protected:
     void         free_members(void);
     virtual void set_region(void) const = 0;
 
-    // Kernel for circular sky region radial integration
+    // Kernel for spatial model radial integration
     class circle_int_kern_rho : public GFunction {
     public:
         circle_int_kern_rho(const GModelSpatial*    model,
-                            const GSkyRegionCircle* reg,
+                            const GSkyRegion&       region,
+                            const GSkyDir&          centre,
                             const GEnergy&          srcEng,
-                            const GTime&            srcTime,
-                            const double            distance,
-                            const double            cosdist,
-                            const double            sindist,
-                            const double            modrad,
-                            const double            cosmodrad) :
+                            const GTime&            srcTime) :
                             m_model(model),
-                            m_reg(reg),
+                            m_region(region),
+                            m_centre(centre),
                             m_srcEng(srcEng),
-                            m_srcTime(srcTime),
-                            m_dist(distance),
-                            m_cosdist(cosdist),
-                            m_sindist(sindist),
-                            m_modrad(modrad),
-                            m_cosmodrad(cosmodrad) { }
+                            m_srcTime(srcTime) { }
         double eval(const double& rho);
     public:
-        const GModelSpatial*    m_model;     //!< Spatial model
-        const GSkyRegionCircle* m_reg;       //!< Integration region
-        GEnergy                 m_srcEng;    //!< Photon energy
-        GTime                   m_srcTime;   //!< Photon time
-        double                  m_dist;      //!< Distance model-region (rad)
-        double                  m_cosdist;   //!< Cos of distance model-region
-        double                  m_sindist;   //!< Sin of distance model-region
-        double                  m_modrad;    //!< Model radius (rad)
-        double                  m_cosmodrad; //!< Cos of model radius
+        const GModelSpatial* m_model;     //!< Spatial model
+        const GSkyRegion&    m_region;    //!< Sky region
+        const GSkyDir&       m_centre;    //!< Model centre
+        GEnergy              m_srcEng;    //!< Photon energy
+        GTime                m_srcTime;   //!< Photon time
     };
 
-    // Kernel for circular sky region azimuth angle integration
+    // Kernel for spatial model azimuth angle integration
     class circle_int_kern_omega : public GFunction {
     public:
         circle_int_kern_omega(const GModelSpatial*    model,
-                              const GSkyRegionCircle* reg,
+                              const GSkyRegion&       region,
+                              const GSkyDir&          centre,
                               const double&           rho,
                               const GEnergy&          srcEng,
                               const GTime&            srcTime) :
                               m_model(model),
-                              m_reg(reg),
+                              m_region(region),
+                              m_centre(centre),
                               m_rho(rho),
                               m_srcEng(srcEng),
                               m_srcTime(srcTime) { }
         double eval(const double& omega);
     public:
-        const GModelSpatial*    m_model;   //!< Spatial model
-        const GSkyRegionCircle* m_reg;     //!< Integration region
-        double                  m_rho;     //!< Offset from center of the region
-        GEnergy                 m_srcEng;  //!< Photon energy
-        GTime                   m_srcTime; //!< Photon time
+        const GModelSpatial* m_model;   //!< Spatial model
+        const GSkyRegion&    m_region;  //!< Sky region
+        const GSkyDir&       m_centre;  //!< Model centre
+        double               m_rho;     //!< Offset from center of the region
+        GEnergy              m_srcEng;  //!< Photon energy
+        GTime                m_srcTime; //!< Photon time
     };
 
     // Proteced members

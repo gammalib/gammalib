@@ -1,8 +1,9 @@
-2023-12-06
+2023-12-12
 
         * Version 2.1.0 released
         ========================
 
+        Generalise flux computation in GModelSpatial::flux method (#4467)
         Fix solidangle computation in GSkyRegionRectangle (#4461)
         Replace distutils by setuptools for Python setup (#4223)
         Add GCOMHkd and GCOMHkds classes (#4209)

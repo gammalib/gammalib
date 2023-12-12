@@ -27,6 +27,8 @@ Bug fixes
 Improvements
 ------------
 
+* [`4467 <https://cta-redmine.irap.omp.eu/issues/4467>`_] -
+  Generalise flux computation in GModelSpatial::flux method (#4467)
 * [`4209 <https://cta-redmine.irap.omp.eu/issues/4209>`_] -
   Add ``GSkyMap`` comparison operators.
   Add COMPTEL DRW support to ``GCOMObservation`` and add ``GCOMDris`` class.

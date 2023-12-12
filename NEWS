@@ -1,6 +1,6 @@
 New Features and Important Changes in GammaLib 2.1.0
 
-24 March 2023
+12 December 2023
 
 
 1. Introduction
@@ -100,6 +100,14 @@ None
 
 9. Model module
 ---------------
+The flux computation in the GModelSpatial::flux method was generalised so that
+it now can handle all types of sky regions. Before the method only worked for
+circular sky regions (#4467).
+
+The solid angle computation in GSkyRegionRectangle was fixed so that it correctly
+returns the solid angle of a rectangle on the sky. Before the solid angle was
+computed for a cartesian rectangle (#4461).
+
 Fixed a segfault problem when saving an empty instance of GModelSpectralTable
 (#4198).
 
